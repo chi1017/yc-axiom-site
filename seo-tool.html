@@ -3152,7 +3152,7 @@ function renderResults(r){
   ring.style.stroke=scoreColor(r.score);
   setTimeout(()=>{ring.style.strokeDashoffset=289-(r.score/100)*289;},80);
   // Count-up
-  const el=document.getElementById('scoreNum');const lbl=el.querySelector('.score-lbl');let n=0;
+  const el=document.getElementById('scoreNum');const lbl=document.createElement('div');lbl.className='score-lbl';lbl.textContent='/100';let n=0;
   const iv=setInterval(()=>{n=Math.min(n+Math.ceil(r.score/25),r.score);el.textContent=n;el.appendChild(lbl);if(n>=r.score)clearInterval(iv);},28);
   document.getElementById('scoreTitle').textContent=r.scoreTitle;
   document.getElementById('scoreSummary').textContent=r.summary;
@@ -5605,7 +5605,7 @@ ${r.checks.filter(c=>c.status==='fail').map(c=>'  · '+c.title).join('\n')||'  �
 
 品牌：${brandSettings.name||'SEO Analyzer'}  ${brandSettings.contact||''}
 ⚠ 注意：Core Web Vitals 請參考 PageSpeed Insights 分析結果。`;
-  navigator.clipboard.writeText(txt).then(()=>alert('✓ 已複製到剪貼簿'));
+  navigator.clipboard.writeText(txt).then(()=>{});
 }
 
 // ═══════════════════════════════════════════════════════
