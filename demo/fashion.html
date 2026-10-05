@@ -1,0 +1,2850 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <!-- ==================== SEO Meta Tags ==================== -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MUJI'N — 極簡時尚服飾品牌 | T-shirt・外套・褲子</title>
+  <meta name="description" content="MUJI'N 是來自台灣的極簡時尚品牌，以高質感布料、精練剪裁，打造日系韓系穿搭風格。精選 T-shirt、外套、褲子等服飾商品。" />
+  <meta name="keywords" content="極簡服飾,日系穿搭,韓系服飾,T-shirt,外套,褲子,台灣品牌,時尚,MUJIN" />
+  <meta name="robots" content="noindex, follow" />
+  <meta name="author" content="MUJI'N Fashion" />
+  <link rel="canonical" href="https://www.mujin.tw/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="MUJI'N — 極簡時尚服飾品牌" />
+  <meta property="og:description" content="高質感布料、精練剪裁，打造日系韓系穿搭風格。" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1200&q=80" />
+  <meta property="og:url" content="https://www.mujin.tw/" />
+  <meta property="og:site_name" content="MUJI'N" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MUJI'N — 極簡時尚服飾品牌" />
+  <meta name="twitter:description" content="高質感布料、精練剪裁，打造日系韓系穿搭風格。" />
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1200&q=80" />
+
+  <!-- JSON-LD 結構化資料 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "MUJI'N",
+        "url": "https://www.mujin.tw/",
+        "logo": "https://www.mujin.tw/logo.png",
+        "description": "台灣極簡時尚服飾品牌，以高質感布料與精練剪裁著稱。",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "台北市",
+          "addressCountry": "TW"
+        }
+      },
+      {
+        "@type": "Product",
+        "name": "無縫 Pima 棉 T-shirt",
+        "description": "採用秘魯 Pima 棉，觸感柔滑，版型俐落，適合日常穿搭。",
+        "brand": { "@type": "Brand", "name": "MUJI'N" },
+        "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80",
+        "offers": {
+          "@type": "Offer",
+          "price": "890",
+          "priceCurrency": "TWD",
+          "availability": "https://schema.org/InStock"
+        }
+      },
+      {
+        "@type": "Product",
+        "name": "羊毛混紡寬版外套",
+        "description": "羊毛混紡面料，寬鬆剪裁，兼顧保暖與時尚感。",
+        "brand": { "@type": "Brand", "name": "MUJI'N" },
+        "image": "https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=600&q=80",
+        "offers": {
+          "@type": "Offer",
+          "price": "3200",
+          "priceCurrency": "TWD",
+          "availability": "https://schema.org/InStock"
+        }
+      },
+      {
+        "@type": "Product",
+        "name": "修身直筒褲",
+        "description": "高腰修身設計，百搭深藍色丹寧，適合各種場合穿搭。",
+        "brand": { "@type": "Brand", "name": "MUJI'N" },
+        "image": "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&q=80",
+        "offers": {
+          "@type": "Offer",
+          "price": "1680",
+          "priceCurrency": "TWD",
+          "availability": "https://schema.org/InStock"
+        }
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    /* ==================== CSS 變數 & Reset ==================== */
+    :root {
+      --color-bg: #faf9f7;
+      --color-bg2: #f2f0ed;
+      --color-surface: #ffffff;
+      --color-ink: #1a1a1a;
+      --color-ink2: #5a5a5a;
+      --color-ink3: #9a9a9a;
+      --color-accent: #c8a96e;
+      --color-accent2: #e8ddd0;
+      --color-border: #e4e0db;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'Noto Sans TC', 'PingFang TC', sans-serif;
+      --font-label: 'Cormorant Garamond', Georgia, serif;
+      --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-sm: 0 2px 12px rgba(0,0,0,0.06);
+      --shadow-md: 0 8px 32px rgba(0,0,0,0.10);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.14);
+      --radius: 2px;
+      --max-w: 1200px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background: var(--color-bg);
+      color: var(--color-ink);
+      font-family: var(--font-body);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    img { display: block; width: 100%; object-fit: cover; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+
+    .container {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ==================== Google Fonts ==================== */
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@300;400&family=Noto+Sans+TC:wght@300;400;500&display=swap');
+
+    /* ==================== 動畫 ==================== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-32px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position: 600px 0; }
+    }
+
+    .fade-up   { animation: fadeUp 0.7s var(--transition) both; }
+    .fade-in   { animation: fadeIn 0.7s var(--transition) both; }
+    .slide-in  { animation: slideInLeft 0.7s var(--transition) both; }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.22s; }
+    .delay-3 { animation-delay: 0.34s; }
+    .delay-4 { animation-delay: 0.46s; }
+
+    /* 交叉觀察器觸發的可見動畫 */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s var(--transition), transform 0.7s var(--transition);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ==================== Navbar ==================== */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      background: rgba(250, 249, 247, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid transparent;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    #navbar.scrolled {
+      border-bottom-color: var(--color-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    /* Logo */
+    .nav-logo {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+    .nav-logo .logo-text {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--color-ink);
+    }
+    .nav-logo .logo-sub {
+      font-family: var(--font-label);
+      font-size: 0.6rem;
+      font-weight: 300;
+      letter-spacing: 0.3em;
+      color: var(--color-accent);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* 桌面選單 */
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      align-items: center;
+    }
+    .nav-links a {
+      font-family: var(--font-label);
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-ink2);
+      position: relative;
+      transition: color var(--transition);
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0;
+      width: 0; height: 1px;
+      background: var(--color-accent);
+      transition: width var(--transition);
+    }
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--color-ink);
+    }
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    /* 購物車按鈕 */
+    .nav-cart-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-family: var(--font-label);
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      color: var(--color-ink2);
+      transition: all var(--transition);
+    }
+    .nav-cart-btn:hover {
+      background: var(--color-ink);
+      color: #fff;
+      border-color: var(--color-ink);
+    }
+    .cart-count {
+      background: var(--color-accent);
+      color: #fff;
+      font-size: 0.65rem;
+      font-family: var(--font-body);
+      min-width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      transition: transform 0.3s;
+    }
+    .cart-count.bump {
+      transform: scale(1.5);
+    }
+
+    /* 漢堡選單（手機） */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 32px;
+      height: 32px;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 100%;
+      height: 1px;
+      background: var(--color-ink);
+      transition: all var(--transition);
+      transform-origin: center;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    /* 手機下拉選單 */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 64px; left: 0; right: 0;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      z-index: 999;
+      padding: 24px;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: var(--shadow-md);
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      padding: 14px 0;
+      font-family: var(--font-label);
+      font-size: 1rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink2);
+      border-bottom: 1px solid var(--color-border);
+      transition: color var(--transition);
+    }
+    .mobile-menu a:last-child { border-bottom: none; }
+    .mobile-menu a:hover { color: var(--color-ink); }
+
+    /* ==================== 頁面區塊切換 ==================== */
+    .page-section {
+      display: none;
+      padding-top: 64px;
+      min-height: 100vh;
+    }
+    .page-section.active { display: block; }
+
+    /* ==================== Hero ==================== */
+    #home {
+      padding-top: 0;
+      position: relative;
+    }
+    .hero-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+
+    .hero-image-side {
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-image-side img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+      transition: transform 8s ease;
+    }
+    .hero-image-side:hover img {
+      transform: scale(1.04);
+    }
+    .hero-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(26,26,26,0.15) 0%, transparent 60%);
+    }
+
+    .hero-content-side {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 64px 80px 56px;
+      background: var(--color-bg);
+      position: relative;
+    }
+    .hero-content-side::before {
+      content: '';
+      position: absolute;
+      top: 60px; right: 0;
+      width: 1px;
+      height: 80px;
+      background: var(--color-accent);
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 4vw, 4.2rem);
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 28px;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--color-accent);
+    }
+
+    .hero-desc {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--color-ink2);
+      line-height: 1.9;
+      max-width: 380px;
+      margin-bottom: 44px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 36px;
+      background: var(--color-ink);
+      color: #fff;
+      font-family: var(--font-label);
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--color-accent);
+      transform: translateX(-100%);
+      transition: transform var(--transition);
+    }
+    .btn-primary:hover::before { transform: translateX(0); }
+    .btn-primary span { position: relative; z-index: 1; }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 32px;
+      border: 1px solid var(--color-border);
+      color: var(--color-ink2);
+      font-family: var(--font-label);
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+    }
+    .btn-outline:hover {
+      border-color: var(--color-ink);
+      color: var(--color-ink);
+      background: var(--color-ink);
+      color: #fff;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 56px;
+      padding-top: 40px;
+      border-top: 1px solid var(--color-border);
+    }
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+    }
+    .hero-stat .num {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+    .hero-stat .label {
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink3);
+    }
+
+    /* Scrolling banner */
+    .marquee-bar {
+      background: var(--color-ink);
+      color: #fff;
+      padding: 14px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .marquee-track {
+      display: inline-flex;
+      gap: 0;
+      animation: marqueeScroll 20s linear infinite;
+    }
+    @keyframes marqueeScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .marquee-item {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      padding: 0 40px;
+      opacity: 0.8;
+    }
+    .marquee-dot {
+      color: var(--color-accent);
+      opacity: 1;
+    }
+
+    /* ==================== Products ==================== */
+    #products {
+      background: var(--color-bg);
+    }
+    .section-header {
+      text-align: center;
+      padding: 80px 0 48px;
+    }
+    .section-eyebrow {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 400;
+      color: var(--color-ink);
+      margin-bottom: 16px;
+    }
+    .section-subtitle {
+      font-size: 0.88rem;
+      font-weight: 300;
+      color: var(--color-ink3);
+      letter-spacing: 0.05em;
+    }
+
+    /* 篩選器 */
+    .filter-bar {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 9px 24px;
+      border: 1px solid var(--color-border);
+      border-radius: 100px;
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-ink3);
+      transition: all var(--transition);
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--color-ink);
+      color: #fff;
+      border-color: var(--color-ink);
+    }
+
+    /* 商品格線 */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-bottom: 80px;
+    }
+
+    /* 商品卡片 */
+    .product-card {
+      background: var(--color-surface);
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+    .product-card:hover .product-image img {
+      transform: scale(1.06);
+    }
+    .product-card:hover .product-actions {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .product-card:hover .product-overlay {
+      opacity: 1;
+    }
+
+    .product-image {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+      background: var(--color-bg2);
+    }
+    .product-image img {
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .product-badge {
+      position: absolute;
+      top: 16px; left: 16px;
+      padding: 4px 12px;
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+    .badge-new { background: var(--color-ink); color: #fff; }
+    .badge-sale { background: var(--color-accent); color: #fff; }
+
+    .product-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(26,26,26,0.08);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .product-actions {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 20px;
+      background: linear-gradient(to top, rgba(26,26,26,0.7) 0%, transparent 100%);
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all var(--transition);
+      z-index: 3;
+    }
+    .btn-cart {
+      flex: 1;
+      padding: 11px;
+      background: rgba(255,255,255,0.95);
+      color: var(--color-ink);
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+    }
+    .btn-cart:hover {
+      background: var(--color-accent);
+      color: #fff;
+    }
+    .btn-detail {
+      padding: 11px 14px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.5);
+      font-size: 1rem;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+    }
+    .btn-detail:hover {
+      background: rgba(255,255,255,0.95);
+      color: var(--color-ink);
+    }
+
+    /* 商品資訊 */
+    .product-info {
+      padding: 20px 20px 24px;
+      border-top: 1px solid var(--color-border);
+    }
+    .product-category {
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--color-ink3);
+      margin-bottom: 6px;
+    }
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--color-ink);
+      margin-bottom: 8px;
+    }
+    .product-price-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .price-current {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-ink);
+    }
+    .price-original {
+      font-size: 0.8rem;
+      color: var(--color-ink3);
+      text-decoration: line-through;
+    }
+
+    /* 色彩選項 */
+    .color-swatches {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .swatch:hover, .swatch.selected {
+      border-color: var(--color-ink3);
+    }
+
+    /* ==================== Product Detail ==================== */
+    #detail {
+      background: var(--color-bg);
+    }
+
+    .detail-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      padding: 60px 0 80px;
+      align-items: start;
+    }
+
+    .detail-gallery {
+      position: sticky;
+      top: 80px;
+    }
+    .detail-main-img {
+      aspect-ratio: 3 / 4;
+      overflow: hidden;
+      border-radius: var(--radius);
+      margin-bottom: 12px;
+      background: var(--color-bg2);
+    }
+    .detail-main-img img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .detail-main-img:hover img { transform: scale(1.04); }
+
+    .detail-thumbs {
+      display: flex;
+      gap: 10px;
+    }
+    .thumb {
+      flex: 1;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: var(--radius);
+      cursor: pointer;
+      background: var(--color-bg2);
+      border: 2px solid transparent;
+      transition: border-color var(--transition);
+    }
+    .thumb.active, .thumb:hover { border-color: var(--color-accent); }
+    .thumb img { height: 100%; object-fit: cover; }
+
+    .detail-content {
+      padding-top: 12px;
+    }
+    .detail-breadcrumb {
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink3);
+      margin-bottom: 20px;
+    }
+    .detail-breadcrumb span { color: var(--color-accent); }
+
+    .detail-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+      font-weight: 400;
+      color: var(--color-ink);
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .detail-subtitle {
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--color-ink3);
+      letter-spacing: 0.08em;
+      margin-bottom: 24px;
+    }
+
+    .detail-price {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--color-ink);
+      margin-bottom: 32px;
+    }
+
+    .detail-divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 28px 0;
+    }
+
+    .option-label {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink2);
+      margin-bottom: 12px;
+    }
+
+    .size-options {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .size-btn {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      color: var(--color-ink2);
+      transition: all var(--transition);
+    }
+    .size-btn:hover, .size-btn.active {
+      background: var(--color-ink);
+      color: #fff;
+      border-color: var(--color-ink);
+    }
+    .size-btn.disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .color-options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .color-opt {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      box-shadow: 0 0 0 1px var(--color-border);
+      transition: all 0.2s;
+    }
+    .color-opt:hover, .color-opt.active {
+      box-shadow: 0 0 0 2px var(--color-accent);
+    }
+
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .qty-btn {
+      width: 40px;
+      height: 40px;
+      font-size: 1.1rem;
+      color: var(--color-ink2);
+      transition: all var(--transition);
+    }
+    .qty-btn:hover { background: var(--color-bg2); }
+    .qty-input {
+      width: 48px;
+      height: 40px;
+      text-align: center;
+      border: none;
+      border-left: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      background: transparent;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      color: var(--color-ink);
+      outline: none;
+    }
+
+    .detail-add-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--color-ink);
+      color: #fff;
+      font-family: var(--font-label);
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .detail-add-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--color-accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--transition);
+    }
+    .detail-add-btn:hover::before { transform: scaleX(1); }
+    .detail-add-btn span { position: relative; z-index: 1; }
+
+    .detail-wish-btn {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid var(--color-border);
+      color: var(--color-ink2);
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+    }
+    .detail-wish-btn:hover {
+      border-color: var(--color-ink);
+      color: var(--color-ink);
+    }
+
+    .detail-meta {
+      margin-top: 32px;
+      padding: 24px;
+      background: var(--color-bg2);
+      border-radius: var(--radius);
+    }
+    .detail-meta-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .detail-meta-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .meta-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+    .meta-text .meta-title {
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--color-ink);
+      margin-bottom: 2px;
+    }
+    .meta-text .meta-desc {
+      font-size: 0.78rem;
+      color: var(--color-ink3);
+    }
+
+    /* Accordion */
+    .accordion {
+      margin-top: 28px;
+    }
+    .accordion-item {
+      border-bottom: 1px solid var(--color-border);
+    }
+    .accordion-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      cursor: pointer;
+    }
+    .accordion-title {
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink2);
+    }
+    .accordion-icon {
+      font-size: 1.1rem;
+      color: var(--color-ink3);
+      transition: transform var(--transition);
+    }
+    .accordion-item.open .accordion-icon { transform: rotate(45deg); }
+    .accordion-body {
+      display: none;
+      padding-bottom: 16px;
+      font-size: 0.83rem;
+      color: var(--color-ink2);
+      line-height: 1.8;
+    }
+    .accordion-item.open .accordion-body { display: block; }
+
+    /* ==================== About ==================== */
+    #about {
+      background: var(--color-bg);
+    }
+
+    .about-hero {
+      position: relative;
+      height: 55vh;
+      min-height: 360px;
+      overflow: hidden;
+    }
+    .about-hero img {
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+    }
+    .about-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(26,26,26,0.3) 0%, rgba(26,26,26,0.5) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .about-hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 400;
+      color: #fff;
+      letter-spacing: 0.05em;
+    }
+    .about-hero-title em {
+      font-style: italic;
+      color: var(--color-accent);
+    }
+
+    .about-content {
+      padding: 80px 0;
+    }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      margin-bottom: 80px;
+    }
+    .about-text h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+      font-weight: 400;
+      color: var(--color-ink);
+      line-height: 1.3;
+      margin-bottom: 24px;
+    }
+    .about-text p {
+      font-size: 0.88rem;
+      font-weight: 300;
+      color: var(--color-ink2);
+      line-height: 2;
+      margin-bottom: 18px;
+    }
+    .about-image-wrap {
+      position: relative;
+    }
+    .about-image-wrap img {
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      border-radius: var(--radius);
+    }
+    .about-image-accent {
+      position: absolute;
+      bottom: -24px;
+      right: -24px;
+      width: 60%;
+      height: 60%;
+      border: 2px solid var(--color-accent);
+      border-radius: var(--radius);
+      z-index: -1;
+    }
+
+    /* 品牌價值格線 */
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--color-border);
+    }
+    .value-card {
+      background: var(--color-surface);
+      padding: 48px 36px;
+      transition: background var(--transition);
+    }
+    .value-card:hover { background: var(--color-bg2); }
+    .value-icon {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    .value-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--color-ink);
+      margin-bottom: 12px;
+    }
+    .value-desc {
+      font-size: 0.83rem;
+      font-weight: 300;
+      color: var(--color-ink3);
+      line-height: 1.8;
+    }
+
+    /* 品牌故事時間軸 */
+    .timeline {
+      padding: 80px 0;
+    }
+    .timeline h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .timeline-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 640px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .timeline-items::before {
+      content: '';
+      position: absolute;
+      left: 64px;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: var(--color-border);
+    }
+    .timeline-item {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      padding: 0 0 40px;
+    }
+    .timeline-year {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-accent);
+      width: 64px;
+      flex-shrink: 0;
+      text-align: right;
+      padding-top: 4px;
+    }
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      flex-shrink: 0;
+      margin-top: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .timeline-body h4 {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 400;
+      margin-bottom: 6px;
+    }
+    .timeline-body p {
+      font-size: 0.82rem;
+      color: var(--color-ink3);
+      line-height: 1.7;
+    }
+
+    /* ==================== Contact ==================== */
+    #contact {
+      background: var(--color-bg2);
+    }
+
+    .contact-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 64px;
+      padding: 80px 0;
+      align-items: start;
+    }
+
+    .contact-info h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+    .contact-info p {
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--color-ink2);
+      line-height: 1.9;
+      margin-bottom: 40px;
+    }
+
+    .contact-details {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .contact-detail-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .contact-detail-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .contact-detail-text .detail-label {
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink3);
+      margin-bottom: 3px;
+    }
+    .contact-detail-text .detail-value {
+      font-size: 0.85rem;
+      color: var(--color-ink);
+    }
+
+    /* 聯絡表單 */
+    .contact-form-wrap {
+      background: var(--color-surface);
+      padding: 48px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .form-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin-bottom: 32px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--color-ink2);
+      margin-bottom: 8px;
+    }
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--color-ink);
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--color-accent);
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    .form-submit {
+      width: 100%;
+      padding: 15px;
+      background: var(--color-ink);
+      color: #fff;
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      transition: all var(--transition);
+      border: none;
+      cursor: pointer;
+    }
+    .form-submit:hover { background: var(--color-accent); }
+
+    .form-success {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+    .form-success .success-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+    .form-success h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+    .form-success p {
+      font-size: 0.85rem;
+      color: var(--color-ink3);
+    }
+
+    /* ==================== Cart ==================== */
+    #cart {
+      background: var(--color-bg);
+    }
+
+    .cart-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 40px;
+      padding: 60px 0 80px;
+      align-items: start;
+    }
+
+    .cart-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 0;
+    }
+    .cart-empty .empty-icon { font-size: 4rem; margin-bottom: 24px; opacity: 0.3; }
+    .cart-empty h3 {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 12px;
+      color: var(--color-ink2);
+    }
+    .cart-empty p {
+      font-size: 0.85rem;
+      color: var(--color-ink3);
+      margin-bottom: 32px;
+    }
+
+    .cart-items-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .cart-section-title {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--color-ink3);
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 0;
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 96px 1fr auto;
+      gap: 20px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--color-border);
+      align-items: center;
+    }
+    .cart-item-img {
+      width: 96px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      background: var(--color-bg2);
+    }
+    .cart-item-info .item-name {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .cart-item-info .item-meta {
+      font-size: 0.78rem;
+      color: var(--color-ink3);
+      margin-bottom: 14px;
+    }
+    .item-qty-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .item-qty-ctrl {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .item-qty-btn {
+      width: 30px;
+      height: 30px;
+      font-size: 1rem;
+      color: var(--color-ink2);
+      transition: background var(--transition);
+    }
+    .item-qty-btn:hover { background: var(--color-bg2); }
+    .item-qty-num {
+      width: 32px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      border-left: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+    }
+    .item-remove {
+      font-size: 0.72rem;
+      font-family: var(--font-label);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-ink3);
+      text-decoration: underline;
+      cursor: pointer;
+      transition: color var(--transition);
+    }
+    .item-remove:hover { color: var(--color-ink); }
+
+    .cart-item-price {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-ink);
+      text-align: right;
+    }
+
+    /* 訂單摘要 */
+    .order-summary {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 32px;
+      position: sticky;
+      top: 80px;
+    }
+    .summary-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 400;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      font-size: 0.85rem;
+      color: var(--color-ink2);
+    }
+    .summary-row.total {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-ink);
+      padding-top: 20px;
+      margin-top: 10px;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .promo-input-row {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0;
+    }
+    .promo-input {
+      flex: 1;
+      padding: 11px 14px;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      font-size: 0.83rem;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .promo-input:focus { border-color: var(--color-accent); }
+    .promo-apply {
+      padding: 11px 16px;
+      background: var(--color-ink);
+      color: #fff;
+      font-family: var(--font-label);
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .promo-apply:hover { background: var(--color-accent); }
+
+    .checkout-btn {
+      width: 100%;
+      padding: 16px;
+      background: var(--color-ink);
+      color: #fff;
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background var(--transition);
+    }
+    .checkout-btn:hover { background: var(--color-accent); }
+
+    .summary-note {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--color-bg2);
+      border-radius: var(--radius);
+      font-size: 0.78rem;
+      color: var(--color-ink3);
+      line-height: 1.7;
+    }
+
+    /* ==================== Toast ==================== */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--color-ink);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-family: var(--font-label);
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      z-index: 9999;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s;
+      pointer-events: none;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ==================== Footer ==================== */
+    footer {
+      background: var(--color-ink);
+      color: rgba(255,255,255,0.6);
+      padding: 64px 0 32px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 32px;
+    }
+
+    .footer-brand .brand-name {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+    .footer-brand .brand-tagline {
+      font-family: var(--font-label);
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      margin-bottom: 20px;
+    }
+    .footer-brand p {
+      font-size: 0.8rem;
+      font-weight: 300;
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+    .social-links {
+      display: flex;
+      gap: 12px;
+    }
+    .social-link {
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      transition: all var(--transition);
+    }
+    .social-link:hover {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      color: #fff;
+    }
+
+    .footer-col h4 {
+      font-family: var(--font-label);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 20px;
+    }
+    .footer-col ul {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-col a {
+      font-size: 0.8rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.5);
+      transition: color var(--transition);
+    }
+    .footer-col a:hover { color: rgba(255,255,255,0.9); }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-copy {
+      font-size: 0.75rem;
+      font-weight: 300;
+    }
+    .footer-legal {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-legal a {
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.4);
+      transition: color var(--transition);
+    }
+    .footer-legal a:hover { color: rgba(255,255,255,0.8); }
+
+    /* ==================== Responsive ==================== */
+    @media (max-width: 1024px) {
+      .hero-wrapper {
+        grid-template-columns: 1fr;
+      }
+      .hero-image-side {
+        height: 50vh;
+      }
+      .hero-content-side {
+        padding: 56px 32px;
+      }
+      .hero-content-side::before { display: none; }
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .detail-wrapper {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .detail-gallery {
+        position: static;
+      }
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .about-image-accent { display: none; }
+      .contact-wrapper {
+        grid-template-columns: 1fr;
+      }
+      .cart-wrapper {
+        grid-template-columns: 1fr;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .nav-cart-btn .cart-label { display: none; }
+
+      .hero-title { font-size: 2.2rem; }
+      .hero-stats { gap: 24px; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 1px; }
+      .values-grid { grid-template-columns: 1fr; }
+      .contact-form-wrap { padding: 28px; }
+      .form-row { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+      .timeline-items::before { left: 56px; }
+    }
+
+    @media (max-width: 480px) {
+      .product-grid { grid-template-columns: 1fr; }
+      .hero-stats { display: none; }
+      .detail-thumbs { gap: 6px; }
+      .size-options { gap: 6px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ==================== Navbar ==================== -->
+  <header>
+    <nav id="navbar" role="navigation" aria-label="主導覽">
+      <div class="container nav-inner">
+
+        <!-- Logo -->
+        <a href="#home" class="nav-logo" onclick="showSection('home')" aria-label="MUJI'N 首頁">
+          <span class="logo-text">MUJI'N</span>
+          <span class="logo-sub">Minimal Fashion</span>
+        </a>
+
+        <!-- 桌面選單 -->
+        <ul class="nav-links" role="menubar">
+          <li role="none"><a href="#home"     onclick="showSection('home')"    class="nav-link active" role="menuitem">Home</a></li>
+          <li role="none"><a href="#products" onclick="showSection('products')" class="nav-link"         role="menuitem">Shop</a></li>
+          <li role="none"><a href="#detail"   onclick="showSection('detail')"  class="nav-link"         role="menuitem">Featured</a></li>
+          <li role="none"><a href="#about"    onclick="showSection('about')"   class="nav-link"         role="menuitem">About</a></li>
+          <li role="none"><a href="#contact"  onclick="showSection('contact')" class="nav-link"         role="menuitem">Contact</a></li>
+        </ul>
+
+        <div style="display:flex;align-items:center;gap:12px;">
+          <!-- 購物車按鈕 -->
+          <button class="nav-cart-btn" onclick="showSection('cart')" aria-label="購物車">
+            <span>🛍</span>
+            <span class="cart-label">Cart</span>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+          <!-- 漢堡選單 -->
+          <button class="hamburger" id="hamburger" aria-label="開啟選單" aria-expanded="false">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- 手機選單 -->
+    <nav class="mobile-menu" id="mobileMenu" aria-label="手機導覽">
+      <a href="#home"     onclick="showSection('home');closeMobileMenu()">Home</a>
+      <a href="#products" onclick="showSection('products');closeMobileMenu()">Shop</a>
+      <a href="#detail"   onclick="showSection('detail');closeMobileMenu()">Featured</a>
+      <a href="#about"    onclick="showSection('about');closeMobileMenu()">About</a>
+      <a href="#contact"  onclick="showSection('contact');closeMobileMenu()">Contact</a>
+      <a href="#cart"     onclick="showSection('cart');closeMobileMenu()">Cart</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ==================== 首頁 (Home) ==================== -->
+    <section id="home" class="page-section active" aria-label="首頁">
+
+      <!-- Hero -->
+      <div class="hero-wrapper">
+        <!-- 圖片側 -->
+        <div class="hero-image-side fade-in">
+          <img
+            src="https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=900&q=80&auto=format&fit=crop"
+            alt="MUJI'N 品牌主視覺 — 極簡女裝穿搭"
+            loading="eager"
+          />
+          <div class="hero-image-overlay"></div>
+        </div>
+
+        <!-- 文字側 -->
+        <div class="hero-content-side">
+          <p class="hero-eyebrow fade-up delay-1">2025 Spring / Summer Collection</p>
+          <h1 class="hero-title fade-up delay-2">
+            Dress in<br>
+            <em>Less,</em><br>
+            Feel More.
+          </h1>
+          <p class="hero-desc fade-up delay-3">
+            MUJI'N 以減法美學為核心，精選優質天然素材，<br>
+            每一件單品都是對日常的溫柔承諾。
+          </p>
+          <div class="hero-actions fade-up delay-4">
+            <button class="btn-primary" onclick="showSection('products')">
+              <span>Shop Now</span>
+              <span>→</span>
+            </button>
+            <button class="btn-outline" onclick="showSection('about')">
+              <span>Our Story</span>
+            </button>
+          </div>
+
+          <div class="hero-stats fade-up delay-4">
+            <div class="hero-stat">
+              <span class="num">120+</span>
+              <span class="label">Products</span>
+            </div>
+            <div class="hero-stat">
+              <span class="num">8K+</span>
+              <span class="label">Customers</span>
+            </div>
+            <div class="hero-stat">
+              <span class="num">100%</span>
+              <span class="label">Natural</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marquee -->
+      <div class="marquee-bar" aria-hidden="true">
+        <div class="marquee-track" id="marqueeTrack">
+          <!-- JavaScript 填充 -->
+        </div>
+      </div>
+
+      <!-- 精選商品預覽（首頁） -->
+      <div style="background: var(--color-bg); padding: 80px 0;">
+        <div class="container">
+          <div class="section-header" style="padding-top:0;">
+            <p class="section-eyebrow reveal">New Arrivals</p>
+            <h2 class="section-title reveal">本季精選</h2>
+            <p class="section-subtitle reveal">每件都是對簡約美學的致敬</p>
+          </div>
+          <div class="product-grid" id="homeProductGrid">
+            <!-- JavaScript 動態填充 3 件 -->
+          </div>
+          <div style="text-align:center;margin-top:48px;">
+            <button class="btn-outline reveal" onclick="showSection('products')" style="margin:0 auto;">
+              <span>View All Products</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== 商品列表 (Products) ==================== -->
+    <section id="products" class="page-section" aria-label="商品列表">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-eyebrow">Collection</p>
+          <h1 class="section-title">所有商品</h1>
+          <p class="section-subtitle">探索 MUJI'N 完整系列</p>
+        </div>
+
+        <!-- 篩選器 -->
+        <div class="filter-bar" role="group" aria-label="商品篩選">
+          <button class="filter-btn active" data-filter="all"    onclick="filterProducts(this,'all')">全部</button>
+          <button class="filter-btn"        data-filter="tshirt" onclick="filterProducts(this,'tshirt')">T-Shirt</button>
+          <button class="filter-btn"        data-filter="jacket" onclick="filterProducts(this,'jacket')">外套</button>
+          <button class="filter-btn"        data-filter="pants"  onclick="filterProducts(this,'pants')">褲子</button>
+        </div>
+
+        <div class="product-grid" id="allProductGrid">
+          <!-- JavaScript 動態填充 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 商品詳細 (Product Detail) ==================== -->
+    <section id="detail" class="page-section" aria-label="商品詳細">
+      <div class="container">
+        <div class="detail-wrapper">
+
+          <!-- 圖片區 -->
+          <div class="detail-gallery reveal">
+            <div class="detail-main-img">
+              <img
+                id="detailMainImg"
+                src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=700&q=80&auto=format&fit=crop"
+                alt="無縫 Pima 棉 T-shirt 正面圖"
+              />
+            </div>
+            <div class="detail-thumbs">
+              <div class="thumb active" onclick="changeDetailImg(this, 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80')">
+                <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&q=60" alt="T-shirt 縮圖 1" />
+              </div>
+              <div class="thumb" onclick="changeDetailImg(this, 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=700&q=80')">
+                <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=200&q=60" alt="T-shirt 縮圖 2" />
+              </div>
+              <div class="thumb" onclick="changeDetailImg(this, 'https://images.unsplash.com/photo-1594938298603-c8148c4b0e26?w=700&q=80')">
+                <img src="https://images.unsplash.com/photo-1594938298603-c8148c4b0e26?w=200&q=60" alt="T-shirt 縮圖 3" />
+              </div>
+            </div>
+          </div>
+
+          <!-- 商品資訊 -->
+          <article class="detail-content reveal">
+            <p class="detail-breadcrumb">Shop <span>/ T-Shirt /</span> 無縫 Pima 棉 T-shirt</p>
+            <h1 class="detail-title">無縫 Pima 棉<br>Classic Tee</h1>
+            <p class="detail-subtitle">Seamless Premium Cotton — Relaxed Fit</p>
+            <p class="detail-price">NT$ 890</p>
+
+            <div class="detail-divider"></div>
+
+            <!-- 顏色選項 -->
+            <p class="option-label">顏色 — <span id="selectedColor" style="color:var(--color-ink);font-weight:500;">暖白</span></p>
+            <div class="color-options" role="radiogroup" aria-label="顏色選擇">
+              <button class="color-opt active" style="background:#f5f0e8;" title="暖白" aria-label="暖白" onclick="selectColor(this,'暖白')"></button>
+              <button class="color-opt"        style="background:#c8c4bc;" title="灰霧" aria-label="灰霧" onclick="selectColor(this,'灰霧')"></button>
+              <button class="color-opt"        style="background:#2c2c2c;" title="炭黑" aria-label="炭黑" onclick="selectColor(this,'炭黑')"></button>
+              <button class="color-opt"        style="background:#b5c4c0;" title="松綠" aria-label="松綠" onclick="selectColor(this,'松綠')"></button>
+            </div>
+
+            <!-- 尺寸選項 -->
+            <p class="option-label">尺寸 — <span id="selectedSize" style="color:var(--color-ink);font-weight:500;">請選擇</span></p>
+            <div class="size-options" role="radiogroup" aria-label="尺寸選擇">
+              <button class="size-btn disabled" onclick="selectSize(this,'XS')" aria-label="XS（已售完）">XS</button>
+              <button class="size-btn"          onclick="selectSize(this,'S')"  aria-label="S">S</button>
+              <button class="size-btn"          onclick="selectSize(this,'M')"  aria-label="M">M</button>
+              <button class="size-btn"          onclick="selectSize(this,'L')"  aria-label="L">L</button>
+              <button class="size-btn"          onclick="selectSize(this,'XL')" aria-label="XL">XL</button>
+            </div>
+
+            <!-- 數量 -->
+            <div class="qty-row">
+              <p class="option-label" style="margin-bottom:0;">數量</p>
+              <div class="qty-control">
+                <button class="qty-btn" onclick="changeQty(-1)" aria-label="減少數量">−</button>
+                <input class="qty-input" type="number" id="qtyInput" value="1" min="1" max="10" aria-label="商品數量" />
+                <button class="qty-btn" onclick="changeQty(1)" aria-label="增加數量">+</button>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <button class="detail-add-btn" onclick="addToCartFromDetail()">
+              <span>加入購物車</span>
+            </button>
+            <button class="detail-wish-btn">
+              ♡ &nbsp; 加入收藏
+            </button>
+
+            <!-- 服務資訊 -->
+            <div class="detail-meta">
+              <div class="detail-meta-item">
+                <span class="meta-icon">🚚</span>
+                <div class="meta-text">
+                  <p class="meta-title">免運費</p>
+                  <p class="meta-desc">訂單滿 NT$1,800 即享全台免運</p>
+                </div>
+              </div>
+              <div class="detail-meta-item">
+                <span class="meta-icon">↩️</span>
+                <div class="meta-text">
+                  <p class="meta-title">14 天退換貨</p>
+                  <p class="meta-desc">商品未使用原包裝均可退換</p>
+                </div>
+              </div>
+              <div class="detail-meta-item">
+                <span class="meta-icon">🌿</span>
+                <div class="meta-text">
+                  <p class="meta-title">永續材質</p>
+                  <p class="meta-desc">GOTS 認證有機棉，對地球友善</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Accordion -->
+            <div class="accordion">
+              <div class="accordion-item">
+                <div class="accordion-head" onclick="toggleAccordion(this)" role="button" aria-expanded="false">
+                  <span class="accordion-title">商品描述</span>
+                  <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-body">
+                  採用來自秘魯的長纖 Pima 棉，觸感絲滑柔軟，耐洗不易變形。無縫側縫剪裁讓線條更俐落，貼近身形卻不束縛。是日系、韓系穿搭愛好者的必備基本款。
+                </div>
+              </div>
+              <div class="accordion-item">
+                <div class="accordion-head" onclick="toggleAccordion(this)" role="button" aria-expanded="false">
+                  <span class="accordion-title">材質與洗滌</span>
+                  <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-body">
+                  100% Pima 棉。建議手洗或機洗（溫水30°C以下）、低溫烘乾，避免漂白，低溫熨燙。
+                </div>
+              </div>
+              <div class="accordion-item">
+                <div class="accordion-head" onclick="toggleAccordion(this)" role="button" aria-expanded="false">
+                  <span class="accordion-title">尺寸參考</span>
+                  <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-body">
+                  S：胸圍 88cm / 衣長 66cm<br>
+                  M：胸圍 96cm / 衣長 68cm<br>
+                  L：胸圍 104cm / 衣長 70cm<br>
+                  XL：胸圍 112cm / 衣長 72cm
+                </div>
+              </div>
+            </div>
+
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 關於我們 (About) ==================== -->
+    <section id="about" class="page-section" aria-label="關於我們">
+
+      <!-- About Hero -->
+      <div class="about-hero">
+        <img
+          src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1400&q=80&auto=format&fit=crop"
+          alt="MUJI'N 品牌工作室 — 衣物設計現場"
+          loading="lazy"
+        />
+        <div class="about-hero-overlay">
+          <h1 class="about-hero-title">Our <em>Story</em></h1>
+        </div>
+      </div>
+
+      <div class="about-content">
+        <div class="container">
+
+          <!-- 品牌介紹 -->
+          <div class="about-grid">
+            <div class="about-text reveal">
+              <h2>少一點，<br>美更多。</h2>
+              <p>
+                MUJI'N 創立於 2019 年台北，由兩位對質感生活有執念的設計師共同創辦。
+                品牌名稱源自日語「無地（むじ）」—— 純色、無花紋，代表我們對純粹的追求。
+              </p>
+              <p>
+                每一季，我們只推出 12 件精選單品，拒絕快時尚，選擇讓好料子說話。
+                從選布、打版到最終縫製，每個環節都在台灣本地完成。
+              </p>
+              <p>
+                我們相信，真正的時尚不是追逐趨勢，而是找到屬於自己的語言。
+              </p>
+              <button class="btn-primary" onclick="showSection('products')" style="margin-top:8px;">
+                <span>探索系列</span>
+                <span>→</span>
+              </button>
+            </div>
+            <div class="about-image-wrap reveal">
+              <img
+                src="https://images.unsplash.com/photo-1516762689617-e1cffcef479d?w=600&q=80&auto=format&fit=crop"
+                alt="MUJI'N 設計師工作照 — 選布與設計"
+                loading="lazy"
+              />
+              <div class="about-image-accent"></div>
+            </div>
+          </div>
+
+          <!-- 品牌價值 -->
+          <div class="values-grid">
+            <article class="value-card reveal">
+              <div class="value-icon">🌿</div>
+              <h3 class="value-title">永續設計</h3>
+              <p class="value-desc">選用 GOTS 認證有機棉與再生天絲，減少製程中的碳足跡，對環境負責。</p>
+            </article>
+            <article class="value-card reveal">
+              <div class="value-icon">🪡</div>
+              <h3 class="value-title">台灣製造</h3>
+              <p class="value-desc">100% 在台灣合作工廠製作，支持在地職人技藝，每針每線都有溫度。</p>
+            </article>
+            <article class="value-card reveal">
+              <div class="value-icon">✦</div>
+              <h3 class="value-title">精選限量</h3>
+              <p class="value-desc">每款限量生產，避免過剩庫存，讓你手中的每件衣服都是稀有的存在。</p>
+            </article>
+          </div>
+
+          <!-- 時間軸 -->
+          <div class="timeline">
+            <h2 class="reveal">品牌歷程</h2>
+            <div class="timeline-items">
+              <div class="timeline-item reveal">
+                <span class="timeline-year">2019</span>
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                  <h4>品牌創立</h4>
+                  <p>於台北大稻埕成立設計工作室，推出首批 6 件基本款，兩天完售。</p>
+                </div>
+              </div>
+              <div class="timeline-item reveal">
+                <span class="timeline-year">2021</span>
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                  <h4>首次海外合作</h4>
+                  <p>與日本選品店 NAM TOKYO 合作，進駐原宿門市，獲得《POPEYE》雜誌報導。</p>
+                </div>
+              </div>
+              <div class="timeline-item reveal">
+                <span class="timeline-year">2023</span>
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                  <h4>永續轉型</h4>
+                  <p>全線改用 GOTS 認證有機棉，包裝 100% 可回收材質，獲得台灣永續時尚獎。</p>
+                </div>
+              </div>
+              <div class="timeline-item reveal">
+                <span class="timeline-year">2025</span>
+                <div class="timeline-dot"></div>
+                <div class="timeline-body">
+                  <h4>線上旗艦店正式上線</h4>
+                  <p>推出全新品牌官網與電商平台，讓全球 MUJI'N 愛好者都能輕鬆入手。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 聯絡我們 (Contact) ==================== -->
+    <section id="contact" class="page-section" aria-label="聯絡我們">
+      <div class="container">
+        <div class="contact-wrapper">
+
+          <!-- 聯絡資訊 -->
+          <div>
+            <div class="section-header" style="text-align:left;padding:0 0 40px;">
+              <p class="section-eyebrow reveal">Get In Touch</p>
+              <h1 class="section-title reveal">聯絡我們</h1>
+            </div>
+
+            <p class="reveal" style="font-size:0.88rem;font-weight:300;color:var(--color-ink2);line-height:1.9;margin-bottom:40px;max-width:360px;">
+              有任何問題、合作提案或媒體詢問，<br>歡迎透過以下方式與我們聯繫，<br>
+              我們將在 1～2 個工作天內回覆。
+            </p>
+
+            <div class="contact-details">
+              <div class="contact-detail-item reveal">
+                <div class="contact-detail-icon">📍</div>
+                <div class="contact-detail-text">
+                  <p class="detail-label">地址</p>
+                  <p class="detail-value">台北市大同區迪化街一段 220 號</p>
+                </div>
+              </div>
+              <div class="contact-detail-item reveal">
+                <div class="contact-detail-icon">📧</div>
+                <div class="contact-detail-text">
+                  <p class="detail-label">電子郵件</p>
+                  <p class="detail-value">hello@mujin.tw</p>
+                </div>
+              </div>
+              <div class="contact-detail-item reveal">
+                <div class="contact-detail-icon">📞</div>
+                <div class="contact-detail-text">
+                  <p class="detail-label">電話</p>
+                  <p class="detail-value">(02) 2555-0880</p>
+                </div>
+              </div>
+              <div class="contact-detail-item reveal">
+                <div class="contact-detail-icon">🕐</div>
+                <div class="contact-detail-text">
+                  <p class="detail-label">營業時間</p>
+                  <p class="detail-value">週一至週五 10:00 — 18:00</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 聯絡表單 -->
+          <div class="contact-form-wrap reveal">
+            <h2 class="form-title">傳送訊息</h2>
+            <div id="contactFormBody">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="fname">姓名</label>
+                  <input class="form-input" type="text" id="fname" name="fname" placeholder="您的姓名" autocomplete="name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="femail">電子郵件</label>
+                  <input class="form-input" type="email" id="femail" name="femail" placeholder="your@email.com" autocomplete="email" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="fsubject">詢問類別</label>
+                <select class="form-select" id="fsubject" name="fsubject">
+                  <option value="">請選擇</option>
+                  <option value="order">訂單相關</option>
+                  <option value="return">退換貨</option>
+                  <option value="collab">品牌合作</option>
+                  <option value="media">媒體採訪</option>
+                  <option value="other">其他</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="fmessage">訊息內容</label>
+                <textarea class="form-textarea" id="fmessage" name="fmessage" placeholder="請輸入您的訊息…"></textarea>
+              </div>
+              <button class="form-submit" type="button" onclick="submitContactForm()">
+                送出訊息
+              </button>
+            </div>
+            <!-- 成功提示 -->
+            <div class="form-success" id="formSuccess">
+              <div class="success-icon">✉️</div>
+              <h3>訊息已傳送！</h3>
+              <p>感謝您的來信，我們將盡快與您聯繫。</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 購物車 (Cart) ==================== -->
+    <section id="cart" class="page-section" aria-label="購物車">
+      <div class="container">
+        <div class="section-header">
+          <p class="section-eyebrow">My Bag</p>
+          <h1 class="section-title">購物車</h1>
+        </div>
+        <div class="cart-wrapper" id="cartWrapper">
+          <!-- JavaScript 動態填充 -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== Footer ==================== -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <!-- 品牌欄 -->
+        <div class="footer-brand">
+          <p class="brand-name">MUJI'N</p>
+          <p class="brand-tagline">Minimal Fashion · Taiwan</p>
+          <p>以極簡為美，以質地為語言。<br>每件單品都是靜靜的宣言。</p>
+          <div class="social-links" aria-label="社群媒體連結">
+            <a href="#" class="social-link" aria-label="Instagram">IG</a>
+            <a href="#" class="social-link" aria-label="Facebook">FB</a>
+            <a href="#" class="social-link" aria-label="LINE">LN</a>
+            <a href="#" class="social-link" aria-label="Pinterest">PT</a>
+          </div>
+        </div>
+
+        <!-- 快速連結 -->
+        <nav class="footer-col" aria-label="快速連結">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="#" onclick="filterProducts(null,'tshirt');showSection('products')">T-Shirts</a></li>
+            <li><a href="#" onclick="filterProducts(null,'jacket');showSection('products')">外套</a></li>
+            <li><a href="#" onclick="filterProducts(null,'pants');showSection('products')">褲子</a></li>
+            <li><a href="#" onclick="showSection('products')">New Arrivals</a></li>
+          </ul>
+        </nav>
+
+        <!-- 關於 -->
+        <nav class="footer-col" aria-label="關於 MUJI'N">
+          <h4>About</h4>
+          <ul>
+            <li><a href="#" onclick="showSection('about')">品牌故事</a></li>
+            <li><a href="#" onclick="showSection('about')">永續承諾</a></li>
+            <li><a href="#" onclick="showSection('about')">台灣製造</a></li>
+            <li><a href="#">媒體報導</a></li>
+          </ul>
+        </nav>
+
+        <!-- 服務 -->
+        <nav class="footer-col" aria-label="客戶服務">
+          <h4>Service</h4>
+          <ul>
+            <li><a href="#" onclick="showSection('contact')">聯絡我們</a></li>
+            <li><a href="#">常見問題</a></li>
+            <li><a href="#">尺寸指南</a></li>
+            <li><a href="#">退換貨政策</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2025 MUJI'N Fashion. All rights reserved.</p>
+        <div class="footer-legal">
+          <a href="#">隱私政策</a>
+          <a href="#">使用條款</a>
+          <a href="#">Cookie 設定</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast 通知 -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- ==================== JavaScript ==================== -->
+  <script>
+    'use strict';
+
+    /* ──────────────────────────────────────────
+       商品資料
+    ────────────────────────────────────────── */
+    const PRODUCTS = [
+      {
+        id: 1, category: 'tshirt',
+        name: '無縫 Pima 棉 T-shirt',
+        nameEn: 'Seamless Cotton Tee',
+        price: 890, originalPrice: null,
+        badge: 'new',
+        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80&auto=format&fit=crop',
+        alt: '無縫 Pima 棉 T-shirt — 暖白色',
+        colors: ['#f5f0e8','#c8c4bc','#2c2c2c','#b5c4c0'],
+      },
+      {
+        id: 2, category: 'tshirt',
+        name: '寬版水洗棉 T-shirt',
+        nameEn: 'Washed Oversize Tee',
+        price: 1080, originalPrice: null,
+        badge: null,
+        image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&q=80&auto=format&fit=crop',
+        alt: '寬版水洗棉 T-shirt — 灰藍色',
+        colors: ['#8fa0b0','#d6d0c8','#2c2c2c'],
+      },
+      {
+        id: 3, category: 'jacket',
+        name: '羊毛混紡寬版外套',
+        nameEn: 'Wool Blend Overcoat',
+        price: 3200, originalPrice: null,
+        badge: 'new',
+        image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=600&q=80&auto=format&fit=crop',
+        alt: '羊毛混紡寬版外套 — 駝色',
+        colors: ['#c4a882','#8c8078','#1e1e1e'],
+      },
+      {
+        id: 4, category: 'jacket',
+        name: '棉麻混紡工裝外套',
+        nameEn: 'Cotton-Linen Chore Coat',
+        price: 2680, originalPrice: 3200,
+        badge: 'sale',
+        image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80&auto=format&fit=crop',
+        alt: '棉麻混紡工裝外套 — 軍綠色',
+        colors: ['#7a8c6e','#c4c0b8','#2c2c2c'],
+      },
+      {
+        id: 5, category: 'pants',
+        name: '修身直筒牛仔褲',
+        nameEn: 'Slim Straight Denim',
+        price: 1680, originalPrice: null,
+        badge: null,
+        image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=600&q=80&auto=format&fit=crop',
+        alt: '修身直筒牛仔褲 — 深藍丹寧',
+        colors: ['#3a5074','#6a8099','#1a1a2e'],
+      },
+      {
+        id: 6, category: 'pants',
+        name: '高腰寬褲',
+        nameEn: 'High-Waist Wide Trousers',
+        price: 1980, originalPrice: null,
+        badge: 'new',
+        image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80&auto=format&fit=crop',
+        alt: '高腰寬褲 — 米白',
+        colors: ['#e8e2d8','#c8c4bc','#2c2c2c'],
+      },
+    ];
+
+    /* 購物車狀態 */
+    let cartItems = [];
+    let currentFilter = 'all';
+
+    /* ──────────────────────────────────────────
+       頁面切換
+    ────────────────────────────────────────── */
+    function showSection(id) {
+      // 隱藏所有頁面
+      document.querySelectorAll('.page-section').forEach(sec => {
+        sec.classList.remove('active');
+      });
+      // 顯示目標頁面
+      const target = document.getElementById(id);
+      if (target) target.classList.add('active');
+
+      // 更新 nav active 狀態
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
+      if (activeLink) activeLink.classList.add('active');
+
+      // 更新購物車
+      if (id === 'cart') renderCart();
+
+      // 滾動到頂部
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // 觸發 reveal 動畫（切換頁面後重新觀察）
+      setTimeout(triggerReveals, 100);
+
+      return false;
+    }
+
+    /* ──────────────────────────────────────────
+       Navbar 滾動效果
+    ────────────────────────────────────────── */
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    /* ──────────────────────────────────────────
+       漢堡選單
+    ────────────────────────────────────────── */
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    hamburger.addEventListener('click', () => {
+      const isOpen = hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open', isOpen);
+      hamburger.setAttribute('aria-expanded', isOpen);
+    });
+
+    function closeMobileMenu() {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+
+    /* ──────────────────────────────────────────
+       Marquee 走馬燈
+    ────────────────────────────────────────── */
+    (function initMarquee() {
+      const items = [
+        'New Arrivals 2025', '台灣製造', 'Free Shipping Over NT$1800',
+        '永續時尚', 'GOTS Certified', '14-Day Returns',
+        'Minimal Fashion', '極簡美學', 'Limited Edition',
+      ];
+      const track = document.getElementById('marqueeTrack');
+      if (!track) return;
+      // 建立兩組以形成無縫循環
+      let html = '';
+      for (let r = 0; r < 2; r++) {
+        items.forEach(text => {
+          html += `<span class="marquee-item">${text}</span><span class="marquee-item marquee-dot">·</span>`;
+        });
+      }
+      track.innerHTML = html;
+    })();
+
+    /* ──────────────────────────────────────────
+       商品卡片渲染
+    ────────────────────────────────────────── */
+    function renderProductCard(product) {
+      const badge = product.badge
+        ? `<span class="product-badge badge-${product.badge}">${product.badge === 'new' ? 'New' : 'Sale'}</span>`
+        : '';
+      const origPrice = product.originalPrice
+        ? `<span class="price-original">NT$ ${product.originalPrice.toLocaleString()}</span>`
+        : '';
+      const swatches = product.colors.map((c, i) =>
+        `<span class="swatch${i === 0 ? ' selected' : ''}" style="background:${c};" aria-label="顏色選項"></span>`
+      ).join('');
+
+      return `
+        <article class="product-card reveal" data-id="${product.id}" data-category="${product.category}">
+          <div class="product-image">
+            ${badge}
+            <img
+              src="${product.image}"
+              alt="${product.alt}"
+              loading="lazy"
+            />
+            <div class="product-overlay"></div>
+            <div class="product-actions">
+              <button class="btn-cart" onclick="addToCart(${product.id})">加入購物車</button>
+              <button class="btn-detail" onclick="showSection('detail')" title="查看詳細" aria-label="查看商品詳細">↗</button>
+            </div>
+          </div>
+          <div class="product-info">
+            <p class="product-category">${product.category === 'tshirt' ? 'T-Shirt' : product.category === 'jacket' ? 'Jacket' : 'Pants'}</p>
+            <h3 class="product-name">${product.name}</h3>
+            <div class="product-price-row">
+              <span class="price-current">NT$ ${product.price.toLocaleString()}</span>
+              ${origPrice}
+            </div>
+            <div class="color-swatches" aria-label="顏色">${swatches}</div>
+          </div>
+        </article>
+      `;
+    }
+
+    /* 首頁精選（3件） */
+    function renderHomeProducts() {
+      const grid = document.getElementById('homeProductGrid');
+      if (!grid) return;
+      const featured = [PRODUCTS[0], PRODUCTS[2], PRODUCTS[4]];
+      grid.innerHTML = featured.map(renderProductCard).join('');
+    }
+
+    /* 全部商品 */
+    function renderAllProducts(filter = 'all') {
+      const grid = document.getElementById('allProductGrid');
+      if (!grid) return;
+      const list = filter === 'all'
+        ? PRODUCTS
+        : PRODUCTS.filter(p => p.category === filter);
+      grid.innerHTML = list.map(renderProductCard).join('');
+      triggerReveals();
+    }
+
+    /* 篩選器 */
+    function filterProducts(btn, filter) {
+      currentFilter = filter;
+      // 更新篩選按鈕樣式
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderAllProducts(filter);
+    }
+
+    /* ──────────────────────────────────────────
+       購物車邏輯
+    ────────────────────────────────────────── */
+    function addToCart(productId, qty = 1, size = 'M', color = '預設') {
+      const product = PRODUCTS.find(p => p.id === productId);
+      if (!product) return;
+
+      const existing = cartItems.find(
+        item => item.id === productId && item.size === size
+      );
+
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        cartItems.push({ ...product, qty, size, color });
+      }
+
+      updateCartCount();
+      showToast(`已加入購物車：${product.name}`);
+    }
+
+    function addToCartFromDetail() {
+      const size = document.getElementById('selectedSize')?.textContent;
+      const color = document.getElementById('selectedColor')?.textContent;
+      const qty = parseInt(document.getElementById('qtyInput')?.value || '1');
+      if (size === '請選擇') {
+        showToast('請先選擇尺寸 ✦');
+        return;
+      }
+      addToCart(1, qty, size, color);
+    }
+
+    function removeFromCart(index) {
+      cartItems.splice(index, 1);
+      updateCartCount();
+      renderCart();
+    }
+
+    function changeItemQty(index, delta) {
+      cartItems[index].qty = Math.max(1, cartItems[index].qty + delta);
+      updateCartCount();
+      renderCart();
+    }
+
+    function updateCartCount() {
+      const total = cartItems.reduce((sum, item) => sum + item.qty, 0);
+      const el = document.getElementById('cartCount');
+      if (!el) return;
+      el.textContent = total;
+      // 跳動動畫
+      el.classList.remove('bump');
+      void el.offsetWidth; // reflow
+      el.classList.add('bump');
+      setTimeout(() => el.classList.remove('bump'), 400);
+    }
+
+    /* 渲染購物車 */
+    function renderCart() {
+      const wrapper = document.getElementById('cartWrapper');
+      if (!wrapper) return;
+
+      if (cartItems.length === 0) {
+        wrapper.innerHTML = `
+          <div class="cart-empty">
+            <div class="empty-icon">🛍</div>
+            <h3>購物車是空的</h3>
+            <p>快去探索我們的精選商品吧！</p>
+            <button class="btn-primary" onclick="showSection('products')" style="margin:0 auto;">
+              <span>去逛逛</span>
+              <span>→</span>
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      // 計算金額
+      const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const shipping = subtotal >= 1800 ? 0 : 80;
+      const total = subtotal + shipping;
+
+      const itemsHtml = cartItems.map((item, i) => `
+        <div class="cart-item">
+          <img class="cart-item-img"
+            src="${item.image}"
+            alt="${item.alt}"
+            loading="lazy"
+          />
+          <div class="cart-item-info">
+            <p class="item-name">${item.name}</p>
+            <p class="item-meta">尺寸：${item.size} ／ 顏色：${item.color}</p>
+            <div class="item-qty-row">
+              <div class="item-qty-ctrl">
+                <button class="item-qty-btn" onclick="changeItemQty(${i},-1)" aria-label="減少">−</button>
+                <span class="item-qty-num">${item.qty}</span>
+                <button class="item-qty-btn" onclick="changeItemQty(${i},1)"  aria-label="增加">+</button>
+              </div>
+              <span class="item-remove" onclick="removeFromCart(${i})" role="button" tabindex="0">移除</span>
+            </div>
+          </div>
+          <p class="cart-item-price">NT$ ${(item.price * item.qty).toLocaleString()}</p>
+        </div>
+      `).join('');
+
+      wrapper.innerHTML = `
+        <div>
+          <p class="cart-section-title">商品明細 (${cartItems.length} 件)</p>
+          <div class="cart-items-list">${itemsHtml}</div>
+          <div style="margin-top:24px;">
+            <button class="btn-outline" onclick="showSection('products')">← 繼續購物</button>
+          </div>
+        </div>
+
+        <aside class="order-summary" aria-label="訂單摘要">
+          <h2 class="summary-title">訂單摘要</h2>
+          <div class="summary-row">
+            <span>小計</span>
+            <span>NT$ ${subtotal.toLocaleString()}</span>
+          </div>
+          <div class="summary-row">
+            <span>運費</span>
+            <span>${shipping === 0 ? '<span style="color:var(--color-accent)">免運</span>' : 'NT$ ' + shipping}</span>
+          </div>
+          ${subtotal < 1800 && subtotal > 0 ? `
+          <div class="summary-row" style="font-size:0.78rem;color:var(--color-accent);">
+            <span>再購 NT$ ${(1800 - subtotal).toLocaleString()} 即享免運</span>
+          </div>` : ''}
+          <div class="summary-row total">
+            <span>總計</span>
+            <span>NT$ ${total.toLocaleString()}</span>
+          </div>
+
+          <div class="promo-input-row">
+            <input class="promo-input" type="text" placeholder="輸入優惠碼" aria-label="優惠碼" />
+            <button class="promo-apply" onclick="showToast('此優惠碼不存在')">套用</button>
+          </div>
+
+          <button class="checkout-btn" onclick="showToast('前往結帳（示範版不跳轉）')">
+            前往結帳
+          </button>
+
+          <div class="summary-note">
+            ✦ 支援信用卡、LINE Pay、街口支付<br>
+            ✦ 訂單滿 NT$1,800 全台免運
+          </div>
+        </aside>
+      `;
+    }
+
+    /* ──────────────────────────────────────────
+       商品詳細頁互動
+    ────────────────────────────────────────── */
+    function changeDetailImg(thumb, src) {
+      const mainImg = document.getElementById('detailMainImg');
+      if (mainImg) {
+        mainImg.style.opacity = 0;
+        setTimeout(() => {
+          mainImg.src = src + '&auto=format&fit=crop';
+          mainImg.style.opacity = 1;
+        }, 200);
+      }
+      document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+      thumb.classList.add('active');
+    }
+
+    function selectSize(btn, size) {
+      if (btn.classList.contains('disabled')) return;
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const el = document.getElementById('selectedSize');
+      if (el) el.textContent = size;
+    }
+
+    function selectColor(btn, color) {
+      document.querySelectorAll('.color-opt').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const el = document.getElementById('selectedColor');
+      if (el) el.textContent = color;
+    }
+
+    function changeQty(delta) {
+      const input = document.getElementById('qtyInput');
+      if (!input) return;
+      let val = parseInt(input.value) + delta;
+      val = Math.max(1, Math.min(10, val));
+      input.value = val;
+    }
+
+    /* ──────────────────────────────────────────
+       Accordion
+    ────────────────────────────────────────── */
+    function toggleAccordion(head) {
+      const item = head.parentElement;
+      const isOpen = item.classList.toggle('open');
+      head.setAttribute('aria-expanded', isOpen);
+    }
+
+    /* ──────────────────────────────────────────
+       聯絡表單
+    ────────────────────────────────────────── */
+    function submitContactForm() {
+      const name  = document.getElementById('fname')?.value.trim();
+      const email = document.getElementById('femail')?.value.trim();
+      const msg   = document.getElementById('fmessage')?.value.trim();
+
+      if (!name || !email || !msg) {
+        showToast('請填寫必填欄位');
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showToast('請輸入有效的電子郵件');
+        return;
+      }
+
+      const formBody    = document.getElementById('contactFormBody');
+      const formSuccess = document.getElementById('formSuccess');
+      if (formBody && formSuccess) {
+        formBody.style.display    = 'none';
+        formSuccess.style.display = 'block';
+      }
+    }
+
+    /* ──────────────────────────────────────────
+       Toast 通知
+    ────────────────────────────────────────── */
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      if (!toast) return;
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    /* ──────────────────────────────────────────
+       Reveal 動畫（Intersection Observer）
+    ────────────────────────────────────────── */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    function triggerReveals() {
+      document.querySelectorAll('.reveal:not(.visible)').forEach(el => {
+        revealObserver.observe(el);
+      });
+    }
+
+    /* ──────────────────────────────────────────
+       初始化
+    ────────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      renderHomeProducts();
+      renderAllProducts();
+      triggerReveals();
+    });
+  </script>
+
+</body>
+</html>
