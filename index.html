@@ -366,7 +366,7 @@
            class would skip the transition entirely — the browser has no
            "before" frame to animate from. */
         main { padding-top: 68px; min-height: 100vh; }
-        .page { display: none; opacity: 0; transform: translateY(16px); transition: opacity 0.55s cubic-bezier(0.23, 1, 0.32, 1), transform 0.55s cubic-bezier(0.23, 1, 0.32, 1); }
+        .page { overflow-x: clip; display: none; opacity: 0; transform: translateY(16px); transition: opacity 0.55s cubic-bezier(0.23, 1, 0.32, 1), transform 0.55s cubic-bezier(0.23, 1, 0.32, 1); }
         .page.showing { display: block; }
         .page.showing.active { opacity: 1; transform: translateY(0); }
 
@@ -780,6 +780,7 @@
             .hamburger { display: block; }
             .about-list { grid-template-columns: 1fr; }
             footer { padding: 48px 20px; }
+            .footer-nav { flex-wrap: wrap; gap: 14px 24px; }
             .footer-inner { flex-direction: column; align-items: flex-start; }
             .hero-logo-frame { width: 150px; height: 150px; }
             .hero-logo-ring { inset: -12px; } .hero-logo-ring-2 { inset: -24px; }
