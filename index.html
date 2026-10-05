@@ -2731,6 +2731,19 @@
             }, { duration: 400, fill: "forwards" });
         });
 
+        /* Mouse events inside the embedded SEO tool iframe never reach this page, so the
+           decorative cursor would freeze at the iframe's edge — hide it while over the tool
+           (and while the pointer is outside the window). */
+        const hideCursor = () => { cursorDot.style.opacity = '0'; cursorFollower.style.opacity = '0'; };
+        const showCursor = () => { cursorDot.style.opacity = ''; cursorFollower.style.opacity = ''; };
+        const seoToolFrame = document.getElementById('seoToolFrame');
+        if (seoToolFrame) {
+            seoToolFrame.addEventListener('mouseenter', hideCursor);
+            seoToolFrame.addEventListener('mouseleave', showCursor);
+        }
+        document.documentElement.addEventListener('mouseleave', hideCursor);
+        document.documentElement.addEventListener('mouseenter', showCursor);
+
         document.querySelectorAll('a, button, .form-chip, .work-item, .faq-item, .tilt-card').forEach(el => {
             el.addEventListener('mouseenter', () => {
                 cursorFollower.style.transform = 'translate(-50%, -50%) scale(1.4)';
