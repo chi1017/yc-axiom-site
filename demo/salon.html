@@ -102,6 +102,11 @@
     transition: background .3s, color .3s;
   }
   .nav-cta:hover { background: var(--gold); color: var(--white); }
+  /* 未捲動時導覽列壓在深色主視覺上，文字改為淺色以維持可讀性 */
+  nav:not(.scrolled) .nav-logo,
+  nav:not(.scrolled) .nav-links a { color: var(--white); }
+  nav:not(.scrolled) .nav-links a:hover { color: var(--gold-lt); }
+  nav:not(.scrolled) .hamburger span { background: var(--white); }
 
   /* Hamburger */
   .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
