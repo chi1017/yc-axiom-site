@@ -825,9 +825,10 @@
             transition: border-color 0.25s ease, color 0.25s ease; white-space: nowrap;
         }
         .seo-tool-frame-open:hover { border-color: var(--accent); color: var(--text-bright); }
-        .seo-tool-iframe-inner { position: relative; width: 100%; height: min(78vh, 880px); background: var(--surface); }
+        .seo-tool-iframe-inner { position: relative; width: 100%; background: var(--surface); }
+        body.on-seo .nav-cta { display: none; }
         .seo-tool-iframe-inner iframe {
-            width: 100%; height: 100%; border: none; position: relative; z-index: 1;
+            width: 100%; height: 70vh; display: block; border: none; position: relative; z-index: 1;
             opacity: 0; transition: opacity 0.5s ease;
         }
         .seo-tool-iframe-inner.loaded iframe { opacity: 1; }
@@ -845,7 +846,6 @@
         @media (max-width: 768px) {
             .seo-tool-header { padding: 32px 20px 28px; }
             .seo-tool-frame-wrap { padding: 0 20px 64px; }
-            .seo-tool-iframe-inner { height: 80vh; }
             .seo-tool-frame-label { display: none; }
         }
     
@@ -2052,16 +2052,9 @@
     </div>
     <div class="seo-tool-frame-wrap">
         <div class="seo-tool-frame">
-            <div class="seo-tool-frame-bar">
-                <span class="seo-tool-frame-dot"></span>
-                <span class="seo-tool-frame-dot"></span>
-                <span class="seo-tool-frame-dot"></span>
-                <span class="seo-tool-frame-label">seo-analyzer · 即時工具</span>
-                <a href="https://chi1017.github.io/yc-axiom-site/seo-tool.html" target="_blank" rel="noopener" class="seo-tool-frame-open">在新分頁開啟 ↗</a>
-            </div>
             <div class="seo-tool-iframe-inner">
                 <div class="seo-tool-loading"><span class="seo-tool-spinner"></span>工具載入中…</div>
-                <iframe src="https://chi1017.github.io/yc-axiom-site/seo-tool.html" title="SEO 分析工具 v18 Pro" loading="lazy" allow="clipboard-write" onload="this.parentElement.classList.add('loaded')"></iframe>
+                <iframe id="seoToolFrame" scrolling="no" src="https://chi1017.github.io/yc-axiom-site/seo-tool.html" title="SEO 分析工具 v18 Pro" loading="lazy" allow="clipboard-write" onload="this.parentElement.classList.add('loaded')"></iframe>
             </div>
         </div>
     </div>
@@ -2938,6 +2931,31 @@
     }
 
     /* ── Page Navigation ── */
+    /* ── SEO tool: auto-size the embedded tool so it scrolls with the page (no inner scrollbar) ── */
+    (function () {
+        var fr = document.getElementById('seoToolFrame');
+        if (!fr) return;
+        var raf = 0;
+        function sendViewport() {
+            raf = 0;
+            if (!fr.contentWindow) return;
+            var r = fr.getBoundingClientRect();
+            var top = Math.max(0, 96 - r.top);
+            var bottom = Math.min(r.height, window.innerHeight - r.top);
+            fr.contentWindow.postMessage({ type: 'seo-viewport', top: top, height: Math.max(0, bottom - top) }, '*');
+        }
+        function queue() { if (!raf) raf = requestAnimationFrame(sendViewport); }
+        window.addEventListener('scroll', queue, { passive: true });
+        window.addEventListener('resize', queue);
+        window.addEventListener('message', function (e) {
+            if (e.source !== fr.contentWindow || !e.data || e.data.type !== 'seo-tool-height') return;
+            var h = Math.ceil(e.data.height);
+            if (h > 200) fr.style.height = h + 'px';
+            queue();
+        });
+        fr.addEventListener('load', queue);
+    })();
+
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => {
             p.classList.remove('active');
@@ -2945,6 +2963,7 @@
         });
         const activePage = document.getElementById('page-' + id);
         activePage.classList.add('showing');
+        document.body.classList.toggle('on-seo', id === 'seo');
         // Force a reflow so the browser registers the "before" state (opacity
         // 0 / translateY 16px) before .active flips it — otherwise the two
         // class changes collapse into one frame and the transition never plays.

@@ -1325,6 +1325,36 @@ input[type="text"]:focus, textarea:focus {
 }
 
 </style>
+<style id="embed-mode">
+html.embedded, html.embedded body { overflow: hidden; }
+html.embedded body { min-height: 0; }
+html.embedded #scrollTopBtn { display: none !important; }
+html.embedded .pdf-overlay { position: absolute; inset: auto; left: 0; right: 0; top: var(--vt, 0px); height: var(--vh, 100vh); }
+html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px) + var(--vh, 600px) - 90px); }
+</style>
+<script>
+(function () {
+  if (window.parent === window) return;
+  var de = document.documentElement;
+  de.classList.add('embedded');
+  function post() {
+    var b = document.body; if (!b) return;
+    var cs = getComputedStyle(b);
+    var h = b.getBoundingClientRect().height + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
+    parent.postMessage({ type: 'seo-tool-height', height: h }, '*');
+  }
+  function init() {
+    if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+    post(); setTimeout(post, 400); setTimeout(post, 1500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  window.addEventListener('message', function (e) {
+    if (e.source !== parent || !e.data || e.data.type !== 'seo-viewport') return;
+    de.style.setProperty('--vt', e.data.top + 'px');
+    de.style.setProperty('--vh', e.data.height + 'px');
+  });
+})();
+</script>
 </head>
 <body>
 
