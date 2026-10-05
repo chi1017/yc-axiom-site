@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, follow">
+<title>LUMIÈRE — 璀璨髮藝</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+TC:wght@300;400;500&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  /* ─── CSS Variables ─── */
+  :root {
+    --cream:   #f8f3ed;
+    --warm:    #ede6da;
+    --gold:    #b89a6a;
+    --gold-lt: #d4ba8a;
+    --dark:    #1a1714;
+    --charcoal:#2e2924;
+    --muted:   #7a6f63;
+    --white:   #ffffff;
+    --shadow:  0 8px 40px rgba(26,23,20,.10);
+    --radius:  4px;
+    --transition: .45s cubic-bezier(.16,1,.3,1);
+  }
+
+  /* ─── Reset ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Serif TC', serif;
+    background: var(--cream);
+    color: var(--dark);
+    overflow-x: hidden;
+  }
+  img { display: block; width: 100%; object-fit: cover; }
+  a { text-decoration: none; color: inherit; }
+
+  /* ─── Scroll animation setup ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(36px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-left  { opacity:0; transform:translateX(-40px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal-right { opacity:0; transform:translateX(40px);  transition: opacity .7s ease, transform .7s ease; }
+  .reveal-left.active, .reveal-right.active { opacity:1; transform:translateX(0); }
+
+  /* ─── Navbar ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 5%;
+    transition: background .4s, box-shadow .4s;
+  }
+  nav.scrolled {
+    background: rgba(248,243,237,.96);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 2px 20px rgba(26,23,20,.08);
+  }
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: .12em;
+    color: var(--dark);
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-links {
+    display: flex;
+    gap: 2.4rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    transition: color .3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .7rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: .65rem 1.6rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    border-radius: var(--radius);
+    transition: background .3s, color .3s;
+  }
+  .nav-cta:hover { background: var(--gold); color: var(--white); }
+
+  /* Hamburger */
+  .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+  .hamburger span { display:block; width:24px; height:1.5px; background:var(--dark); transition:.3s; }
+
+  /* ─── HERO ─── */
+  #hero {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80') center/cover no-repeat;
+    transform: scale(1.08);
+    transition: transform 8s ease;
+  }
+  #hero.loaded .hero-bg { transform: scale(1); }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(26,23,20,.72) 0%, rgba(26,23,20,.35) 60%, transparent 100%);
+  }
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 7.5rem 8% 6rem;
+    max-width: 700px;
+  }
+  .hero-eyebrow {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .68rem;
+    font-weight: 400;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--gold-lt);
+    margin-bottom: 1.2rem;
+    opacity: 0;
+    animation: fadeUp .8s .3s forwards;
+  }
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.6rem, 6vw, 5rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 1.4rem;
+    opacity: 0;
+    animation: fadeUp .8s .5s forwards;
+  }
+  .hero-title em { font-style: italic; color: var(--gold-lt); }
+  .hero-sub {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(255,255,255,.78);
+    line-height: 1.9;
+    margin-bottom: 2.4rem;
+    max-width: 420px;
+    opacity: 0;
+    animation: fadeUp .8s .7s forwards;
+  }
+  .hero-btns {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp .8s .9s forwards;
+  }
+  .btn-primary {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: 1rem 2.2rem;
+    background: var(--gold);
+    color: var(--white);
+    border-radius: var(--radius);
+    transition: background var(--transition), transform .3s;
+  }
+  .btn-primary:hover { background: #a0834e; transform: translateY(-2px); }
+  .btn-outline {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: 1rem 2.2rem;
+    border: 1px solid rgba(255,255,255,.5);
+    color: var(--white);
+    border-radius: var(--radius);
+    transition: border-color .3s, background .3s;
+  }
+  .btn-outline:hover { border-color: var(--white); background: rgba(255,255,255,.1); }
+  .hero-scroll {
+    position: absolute;
+    bottom: 2.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+    color: rgba(255,255,255,.5);
+    font-family: 'Montserrat', sans-serif;
+    font-size: .6rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,.3);
+    animation: scrollPulse 2s infinite;
+  }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes scrollPulse { 0%,100%{height:40px;opacity:.3} 50%{height:60px;opacity:.7} }
+
+  /* ─── Section Shared ─── */
+  section { padding: 6rem 5%; }
+  .section-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .62rem;
+    font-weight: 500;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .8rem;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 300;
+    line-height: 1.2;
+    color: var(--dark);
+    margin-bottom: 1rem;
+  }
+  .section-title em { font-style: italic; color: var(--gold); }
+  .section-sub {
+    font-size: .93rem;
+    font-weight: 300;
+    color: var(--muted);
+    line-height: 1.9;
+    max-width: 480px;
+  }
+  .divider {
+    width: 48px;
+    height: 1px;
+    background: var(--gold);
+    margin: 1.4rem 0 2.8rem;
+  }
+
+  /* ─── SERVICES ─── */
+  #services { background: var(--dark); }
+  #services .section-label { color: var(--gold-lt); }
+  #services .section-title { color: var(--white); }
+  #services .section-sub { color: rgba(255,255,255,.5); }
+  #services .divider { background: var(--gold); }
+  .services-header { max-width: 540px; }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5px;
+    margin-top: 3.5rem;
+  }
+  .service-card {
+    background: #221e1a;
+    padding: 2.6rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background var(--transition);
+    cursor: default;
+  }
+  .service-card::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    background: linear-gradient(135deg, var(--gold) 0%, transparent 60%);
+    opacity:0;
+    transition: opacity var(--transition);
+  }
+  .service-card:hover { background: #2e2822; }
+  .service-card:hover::before { opacity:.07; }
+  .service-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+    display:block;
+  }
+  .service-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--white);
+    margin-bottom: .5rem;
+    letter-spacing: .04em;
+  }
+  .service-desc {
+    font-size: .83rem;
+    font-weight: 300;
+    color: rgba(255,255,255,.45);
+    line-height: 1.8;
+    margin-bottom: 1.4rem;
+  }
+  .service-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    color: var(--gold-lt);
+    font-weight: 300;
+  }
+  .service-price small {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .6rem;
+    letter-spacing: .1em;
+    color: var(--muted);
+    display: block;
+    margin-top: .2rem;
+  }
+  .service-tag {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: .55rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    padding: .3rem .7rem;
+    background: var(--gold);
+    color: var(--white);
+    border-radius: 2px;
+  }
+
+  /* ─── ABOUT ─── */
+  #about { background: var(--cream); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+  .about-img-wrap {
+    position: relative;
+  }
+  .about-img-main {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    border-radius: 2px;
+  }
+  .about-img-accent {
+    position: absolute;
+    width: 52%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    bottom: -2.5rem;
+    right: -2.5rem;
+    border: 6px solid var(--cream);
+    border-radius: 2px;
+  }
+  .about-badge {
+    position: absolute;
+    top: 2rem;
+    left: -2rem;
+    background: var(--gold);
+    color: var(--white);
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  .about-badge .num { font-size: 2rem; font-weight: 600; line-height: 1; }
+  .about-badge .label { font-size: .62rem; letter-spacing: .08em; font-weight: 300; }
+  .about-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+    margin-top: 2.4rem;
+  }
+  .about-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: .8rem;
+    padding: 1.2rem;
+    background: var(--warm);
+    border-radius: var(--radius);
+  }
+  .feature-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: .1rem; }
+  .feature-text strong { display: block; font-size: .82rem; font-weight: 500; margin-bottom: .2rem; }
+  .feature-text span { font-size: .78rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
+
+  /* ─── GALLERY ─── */
+  #gallery { background: var(--warm); }
+  .gallery-header-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2.8rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .gallery-masonry {
+    columns: 3;
+    column-gap: 1rem;
+  }
+  .gallery-item {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    border-radius: var(--radius);
+    position: relative;
+    cursor: pointer;
+  }
+  .gallery-item img {
+    width: 100%;
+    display: block;
+    transition: transform .6s ease;
+  }
+  .gallery-item:hover img { transform: scale(1.06); }
+  .gallery-item-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(26,23,20,.7) 0%, transparent 55%);
+    opacity: 0;
+    transition: opacity .4s;
+    display: flex;
+    align-items: flex-end;
+    padding: 1.2rem;
+  }
+  .gallery-item:hover .gallery-item-overlay { opacity: 1; }
+  .gallery-item-label {
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--white);
+    font-size: 1rem;
+    font-style: italic;
+  }
+
+  /* Before/After badges */
+  .ba-wrap { position: relative; }
+  .ba-badge {
+    position: absolute;
+    top: .8rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: .55rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .3rem .6rem;
+    border-radius: 2px;
+    z-index: 2;
+  }
+  .ba-before { left:.8rem; background: rgba(26,23,20,.7); color:#fff; }
+  .ba-after  { right:.8rem; background: var(--gold); color:#fff; }
+
+  /* ─── TESTIMONIALS ─── */
+  #testimonials { background: var(--dark); }
+  #testimonials .section-title { color: var(--white); }
+  #testimonials .section-label { color: var(--gold-lt); }
+  #testimonials .divider { background: var(--gold); }
+  .testimonials-slider {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3.2rem;
+  }
+  .testi-card {
+    background: #221e1a;
+    padding: 2rem;
+    border-radius: var(--radius);
+    position: relative;
+    border-top: 2px solid transparent;
+    transition: border-color .3s, transform .3s;
+  }
+  .testi-card:hover { border-color: var(--gold); transform: translateY(-4px); }
+  .testi-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3.5rem;
+    color: var(--gold);
+    line-height: .7;
+    margin-bottom: 1rem;
+    opacity: .5;
+  }
+  .testi-text {
+    font-size: .9rem;
+    font-weight: 300;
+    color: rgba(255,255,255,.72);
+    line-height: 1.9;
+    margin-bottom: 1.6rem;
+  }
+  .testi-stars { color: var(--gold); font-size: .85rem; margin-bottom: 1rem; letter-spacing: .1em; }
+  .testi-author { display: flex; align-items: center; gap: .9rem; }
+  .testi-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+  .testi-name { font-size: .85rem; color: var(--white); font-weight: 400; }
+  .testi-info { font-size: .72rem; color: var(--muted); font-weight: 300; margin-top: .1rem; }
+  .service-badge {
+    display: inline-block;
+    margin-top: .4rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: .55rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: .25rem .6rem;
+    border: 1px solid var(--gold);
+    color: var(--gold-lt);
+    border-radius: 2px;
+  }
+
+  /* ─── CTA ─── */
+  #cta {
+    background: var(--gold);
+    padding: 5.5rem 5%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  #cta::before {
+    content: 'LUMIÈRE';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(6rem, 16vw, 14rem);
+    font-weight: 700;
+    color: rgba(255,255,255,.07);
+    pointer-events: none;
+    letter-spacing: .1em;
+    white-space: nowrap;
+  }
+  .cta-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .65rem;
+    font-weight: 500;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
+    margin-bottom: 1rem;
+  }
+  .cta-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 300;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .cta-sub {
+    color: rgba(255,255,255,.75);
+    font-size: .93rem;
+    font-weight: 300;
+    line-height: 1.9;
+    margin-bottom: 2.4rem;
+  }
+  .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-white {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: 1rem 2.4rem;
+    background: var(--white);
+    color: var(--gold);
+    border-radius: var(--radius);
+    transition: transform .3s, box-shadow .3s;
+  }
+  .btn-white:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+  .btn-outline-white {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    padding: 1rem 2.4rem;
+    border: 1px solid rgba(255,255,255,.6);
+    color: var(--white);
+    border-radius: var(--radius);
+    transition: background .3s, border-color .3s;
+  }
+  .btn-outline-white:hover { background: rgba(255,255,255,.15); border-color: var(--white); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--dark);
+    padding: 4rem 5% 2.5rem;
+    color: rgba(255,255,255,.5);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+  .footer-brand .nav-logo { color: var(--white); font-size: 1.5rem; }
+  .footer-desc {
+    font-size: .8rem;
+    line-height: 1.9;
+    margin-top: 1rem;
+    color: rgba(255,255,255,.4);
+    font-weight: 300;
+  }
+  .footer-socials { display: flex; gap: .8rem; margin-top: 1.4rem; }
+  .social-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .85rem;
+    color: rgba(255,255,255,.5);
+    transition: border-color .3s, color .3s;
+  }
+  .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .footer-heading {
+    font-family: 'Montserrat', sans-serif;
+    font-size: .6rem;
+    font-weight: 500;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: var(--gold-lt);
+    margin-bottom: 1.2rem;
+  }
+  .footer-list { list-style: none; }
+  .footer-list li {
+    font-size: .8rem;
+    line-height: 1.6;
+    margin-bottom: .55rem;
+    font-weight: 300;
+  }
+  .footer-list a:hover { color: var(--gold-lt); }
+  .footer-hours-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: .78rem;
+    margin-bottom: .5rem;
+    font-weight: 300;
+    gap: 1rem;
+  }
+  .footer-hours-item span:first-child { color: rgba(255,255,255,.4); }
+  .footer-hours-item span:last-child  { color: rgba(255,255,255,.7); }
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding-top: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: .72rem;
+    font-weight: 300;
+  }
+  .footer-bottom a { color: var(--gold-lt); }
+
+  /* ─── Mobile Menu ─── */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--dark);
+    z-index: 99;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.2rem;
+  }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    color: var(--white);
+    font-weight: 300;
+    letter-spacing: .08em;
+    transition: color .3s;
+  }
+  .mobile-menu a:hover { color: var(--gold); }
+  .mobile-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 5%;
+    font-size: 1.5rem;
+    color: var(--white);
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .nav-links, .nav-cta { display: none; }
+    .hamburger { display: flex; }
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .about-img-accent { display: none; }
+    .about-badge { left: auto; right: 1rem; }
+    .gallery-masonry { columns: 2; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    section { padding: 4.5rem 5%; }
+    .gallery-masonry { columns: 1; }
+    .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .hero-content { padding: 7rem 6% 6rem; }
+    .about-features { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ─── -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">LUMI<span>È</span>RE</a>
+  <ul class="nav-links">
+    <li><a href="#services">服務</a></li>
+    <li><a href="#about">關於</a></li>
+    <li><a href="#gallery">作品</a></li>
+    <li><a href="#testimonials">評價</a></li>
+  </ul>
+  <a href="https://www.instagram.com/" target="_blank" class="nav-cta">立即預約</a>
+  <div class="hamburger" id="menuBtn" aria-label="開啟選單">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ─── MOBILE MENU ─── -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" id="menuClose" aria-label="關閉選單">✕</button>
+  <a href="#services" class="menu-link">服務</a>
+  <a href="#about" class="menu-link">關於</a>
+  <a href="#gallery" class="menu-link">作品</a>
+  <a href="#testimonials" class="menu-link">評價</a>
+  <a href="https://www.instagram.com/" target="_blank" style="color:var(--gold);font-family:'Montserrat',sans-serif;font-size:1rem;letter-spacing:.2em;text-transform:uppercase;">立即預約</a>
+</div>
+
+<!-- ─── HERO ─── -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Taichung · Premium Hair Studio</p>
+    <h1 class="hero-title">
+      讓每一縷<em>秀髮</em><br />都成為你的<br />最美名片
+    </h1>
+    <p class="hero-sub">專業髮型師團隊，融合日系美學與精湛技術，為你打造獨一無二的專屬髮型。</p>
+    <div class="hero-btns">
+      <a href="https://www.instagram.com/" target="_blank" class="btn-primary">✦ 立即預約</a>
+      <a href="https://www.instagram.com/" target="_blank" class="btn-outline">前往 Instagram</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>scroll</span>
+  </div>
+</section>
+
+<!-- ─── SERVICES ─── -->
+<section id="services">
+  <div class="services-header reveal">
+    <p class="section-label">Our Services</p>
+    <h2 class="section-title">精選<em>髮藝</em>服務</h2>
+    <div class="divider"></div>
+    <p class="section-sub" style="color:rgba(255,255,255,.45)">每一項服務都經過精心設計，為你帶來最完美的髮型體驗。</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card reveal" style="transition-delay:.1s">
+      <span class="service-icon">✂️</span>
+      <div class="service-name">精緻剪髮</div>
+      <p class="service-desc">根據臉型、個性與生活方式量身設計，打造最適合你的髮型輪廓。</p>
+      <div class="service-price">NT$ 800 起<small>設計師 / 總監另計</small></div>
+    </div>
+    <div class="service-card reveal" style="transition-delay:.15s">
+      <span class="service-tag">熱門</span>
+      <span class="service-icon">🎨</span>
+      <div class="service-name">時尚染髮</div>
+      <p class="service-desc">進口染劑・低傷害配方，灰咖、奶茶棕、珍珠霧感，色彩持久不褪色。</p>
+      <div class="service-price">NT$ 2,000 起<small>依髮長與色系調整</small></div>
+    </div>
+    <div class="service-card reveal" style="transition-delay:.2s">
+      <span class="service-icon">🌊</span>
+      <div class="service-name">質感燙髮</div>
+      <p class="service-desc">日系離子燙、空氣感捲燙、冷燙，打造蓬鬆自然的完美弧度。</p>
+      <div class="service-price">NT$ 2,500 起<small>依髮長與燙法調整</small></div>
+    </div>
+    <div class="service-card reveal" style="transition-delay:.25s">
+      <span class="service-icon">✨</span>
+      <div class="service-name">深層護髮</div>
+      <p class="service-desc">Olaplex 護髮療程、角蛋白修護，讓受損髮絲重拾光澤與彈性。</p>
+      <div class="service-price">NT$ 1,200 起<small>30–60 分鐘護髮療程</small></div>
+    </div>
+    <div class="service-card reveal" style="transition-delay:.3s">
+      <span class="service-tag">推薦</span>
+      <span class="service-icon">💆</span>
+      <div class="service-name">頭皮 SPA</div>
+      <p class="service-desc">舒壓頭皮按摩 + 專業護理，促進頭皮健康，讓秀髮從根部閃耀。</p>
+      <div class="service-price">NT$ 1,500 起<small>含精油按摩與護理</small></div>
+    </div>
+    <div class="service-card reveal" style="transition-delay:.35s">
+      <span class="service-icon">💄</span>
+      <div class="service-name">造型整髮</div>
+      <p class="service-desc">婚宴、派對、拍攝造型，讓每個重要時刻都留下最美的姿態。</p>
+      <div class="service-price">NT$ 600 起<small>依造型複雜度調整</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ABOUT ─── -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-img-wrap reveal-left">
+      <img class="about-img-main" src="https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=800&q=80" alt="設計師" />
+      <img class="about-img-accent" src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=400&q=80" alt="沙龍內部" />
+      <div class="about-badge">
+        <span class="num">10+</span>
+        <span class="label">年<br/>專業經驗</span>
+      </div>
+    </div>
+    <div class="reveal-right">
+      <p class="section-label">About LUMIÈRE</p>
+      <h2 class="section-title">用雙手，為你<em>點亮</em><br />最美的自己</h2>
+      <div class="divider"></div>
+      <p class="section-sub">LUMIÈRE 璀璨髮藝，成立於 2015 年，坐落於台中精華地段。我們相信，一個完美的髮型不只是外表的改變，更是內心自信的展現。</p>
+      <p style="font-size:.85rem;color:var(--muted);line-height:1.9;margin-top:1rem;font-weight:300">旗下設計師均擁有日本、韓國進修經歷，精通各式剪染燙技術，持續追求最前沿的美髮工藝，只為給你最完美的作品。</p>
+      <div class="about-features">
+        <div class="about-feature">
+          <span class="feature-icon">🇯🇵</span>
+          <div class="feature-text">
+            <strong>日韓進修認證</strong>
+            <span>東京・首爾頂級沙龍實習訓練</span>
+          </div>
+        </div>
+        <div class="about-feature">
+          <span class="feature-icon">🌿</span>
+          <div class="feature-text">
+            <strong>純天然低傷害</strong>
+            <span>精選進口低氨染劑，守護髮質</span>
+          </div>
+        </div>
+        <div class="about-feature">
+          <span class="feature-icon">💬</span>
+          <div class="feature-text">
+            <strong>免費深度諮詢</strong>
+            <span>服務前詳細溝通，100% 滿意</span>
+          </div>
+        </div>
+        <div class="about-feature">
+          <span class="feature-icon">🏆</span>
+          <div class="feature-text">
+            <strong>獲獎設計團隊</strong>
+            <span>台中美髮大賞連續三年優勝</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── GALLERY ─── -->
+<section id="gallery">
+  <div class="gallery-header-row">
+    <div class="reveal">
+      <p class="section-label">Portfolio</p>
+      <h2 class="section-title">設計師<em>作品集</em></h2>
+      <div class="divider"></div>
+    </div>
+    <div class="reveal" style="text-align:right">
+      <a href="https://www.instagram.com/" target="_blank" class="btn-primary" style="display:inline-block">查看更多作品 →</a>
+    </div>
+  </div>
+  <div class="gallery-masonry">
+    <div class="gallery-item reveal" style="transition-delay:.05s">
+      <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80" alt="奶茶棕染髮" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">奶茶棕 · 霧感染</span></div>
+    </div>
+    <div class="gallery-item reveal" style="transition-delay:.1s">
+      <img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=600&q=80" alt="捲髮造型" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">空氣感捲燙</span></div>
+    </div>
+    <div class="gallery-item reveal" style="transition-delay:.15s">
+      <img src="https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80" alt="直髮造型" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">光感日系直髮</span></div>
+    </div>
+    <div class="gallery-item reveal ba-wrap" style="transition-delay:.2s">
+      <span class="ba-badge ba-before">Before</span>
+      <span class="ba-badge ba-after">After</span>
+      <img src="https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=600&q=80" alt="Before After" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">染燙全方位改造</span></div>
+    </div>
+    <div class="gallery-item reveal" style="transition-delay:.25s">
+      <img src="https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=600&q=80" alt="沙龍環境" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">舒適的沙龍空間</span></div>
+    </div>
+    <div class="gallery-item reveal" style="transition-delay:.3s">
+      <img src="https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&q=80" alt="護髮" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">Olaplex 深層護髮</span></div>
+    </div>
+    <div class="gallery-item reveal" style="transition-delay:.35s">
+      <img src="https://images.unsplash.com/photo-1620331311520-246422fd82f9?w=600&q=80" alt="染髮" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">珍珠灰 · 時尚染</span></div>
+    </div>
+    <div class="gallery-item reveal" style="transition-delay:.4s">
+      <img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?w=600&q=80" alt="剪髮" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">精緻剪裁 · 輪廓設計</span></div>
+    </div>
+    <div class="gallery-item reveal" style="transition-delay:.45s">
+      <img src="https://images.unsplash.com/photo-1612532275214-e4ca76d0e4d1?w=600&q=80" alt="造型" />
+      <div class="gallery-item-overlay"><span class="gallery-item-label">宴會造型</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TESTIMONIALS ─── -->
+<section id="testimonials">
+  <div class="reveal" style="max-width:500px">
+    <p class="section-label">Client Love</p>
+    <h2 class="section-title" style="color:var(--white)">顧客的<em>真實</em>心聲</h2>
+    <div class="divider"></div>
+  </div>
+  <div class="testimonials-slider">
+    <div class="testi-card reveal" style="transition-delay:.1s">
+      <div class="testi-quote">"</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">第一次來就愛上了！設計師很細心地了解我的需求，染出來的奶茶色超美，朋友都說我換了個人一樣。下次一定繼續回來！</p>
+      <div class="testi-author">
+        <div class="testi-avatar">陳</div>
+        <div>
+          <div class="testi-name">陳小姐</div>
+          <div class="testi-info">台中 · 上班族</div>
+          <span class="service-badge">染髮 · 護髮</span>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal" style="transition-delay:.15s">
+      <div class="testi-quote">"</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">環境很舒適，設計師技術超厲害，燙出來的捲度自然又好看，洗完頭自己在家也能輕鬆打理。強力推薦！</p>
+      <div class="testi-author">
+        <div class="testi-avatar">林</div>
+        <div>
+          <div class="testi-name">林先生</div>
+          <div class="testi-info">台中 · 學生</div>
+          <span class="service-badge">燙髮 · 剪髮</span>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal" style="transition-delay:.2s">
+      <div class="testi-quote">"</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">做了頭皮 SPA 之後，頭皮的狀況好很多，設計師也針對我的髮質給了很多保養建議，非常專業！值得五星好評。</p>
+      <div class="testi-author">
+        <div class="testi-avatar">王</div>
+        <div>
+          <div class="testi-name">王太太</div>
+          <div class="testi-info">台中 · 家庭主婦</div>
+          <span class="service-badge">頭皮 SPA · 護髮</span>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal" style="transition-delay:.25s">
+      <div class="testi-quote">"</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">婚禮造型完全超乎預期！設計師事先詳細溝通，完美呈現我想要的感覺，朋友和家人都讚不絕口，謝謝 LUMIÈRE！</p>
+      <div class="testi-author">
+        <div class="testi-avatar">張</div>
+        <div>
+          <div class="testi-name">張新娘</div>
+          <div class="testi-info">台中 · 新娘</div>
+          <span class="service-badge">婚宴造型</span>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal" style="transition-delay:.3s">
+      <div class="testi-quote">"</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">每次剪髮都很有驚喜感，設計師很懂得根據臉型建議髮型，完全不用費心溝通，直接信任就對了！</p>
+      <div class="testi-author">
+        <div class="testi-avatar">許</div>
+        <div>
+          <div class="testi-name">許小姐</div>
+          <div class="testi-info">台中 · 設計師</div>
+          <span class="service-badge">精緻剪髮</span>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal" style="transition-delay:.35s">
+      <div class="testi-quote">"</div>
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">從日本回台後第一次染髮就找到 LUMIÈRE，珍珠灰的色調完全符合我的期待，染劑品質也很好，不傷髮。</p>
+      <div class="testi-author">
+        <div class="testi-avatar">吳</div>
+        <div>
+          <div class="testi-name">吳先生</div>
+          <div class="testi-info">台中 · 工程師</div>
+          <span class="service-badge">時尚染髮</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ─── -->
+<section id="cta">
+  <div class="reveal">
+    <p class="cta-label">Limited Booking Available</p>
+    <h2 class="cta-title">準備好迎接<br />全新的自己了嗎？</h2>
+    <p class="cta-sub">現在預約，享受免費深度髮型諮詢。<br />名額有限，立即確認你的專屬時段。</p>
+    <div class="cta-btns">
+      <a href="https://www.instagram.com/" target="_blank" class="btn-white">✦ 立即線上預約</a>
+      <a href="https://www.instagram.com/" target="_blank" class="btn-outline-white">📷 前往 Instagram</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo">LUMI<span style="color:var(--gold)">È</span>RE</div>
+      <p class="footer-desc">璀璨髮藝，台中市精緻美髮沙龍。<br />以頂尖技術與日韓美學，為每位顧客打造最完美的髮型。</p>
+      <div class="footer-socials">
+        <a href="https://www.instagram.com/" target="_blank" class="social-btn" aria-label="Instagram">📷</a>
+        <a href="#" class="social-btn" aria-label="LINE">💬</a>
+        <a href="#" class="social-btn" aria-label="Facebook">👤</a>
+      </div>
+    </div>
+    <div>
+      <p class="footer-heading">服務項目</p>
+      <ul class="footer-list">
+        <li>精緻剪髮</li>
+        <li>時尚染髮</li>
+        <li>質感燙髮</li>
+        <li>深層護髮</li>
+        <li>頭皮 SPA</li>
+        <li>婚宴造型</li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-heading">快速連結</p>
+      <ul class="footer-list">
+        <li><a href="#services">服務介紹</a></li>
+        <li><a href="#about">關於我們</a></li>
+        <li><a href="#gallery">作品展示</a></li>
+        <li><a href="#testimonials">顧客評價</a></li>
+        <li><a href="https://www.instagram.com/" target="_blank">線上預約</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="footer-heading">營業時間</p>
+      <div class="footer-hours-item"><span>週一</span><span>公休</span></div>
+      <div class="footer-hours-item"><span>週二 — 五</span><span>11:00 – 20:00</span></div>
+      <div class="footer-hours-item"><span>週六</span><span>10:00 – 20:00</span></div>
+      <div class="footer-hours-item"><span>週日</span><span>10:00 – 18:00</span></div>
+      <div style="margin-top:1.2rem">
+        <p class="footer-heading" style="margin-bottom:.5rem">聯絡 & 地址</p>
+        <p style="font-size:.78rem;line-height:1.8;font-weight:300">📍 台中市西區精誠路 100 號<br />📞 04-2328-XXXX<br />✉️ hello@lumiere-hair.com</p>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 LUMIÈRE 璀璨髮藝 · All Rights Reserved.</span>
+    <span>Design with ♡ in Taichung · <a href="#">隱私權政策</a></span>
+  </div>
+</footer>
+
+<script>
+// ─── Navbar scroll ───
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ─── Hero parallax + zoom-out ───
+const hero = document.getElementById('hero');
+setTimeout(() => hero.classList.add('loaded'), 100);
+
+// ─── Mobile Menu ───
+const menuBtn  = document.getElementById('menuBtn');
+const menuClose = document.getElementById('menuClose');
+const mobileMenu = document.getElementById('mobileMenu');
+menuBtn.addEventListener('click', () => mobileMenu.classList.add('open'));
+menuClose.addEventListener('click', () => mobileMenu.classList.remove('open'));
+document.querySelectorAll('.menu-link').forEach(l => l.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+// ─── Scroll reveal ───
+const revealEls = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('active');
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => observer.observe(el));
+
+// ─── Smooth anchor scroll ───
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', (e) => {
+    const target = document.querySelector(anchor.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      const offset = target.getBoundingClientRect().top + window.scrollY - 70;
+      window.scrollTo({ top: offset, behavior: 'smooth' });
+    }
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1807 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, follow">
+    <title>萌寵美學 Pawfect Spa | 台北頂級寵物美容與低敏碳酸泉 SPA</title>
+    <meta id="meta-description" name="description" content="萌寵美學 Pawfect Spa 提供最專業的狗狗貓咪美容、低敏藥浴與碳酸泉 SPA。我們堅持一對一預約制、透明安全防護、國家級檢定美容師，給毛孩最舒適的無壓力美容體驗。">
+    <meta id="meta-keywords" name="keywords" content="寵物美容, 狗狗洗澡, 貓咪剪毛, 寵物沙龍, 寵物SPA, 碳酸泉, 台北寵物美容, 寵物剪指甲">
+    
+    <!-- 引入 Tailwind CSS 與 Google 字型 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdfbf7',
+                            100: '#f8f3e8',
+                            200: '#eddcc5',
+                            300: '#dfc19c',
+                            400: '#cfa271',
+                            500: '#b87f4c',
+                            600: '#9d6337',
+                            700: '#7e4b2a',
+                            800: '#5c3520',
+                            900: '#422416',
+                        },
+                        sage: {
+                            50: '#f4f7f5',
+                            100: '#e5ebe6',
+                            500: '#7d9a83',
+                            600: '#627c67',
+                            700: '#4d6151',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- 引入 FontAwesome 與 Lucide 圖標 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 動態 JSON-LD 結構化資料注入區 -->
+    <script id="schema-markup" type="application/ld+json"></script>
+
+    <!-- 自訂細節微調樣式 -->
+    <style>
+        .page-view {
+            display: none;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .page-view.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #b87f4c 0%, #7e4b2a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-brand-50 text-stone-800 font-sans min-h-screen flex flex-col antialiased selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- 導覽列 Navbar -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-100 shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- 品牌標誌 Logo -->
+                <a href="#home" class="flex items-center space-x-3 group">
+                    <div class="w-11 h-11 rounded-full bg-brand-500 flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform duration-300">
+                        <i class="fa-solid fa-paw text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold tracking-wider text-brand-800 block">萌寵美學</span>
+                        <span class="text-xs tracking-widest text-brand-500 uppercase block -mt-1">Pawfect Spa Salon</span>
+                    </div>
+                </a>
+
+                <!-- 桌上型導覽選單 -->
+                <nav class="hidden md:flex space-x-1 lg:space-x-2">
+                    <a href="#home" data-nav-link="home" class="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:text-brand-600 hover:bg-brand-100/50 transition-all">首頁首選</a>
+                    <a href="#services" data-nav-link="services" class="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:text-brand-600 hover:bg-brand-100/50 transition-all">專業服務</a>
+                    <a href="#gallery" data-nav-link="gallery" class="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:text-brand-600 hover:bg-brand-100/50 transition-all">美學成果</a>
+                    <a href="#about" data-nav-link="about" class="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:text-brand-600 hover:bg-brand-100/50 transition-all">關於我們</a>
+                    <a href="#contact" data-nav-link="contact" class="px-3 py-2 rounded-lg text-sm font-medium text-stone-600 hover:text-brand-600 hover:bg-brand-100/50 transition-all">預約諮詢</a>
+                </nav>
+
+                <!-- 導覽列 CTA 預約按鈕 -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="tel:021234567" class="text-stone-600 hover:text-brand-600 transition-colors flex items-center space-x-1 text-sm font-medium">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>02-1234-5678</span>
+                    </a>
+                    <a href="#contact" class="bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm px-5 py-2.5 rounded-full shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 transition-all transform hover:-translate-y-0.5">
+                        <i class="fa-regular fa-calendar-check mr-1.5"></i> 線上預約
+                    </a>
+                </div>
+
+                <!-- 手機版選單按鈕 -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" type="button" class="text-stone-700 hover:text-brand-600 focus:outline-none p-2 rounded-md" aria-label="Toggle menu">
+                        <i class="fa-solid fa-bars text-2xl" id="menu-icon-bars"></i>
+                        <i class="fa-solid fa-xmark text-2xl hidden" id="menu-icon-close"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 手機版下拉選單 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/95 border-b border-brand-100 transition-all duration-300">
+            <div class="px-4 pt-2 pb-6 space-y-1">
+                <a href="#home" data-nav-link="home" class="block px-4 py-3 rounded-xl text-base font-medium text-stone-700 hover:bg-brand-50 hover:text-brand-600">首頁首選</a>
+                <a href="#services" data-nav-link="services" class="block px-4 py-3 rounded-xl text-base font-medium text-stone-700 hover:bg-brand-50 hover:text-brand-600">專業服務</a>
+                <a href="#gallery" data-nav-link="gallery" class="block px-4 py-3 rounded-xl text-base font-medium text-stone-700 hover:bg-brand-50 hover:text-brand-600">美學成果</a>
+                <a href="#about" data-nav-link="about" class="block px-4 py-3 rounded-xl text-base font-medium text-stone-700 hover:bg-brand-50 hover:text-brand-600">關於我們</a>
+                <a href="#contact" data-nav-link="contact" class="block px-4 py-3 rounded-xl text-base font-medium text-stone-700 hover:bg-brand-50 hover:text-brand-600">預約諮詢</a>
+                <div class="pt-4 border-t border-stone-100 flex flex-col space-y-3">
+                    <a href="tel:021234567" class="flex items-center justify-center space-x-2 text-stone-700 py-2">
+                        <i class="fa-solid fa-phone text-brand-600"></i>
+                        <span class="font-medium">專線電話 02-1234-5678</span>
+                    </a>
+                    <a href="#contact" class="bg-brand-600 text-white text-center font-medium py-3 rounded-xl shadow-md">
+                        <i class="fa-regular fa-calendar-check mr-2"></i> 立即線上預約
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 訊息提示通知 Modal/Toast 容器 -->
+    <div id="toast-container" class="fixed top-24 right-4 z-50 flex flex-col space-y-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- 主要內容區：承載 SPA 路由切換的各個頁面 (Main Views) -->
+    <main class="flex-grow">
+
+        <!-- ==================== HOME VIEW ==================== -->
+        <div id="view-home" class="page-view active">
+            <!-- 英雄主視覺 (Hero Section) -->
+            <section class="relative bg-gradient-to-br from-brand-100 via-brand-50 to-white overflow-hidden py-12 md:py-24">
+                <div class="absolute inset-0 z-0 opacity-10 pointer-events-none">
+                    <div class="absolute -top-12 -left-12 w-64 h-64 rounded-full bg-brand-300 filter blur-3xl"></div>
+                    <div class="absolute bottom-12 right-12 w-80 h-80 rounded-full bg-sage-100 filter blur-3xl"></div>
+                </div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <!-- 左側文案 -->
+                    <div class="lg:col-span-6 space-y-6 text-center lg:text-left">
+                        <div class="inline-flex items-center space-x-2 bg-brand-200/50 text-brand-800 px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider">
+                            <i class="fa-solid fa-certificate"></i>
+                            <span>台北旗艦店・五星安心美容沙龍</span>
+                        </div>
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-stone-900 leading-tight">
+                            讓毛孩散發內外自信<br>
+                            <span class="text-gradient">健康、精緻、無壓力美容</span>
+                        </h1>
+                        <p class="text-lg text-stone-600 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                            「萌寵美學」為貓狗量身打造尊榮洗護，堅持一對一溫柔手法與透明大玻璃隔間。我們使用進口天然低敏沐浴系統與碳酸泉水療，讓每一次梳洗都是一場奢華的療癒旅程。
+                        </p>
+                        <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
+                            <a href="#contact" class="bg-brand-600 hover:bg-brand-700 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg shadow-brand-500/30 transition-all hover:scale-[1.02] text-center">
+                                <i class="fa-regular fa-calendar-check mr-2"></i> 立即線上預約
+                            </a>
+                            <a href="#services" class="border-2 border-brand-500/30 hover:border-brand-500 text-brand-800 font-bold text-lg px-8 py-4 rounded-full bg-white/50 hover:bg-brand-50 transition-all text-center">
+                                了解美容方案
+                            </a>
+                        </div>
+                        <!-- 特色標籤 -->
+                        <div class="grid grid-cols-3 gap-4 pt-4 border-t border-brand-200/50">
+                            <div class="text-center lg:text-left">
+                                <p class="text-2xl font-black text-brand-700">100%</p>
+                                <p class="text-xs text-stone-500">透明防護玻璃</p>
+                            </div>
+                            <div class="text-center lg:text-left">
+                                <p class="text-2xl font-black text-brand-700">6大</p>
+                                <p class="text-xs text-stone-500">專業檢定證照</p>
+                            </div>
+                            <div class="text-center lg:text-left">
+                                <p class="text-2xl font-black text-brand-700">5星</p>
+                                <p class="text-xs text-stone-500">千名飼主好評推薦</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 右側多層次主圖 -->
+                    <div class="lg:col-span-6 relative flex justify-center">
+                        <div class="relative w-full max-w-md md:max-w-lg">
+                            <!-- 背景飾板 -->
+                            <div class="absolute inset-0 bg-brand-200 rounded-3xl transform rotate-3 scale-95 shadow-lg"></div>
+                            <!-- 主圖容器 -->
+                            <div class="relative bg-white p-4 rounded-3xl shadow-xl transform -rotate-2 hover:rotate-0 transition-all duration-500">
+                                <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=800" alt="正在享受溫水泡泡SPA洗澡的黃金獵犬" class="rounded-2xl w-full h-[380px] object-cover" onerror="this.src='https://placehold.co/800x600/eddcc5/5c3520?text=Pawfect+Spa'">
+                                <div class="absolute bottom-8 left-8 bg-white/95 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-lg border border-brand-100 flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600">
+                                        <i class="fa-solid fa-soap text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-stone-400 font-semibold block">今日主推</p>
+                                        <p class="text-sm font-bold text-stone-800">微分子深層碳酸泉療</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 品牌安心三大承諾 -->
+            <section class="py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
+                        <span class="text-brand-600 font-bold uppercase tracking-wider text-sm block">我們之所以與眾不同</span>
+                        <h2 class="text-3xl font-extrabold text-stone-900">為什麼家長們都選擇「萌寵美學」？</h2>
+                        <p class="text-stone-600">我們堅信，美容不該是讓毛孩發抖恐懼的過程，而是充滿溫馨撫慰、呵護備至的安全時光。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- 優勢 1 -->
+                        <div class="bg-brand-50 p-8 rounded-3xl border border-brand-100 hover:shadow-xl transition-all hover:-translate-y-1">
+                            <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                                <i class="fa-solid fa-eye text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-stone-900 mb-3">100% 全程玻璃透明化</h3>
+                            <p class="text-stone-600 leading-relaxed text-sm">
+                                設有大型全透明落地鋼化玻璃美容房，家長可全程在外觀看或隨時探視。不做隱藏式美容，真正做到安全看得見、洗護最安心。
+                            </p>
+                        </div>
+                        <!-- 優勢 2 -->
+                        <div class="bg-brand-50 p-8 rounded-3xl border border-brand-100 hover:shadow-xl transition-all hover:-translate-y-1">
+                            <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                                <i class="fa-solid fa-shield-cat text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-stone-900 mb-3">客製化抗敏與皮毛管理</h3>
+                            <p class="text-stone-600 leading-relaxed text-sm">
+                                每位毛孩美容前均進行專業「皮毛狀況檢測」，依據乾癢、出油、皮屑等狀況配置不同的歐盟認證草本洗劑與微分子碳酸水。
+                            </p>
+                        </div>
+                        <!-- 優勢 3 -->
+                        <div class="bg-brand-50 p-8 rounded-3xl border border-brand-100 hover:shadow-xl transition-all hover:-translate-y-1">
+                            <div class="w-14 h-14 bg-brand-100 text-brand-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+                                <i class="fa-solid fa-user-doctor text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-bold text-stone-900 mb-3">一對一無壓溫柔減敏</h3>
+                            <p class="text-stone-600 leading-relaxed text-sm">
+                                專為高敏感、抗拒洗澡或老犬規劃「心理紓壓洗護法」。美容師手法輕柔，絕不粗暴強迫，視毛孩情緒給予適當休息與點心鼓勵。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 服務導流方案 -->
+            <section class="py-16 bg-brand-100/50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                        <div class="space-y-3">
+                            <span class="text-brand-600 font-bold uppercase tracking-wider text-sm block">三大王牌服務</span>
+                            <h2 class="text-3xl font-extrabold text-stone-900">最懂毛孩需求的洗護方案</h2>
+                        </div>
+                        <a href="#services" class="mt-4 md:mt-0 text-brand-600 hover:text-brand-700 font-bold flex items-center space-x-1 group">
+                            <span>查看所有服務詳情</span>
+                            <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- 洗澡護理 -->
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col h-full group">
+                            <div class="relative overflow-hidden h-56">
+                                <img src="https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&q=80&w=600" alt="拉布拉多犬洗澡吹乾中" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Bath+Care'">
+                                <span class="absolute top-4 right-4 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full">基礎保養</span>
+                            </div>
+                            <div class="p-8 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold text-stone-900 mb-2">微氣泡深層洗澡護理</h3>
+                                <p class="text-stone-500 text-sm mb-6 flex-grow">包含洗前梳理、剪指甲、剃腳底毛、清耳朵、擠肛門腺、溫和雙刷兩次及吹整蓬鬆，極致潔淨。</p>
+                                <div class="border-t border-stone-100 pt-4 flex items-center justify-between">
+                                    <span class="text-stone-400 text-xs">NT$ <span class="text-xl font-bold text-brand-700">600</span> 起</span>
+                                    <a href="#contact" onclick="preselectService('bath')" class="bg-brand-50 hover:bg-brand-600 hover:text-white text-brand-600 font-bold text-xs px-4 py-2 rounded-full transition-all">立即挑選</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 造型修剪 -->
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col h-full group">
+                            <div class="relative overflow-hidden h-56">
+                                <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=600" alt="美容師正在精細修剪比熊犬的頭型" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Grooming+Style'">
+                                <span class="absolute top-4 right-4 bg-sage-600 text-white text-xs font-bold px-3 py-1 rounded-full">精緻造型</span>
+                            </div>
+                            <div class="p-8 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold text-stone-900 mb-2">匠人精緻剪毛造型</h3>
+                                <p class="text-stone-500 text-sm mb-6 flex-grow">依據毛孩骨骼與臉型進行客製化修剪。不論是超萌泰迪圓圓臉、網紅比熊棉花糖，都能完美駕馭。</p>
+                                <div class="border-t border-stone-100 pt-4 flex items-center justify-between">
+                                    <span class="text-stone-400 text-xs">NT$ <span class="text-xl font-bold text-brand-700">1,200</span> 起</span>
+                                    <a href="#contact" onclick="preselectService('trim')" class="bg-brand-50 hover:bg-brand-600 hover:text-white text-brand-600 font-bold text-xs px-4 py-2 rounded-full transition-all">立即挑選</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 碳酸溫泉SPA -->
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col h-full group">
+                            <div class="relative overflow-hidden h-56">
+                                <img src="https://images.unsplash.com/photo-1608096299210-db7e38487075?auto=format&fit=crop&q=80&w=600" alt="正在浸泡碳酸溫泉的白色博美犬" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Ozone+Spa'">
+                                <span class="absolute top-4 right-4 bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">日系SPA</span>
+                            </div>
+                            <div class="p-8 flex flex-col flex-grow">
+                                <h3 class="text-xl font-bold text-stone-900 mb-2">日系極上碳酸泉水療 SPA</h3>
+                                <p class="text-stone-500 text-sm mb-6 flex-grow">採用日本三菱進口設備產生高濃度微細氣泡，能深入毛孔帶走皮脂垢並維持肌膚弱酸性屏障。</p>
+                                <div class="border-t border-stone-100 pt-4 flex items-center justify-between">
+                                    <span class="text-stone-400 text-xs">NT$ <span class="text-xl font-bold text-brand-700">1,500</span> 起</span>
+                                    <a href="#contact" onclick="preselectService('spa')" class="bg-brand-50 hover:bg-brand-600 hover:text-white text-brand-600 font-bold text-xs px-4 py-2 rounded-full transition-all">立即挑選</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 成果驚奇Before & After (互動拉條) -->
+            <section class="py-16 bg-white overflow-hidden">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-2xl mx-auto space-y-4 mb-12">
+                        <span class="text-brand-600 font-bold uppercase tracking-wider text-sm block">魔法般的蛻變</span>
+                        <h2 class="text-3xl font-extrabold text-stone-900">Before / After 美容大變身</h2>
+                        <p class="text-stone-600">左右滑動滑條，親自見證雜亂毛燥到完美精緻的驚豔過程！</p>
+                    </div>
+
+                    <div class="flex flex-col lg:flex-row items-center gap-12">
+                        <!-- 互動拉條本體 -->
+                        <div class="w-full lg:w-1/2 flex justify-center">
+                            <div id="before-after-slider" class="relative w-full max-w-[480px] aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl select-none group cursor-ew-resize">
+                                <!-- Before 圖片 (底層) -->
+                                <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=640" alt="博美犬美容前雜亂無章的模樣" class="absolute inset-0 w-full h-full object-cover pointer-events-none">
+                                <div class="absolute bottom-4 left-4 bg-stone-900/70 text-white text-xs px-3 py-1 rounded-full font-bold">美容前 (Before)</div>
+                                
+                                <!-- After 圖片 (上層，寬度動態控制) -->
+                                <div id="after-image-container" class="absolute inset-0 w-1/2 overflow-hidden border-r-2 border-white">
+                                    <img src="https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&q=80&w=640" alt="博美犬美容後極其可愛的模樣" class="absolute top-0 left-0 w-[480px] h-full object-cover max-w-none pointer-events-none">
+                                    <div class="absolute bottom-4 left-4 bg-brand-600/90 text-white text-xs px-3 py-1 rounded-full font-bold">美容後 (After)</div>
+                                </div>
+
+                                <!-- 控制滑動點 (Handle) -->
+                                <div id="slider-handle" class="absolute top-0 bottom-0 left-1/2 w-1 -ml-[2px] bg-white cursor-ew-resize z-20 flex items-center justify-center">
+                                    <div class="w-10 h-10 rounded-full bg-white text-brand-600 shadow-xl flex items-center justify-center border-2 border-brand-500 transform transition-transform group-hover:scale-110">
+                                        <i class="fa-solid fa-arrows-left-right text-sm"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 側邊說明文案 -->
+                        <div class="w-full lg:w-1/2 space-y-6">
+                            <div class="inline-flex items-center space-x-2 bg-sage-50 text-sage-700 px-4 py-1.5 rounded-full text-sm font-semibold">
+                                <i class="fa-solid fa-dog"></i>
+                                <span>造型個案：博美犬・Mochi</span>
+                            </div>
+                            <h3 class="text-2xl font-bold text-stone-900">毛髮修復與蓬鬆圓臉雕塑</h3>
+                            <p class="text-stone-600 leading-relaxed">
+                                Mochi 的家長送來時，底毛多處嚴重打結、皮脂分泌過旺並有明顯體味。我們美容團隊首先進行了 <strong class="text-brand-800">毛結精細梳開護理</strong>，隨後施作 <strong class="text-brand-800">微分子碳酸洗浴</strong> 深層清除皮屑。
+                            </p>
+                            <p class="text-stone-600 leading-relaxed">
+                                最後由資深美容師巧手雕刻「元氣熊造型頭」，重新帶回蓬鬆圓潤的彈性，讓 Mochi 瞬間減齡，重返自信的可愛巔峰！
+                            </p>
+                            <div class="pt-4 flex gap-4">
+                                <a href="#gallery" class="text-brand-600 hover:text-brand-700 font-bold flex items-center space-x-1 group">
+                                    <span>欣賞更多驚奇美學成果</span>
+                                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 千位家長真誠推薦 -->
+            <section class="py-16 bg-brand-100/30">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-2xl mx-auto space-y-4 mb-12">
+                        <span class="text-brand-600 font-bold uppercase tracking-wider text-sm block">五星真誠好評</span>
+                        <h2 class="text-3xl font-extrabold text-stone-900">聽聽毛家長們的真心話</h2>
+                        <p class="text-stone-600">超過千名飼主見證，每次預約都是最高規格的寵愛待遇。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- 評論 1 -->
+                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-brand-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex text-amber-400 mb-4">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <p class="text-stone-600 text-sm leading-relaxed italic mb-6">
+                                    "以前去別的地方洗澡回來，阿比（黃金獵犬）都會情緒低落好幾天。但在這裡因為有全透明玻璃，我可以隨時看到她正開心地跟美容師互動。洗得超乾淨，毛蓬鬆到爆炸，回家完全沒有焦慮感！推薦給所有會擔心的高敏家長！"
+                                </p>
+                            </div>
+                            <div class="flex items-center space-x-3 border-t border-stone-100 pt-4">
+                                <div class="w-10 h-10 rounded-full bg-brand-200 flex items-center justify-center font-bold text-brand-800 text-sm">林</div>
+                                <div>
+                                    <p class="text-sm font-bold text-stone-900">林小姐（阿比的麻麻）</p>
+                                    <p class="text-xs text-stone-400">黃金獵犬 2歲</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 評論 2 -->
+                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-brand-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex text-amber-400 mb-4">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <p class="text-stone-600 text-sm leading-relaxed italic mb-6">
+                                    "店裡的環境超級乾淨，完全沒有一般寵物店的尿騷味，反而是一股很放鬆的茶樹精油香味。美容師對貓咪非常溫柔有耐心，剪指甲非常迅速！我的貓咪第一次美容沒有哈氣，給滿分！"
+                                </p>
+                            </div>
+                            <div class="flex items-center space-x-3 border-t border-stone-100 pt-4">
+                                <div class="w-10 h-10 rounded-full bg-sage-100 flex items-center justify-center font-bold text-sage-700 text-sm">陳</div>
+                                <div>
+                                    <p class="text-sm font-bold text-stone-900">陳先生（球球的爸爸）</p>
+                                    <p class="text-xs text-stone-400">英國短毛貓 1歲</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 評論 3 -->
+                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-brand-100 flex flex-col justify-between">
+                            <div>
+                                <div class="flex text-amber-400 mb-4">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </div>
+                                <p class="text-stone-600 text-sm leading-relaxed italic mb-6">
+                                    "每次帶波比來做碳酸泉SPA洗澡回來，他的異位性皮膚炎癢感就明顯減緩。美容師會非常仔細地記下波比每顆紅疹的位置，並回報拍照給我，這用心程度在別處從沒見過！"
+                                </p>
+                            </div>
+                            <div class="flex items-center space-x-3 border-t border-stone-100 pt-4">
+                                <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-800 text-sm">黃</div>
+                                <div>
+                                    <p class="text-sm font-bold text-stone-900">黃小姐（波比的麻麻）</p>
+                                    <p class="text-xs text-stone-400">法鬥 3歲</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 誘人CTA -->
+            <section class="py-16 bg-gradient-to-r from-brand-700 to-brand-950 text-white relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
+                    <span class="bg-white/10 text-brand-200 px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase">FIRST BOOKING OFFER</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight">首次體驗限時回饋，給毛孩最好的見面禮</h2>
+                    <p class="text-lg text-brand-200 max-w-2xl mx-auto">
+                        即日起透過線上預約，新客首洗即享 <strong class="text-white">【免健檢皮毛評估】</strong>，並加贈日系微分子碳酸洗浴乙次（價值 $400）。名額有限，請提早卡位！
+                    </p>
+                    <div class="flex justify-center pt-4">
+                        <a href="#contact" class="bg-white text-brand-900 hover:bg-brand-100 font-extrabold text-lg px-10 py-4 rounded-full shadow-2xl transition-all transform hover:scale-105">
+                            <i class="fa-regular fa-calendar-check mr-2"></i> 搶先預約專屬時段
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ==================== SERVICES VIEW ==================== -->
+        <div id="view-services" class="page-view">
+            <!-- 頂部精美橫幅 -->
+            <section class="bg-brand-100 py-16 text-center">
+                <div class="max-w-7xl mx-auto px-4">
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-stone-900 mb-4">精緻沙龍美容服務項目</h1>
+                    <p class="text-stone-600 max-w-2xl mx-auto text-base">專業、透明、無壓力的頂級呵護。以下為基礎定價指引，將視每隻毛孩的具體體型、毛況及情緒進行客製化彈性評估。</p>
+                </div>
+            </section>
+
+            <!-- 服務計算器：提高預約率與參與度的神器 -->
+            <section class="py-12 bg-white">
+                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="bg-brand-50 p-6 md:p-10 rounded-3xl border border-brand-200 shadow-xl">
+                        <div class="text-center mb-8">
+                            <span class="bg-brand-200 text-brand-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">智能估算服務費用</span>
+                            <h2 class="text-2xl font-bold text-stone-900 mt-2">線上客製化金額快速估算</h2>
+                            <p class="text-stone-500 text-xs mt-1">請選擇您的寵物規格，獲得約略的即時美容報價</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <!-- 步驟 1: 選擇寵物品種/體型 -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-extrabold text-stone-700">1. 選擇品種與體型</label>
+                                <select id="calc-size" onchange="calculatePrice()" class="w-full bg-white border border-brand-200 rounded-xl px-4 py-3 text-stone-700 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                    <option value="small-dog">小型犬 (約5kg以下，如吉娃娃、瑪爾)</option>
+                                    <option value="medium-dog" selected>中型犬 (約5-15kg，如柴犬、柯基、貴賓)</option>
+                                    <option value="large-dog">大型犬 (約15-30kg，如薩摩耶、黃金獵犬)</option>
+                                    <option value="cat">貓咪 (不分體型，需溫柔手法特殊處理)</option>
+                                </select>
+                            </div>
+
+                            <!-- 步驟 2: 選擇毛髮長度與狀態 -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-extrabold text-stone-700">2. 毛髮長度與毛況</label>
+                                <select id="calc-coat" onchange="calculatePrice()" class="w-full bg-white border border-brand-200 rounded-xl px-4 py-3 text-stone-700 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                    <option value="short" selected>短毛 / 滑毛 (毛髮整理容易)</option>
+                                    <option value="long">長毛 / 雙層毛 (易打結、需深度吹整)</option>
+                                    <option value="matted">嚴重打結 / 換毛期 (需人工梳結拆毛)</option>
+                                </select>
+                            </div>
+
+                            <!-- 步驟 3: 選擇服務項目 -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-extrabold text-stone-700">3. 選擇洗護美容項目</label>
+                                <select id="calc-service" onchange="calculatePrice()" class="w-full bg-white border border-brand-200 rounded-xl px-4 py-3 text-stone-700 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                    <option value="bath" selected>微氣泡深層洗澡護理</option>
+                                    <option value="trim">匠人精緻剪毛造型 (含洗澡)</option>
+                                    <option value="spa">日系極上碳酸泉水療 SPA (含洗澡)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 估算結果與CTA -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div>
+                                <p class="text-xs text-stone-400 font-bold">預估合計金額 (未含現場實際毛況折舊折價)</p>
+                                <p class="text-stone-800 mt-1">
+                                    NT$ <span id="calculated-price" class="text-4xl font-black text-brand-600">800</span>
+                                </p>
+                            </div>
+                            <button onclick="applyEstimateToBooking()" class="w-full md:w-auto bg-brand-600 hover:bg-brand-700 text-white font-extrabold px-8 py-4 rounded-xl shadow-md transition-all">
+                                帶入此選項，前往預約 <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 服務流程流程圖 -->
+            <section class="py-16 bg-brand-50/50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-2xl mx-auto space-y-4 mb-16">
+                        <span class="text-brand-600 font-bold uppercase tracking-wider text-sm block">我們注重每一個細節</span>
+                        <h2 class="text-3xl font-extrabold text-stone-900">極致安心 9 道標準美容流程</h2>
+                        <p class="text-stone-600">不求快、不趕時間，堅持按部就班地完成每一個安全呵護步驟。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                        <!-- Step 1 -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+                            <span class="absolute -top-4 -left-4 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">01</span>
+                            <h3 class="font-extrabold text-stone-900 mb-2 mt-2">健康狀況檢測</h3>
+                            <p class="text-stone-500 text-xs">檢查皮膚有無紅疹、毛髮打結狀況、耳朵是否發炎，並進行防護評估。</p>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+                            <span class="absolute -top-4 -left-4 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">02</span>
+                            <h3 class="font-extrabold text-stone-900 mb-2 mt-2">指甲與腳底整理</h3>
+                            <p class="text-stone-500 text-xs">修剪過長指甲、磨平銳角避免抓傷，並剃除趾縫多餘雜毛，防止防滑受傷。</p>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+                            <span class="absolute -top-4 -left-4 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">03</span>
+                            <h3 class="font-extrabold text-stone-900 mb-2 mt-2">耳道清潔與護理</h3>
+                            <p class="text-stone-500 text-xs">使用無醇植物配方清耳水清潔耳道深處蠟質，維持耳道乾爽不潮濕。</p>
+                        </div>
+                        <!-- Step 4 -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+                            <span class="absolute -top-4 -left-4 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">04</span>
+                            <h3 class="font-extrabold text-stone-900 mb-2 mt-2">精細溫和梳理開結</h3>
+                            <p class="text-stone-500 text-xs">不強拉毛髮，使用氣墊排梳與保護油，細心拆解打結毛塊，避免皮膚拉扯。</p>
+                        </div>
+                        <!-- Step 5 -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+                            <span class="absolute -top-4 -left-4 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">05</span>
+                            <h3 class="font-extrabold text-stone-900 mb-2 mt-2">深層去油二次洗</h3>
+                            <p class="text-stone-500 text-xs">第一回洗去油脂髒垢，第二回選用草本低敏配方針對毛髮深度保養與按摩。</p>
+                        </div>
+                        <!-- Step 6 -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+                            <span class="absolute -top-4 -left-4 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">06</span>
+                            <h3 class="font-extrabold text-stone-900 mb-2 mt-2">肛門腺清理</h3>
+                            <p class="text-stone-500 text-xs">洗澡洗浴過程中適度溫柔擠出肛門腺囊液，遠離異味與腺體發炎腫脹。</p>
+                        </div>
+                        <!-- Step 7 -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+                            <span class="absolute -top-4 -left-4 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">07</span>
+                            <h3 class="font-extrabold text-stone-900 mb-2 mt-2">低噪溫控吹風吹整</h3>
+                            <p class="text-stone-500 text-xs">絕不使用高溫烘箱！堅持美容師手持暖風吹風機，一邊安撫一邊梳理蓬鬆。</p>
+                        </div>
+                        <!-- Step 8 -->
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm relative">
+                            <span class="absolute -top-4 -left-4 w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm">08</span>
+                            <h3 class="font-extrabold text-stone-900 mb-2 mt-2">精緻匠人修剪造型</h3>
+                            <p class="text-stone-500 text-xs">如有選擇剪毛，將進行全身、四肢與臉部的純手工細緻修剪與輪廓雕琢。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ==================== GALLERY VIEW ==================== -->
+        <div id="view-gallery" class="page-view">
+            <!-- 頂部標題 -->
+            <section class="bg-brand-100 py-16 text-center">
+                <div class="max-w-7xl mx-auto px-4">
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-stone-900 mb-4">美學成果案例展示</h1>
+                    <p class="text-stone-600 max-w-2xl mx-auto text-base">這不是普通的洗護，這是給毛孩的一場華麗蛻變。點擊任意案例，深入查看美容詳情與造型解析！</p>
+                </div>
+            </section>
+
+            <!-- 分類過濾選單 -->
+            <section class="py-8 bg-white border-b border-brand-100">
+                <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-3">
+                    <button onclick="filterGallery('all')" class="gallery-filter-btn active bg-brand-600 text-white font-semibold text-sm px-6 py-2.5 rounded-full shadow-md transition-all">全部造型</button>
+                    <button onclick="filterGallery('dog')" class="gallery-filter-btn bg-brand-50 hover:bg-brand-100 text-stone-700 font-semibold text-sm px-6 py-2.5 rounded-full transition-all">狗狗美容</button>
+                    <button onclick="filterGallery('cat')" class="gallery-filter-btn bg-brand-50 hover:bg-brand-100 text-stone-700 font-semibold text-sm px-6 py-2.5 rounded-full transition-all">貓咪美學</button>
+                    <button onclick="filterGallery('spa')" class="gallery-filter-btn bg-brand-50 hover:bg-brand-100 text-stone-700 font-semibold text-sm px-6 py-2.5 rounded-full transition-all">高級 SPA 療癒</button>
+                </div>
+            </section>
+
+            <!-- 作品卡片格柵 -->
+            <section class="py-12 bg-brand-50/30">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="gallery-grid">
+                        
+                        <!-- 案例 1 -->
+                        <div class="gallery-item dog bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group">
+                            <div class="relative overflow-hidden h-64">
+                                <img src="https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&q=80&w=600" alt="比熊犬完美修剪後像棉花糖一樣" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Bichon+Frise'">
+                                <span class="absolute top-4 left-4 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">棉花糖圓球頭</span>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-stone-900 mb-1">比熊犬・波波 (Popo)</h3>
+                                <p class="text-xs text-brand-600 font-semibold mb-4">服務項目：極致剪毛造型 + 碳酸泉</p>
+                                <p class="text-stone-500 text-sm mb-6">家長希望波波像棉花糖一樣圓蓬蓬，我們採用純剪刀純手工慢慢雕琢造型。</p>
+                                <a href="#gallery-detail/popo" class="block text-center bg-brand-100 hover:bg-brand-600 hover:text-white text-brand-800 font-bold text-sm py-3 rounded-2xl transition-all">
+                                    查看細部改造細節
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 案例 2 -->
+                        <div class="gallery-item dog bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group">
+                            <div class="relative overflow-hidden h-64">
+                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=600" alt="可愛博美犬做完美容造型" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Pomeranian'">
+                                <span class="absolute top-4 left-4 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">精緻熊貓泰迪剪</span>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-stone-900 mb-1">博美犬・點點 (Diandian)</h3>
+                                <p class="text-xs text-brand-600 font-semibold mb-4">服務項目：寵物毛髮雕塑 + 精緻洗洗</p>
+                                <p class="text-stone-500 text-sm mb-6">原先底毛雜亂多油，經過深層抗敏洗澡後，修飾成超級吸睛的泰迪造型。</p>
+                                <a href="#gallery-detail/diandian" class="block text-center bg-brand-100 hover:bg-brand-600 hover:text-white text-brand-800 font-bold text-sm py-3 rounded-2xl transition-all">
+                                    查看細部改造細節
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 案例 3 -->
+                        <div class="gallery-item cat bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group">
+                            <div class="relative overflow-hidden h-64">
+                                <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600" alt="做完沙龍美容後的布偶貓" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Ragdoll+Cat'">
+                                <span class="absolute top-4 left-4 bg-sage-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">奢華布偶貓專屬護理</span>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-stone-900 mb-1">布偶貓・雪莉 (Sherry)</h3>
+                                <p class="text-xs text-brand-600 font-semibold mb-4">服務項目：貓咪極致無壓洗護 + 除廢毛</p>
+                                <p class="text-stone-500 text-sm mb-6">高感度布偶貓需要極度的安撫。我們使用低噪吹風，順利帶走死毛並重現絲滑質感。</p>
+                                <a href="#gallery-detail/sherry" class="block text-center bg-brand-100 hover:bg-brand-600 hover:text-white text-brand-800 font-bold text-sm py-3 rounded-2xl transition-all">
+                                    查看細部改造細節
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 案例 4 -->
+                        <div class="gallery-item spa bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group">
+                            <div class="relative overflow-hidden h-64">
+                                <img src="https://images.unsplash.com/photo-1608096299210-db7e38487075?auto=format&fit=crop&q=80&w=600" alt="正在水療浴池泡碳酸泉的柴犬" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Shiba+Spa'">
+                                <span class="absolute top-4 left-4 bg-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">極致抗敏碳酸泉</span>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-stone-900 mb-1">柴犬・橘子 (Juzi)</h3>
+                                <p class="text-xs text-brand-600 font-semibold mb-4">服務項目：極上微分子碳酸水療 SPA</p>
+                                <p class="text-stone-500 text-sm mb-6">橘子處於換毛期且皮膚有微恙。經過微氣泡深層代謝後，老廢毛徹底清除。</p>
+                                <a href="#gallery-detail/juzi" class="block text-center bg-brand-100 hover:bg-brand-600 hover:text-white text-brand-800 font-bold text-sm py-3 rounded-2xl transition-all">
+                                    查看細部改造細節
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 案例 5 -->
+                        <div class="gallery-item dog bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group">
+                            <div class="relative overflow-hidden h-64">
+                                <img src="https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=600" alt="可愛玩具貴賓剪毛造型" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Poodle'">
+                                <span class="absolute top-4 left-4 bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">元氣泰迪修容</span>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-stone-900 mb-1">貴賓犬・巧克 (Choco)</h3>
+                                <p class="text-xs text-brand-600 font-semibold mb-4">服務項目：全身純剪刀雕塑 + 毛色活化藥浴</p>
+                                <p class="text-stone-500 text-sm mb-6">活潑的巧克毛色有些褪，我們搭配草本護色洗，重現光澤並修剪成泰迪熊。</p>
+                                <a href="#gallery-detail/choco" class="block text-center bg-brand-100 hover:bg-brand-600 hover:text-white text-brand-800 font-bold text-sm py-3 rounded-2xl transition-all">
+                                    查看細部改造細節
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 案例 6 -->
+                        <div class="gallery-item cat bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group">
+                            <div class="relative overflow-hidden h-64">
+                                <img src="https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&q=80&w=600" alt="洗完澡吹好風的短毛貓" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Short+Hair+Cat'">
+                                <span class="absolute top-4 left-4 bg-sage-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">極速除廢毛精油護理</span>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-stone-900 mb-1">美短貓・皮皮 (Pipi)</h3>
+                                <p class="text-xs text-brand-600 font-semibold mb-4">服務項目：草本低敏控油洗澡 + 全面除雜毛</p>
+                                <p class="text-stone-500 text-sm mb-6">皮皮出油量大，使用天然茶樹控油沐浴露，成功讓毛色重返絲滑與乾淨。</p>
+                                <a href="#gallery-detail/pipi" class="block text-center bg-brand-100 hover:bg-brand-600 hover:text-white text-brand-800 font-bold text-sm py-3 rounded-2xl transition-all">
+                                    查看細部改造細節
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ==================== GALLERY DETAIL VIEW ==================== -->
+        <div id="view-gallery-detail" class="page-view">
+            <section class="py-12 bg-white">
+                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <!-- 返回按鈕 -->
+                    <a href="#gallery" class="inline-flex items-center space-x-2 text-brand-600 hover:text-brand-700 font-bold mb-8 transition-colors">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>返回成果作品展示牆</span>
+                    </a>
+
+                    <!-- 詳細內容骨架 (將由 JS 動態填充) -->
+                    <article id="detail-content" class="bg-brand-50 p-6 md:p-12 rounded-3xl border border-brand-200 shadow-xl space-y-8">
+                        <!-- 動態填充區 -->
+                    </article>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ==================== ABOUT VIEW ==================== -->
+        <div id="view-about" class="page-view">
+            <!-- 頂部標題 -->
+            <section class="bg-brand-100 py-16 text-center">
+                <div class="max-w-7xl mx-auto px-4">
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-stone-900 mb-4">關於「萌寵美學」</h1>
+                    <p class="text-stone-600 max-w-2xl mx-auto text-base">這不僅是一份事業，更是我們對生命許下的溫柔承諾。了解我們如何重新定義寵物美容體驗。</p>
+                </div>
+            </section>
+
+            <!-- 品牌故事與理念 -->
+            <section class="py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <!-- 左側理念 -->
+                    <div class="lg:col-span-6 space-y-6">
+                        <span class="text-brand-600 font-bold tracking-widest uppercase text-sm">BRAND STORY</span>
+                        <h2 class="text-3xl font-extrabold text-stone-900 leading-tight">「因為牠們，是我們一輩子的家人。」</h2>
+                        <p class="text-stone-600 leading-relaxed">
+                            創辦人 Sherry 本身是一位擁有 10 年資歷的獸醫助理與資深寵物美容師。她發現市面上許多美容院為了追求效率與翻桌率，常使用強迫限制、粗暴烘箱、快速修剪，導致毛孩身心受創、回家抗拒洗澡。
+                        </p>
+                        <p class="text-stone-600 leading-relaxed">
+                            「寵物美容，應該是給毛孩溫柔按摩、放鬆緊繃肌肉的療癒體驗。」於是 Sherry 創立了「萌寵美學」。在這裡，我們堅持不求快、不強迫、不使用封閉烘箱，並將玻璃室完全透明化。把每一隻託付給我們的毛孩，都當成自己的家人般疼愛。
+                        </p>
+                        
+                        <!-- 專業特點列表 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-check text-brand-500 mt-1"></i>
+                                <div>
+                                    <h4 class="font-bold text-stone-950 text-sm">國際專業美容證照</h4>
+                                    <p class="text-stone-500 text-xs">全員持有 KCT 國家級及 A 級大師美容檢定。</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-2">
+                                <i class="fa-solid fa-check text-brand-500 mt-1"></i>
+                                <div>
+                                    <h4 class="font-bold text-stone-950 text-sm">無毒安全頂級沐浴露</h4>
+                                    <p class="text-stone-500 text-xs">僅使用歐盟生態與 USDA organic 雙認證洗護。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 右側團隊照片 -->
+                    <div class="lg:col-span-6 flex justify-center">
+                        <div class="relative w-full max-w-md">
+                            <div class="absolute inset-0 bg-brand-200 rounded-3xl transform -rotate-3 scale-95"></div>
+                            <div class="relative bg-white p-4 rounded-3xl shadow-xl transform rotate-2">
+                                <img src="https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=600" alt="萌寵美學創辦人Sherry正在溫柔地為金毛尋回犬整理毛髮" class="rounded-2xl w-full h-[400px] object-cover" onerror="this.src='https://placehold.co/600x480/eddcc5/5c3520?text=About+Us'">
+                                <div class="absolute -bottom-6 -right-6 bg-brand-800 text-white px-6 py-4 rounded-2xl shadow-lg border border-brand-700">
+                                    <p class="text-xs text-brand-200">創辦人</p>
+                                    <p class="text-lg font-bold">Sherry Chen</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 美容師陣容介紹 -->
+            <section class="py-16 bg-brand-50/50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-2xl mx-auto space-y-4 mb-16">
+                        <span class="text-brand-600 font-bold uppercase tracking-wider text-sm block">菁英美容團隊</span>
+                        <h2 class="text-3xl font-extrabold text-stone-900">國家級檢定與愛心兼備的專家</h2>
+                        <p class="text-stone-600">我們每位美容師皆持有專業執照，且需經過嚴苛的「減敏心理解碼」培訓。</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- 美容師 1 -->
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-100 p-6 text-center group">
+                            <div class="w-32 h-32 rounded-full overflow-hidden mx-auto mb-6 border-4 border-brand-200 relative">
+                                <img src="https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&q=80&w=200" alt="資深寵物美容師Sherry" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/200x200/eddcc5/5c3520?text=Sherry'">
+                            </div>
+                            <h3 class="text-xl font-bold text-stone-900 mb-1">Sherry Chen</h3>
+                            <p class="text-brand-600 text-xs font-semibold mb-4">創辦人兼技術督導 (10年資歷)</p>
+                            <div class="bg-brand-50 p-4 rounded-2xl text-stone-500 text-xs text-left space-y-2">
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> KCT 理事長獎 A 級美容檢定</p>
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> 日本JAPDT寵物訓練減敏認證</p>
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> 擅長貓咪高感度無壓洗護</p>
+                            </div>
+                        </div>
+                        <!-- 美容師 2 -->
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-100 p-6 text-center group">
+                            <div class="w-32 h-32 rounded-full overflow-hidden mx-auto mb-6 border-4 border-brand-200 relative">
+                                <img src="https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=200" alt="高級美容師Kevin" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/200x200/eddcc5/5c3520?text=Kevin'">
+                            </div>
+                            <h3 class="text-xl font-bold text-stone-900 mb-1">Kevin Wang</h3>
+                            <p class="text-brand-600 text-xs font-semibold mb-4">高級造型師 (6年資歷)</p>
+                            <div class="bg-brand-50 p-4 rounded-2xl text-stone-500 text-xs text-left space-y-2">
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> KCT 精緻剪毛大賽卓越獎</p>
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> 擅長玩具貴賓、比熊犬雕剪</p>
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> 溫柔幽默，超有大狗狗緣</p>
+                            </div>
+                        </div>
+                        <!-- 美容師 3 -->
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-100 p-6 text-center group">
+                            <div class="w-32 h-32 rounded-full overflow-hidden mx-auto mb-6 border-4 border-brand-200 relative">
+                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=200" alt="SPA專職理療師Lisa" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src='https://placehold.co/200x200/eddcc5/5c3520?text=Lisa'">
+                            </div>
+                            <h3 class="text-xl font-bold text-stone-900 mb-1">Lisa Huang</h3>
+                            <p class="text-brand-600 text-xs font-semibold mb-4">皮毛SPA管理師 (5年資歷)</p>
+                            <div class="bg-brand-50 p-4 rounded-2xl text-stone-500 text-xs text-left space-y-2">
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> 亞洲寵物皮毛理療師結業</p>
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> 專長：問題肌藥浴配方調整</p>
+                                <p><i class="fa-solid fa-circle text-[6px] text-brand-600 mr-1"></i> 堅持一對一減敏除廢毛洗護</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ==================== CONTACT VIEW ==================== -->
+        <div id="view-contact" class="page-view">
+            <!-- 頂部標題 -->
+            <section class="bg-brand-100 py-16 text-center">
+                <div class="max-w-7xl mx-auto px-4">
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-stone-900 mb-4">線上預約與聯絡諮詢</h1>
+                    <p class="text-stone-600 max-w-2xl mx-auto text-base">一對一極致精細美容，每日接待名額有限。歡迎填寫下方預約意願表，我們將有專人於 24 小時內聯絡確認！</p>
+                </div>
+            </section>
+
+            <!-- 預約表單與聯絡資訊 -->
+            <section class="py-16 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12">
+                    
+                    <!-- 左側聯絡卡與營業資訊 -->
+                    <div class="lg:col-span-5 space-y-8">
+                        <div class="bg-brand-50 p-8 rounded-3xl border border-brand-200">
+                            <h3 class="text-2xl font-bold text-stone-900 mb-6">萌寵美學 Pawfect Spa</h3>
+                            
+                            <div class="space-y-6">
+                                <!-- 電話 -->
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shrink-0">
+                                        <i class="fa-solid fa-phone"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-stone-400 font-semibold uppercase">預約專線</p>
+                                        <a href="tel:0212345678" class="text-base font-bold text-stone-800 hover:text-brand-600 transition-colors">02-1234-5678</a>
+                                    </div>
+                                </div>
+                                <!-- LINE -->
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0">
+                                        <i class="fa-brands fa-line text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-stone-400 font-semibold uppercase">官方 LINE 預約諮詢</p>
+                                        <a href="#mock-line" onclick="showToast('模擬前往 LINE 官方帳號進行客服溝通中！', 'success')" class="text-base font-bold text-stone-800 hover:text-green-600 transition-colors">@pawfect_spa (點此加入)</a>
+                                    </div>
+                                </div>
+                                <!-- IG -->
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 shrink-0">
+                                        <i class="fa-brands fa-instagram text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-stone-400 font-semibold uppercase">最新成果與動態 IG</p>
+                                        <a href="#mock-ig" onclick="showToast('模擬前往 Instagram 粉絲專頁！', 'success')" class="text-base font-bold text-stone-800 hover:text-pink-600 transition-colors">@pawfect_spa_salon</a>
+                                    </div>
+                                </div>
+                                <!-- 地址 -->
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shrink-0">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-stone-400 font-semibold uppercase">門市地址</p>
+                                        <p class="text-base font-bold text-stone-800">台北市大安區新生南路三段 888 號 1 樓</p>
+                                    </div>
+                                </div>
+                                <!-- 營業時間 -->
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 shrink-0">
+                                        <i class="fa-regular fa-clock"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-stone-400 font-semibold uppercase">營業時間</p>
+                                        <p class="text-base font-bold text-stone-800">每日 10:00 - 20:00 (週四公休)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 自製手繪風格地圖 SVG Mockup -->
+                        <div class="relative w-full aspect-[4/3] rounded-3xl overflow-hidden border border-brand-200 bg-brand-50 p-4 flex flex-col justify-between shadow-md">
+                            <div class="flex justify-between items-center">
+                                <span class="bg-brand-600 text-white text-xs font-bold px-3 py-1 rounded-full"><i class="fa-solid fa-map-pin mr-1"></i>交通指南</span>
+                                <span class="text-xs text-stone-400">捷運公館站 3 號出口步行 5 分鐘</span>
+                            </div>
+                            <!-- 地圖模擬視覺 -->
+                            <div class="my-auto flex flex-col items-center justify-center text-center space-y-3">
+                                <div class="relative">
+                                    <div class="absolute -top-3 -left-3 w-10 h-10 rounded-full bg-brand-500/20 animate-ping"></div>
+                                    <div class="w-12 h-12 rounded-full bg-brand-600 flex items-center justify-center text-white text-xl shadow-lg relative z-10">
+                                        <i class="fa-solid fa-paw"></i>
+                                    </div>
+                                </div>
+                                <p class="text-sm font-bold text-stone-700">台北市大安區新生南路三段 888 號</p>
+                                <p class="text-xs text-stone-400">新生南路與辛亥路交叉口旁（台大體育館正對面）</p>
+                            </div>
+                            <button onclick="showToast('地圖已導流：已為您模擬開啟 Google 地圖導航！', 'success')" class="w-full bg-white hover:bg-brand-100 text-brand-800 text-xs font-bold py-2.5 rounded-xl border border-brand-200 transition-all">
+                                <i class="fa-regular fa-map mr-1"></i> 在 Google 地圖中開啟
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 右側多步驟預約表單 -->
+                    <div class="lg:col-span-7">
+                        <div class="bg-white p-6 md:p-10 rounded-3xl border border-brand-200 shadow-xl">
+                            <!-- 預約進度指示 -->
+                            <div class="mb-8">
+                                <div class="flex justify-between text-xs text-stone-400 font-bold mb-2">
+                                    <span id="step-label-1" class="text-brand-600">1. 基本資訊</span>
+                                    <span id="step-label-2">2. 時間與方案</span>
+                                    <span id="step-label-3">3. 送出申請</span>
+                                </div>
+                                <div class="w-full bg-brand-100 h-2 rounded-full overflow-hidden">
+                                    <div id="booking-progress-bar" class="bg-brand-600 h-full w-1/3 transition-all duration-300"></div>
+                                </div>
+                            </div>
+
+                            <!-- 預約表單本體 -->
+                            <form id="booking-form" onsubmit="handleBookingSubmit(event)">
+                                
+                                <!-- 步驟 1: 家長與毛孩基本資訊 -->
+                                <div id="booking-step-1" class="space-y-6">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label for="book-parent-name" class="block text-sm font-extrabold text-stone-700">您的姓名 <span class="text-red-500">*</span></label>
+                                            <input type="text" id="book-parent-name" required placeholder="如：林小姐" class="w-full bg-brand-50/50 border border-brand-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label for="book-parent-phone" class="block text-sm font-extrabold text-stone-700">聯絡電話 <span class="text-red-500">*</span></label>
+                                            <input type="tel" id="book-parent-phone" required placeholder="如：0912-345-678" class="w-full bg-brand-50/50 border border-brand-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label for="book-pet-type" class="block text-sm font-extrabold text-stone-700">寵物種類 <span class="text-red-500">*</span></label>
+                                            <select id="book-pet-type" required class="w-full bg-brand-50/50 border border-brand-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                                <option value="dog">狗狗 (Dog)</option>
+                                                <option value="cat">貓咪 (Cat)</option>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label for="book-pet-breed" class="block text-sm font-extrabold text-stone-700">品種 / 大約體型 <span class="text-red-500">*</span></label>
+                                            <input type="text" id="book-pet-breed" required placeholder="如：米克斯 / 8公斤" class="w-full bg-brand-50/50 border border-brand-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-end pt-4">
+                                        <button type="button" onclick="nextBookingStep(2)" class="bg-brand-600 hover:bg-brand-700 text-white font-extrabold px-6 py-3 rounded-xl transition-all">
+                                            下一頁，填寫方案與時間 <i class="fa-solid fa-arrow-right ml-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- 步驟 2: 美容方案與時間 -->
+                                <div id="booking-step-2" class="space-y-6 hidden">
+                                    <div class="space-y-2">
+                                        <label for="book-service" class="block text-sm font-extrabold text-stone-700">預計洗護服務項目 <span class="text-red-500">*</span></label>
+                                        <select id="book-service" required class="w-full bg-brand-50/50 border border-brand-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                            <option value="bath">微氣泡深層洗澡護理</option>
+                                            <option value="trim">匠人精緻剪毛造型 (含洗澡)</option>
+                                            <option value="spa">日系極上碳酸泉水療 SPA (含洗澡)</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label for="book-date" class="block text-sm font-extrabold text-stone-700">預計到店日期 <span class="text-red-500">*</span></label>
+                                            <input type="date" id="book-date" required class="w-full bg-brand-50/50 border border-brand-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label for="book-time" class="block text-sm font-extrabold text-stone-700">預計到店時段 <span class="text-red-500">*</span></label>
+                                            <select id="book-time" required class="w-full bg-brand-50/50 border border-brand-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all">
+                                                <option value="morning">上午時段 (10:00 - 13:00)</option>
+                                                <option value="afternoon">下午時段 (13:00 - 17:00)</option>
+                                                <option value="evening">晚上時段 (17:00 - 19:00)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label for="book-notes" class="block text-sm font-extrabold text-stone-700">備註毛孩習慣與狀況（選填）</label>
+                                        <textarea id="book-notes" rows="3" placeholder="如：會害怕大風機、對陌生人敏感、身上有部分濕疹..." class="w-full bg-brand-50/50 border border-brand-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all resize-none"></textarea>
+                                    </div>
+
+                                    <div class="flex justify-between pt-4">
+                                        <button type="button" onclick="nextBookingStep(1)" class="border border-brand-200 hover:bg-brand-50 text-stone-700 font-extrabold px-6 py-3 rounded-xl transition-all">
+                                            返回上一步
+                                        </button>
+                                        <button type="button" onclick="nextBookingStep(3)" class="bg-brand-600 hover:bg-brand-700 text-white font-extrabold px-6 py-3 rounded-xl transition-all">
+                                            最後一步，送出確認 <i class="fa-solid fa-check ml-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- 步驟 3: 確認詳情並送出 -->
+                                <div id="booking-step-3" class="space-y-6 hidden">
+                                    <div class="bg-brand-50 p-6 rounded-2xl border border-brand-200 space-y-3 text-sm">
+                                        <h4 class="font-bold text-stone-900 text-base mb-2 border-b border-brand-200 pb-2">請確認以下預約意願資訊</h4>
+                                        <p><span class="text-stone-400 font-semibold">家長姓名：</span> <span id="summary-parent-name">-</span></p>
+                                        <p><span class="text-stone-400 font-semibold">聯絡電話：</span> <span id="summary-parent-phone">-</span></p>
+                                        <p><span class="text-stone-400 font-semibold">毛孩規格：</span> <span id="summary-pet-type">-</span> / <span id="summary-pet-breed">-</span></p>
+                                        <p><span class="text-stone-400 font-semibold">預訂服務：</span> <span id="summary-service">-</span></p>
+                                        <p><span class="text-stone-400 font-semibold">預訂時間：</span> <span id="summary-date">-</span> / <span id="summary-time">-</span></p>
+                                        <p><span class="text-stone-400 font-semibold">其他備註：</span> <span id="summary-notes">-</span></p>
+                                    </div>
+
+                                    <p class="text-stone-500 text-xs">
+                                        ※ 本表單僅供預約意願收集與時段協調使用，實際預約成功與否需等候本店客服人員致電或 LINE 與您確認為主，謝謝您的理解。
+                                    </p>
+
+                                    <div class="flex justify-between pt-4">
+                                        <button type="button" onclick="nextBookingStep(2)" class="border border-brand-200 hover:bg-brand-50 text-stone-700 font-extrabold px-6 py-3 rounded-xl transition-all">
+                                            返回上一步
+                                        </button>
+                                        <button type="submit" class="bg-brand-800 hover:bg-brand-950 text-white font-extrabold px-8 py-3.5 rounded-xl transition-all shadow-md">
+                                            確認無誤，送出預約申請
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 頁腳 Footer -->
+    <footer class="bg-stone-950 text-stone-400 pt-16 pb-8 border-t border-brand-900/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
+            
+            <!-- 專欄 1: 品牌定位與簡介 -->
+            <div class="md:col-span-4 space-y-4">
+                <a href="#home" class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center text-white">
+                        <i class="fa-solid fa-paw text-lg"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-wider text-white">萌寵美學</span>
+                </a>
+                <p class="text-stone-400 text-sm leading-relaxed">
+                    精緻與安心並存的寵物沙龍，深耕皮毛調理、減敏手法與透明化洗護。我們用雙手與愛心，讓每一次洗澡美容都是一場安心療癒的 SPA 美學旅程。
+                </p>
+                <div class="flex space-x-4 pt-2">
+                    <a href="#mock-fb" onclick="showToast('已模擬前往官方 Facebook 粉絲團！', 'info')" class="w-10 h-10 rounded-full bg-stone-900 hover:bg-brand-600 text-stone-400 hover:text-white flex items-center justify-center transition-all shadow-sm">
+                        <i class="fa-brands fa-facebook-f"></i>
+                    </a>
+                    <a href="#mock-ig" onclick="showToast('已模擬前往官方 Instagram！', 'info')" class="w-10 h-10 rounded-full bg-stone-900 hover:bg-brand-600 text-stone-400 hover:text-white flex items-center justify-center transition-all shadow-sm">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="#mock-line" onclick="showToast('已模擬前往官方 LINE 帳號！', 'info')" class="w-10 h-10 rounded-full bg-stone-900 hover:bg-brand-600 text-stone-400 hover:text-white flex items-center justify-center transition-all shadow-sm">
+                        <i class="fa-brands fa-line text-lg"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 專欄 2: 快捷導覽 -->
+            <div class="md:col-span-2 space-y-4">
+                <h4 class="text-white font-extrabold text-sm tracking-wider uppercase border-l-2 border-brand-500 pl-2">快捷導覽</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#home" class="hover:text-white transition-colors">首頁首選</a></li>
+                    <li><a href="#services" class="hover:text-white transition-colors">專業洗護</a></li>
+                    <li><a href="#gallery" class="hover:text-white transition-colors">美學作品</a></li>
+                    <li><a href="#about" class="hover:text-white transition-colors">關於品牌</a></li>
+                    <li><a href="#contact" class="hover:text-white transition-colors">線上預約</a></li>
+                </ul>
+            </div>
+
+            <!-- 專欄 3: 專業核心認證 -->
+            <div class="md:col-span-3 space-y-4">
+                <h4 class="text-white font-extrabold text-sm tracking-wider uppercase border-l-2 border-brand-500 pl-2">專業核心認證</h4>
+                <ul class="space-y-3 text-xs text-stone-400">
+                    <li class="flex items-center space-x-2">
+                        <i class="fa-solid fa-award text-brand-500 text-sm"></i>
+                        <span>KCT 國家大會美容指定檢定 A 級認證</span>
+                    </li>
+                    <li class="flex items-center space-x-2">
+                        <i class="fa-solid fa-award text-brand-500 text-sm"></i>
+                        <span>日本 JAPDT 獸醫減敏訓練師理療結業</span>
+                    </li>
+                    <li class="flex items-center space-x-2">
+                        <i class="fa-solid fa-award text-brand-500 text-sm"></i>
+                        <span>歐盟 ECOCERT 自然生態有機洗護洗劑</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 專欄 4: 安全宣導 -->
+            <div class="md:col-span-3 space-y-4">
+                <h4 class="text-white font-extrabold text-sm tracking-wider uppercase border-l-2 border-brand-500 pl-2">萌寵叮嚀</h4>
+                <p class="text-xs text-stone-400 leading-relaxed">
+                    為了毛孩們的身心安全與高水準護理，萌寵美學全門市一律堅持「預約制」。若因臨時路過無法等候，敬請見諒！歡迎立即提前利用線上表單卡位預定專屬時段。
+                </p>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-stone-900 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-stone-500">
+            <p>&copy; 2026 萌寵美學 Pawfect Spa Salon. All Rights Reserved. 台北優質寵物美容首選推薦</p>
+            <p>網頁設計與技術：專業前端美學工程團隊規劃製作 | 網站無障礙與 SEO 搜尋優化標準版</p>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+    <script>
+        // 美學案例庫 (Gallery Data) - 便於 SEO 模擬與單頁展示切換
+        const galleryData = {
+            popo: {
+                title: "比熊犬・波波 (Popo)",
+                service: "匠人精緻剪毛造型 + 日系微分子碳酸泉",
+                tag: "棉花糖圓球頭造型",
+                beforeImg: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=640",
+                afterImg: "https://images.unsplash.com/photo-1544568100-847a948585b9?auto=format&fit=crop&q=80&w=640",
+                stylist: "Kevin Wang (高級造型師)",
+                description: "波波在來美容院之前，身上的底毛因在草地上玩耍而有嚴重的樹枝殘留與細微毛結。我們團隊為波波調配了極致溫和去污方案，並採用手剪慢雕的方式，把四肢修剪為如泰迪熊般軟萌飽滿的微喇叭狀，頭型重現完美的大棉花糖圓球，走在路上回頭率百分百！",
+                steps: "檢查全身結垢 → 手工精細拆結 → 控油雙刷清洗 → 碳酸泉全身深層浸浴 SPA → 手持低噪暖風吹風拉直毛髮 → 全身頂級剪刀純手工圓輪廓雕塑。",
+                productUsed: "義大利草本活膚控油浴露、天然大馬士革玫瑰毛囊養護精華油。"
+            },
+            diandian: {
+                title: "博美犬・點點 (Diandian)",
+                service: "寵物毛髮雕塑 + 微氣泡舒敏洗澡",
+                tag: "元氣熊造型剪",
+                beforeImg: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=640",
+                afterImg: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=640",
+                stylist: "Sherry Chen (技術總監)",
+                description: "點點是典型高敏感的小博美，對吹風機的風噪非常畏懼。我們在操作時，第一步就是由 Lisa 美容師給點點提供特製的有機鴨肉點心進行安撫，美容室全程播放白噪音與狗狗安定音樂。採用一邊按摩、一邊手吹的方式，成功消除點點的緊張感，並修剪成高質感元氣熊造型頭！",
+                steps: "情緒脫敏放鬆 → 指甲打磨與耳道草本洗 → 微氣泡抗敏水療舒緩洗 → 低噪手持式暖風吹整拉毛 → 臉部與耳朵精細圓滑弧度精剪。",
+                productUsed: "澳洲有機洋甘菊修護低敏沐浴乳、天然小麥胚芽蓬鬆護毛素。"
+            },
+            sherry: {
+                title: "布偶貓・雪莉 (Sherry)",
+                service: "貓咪極緻無壓洗護 + 專業廢毛深層拔除",
+                tag: "奢華布偶貓沙龍",
+                beforeImg: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=640",
+                afterImg: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&q=80&w=640",
+                stylist: "Lisa Huang (皮毛管理師)",
+                description: "貓咪是極重度地域防備心理的動物。雪莉家長表示雪莉在家梳毛時經常會出現哈氣和反抗。Lisa 管理師採用了貓咪減壓包裹手法（Purr-fect Handling），配合無香精極速深層除毛設備，快速而溫柔地替雪莉帶走了多達一整碗的老廢死毛。洗完後，布偶貓那標誌性的絲滑、柔亮緞面質感完美回歸！",
+                steps: "特製貓房一對一情緒輔導 → 剪甲與貓咪潔耳膏理療 → 特製貓用無香舒敏兩階段清洗 → 快速低溫風力除毛 → 純手工毛髮亮澤微噴護理。",
+                productUsed: "日本A.P.D.C專業貓咪低敏除油泡沫洗劑、天然絲蛋白多效蓬鬆護毛噴霧。"
+            },
+            juzi: {
+                title: "柴犬・橘子 (Juzi)",
+                service: "微分子高濃度碳酸泉水療 + 換毛期精細大梳理",
+                tag: "極致深層去油代謝",
+                beforeImg: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=640",
+                afterImg: "https://images.unsplash.com/photo-1608096299210-db7e38487075?auto=format&fit=crop&q=80&w=640",
+                stylist: "Lisa Huang (皮毛管理師)",
+                description: "柴犬橘子正逢季節性大換毛，身上有大量的廢毛堆積堵塞，導致皮脂腺分泌過剩，皮膚摸起來油膩且有些許皮屑、泛紅。我們利用日本引進的高濃度微分子碳酸水進行 15 分鐘全身碳酸SPA水療。氣泡能深入橘子的濃密雙層底毛中，溫和分解油垢、修護肌膚屏障。",
+                steps: "全身換毛梳開老死底毛 → 控油茶樹去油脂初洗 → 日本碳酸泉微分子恆溫水療泡浴（SPA） → 滋潤潤絲防護 → 吹風深層除毛整理。",
+                productUsed: "日本進口專業高濃度碳酸泉水療儀、茶樹深層舒敏控油配方、燕麥滋潤理療霜。"
+            },
+            choco: {
+                title: "貴賓犬・巧克 (Choco)",
+                service: "全身剪刀精雕造型 + 植物控油藥浴",
+                tag: "元氣泰迪修容造型",
+                beforeImg: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=640",
+                afterImg: "https://images.unsplash.com/photo-1596492784531-6e6eb5ea9993?auto=format&fit=crop&q=80&w=640",
+                stylist: "Kevin Wang (高級造型師)",
+                description: "巧克是隻活潑討喜的小貴賓，家長常帶他出去露營，因此毛色顯得有些暗沈無光澤。Kevin 老師幫他選用了植物草本色澤修護配方洗，同時針對營地碎草造成的打結，逐一耐心手剪，再修飾成最受歡迎的元氣泰迪熊圓潤大耳朵，徹底重返小紳士的光采與精緻！",
+                steps: "指甲打磨除銳角 → 肛門腺與足底理療 → 控油與護色藥浴兩階段護理 → 暖風溫和吹整蓬鬆毛髮 → 泰迪造型精雕細琢。",
+                productUsed: "義大利天然燕麥舒緩活膚液、草本活色亮澤護理精華。"
+            },
+            pipi: {
+                title: "美短貓・皮皮 (Pipi)",
+                service: "控油草本舒敏洗澡 + 指甲打磨清潔",
+                tag: "短毛貓去油護理",
+                beforeImg: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=640",
+                afterImg: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?auto=format&fit=crop&q=80&w=640",
+                stylist: "Lisa Huang (皮毛管理師)",
+                description: "美短貓皮皮有些微的下巴黑頭與背部出油狀況。我們使用專業貓咪去油晶華，溫柔乳化洗淨皮脂，並敷上天然海泥精華修復。皮皮在整個過程中都非常安定，洗完後毛色斑紋變得黑白分明，閃耀著極富質感的絲滑光輝！",
+                steps: "油脂局部乳化去油 → 舒敏草本去污雙刷洗 → 海泥修護毛孔敷膜 → 低溫吹乾吹蓬鬆 → 黑頭精細除污護理。",
+                productUsed: "日本專業貓用去油溫和膏、死海泥抗敏保濕修護泡沫。"
+            }
+        };
+
+        // 單頁 SPA 路由機制
+        const routes = {
+            'home': {
+                title: '萌寵美學 Pawfect Spa | 台北頂級寵物美容與低敏碳酸泉 SPA',
+                desc: '萌寵美學 Pawfect Spa 提供最專業的狗狗貓咪美容、低敏藥浴與碳酸泉 SPA。我們堅持一對一預約制、透明安全防護、國家級檢定美容師，給毛孩最舒適的無壓力美容體驗。',
+                keywords: '寵物美容, 狗狗洗澡, 貓咪剪毛, 寵物沙籠, 寵物SPA, 碳酸泉, 台北寵物美容, 寵物剪指甲',
+                schema: {
+                    "@context": "https://schema.org",
+                    "@type": "LocalBusiness",
+                    "name": "萌寵美學 Pawfect Spa",
+                    "image": "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=800",
+                    "telephone": "02-1234-5678",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "streetAddress": "新生南路三段 888 號 1 樓",
+                        "addressLocality": "台北市大安區",
+                        "postalCode": "106",
+                        "addressCountry": "TW"
+                    },
+                    "openingHoursSpecification": {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Friday", "Saturday", "Sunday"],
+                        "opens": "10:00",
+                        "closes": "20:00"
+                    },
+                    "priceRange": "$$"
+                }
+            },
+            'services': {
+                title: '服務項目與方案定價 | 萌寵美學 Pawfect Spa 寵物沙龍',
+                desc: '查看萌寵美學的最完整美容服務定價！包含微分子碳酸溫泉 SPA、專業拆結、精剪精緻造型、低敏防護藥浴。內建即時智能報價估算器，讓預算一目了然！',
+                keywords: '寵物美容價格, 狗狗洗澡費用, 寵物SPA收費, 碳酸水療定價, 貓咪剪毛價格',
+                schema: {
+                    "@context": "https://schema.org",
+                    "@type": "Service",
+                    "serviceType": "Pet Grooming and Spa Services",
+                    "provider": {
+                        "@type": "LocalBusiness",
+                        "name": "萌寵美學 Pawfect Spa"
+                    },
+                    "areaServed": {
+                        "@type": "State",
+                        "name": "Taipei"
+                    },
+                    "hasOfferCatalog": {
+                        "@type": "OfferCatalog",
+                        "name": "Grooming Packages",
+                        "itemListElement": [
+                            {
+                                "@type": "Offer",
+                                "itemOffered": {
+                                    "@type": "Service",
+                                    "name": "微氣泡深層洗澡護理"
+                                },
+                                "priceSpecification": {
+                                    "@type": "PriceSpecification",
+                                    "price": "600",
+                                    "priceCurrency": "TWD"
+                                }
+                            },
+                            {
+                                "@type": "Offer",
+                                "itemOffered": {
+                                    "@type": "Service",
+                                    "name": "匠人精緻剪毛造型"
+                                },
+                                "priceSpecification": {
+                                    "@type": "PriceSpecification",
+                                    "price": "1200",
+                                    "priceCurrency": "TWD"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            'gallery': {
+                title: '美學成果案例展示牆 | 萌寵美學 Pawfect Spa',
+                desc: '見證無數狗狗貓咪在萌寵美學的華麗蛻變！包含比熊犬棉花糖造型、博美圓圓頭、布偶貓除廢毛保養等 Before & After 高清晰實例對比。',
+                keywords: '寵物剪毛作品集, 寵物美容照片, 狗狗剪毛範例, 比熊造型, 貓咪沙龍照',
+                schema: {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [{
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "首頁",
+                        "item": "https://example.com/#home"
+                    },{
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "美學成果",
+                        "item": "https://example.com/#gallery"
+                    }]
+                }
+            },
+            'gallery-detail': {
+                title: '美學案例改造詳情 | 萌寵美學 Pawfect Spa',
+                desc: '深入探索萌寵美學寵物美容案例的精緻修剪全過程！包含詳細美容步驟、美容師技術解析與所使用的頂級防護沐浴露介紹。',
+                keywords: '寵物案例解析, 寵物造型美容細節, 比熊美容大變身, 貓咪除廢毛理療',
+                schema: null // 將依案例動態調整
+            },
+            'about': {
+                title: '關於品牌與精英美容師團隊 | 萌寵美學 Pawfect Spa',
+                desc: '萌寵美學由 10 年資深獸醫助理 Sherry 創立。我們堅守 100% 透明化全景玻璃房、一對一溫柔防護減壓，全員擁有國家級 KCT 美容證照證書，誠信呵護毛孩。',
+                keywords: '關於萌寵美學, 寵物美容師推薦, KCT大師級證照, 寵物美容理念, 透明美容室',
+                schema: {
+                    "@context": "https://schema.org",
+                    "@type": "AboutPage",
+                    "mainEntity": {
+                        "@type": "Organization",
+                        "name": "萌寵美學 Pawfect Spa",
+                        "founder": "Sherry Chen",
+                        "description": "提供高端、透明、一對一減壓洗護的頂級寵物美容中心。"
+                    }
+                }
+            },
+            'contact': {
+                title: '線上預約專區與聯絡指南 | 萌寵美學 Pawfect Spa',
+                desc: '即刻利用線上多步驟表單申請預約「萌寵美學」最精緻的洗護時段！提供 LINE 快速通道、交通指南、營業時間說明，24 小時內專人貼心聯絡。',
+                keywords: '線上預約寵物美容, 台北寵物洗澡預約, 萌寵美學LINE, 萌寵美學電話',
+                schema: {
+                    "@context": "https://schema.org",
+                    "@type": "ContactPage",
+                    "mainEntity": {
+                        "@type": "LocalBusiness",
+                        "name": "萌寵美學 Pawfect Spa",
+                        "telephone": "02-1234-5678",
+                        "address": "台北市大安區新生南路三段 888 號"
+                    }
+                }
+            }
+        };
+
+        // 路由切換處理函數 (SPA Client Router)
+        function handleRouting() {
+            const hash = window.location.hash.substring(1) || 'home';
+            let mainRoute = hash;
+            let subParam = '';
+
+            // 支援子參數，如 gallery-detail/popo
+            if (hash.includes('/')) {
+                const parts = hash.split('/');
+                mainRoute = parts[0];
+                subParam = parts[1];
+            }
+
+            // 安全 fallback
+            if (!routes[mainRoute]) {
+                window.location.hash = '#home';
+                return;
+            }
+
+            // 1. 切換 View 頁面 active 狀態 (附帶流暢轉場效果)
+            document.querySelectorAll('.page-view').forEach(view => {
+                view.classList.remove('active');
+            });
+            const activeView = document.getElementById(`view-${mainRoute}`);
+            if (activeView) {
+                activeView.classList.add('active');
+            }
+
+            // 2. 更新 Navbar Active 狀態
+            document.querySelectorAll('[data-nav-link]').forEach(link => {
+                const linkDest = link.getAttribute('data-nav-link');
+                if (linkDest === mainRoute) {
+                    link.classList.add('bg-brand-600', 'text-white');
+                    link.classList.remove('text-stone-600', 'hover:bg-brand-100/50');
+                } else {
+                    link.classList.remove('bg-brand-600', 'text-white');
+                    link.classList.add('text-stone-600', 'hover:bg-brand-100/50');
+                }
+            });
+
+            // 3. 多層次 SEO 標籤動態更新
+            let routeSEO = { ...routes[mainRoute] };
+            if (mainRoute === 'gallery-detail' && subParam && galleryData[subParam]) {
+                const petInfo = galleryData[subParam];
+                routeSEO.title = `${petInfo.title} | 美學成果詳細改造 | 萌寵美學 Pawfect Spa`;
+                routeSEO.desc = `查看【${petInfo.title}】在萌寵美學由美容師 ${petInfo.stylist} 主辦的改造全流程。方案為 ${petInfo.service}，完美呈現：${petInfo.tag}。`;
+            }
+
+            document.title = routeSEO.title;
+            document.getElementById('meta-description').setAttribute('content', routeSEO.desc);
+            document.getElementById('meta-keywords').setAttribute('content', routeSEO.keywords);
+
+            // 4. 動態注入 Schema Markup (JSON-LD)
+            const schemaTag = document.getElementById('schema-markup');
+            if (routeSEO.schema) {
+                schemaTag.textContent = JSON.stringify(routeSEO.schema);
+            } else if (mainRoute === 'gallery-detail' && subParam && galleryData[subParam]) {
+                const petInfo = galleryData[subParam];
+                const dynamicSchema = {
+                    "@context": "https://schema.org",
+                    "@type": "BlogPosting",
+                    "headline": `${petInfo.title} 美容美學改造案例`,
+                    "image": petInfo.afterImg,
+                    "author": {
+                        "@type": "Person",
+                        "name": petInfo.stylist
+                    },
+                    "description": petInfo.description
+                };
+                schemaTag.textContent = JSON.stringify(dynamicSchema);
+            } else {
+                schemaTag.textContent = '';
+            }
+
+            // 5. 針對作品詳細頁，進行動態資料渲染
+            if (mainRoute === 'gallery-detail') {
+                renderGalleryDetailPage(subParam);
+            }
+
+            // 6. 路由變更時自動平滑滾動至網頁最上方
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // 關閉手機版導覽選單
+            closeMobileMenu();
+        }
+
+        // 綁定路由監聽
+        window.addEventListener('hashchange', handleRouting);
+        window.addEventListener('DOMContentLoaded', () => {
+            handleRouting();
+            initBeforeAfterSlider();
+        });
+
+
+        // 動態渲染「案例詳情頁」內容
+        function renderGalleryDetailPage(id) {
+            const container = document.getElementById('detail-content');
+            if (!id || !galleryData[id]) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <i class="fa-solid fa-triangle-exclamation text-brand-600 text-5xl mb-4"></i>
+                        <h3 class="text-xl font-bold text-stone-800">找不到此美學成果案例！</h3>
+                        <p class="text-stone-500 text-sm mt-2">請返回作品牆重新挑選，感謝您的體諒！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const pet = galleryData[id];
+            container.innerHTML = `
+                <!-- 標題頭部 -->
+                <div class="border-b border-brand-200 pb-6 text-center lg:text-left space-y-3">
+                    <span class="bg-brand-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm">${pet.tag}</span>
+                    <h1 class="text-3xl md:text-4xl font-black text-stone-900 mt-2">${pet.title}</h1>
+                    <p class="text-brand-700 font-semibold text-sm">美學主辦服務：${pet.service}</p>
+                    <p class="text-stone-400 text-xs">專屬美容師：${pet.stylist}</p>
+                </div>
+
+                <!-- 雙圖對比區 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Before Card -->
+                    <div class="bg-white p-4 rounded-3xl border border-brand-100 shadow-md">
+                        <p class="text-stone-400 font-extrabold text-sm mb-3"><i class="fa-solid fa-circle text-stone-300 mr-1.5"></i> 美容前打結雜亂 (Before)</p>
+                        <img src="${pet.beforeImg}" alt="${pet.title}美容前的混亂模樣" class="rounded-2xl w-full h-80 object-cover" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=Before'">
+                    </div>
+                    <!-- After Card -->
+                    <div class="bg-brand-100/50 p-4 rounded-3xl border border-brand-200 shadow-md">
+                        <p class="text-brand-700 font-extrabold text-sm mb-3"><i class="fa-solid fa-circle text-brand-500 mr-1.5"></i> 頂級洗護精修後 (After)</p>
+                        <img src="${pet.afterImg}" alt="${pet.title}美容後超級亮麗的全新模樣" class="rounded-2xl w-full h-80 object-cover animate-pulse" onerror="this.src='https://placehold.co/600x400/eddcc5/5c3520?text=After'">
+                    </div>
+                </div>
+
+                <!-- 詳細報告與心路歷程 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6">
+                    <div class="lg:col-span-2 space-y-4">
+                        <h3 class="text-xl font-extrabold text-stone-900 border-l-4 border-brand-500 pl-3">理療修復心得</h3>
+                        <p class="text-stone-600 leading-relaxed text-sm">${pet.description}</p>
+                        
+                        <h3 class="text-xl font-extrabold text-stone-900 border-l-4 border-brand-500 pl-3 pt-4">全程九道精細工序</h3>
+                        <p class="text-stone-600 leading-relaxed text-xs bg-white p-4 rounded-xl border border-brand-100">${pet.steps}</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-2xl border border-brand-100 shadow-sm space-y-4">
+                            <h4 class="font-extrabold text-stone-900 text-sm">專業產品選用</h4>
+                            <p class="text-stone-500 text-xs leading-relaxed italic">
+                                "萌寵美學堅持不偷工減料，此案例針對皮毛乾癢，我們特別採用：<br><strong class="text-brand-700 font-semibold">${pet.productUsed}</strong>"
+                            </p>
+                        </div>
+
+                        <!-- 帶入行動呼籲 (CTA) 以提升轉換率 -->
+                        <div class="bg-gradient-to-br from-brand-600 to-brand-800 text-white p-6 rounded-2xl shadow-lg space-y-4">
+                            <h4 class="font-extrabold text-base">想要相同的精緻造型？</h4>
+                            <p class="text-xs text-brand-100">一對一定製化美學，幫您的毛孩預約這套奢華變身方案！</p>
+                            <button onclick="bookThisCaseStyle('${id}')" class="w-full bg-white hover:bg-brand-100 text-brand-800 text-xs font-black py-3 rounded-full transition-all flex items-center justify-center space-x-1">
+                                <i class="fa-regular fa-calendar-check text-sm"></i>
+                                <span>立即預約此同款美學造型</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        // Before/After 圖片拖拉互動模組 (B&F Interactive Slider)
+        function initBeforeAfterSlider() {
+            const slider = document.getElementById('before-after-slider');
+            const afterContainer = document.getElementById('after-image-container');
+            const handle = document.getElementById('slider-handle');
+
+            if (!slider || !afterContainer || !handle) return;
+
+            let isDragging = false;
+
+            function setPosition(x) {
+                const rect = slider.getBoundingClientRect();
+                let percentage = ((x - rect.left) / rect.width) * 100;
+                if (percentage < 0) percentage = 0;
+                if (percentage > 100) percentage = 100;
+
+                afterContainer.style.width = `${percentage}%`;
+                handle.style.left = `${percentage}%`;
+            }
+
+            // 滑鼠與觸碰事件綁定
+            slider.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                setPosition(e.clientX);
+            });
+
+            window.addEventListener('mouseup', () => { isDragging = false; });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                setPosition(e.clientX);
+            });
+
+            // 行動觸控適配 (Mobile Touch Support)
+            slider.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                setPosition(e.touches[0].clientX);
+            }, { passive: true });
+
+            window.addEventListener('touchend', () => { isDragging = false; });
+
+            window.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                setPosition(e.touches[0].clientX);
+            }, { passive: true });
+        }
+
+
+        // 即時金額試算邏輯 (Service Calculator)
+        function calculatePrice() {
+            const size = document.getElementById('calc-size').value;
+            const coat = document.getElementById('calc-coat').value;
+            const service = document.getElementById('calc-service').value;
+
+            // 基礎費率矩陣
+            let basePrice = 600; // 小型犬洗澡基準
+
+            // 體型影響倍率
+            if (size === 'medium-dog') basePrice += 200;
+            else if (size === 'large-dog') basePrice += 600;
+            else if (size === 'cat') basePrice += 400; // 貓咪處理技術精細
+
+            // 服務方案增量
+            if (service === 'trim') basePrice += 600; // 精修剪毛
+            else if (service === 'spa') basePrice += 400; // SPA 碳酸浴
+
+            // 毛質狀態增量
+            if (coat === 'long') basePrice += 150;
+            else if (coat === 'matted') basePrice += 300; // 打結工本費
+
+            // 更新至畫面上
+            document.getElementById('calculated-price').innerText = basePrice.toLocaleString();
+        }
+
+        // 帶入試算結果前往預約 (CTA Bridge)
+        function applyEstimateToBooking() {
+            const serviceVal = document.getElementById('calc-service').value;
+            const petTypeVal = document.getElementById('calc-size').value.includes('cat') ? 'cat' : 'dog';
+            
+            // 帶入預約欄位
+            document.getElementById('book-service').value = serviceVal;
+            document.getElementById('book-pet-type').value = petTypeVal;
+
+            showToast("已成功將試算方案：系統帶入下方線上預約表！", "success");
+            window.location.hash = '#contact';
+        }
+
+        // 案例與造型篩選
+        function filterGallery(category) {
+            // 切換按鈕樣式
+            document.querySelectorAll('.gallery-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-600', 'text-white', 'shadow-md');
+                btn.classList.add('bg-brand-50', 'text-stone-700', 'hover:bg-brand-100');
+            });
+            event.target.classList.add('bg-brand-600', 'text-white', 'shadow-md');
+            event.target.classList.remove('bg-brand-50', 'text-stone-700', 'hover:bg-brand-100');
+
+            // 進行格柵卡片展示隱藏
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                if (category === 'all' || item.classList.contains(category)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+
+        // 從案例詳情引導預約 (Direct Booking from Gallery)
+        function bookThisCaseStyle(id) {
+            const pet = galleryData[id];
+            if (!pet) return;
+
+            // 自動設定服務選擇
+            let mappedService = 'bath';
+            if (pet.service.includes('剪毛') || pet.service.includes('造型')) mappedService = 'trim';
+            else if (pet.service.includes('SPA') || pet.service.includes('碳酸泉')) mappedService = 'spa';
+
+            document.getElementById('book-service').value = mappedService;
+            document.getElementById('book-pet-type').value = id.includes('sherry') || id.includes('pipi') ? 'cat' : 'dog';
+            document.getElementById('book-notes').value = `希望幫我家寶貝預訂和官網上案例【${pet.title}】完全一模一樣的：${pet.tag} 造型與洗護套餐！`;
+
+            showToast(`已為您自動預選：【${pet.title}】的同款精緻服務！`, "success");
+            window.location.hash = '#contact';
+        }
+
+
+        // 預約多步驟狀態管理
+        let currentStep = 1;
+
+        function nextBookingStep(step) {
+            // 表單簡易欄位防空驗證
+            if (step === 2) {
+                const name = document.getElementById('book-parent-name').value;
+                const phone = document.getElementById('book-parent-phone').value;
+                if (!name || !phone) {
+                    showToast('請務必填寫家長姓名與聯絡電話！', 'warning');
+                    return;
+                }
+            }
+            if (step === 3) {
+                const date = document.getElementById('book-date').value;
+                if (!date) {
+                    showToast('請選擇預計到店日期！', 'warning');
+                    return;
+                }
+                // 在最後一步前填滿摘要 (Summary Fill)
+                fillBookingSummary();
+            }
+
+            // 更新步驟面板可見度
+            document.getElementById('booking-step-1').classList.add('hidden');
+            document.getElementById('booking-step-2').classList.add('hidden');
+            document.getElementById('booking-step-3').classList.add('hidden');
+            document.getElementById(`booking-step-${step}`).classList.remove('hidden');
+
+            // 更新指示燈與進度條
+            document.getElementById('step-label-1').className = step >= 1 ? 'text-brand-600 font-bold' : 'text-stone-400';
+            document.getElementById('step-label-2').className = step >= 2 ? 'text-brand-600 font-bold' : 'text-stone-400';
+            document.getElementById('step-label-3').className = step >= 3 ? 'text-brand-600 font-bold' : 'text-stone-400';
+
+            const barWidth = step === 1 ? '33%' : step === 2 ? '66%' : '100%';
+            document.getElementById('booking-progress-bar').style.width = barWidth;
+
+            currentStep = step;
+        }
+
+        // 自動將資料組裝成摘要報告
+        function fillBookingSummary() {
+            document.getElementById('summary-parent-name').innerText = document.getElementById('book-parent-name').value;
+            document.getElementById('summary-parent-phone').innerText = document.getElementById('book-parent-phone').value;
+            
+            const petType = document.getElementById('book-pet-type').value === 'cat' ? '貓咪 🐱' : '狗狗 🐶';
+            document.getElementById('summary-pet-type').innerText = petType;
+            document.getElementById('summary-pet-breed').innerText = document.getElementById('book-pet-breed').value;
+
+            const serviceMap = {
+                'bath': '微氣泡深層洗澡護理',
+                'trim': '匠人精緻剪毛造型 (含洗澡)',
+                'spa': '日系極上碳酸泉水療 SPA (含洗澡)'
+            };
+            document.getElementById('summary-service').innerText = serviceMap[document.getElementById('book-service').value];
+            document.getElementById('summary-date').innerText = document.getElementById('book-date').value;
+
+            const timeMap = {
+                'morning': '上午時段 (10:00 - 13:00)',
+                'afternoon': '下午時段 (13:00 - 17:00)',
+                'evening': '晚上時段 (17:00 - 19:00)'
+            };
+            document.getElementById('summary-time').innerText = timeMap[document.getElementById('book-time').value];
+            document.getElementById('summary-notes').innerText = document.getElementById('book-notes').value || '無額外備註';
+        }
+
+        // 提交表單模擬 (Booking Submission Mockup)
+        function handleBookingSubmit(event) {
+            event.preventDefault();
+            
+            // 模擬成功回饋
+            showToast('🎉 預約成功！您的意願申請已傳送至後台，我們將於 24 小時內聯絡您安排時段！', 'success', 6000);
+            
+            // 重設表單與狀態
+            document.getElementById('booking-form').reset();
+            nextBookingStep(1);
+            
+            // 返回首頁
+            setTimeout(() => {
+                window.location.hash = '#home';
+            }, 3000);
+        }
+
+        // 給外部(如首頁卡片)快速挑選服務用
+        function preselectService(serviceId) {
+            document.getElementById('book-service').value = serviceId;
+            showToast("已為您帶入對應的美學方案，歡迎預填聯絡資料！", "info");
+        }
+
+
+        // 手機版選單控制器
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const iconBars = document.getElementById('menu-icon-bars');
+        const iconClose = document.getElementById('menu-icon-close');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                iconBars.classList.add('hidden');
+                iconClose.classList.remove('hidden');
+            } else {
+                closeMobileMenu();
+            }
+        });
+
+        function closeMobileMenu() {
+            mobileMenu.classList.add('hidden');
+            iconBars.classList.remove('hidden');
+            iconClose.classList.add('hidden');
+        }
+
+        // 美化版 Toast 通知提示 (替代 alert)
+        function showToast(message, type = 'success', duration = 4000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const typeColors = {
+                success: 'bg-stone-900 border-l-4 border-green-500 text-white',
+                warning: 'bg-stone-900 border-l-4 border-amber-500 text-white',
+                info: 'bg-stone-900 border-l-4 border-brand-500 text-white'
+            };
+
+            const typeIcons = {
+                success: '<i class="fa-solid fa-circle-check text-green-400 text-base"></i>',
+                warning: '<i class="fa-solid fa-circle-exclamation text-amber-400 text-base"></i>',
+                info: '<i class="fa-solid fa-circle-info text-brand-300 text-base"></i>'
+            };
+
+            toast.className = `flex items-center space-x-3 p-4 rounded-xl shadow-2xl border border-white/10 ${typeColors[type]} pointer-events-auto transform translate-y-2 opacity-0 transition-all duration-300 max-w-sm w-full`;
+            toast.innerHTML = `
+                <div class="shrink-0">${typeIcons[type]}</div>
+                <div class="text-xs font-bold flex-grow leading-relaxed">${message}</div>
+                <button onclick="this.parentElement.remove()" class="text-stone-400 hover:text-white transition-colors p-1"><i class="fa-solid fa-xmark text-sm"></i></button>
+            `;
+
+            container.appendChild(toast);
+            
+            // 觸發滑入動畫
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            // 自動定時消失
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, duration);
+        }
+    </script>
+</body>
+</html>

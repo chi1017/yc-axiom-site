@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, follow">
+<title id="page-title">茶の間 CHANOMA｜日系抹茶咖啡廳・台中精品飲品</title>
+<meta name="description" id="page-desc" content="台中頂級日系抹茶咖啡廳，手點抹茶、精品咖啡、和風甜品，極致深色美學空間，打卡首選。">
+<meta name="keywords" content="台中抹茶,日系咖啡廳,精品抹茶,手點抹茶,台中咖啡,和風飲品">
+<meta property="og:title" content="茶の間 CHANOMA｜日系抹茶咖啡廳">
+<meta property="og:description" content="手點抹茶 × 精品咖啡 × 和風深色美學">
+<meta property="og:type" content="cafe">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700;900&family=Noto+Sans+TC:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CafeOrCoffeeShop",
+  "name": "茶の間 CHANOMA",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "中山路二段88號",
+    "addressLocality": "台中市西區",
+    "addressCountry": "TW"
+  },
+  "servesCuisine": "Japanese, Tea, Coffee",
+  "openingHours": ["Tu-Su 10:00-20:00"],
+  "priceRange": "NT$120-NT$280"
+}
+</script>
+
+<style>
+:root {
+  --ink:       #0C0B08;
+  --ink-soft:  #161410;
+  --ink-mid:   #1E1C16;
+  --ink-warm:  #252018;
+  --gold:      #B8963E;
+  --gold-light:#D4AE5A;
+  --gold-pale: #E8CC84;
+  --matcha:    #4A5C3A;
+  --matcha-mid:#5E7449;
+  --matcha-bright:#7A9A5A;
+  --cream:     #F0E8D8;
+  --cream-dim: #C8BCA8;
+  --text-muted:#7A7060;
+  --text-body: #B3A892;
+  --border:    rgba(184,150,62,0.12);
+  --border-gold:rgba(184,150,62,0.3);
+  --border-matcha:rgba(74,92,58,0.3);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Noto Sans TC',sans-serif;
+  background:var(--ink); color:var(--cream);
+  overflow-x:hidden; cursor:none;
+}
+
+/* ── CURSOR ── */
+#cursor{
+  position:fixed;top:0;left:0;pointer-events:none;z-index:9999;
+  width:8px;height:8px;background:var(--gold-light);border-radius:50%;
+  transform:translate(-50%,-50%);transition:width 0.2s,height 0.2s;
+}
+#cursor-ring{
+  position:fixed;top:0;left:0;pointer-events:none;z-index:9998;
+  width:32px;height:32px;border:1px solid rgba(184,150,62,0.45);border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+
+/* ── NAV ── */
+#main-nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:72px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 60px;transition:background 0.5s,border-bottom 0.5s;
+}
+#main-nav.solid{
+  background:rgba(12,11,8,0.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border-gold);
+}
+.nav-brand{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;
+  letter-spacing:0.18em;color:var(--cream);text-decoration:none;
+  display:flex;align-items:center;gap:12px;
+}
+.nav-brand .kanji{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:0.85rem;color:var(--gold);letter-spacing:0.25em;
+}
+.nav-links{display:flex;list-style:none;}
+.nav-links li a{
+  display:block;padding:8px 18px;
+  color:var(--text-muted);text-decoration:none;
+  font-size:0.72rem;letter-spacing:0.2em;
+  transition:color 0.3s;position:relative;
+}
+.nav-links li a::after{
+  content:'';position:absolute;bottom:2px;left:18px;right:18px;
+  height:1px;background:var(--gold);transform:scaleX(0);
+  transition:transform 0.3s;transform-origin:left;
+}
+.nav-links li a:hover{color:var(--cream);}
+.nav-links li a:hover::after,.nav-links li a.active::after{transform:scaleX(1);}
+.nav-links li a.active{color:var(--gold-light);}
+.nav-cta{
+  background:transparent;color:var(--gold-light);
+  border:1px solid var(--border-gold);
+  padding:8px 22px;font-size:0.7rem;letter-spacing:0.2em;
+  text-decoration:none;transition:background 0.3s,color 0.3s;white-space:nowrap;
+}
+.nav-cta:hover{background:var(--gold);color:var(--ink);}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;}
+.hamburger span{width:22px;height:1px;background:var(--cream);transition:all 0.3s;}
+
+/* ── PAGES ── */
+.page{display:none;min-height:100vh;}
+.page.active{display:block;}
+
+/* ── HERO ── */
+.hero{
+  height:100vh;min-height:700px;
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 65% 40%, rgba(74,92,58,0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 75%, rgba(184,150,62,0.1) 0%, transparent 45%),
+    linear-gradient(160deg,#080705 0%,#110f09 45%,#0a0905 100%);
+}
+/* Japanese paper texture overlay */
+.hero-bg::after{
+  content:'';position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:0.6;
+}
+/* Vertical gold line — Japanese torii feel */
+.hero-vline{
+  position:absolute;top:0;left:50%;width:1px;height:0;
+  background:linear-gradient(180deg,transparent,var(--gold),transparent);
+  animation:vline-drop 2s 0.5s forwards;
+}
+@keyframes vline-drop{to{height:100%}}
+.hero-hline{
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  animation:hline-in 1.5s 1s both;
+}
+@keyframes hline-in{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+.hero-content{
+  position:relative;z-index:2;
+  padding:0 60px;max-width:800px;
+}
+.hero-jp{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:0.75rem;letter-spacing:0.5em;color:var(--gold);
+  margin-bottom:24px;
+  opacity:0;animation:fade-up 0.8s 1s both;
+  display:flex;align-items:center;gap:16px;
+}
+.hero-jp::before{content:'';width:32px;height:1px;background:var(--gold);}
+.hero-h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(3rem,7vw,6rem);
+  line-height:1.22;letter-spacing:0.06em;color:var(--cream);
+  opacity:0;animation:fade-up 1s 1.2s both;
+}
+.hero-h1 .matcha-word{
+  color:var(--matcha-bright);position:relative;display:inline-block;
+}
+.hero-h1 .matcha-word::after{
+  content:'';position:absolute;bottom:-4px;left:0;right:0;
+  height:1px;background:var(--matcha-bright);
+  animation:hline-in 0.8s 2.5s both;
+}
+.hero-h1 .gold-word{color:var(--gold-light);}
+.hero-sub{
+  margin-top:20px;font-size:0.95rem;
+  letter-spacing:0.25em;color:var(--text-muted);
+  opacity:0;animation:fade-up 0.8s 1.7s both;
+}
+.hero-btns{
+  display:flex;gap:14px;margin-top:44px;
+  opacity:0;animation:fade-up 0.8s 2s both;
+}
+.btn-gold{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold);color:var(--ink);
+  padding:14px 36px;font-size:0.75rem;
+  letter-spacing:0.2em;text-decoration:none;font-weight:500;
+  transition:background 0.3s,transform 0.2s,box-shadow 0.3s;
+}
+.btn-gold:hover{
+  background:var(--gold-pale);transform:translateY(-2px);
+  box-shadow:0 10px 40px rgba(184,150,62,0.3);
+}
+.btn-outline-gold{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:var(--cream);
+  border:1px solid var(--border-gold);
+  padding:14px 36px;font-size:0.75rem;
+  letter-spacing:0.2em;text-decoration:none;
+  transition:border-color 0.3s,background 0.3s,transform 0.2s;
+}
+.btn-outline-gold:hover{
+  border-color:var(--gold-light);
+  background:rgba(184,150,62,0.07);transform:translateY(-2px);
+}
+
+/* Hero right — decorative matcha circle */
+.hero-right{
+  position:absolute;right:60px;top:50%;transform:translateY(-50%);
+  width:360px;height:360px;
+  opacity:0;animation:fade-in 1.5s 1.5s both;
+}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.hero-deco-ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:1px solid var(--border-gold);
+  animation:spin-s 25s linear infinite;
+}
+.hero-deco-ring-2{
+  position:absolute;inset:24px;border-radius:50%;
+  border:1px dashed rgba(74,92,58,0.3);
+  animation:spin-s 18s linear infinite reverse;
+}
+@keyframes spin-s{to{transform:rotate(360deg)}}
+.hero-deco-inner{
+  position:absolute;inset:50px;border-radius:50%;
+  background:radial-gradient(ellipse at 40% 35%,rgba(74,92,58,0.25),rgba(12,11,8,0.8));
+  border:1px solid rgba(74,92,58,0.2);
+  display:flex;align-items:center;justify-content:center;
+  animation:float-s 6s ease-in-out infinite;
+  font-size:6rem;
+  filter:drop-shadow(0 0 40px rgba(74,92,58,0.4));
+}
+@keyframes float-s{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.hero-deco-tag{
+  position:absolute;
+  background:var(--ink-soft);border:1px solid var(--border-gold);
+  padding:7px 14px;font-size:0.6rem;letter-spacing:0.25em;color:var(--gold);
+}
+.hero-tag-t{top:40px;right:-10px;}
+.hero-tag-b{bottom:60px;left:-20px;}
+
+.hero-scroll{
+  position:absolute;bottom:32px;left:60px;
+  display:flex;align-items:center;gap:12px;
+  font-size:0.58rem;letter-spacing:0.35em;color:var(--text-muted);
+  opacity:0;animation:fade-up 0.8s 2.8s both;
+}
+.scroll-ln{width:44px;height:1px;background:var(--text-muted);animation:expand 2s 3.2s both;}
+@keyframes expand{from{width:0}to{width:44px}}
+@keyframes fade-up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MARQUEE ── */
+.marquee-bar{
+  background:var(--ink-warm);padding:13px 0;
+  overflow:hidden;white-space:nowrap;
+  border-top:1px solid var(--border-gold);
+  border-bottom:1px solid var(--border-gold);
+}
+.marquee-inner{display:inline-flex;animation:marquee 24s linear infinite;}
+.marquee-item{
+  display:inline-flex;align-items:center;gap:18px;
+  font-size:0.66rem;letter-spacing:0.28em;color:var(--cream-dim);
+  padding:0 28px;opacity:0.7;font-family:'Cormorant Garamond',serif;font-style:italic;
+}
+.marquee-item .dot{color:var(--gold);opacity:0.7;}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ── COMMON ── */
+.section{padding:110px 60px;}
+.section-sm{padding:70px 60px;}
+.max-w{max-width:1240px;margin:0 auto;}
+.label-tag{
+  display:inline-flex;align-items:center;gap:12px;
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:0.75rem;letter-spacing:0.35em;color:var(--gold);
+  margin-bottom:16px;
+}
+.label-tag::before{content:'';width:22px;height:1px;background:var(--gold);}
+.section-h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:clamp(1.9rem,3.8vw,3rem);
+  line-height:1.35;letter-spacing:0.07em;color:var(--cream);
+}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.9s,transform 0.9s;}
+.reveal.vis{opacity:1;transform:none;}
+.reveal-d1{transition-delay:0.1s;}
+.reveal-d2{transition-delay:0.2s;}
+.reveal-d3{transition-delay:0.3s;}
+
+/* ── FEATURED DRINKS ── */
+.drinks-section{background:var(--ink);}
+.drinks-grid{
+  display:grid;grid-template-columns:1.5fr 1fr 1fr;
+  gap:2px;margin-top:52px;
+}
+.drink-card{
+  position:relative;overflow:hidden;cursor:pointer;
+  background:var(--ink-soft);aspect-ratio:3/4;
+  transition:transform 0.4s;
+}
+.drink-card.featured{aspect-ratio:unset;grid-row:span 2;}
+.drink-card:hover{transform:scale(0.983);z-index:2;}
+.drink-bg{position:absolute;inset:0;overflow:hidden;}
+.drink-bg img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s;}
+.drink-card:hover .drink-bg img{transform:scale(1.06);}
+/* placeholder gradient when no image */
+.drink-bg-grad{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:5.5rem;
+}
+.drink-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 20%,rgba(8,7,5,0.97) 100%);
+}
+.drink-info{position:absolute;bottom:0;left:0;right:0;padding:26px 28px;}
+.drink-cat{font-size:0.56rem;letter-spacing:0.32em;color:var(--gold);text-transform:uppercase;margin-bottom:6px;}
+.drink-name{
+  font-family:'Noto Serif TC',serif;font-weight:700;
+  font-size:1.3rem;letter-spacing:0.07em;color:var(--cream);margin-bottom:7px;
+}
+.drink-desc{
+  font-size:0.75rem;color:var(--text-muted);line-height:1.7;margin-bottom:12px;
+  max-height:0;overflow:hidden;transition:max-height 0.4s;
+}
+.drink-card:hover .drink-desc{max-height:56px;}
+.drink-price{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:1.2rem;color:var(--gold-light);
+}
+.drink-more{
+  display:inline-flex;align-items:center;gap:7px;margin-top:8px;
+  font-size:0.65rem;letter-spacing:0.2em;color:var(--gold);
+  text-decoration:none;opacity:0;transition:opacity 0.3s;
+}
+.drink-card:hover .drink-more{opacity:1;}
+
+/* ── STORY ── */
+.story-section{background:var(--ink-soft);}
+.story-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;
+  align-items:center;max-width:1240px;margin:0 auto;
+}
+.story-visual{
+  position:relative;aspect-ratio:4/5;overflow:hidden;
+}
+.story-visual img{width:100%;height:100%;object-fit:cover;display:block;}
+.story-visual-grad{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(74,92,58,0.15),transparent 50%);
+  pointer-events:none;
+}
+.story-corner-gold{
+  position:absolute;bottom:16px;right:16px;width:44px;height:44px;
+  border-bottom:2px solid var(--gold);border-right:2px solid var(--gold);
+  pointer-events:none;
+}
+.story-corner-dim{
+  position:absolute;top:16px;left:16px;width:44px;height:44px;
+  border-top:1px solid var(--border);border-left:1px solid var(--border);
+  pointer-events:none;
+}
+/* Placeholder when no image */
+.story-visual-placeholder{
+  width:100%;height:100%;
+  background:radial-gradient(ellipse at 40% 35%,rgba(74,92,58,0.3),var(--ink-warm));
+  display:flex;align-items:center;justify-content:center;
+  font-size:9rem;animation:float-s 6s ease-in-out infinite;
+  filter:drop-shadow(0 0 50px rgba(74,92,58,0.4));
+}
+.story-text .section-h2{margin-bottom:28px;}
+.story-text p{font-size:0.9rem;line-height:2.2;color:var(--text-body);margin-bottom:16px;}
+.story-text p strong{color:var(--cream);font-weight:500;}
+.story-pills{display:flex;flex-wrap:wrap;gap:9px;margin:28px 0 34px;}
+.pill{
+  padding:7px 16px;border:1px solid var(--border);
+  font-size:0.68rem;letter-spacing:0.15em;color:var(--text-muted);
+  transition:border-color 0.3s,color 0.3s;
+}
+.pill:hover{border-color:var(--gold);color:var(--cream);}
+
+/* ── PHILOSOPHY 3-BLOCKS ── */
+.philosophy{background:var(--ink);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.philo-row{display:grid;grid-template-columns:repeat(3,1fr);}
+.philo-block{
+  padding:60px 44px;border-right:1px solid var(--border);
+  transition:background 0.3s;
+}
+.philo-block:last-child{border-right:none;}
+.philo-block:hover{background:rgba(184,150,62,0.03);}
+.philo-num{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:3rem;color:var(--gold);opacity:0.4;line-height:1;margin-bottom:16px;
+}
+.philo-title{
+  font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:700;
+  color:var(--cream);letter-spacing:0.08em;margin-bottom:12px;
+}
+.philo-body{font-size:0.78rem;color:var(--text-muted);line-height:2;}
+
+/* ── MENU PAGE ── */
+.menu-hero{
+  padding:160px 60px 80px;background:var(--ink-soft);
+  border-bottom:1px solid var(--border);
+}
+.menu-tabs{
+  display:flex;margin-top:48px;border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+.menu-tab{
+  padding:13px 26px;font-size:0.72rem;letter-spacing:0.2em;
+  color:var(--text-muted);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color 0.3s;
+}
+.menu-tab:hover{color:var(--cream);}
+.menu-tab.active{color:var(--gold-light);border-bottom-color:var(--gold);}
+
+.menu-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border);margin-top:1px;
+}
+.menu-card{
+  background:var(--ink-soft);padding:32px 28px;
+  display:flex;gap:18px;cursor:pointer;
+  border:1px solid transparent;
+  transition:background 0.3s,border-color 0.3s,transform 0.3s;
+}
+.menu-card:hover{background:var(--ink-warm);border-color:var(--border-gold);transform:translateY(-2px);}
+.menu-img{width:76px;height:76px;flex-shrink:0;border-radius:2px;overflow:hidden;}
+.menu-img img{width:100%;height:100%;object-fit:cover;}
+.menu-img-placeholder{
+  width:76px;height:76px;flex-shrink:0;border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;background:var(--ink-warm);
+}
+.menu-body{flex:1;}
+.menu-cat-label{font-size:0.55rem;letter-spacing:0.3em;color:var(--gold);margin-bottom:5px;}
+.menu-name{font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.05rem;letter-spacing:0.06em;color:var(--cream);margin-bottom:6px;}
+.menu-desc{font-size:0.73rem;color:var(--text-muted);line-height:1.8;margin-bottom:10px;}
+.menu-footer{display:flex;justify-content:space-between;align-items:center;}
+.menu-price{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--gold-light);}
+.menu-temp{font-size:0.62rem;color:var(--text-muted);}
+.menu-link{font-size:0.6rem;letter-spacing:0.2em;color:var(--gold);margin-top:8px;display:inline-flex;align-items:center;gap:5px;}
+
+/* ── PRODUCT PAGE ── */
+.product-hero{
+  padding:160px 60px 80px;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;
+  align-items:center;background:var(--ink-soft);
+}
+.product-visual{aspect-ratio:1;overflow:hidden;position:relative;}
+.product-visual img{width:100%;height:100%;object-fit:cover;}
+.product-visual-placeholder{
+  width:100%;height:100%;
+  background:radial-gradient(ellipse at 40% 35%,rgba(74,92,58,0.25),var(--ink-warm));
+  display:flex;align-items:center;justify-content:center;font-size:11rem;
+  filter:drop-shadow(0 0 50px rgba(74,92,58,0.4));
+  animation:float-s 5s ease-in-out infinite;
+}
+.product-visual::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 50%,rgba(74,92,58,0.1),transparent 65%);
+  pointer-events:none;
+}
+.breadcrumb{
+  display:flex;align-items:center;gap:8px;
+  font-size:0.62rem;letter-spacing:0.15em;color:var(--text-muted);margin-bottom:22px;
+}
+.breadcrumb a{color:var(--text-muted);text-decoration:none;transition:color 0.3s;}
+.breadcrumb a:hover{color:var(--gold);}
+.breadcrumb .sep{color:var(--border);}
+.product-h1{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2.2rem,4.5vw,3.5rem);letter-spacing:0.06em;color:var(--cream);margin-bottom:12px;
+}
+.product-en{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:1.1rem;color:var(--gold);letter-spacing:0.2em;margin-bottom:28px;
+}
+.flavor-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px;}
+.flavor-tag{
+  padding:5px 14px;background:rgba(74,92,58,0.12);
+  border:1px solid var(--border-matcha);color:var(--matcha-bright);
+  font-size:0.66rem;letter-spacing:0.15em;
+}
+.flavor-tag.gold-tag{
+  background:rgba(184,150,62,0.08);
+  border-color:var(--border-gold);color:var(--gold-light);
+}
+.intensity-meter{margin-bottom:28px;}
+.intensity-label{font-size:0.62rem;letter-spacing:0.3em;color:var(--text-muted);margin-bottom:9px;}
+.intensity-dots{display:flex;gap:7px;}
+.i-dot{width:22px;height:6px;background:var(--border);}
+.i-dot.on{background:var(--matcha);}
+.i-dot.on.hi{background:var(--matcha-bright);box-shadow:0 0 10px rgba(122,154,90,0.4);}
+.product-desc-text{font-size:0.9rem;line-height:2.2;color:var(--text-body);margin-bottom:32px;}
+.product-desc-text strong{color:var(--cream);}
+.product-price-big{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:2rem;color:var(--gold-light);margin-bottom:28px;
+}
+.product-actions{display:flex;gap:12px;}
+.product-content{padding:80px 60px;max-width:1240px;margin:0 auto;}
+.product-sec{margin-bottom:56px;}
+.product-sec h2{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.5rem;
+  letter-spacing:0.06em;color:var(--cream);margin-bottom:14px;
+  padding-bottom:12px;border-bottom:1px solid var(--border);
+}
+.product-sec p{font-size:0.88rem;color:var(--text-muted);line-height:2.1;}
+.temp-options{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px;}
+.temp-card{
+  padding:18px 22px;border:1px solid var(--border);
+  font-size:0.78rem;color:var(--text-muted);line-height:1.8;
+  transition:border-color 0.3s;
+}
+.temp-card:hover{border-color:var(--border-gold);color:var(--cream);}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px;}
+.related-item{
+  background:var(--ink-soft);padding:18px;cursor:pointer;
+  border:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  transition:border-color 0.3s,background 0.3s;
+}
+.related-item:hover{border-color:var(--border-gold);background:var(--ink-warm);}
+.related-thumb{width:48px;height:48px;border-radius:2px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--ink-warm);font-size:1.8rem;}
+.related-thumb img{width:100%;height:100%;object-fit:cover;}
+.related-n{font-family:'Noto Serif TC',serif;font-size:0.88rem;color:var(--cream);}
+.related-p{font-size:0.72rem;color:var(--gold-light);margin-top:3px;}
+
+/* ── ABOUT ── */
+.about-hero{padding:160px 60px 80px;background:var(--ink-soft);}
+.about-content{padding:80px 60px;max-width:960px;margin:0 auto;}
+.about-content h2{font-family:'Noto Serif TC',serif;font-size:1.7rem;color:var(--cream);margin:38px 0 14px;}
+.about-content p{font-size:0.9rem;color:var(--text-body);line-height:2.3;margin-bottom:16px;}
+.about-content p strong{color:var(--cream);}
+.values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:32px 0;background:var(--border);}
+.value-block{
+  background:var(--ink-soft);padding:36px 28px;
+  border-bottom:2px solid transparent;
+  transition:border-color 0.3s,background 0.3s;
+}
+.value-block:hover{border-bottom-color:var(--gold);background:var(--ink-warm);}
+.value-icon{font-size:2rem;margin-bottom:14px;display:block;filter:drop-shadow(0 0 14px rgba(184,150,62,0.3));}
+.value-title{font-family:'Noto Serif TC',serif;font-size:1rem;color:var(--cream);letter-spacing:0.08em;margin-bottom:8px;}
+.value-body{font-size:0.76rem;color:var(--text-muted);line-height:1.9;}
+
+/* ── CONTACT ── */
+.contact-hero{padding:160px 60px 80px;background:var(--ink-soft);}
+.contact-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;
+  padding:80px 60px;max-width:1240px;margin:0 auto;
+}
+.contact-map{
+  aspect-ratio:4/3;border:1px solid var(--border);
+  overflow:hidden;position:relative;
+}
+.contact-map iframe{width:100%;height:100%;border:0;display:block;}
+.map-caption{
+  position:absolute;bottom:0;left:0;right:0;
+  text-align:center;font-size:0.65rem;letter-spacing:0.2em;
+  color:var(--text-muted);background:rgba(12,11,8,0.75);padding:8px;
+}
+.info-block{margin-bottom:32px;}
+.info-label{font-size:0.6rem;letter-spacing:0.35em;color:var(--gold);text-transform:uppercase;margin-bottom:7px;}
+.info-val{font-size:0.92rem;color:var(--cream);line-height:1.9;}
+.hours-grid{display:grid;grid-template-columns:auto 1fr;gap:5px 18px;font-size:0.82rem;}
+.h-day{color:var(--text-muted);}
+.h-time{color:var(--cream);}
+
+/* ── CTA ── */
+.cta-banner{
+  background:linear-gradient(135deg,#0a0d08,#060805);
+  padding:110px 60px;text-align:center;position:relative;overflow:hidden;
+}
+.cta-banner::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 60%,rgba(74,92,58,0.15) 0%,transparent 60%);
+}
+.cta-banner::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 40%,rgba(184,150,62,0.07) 0%,transparent 50%);
+}
+.cta-h2{
+  font-family:'Noto Serif TC',serif;font-weight:900;
+  font-size:clamp(2rem,4.5vw,3.8rem);
+  letter-spacing:0.1em;color:var(--cream);
+  line-height:1.4;position:relative;z-index:2;margin-bottom:12px;
+}
+.cta-h2 em{font-style:normal;color:var(--matcha-bright);}
+.cta-h2 .gold-em{color:var(--gold-light);}
+.cta-sub{font-size:0.82rem;letter-spacing:0.22em;color:var(--text-muted);position:relative;z-index:2;margin-bottom:40px;}
+.cta-btns{display:flex;gap:14px;justify-content:center;position:relative;z-index:2;}
+
+/* ── FAQ ── */
+.faq-section{background:var(--ink);}
+.faq-list{margin-top:44px;border-top:1px solid var(--border);}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-q{
+  padding:20px 0;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:0.88rem;color:var(--cream);letter-spacing:0.04em;transition:color 0.3s;
+}
+.faq-q:hover{color:var(--gold-light);}
+.faq-icon{font-size:1.1rem;color:var(--gold);transition:transform 0.3s;}
+.faq-item.open .faq-icon{transform:rotate(45deg);}
+.faq-a{
+  max-height:0;overflow:hidden;
+  font-size:0.82rem;color:var(--text-muted);line-height:1.9;
+  transition:max-height 0.4s,padding 0.4s;
+}
+.faq-item.open .faq-a{max-height:160px;padding-bottom:18px;}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);border-top:1px solid var(--border);padding:56px 60px;}
+.footer-inner{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:48px;}
+.footer-logo{
+  font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.3rem;
+  letter-spacing:0.15em;color:var(--cream);margin-bottom:8px;
+}
+.footer-logo .en{
+  font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:0.8rem;color:var(--gold);letter-spacing:0.3em;display:block;margin-top:4px;
+}
+.footer-bio{font-size:0.76rem;color:var(--text-muted);line-height:1.9;margin-top:12px;}
+.footer-col h4{font-size:0.62rem;letter-spacing:0.3em;color:var(--gold);text-transform:uppercase;margin-bottom:16px;}
+.footer-col ul{list-style:none;}
+.footer-col li{margin-bottom:9px;}
+.footer-col a{font-size:0.75rem;color:var(--text-muted);text-decoration:none;transition:color 0.3s;}
+.footer-col a:hover{color:var(--cream);}
+.footer-bottom{
+  max-width:1240px;margin:36px auto 0;padding-top:22px;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:0.65rem;color:var(--text-muted);
+}
+.social-row{display:flex;gap:10px;margin-top:18px;}
+.social-btn{
+  width:36px;height:36px;border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.9rem;text-decoration:none;
+  transition:border-color 0.3s,background 0.3s;
+}
+.social-btn:hover{border-color:var(--gold);background:rgba(184,150,62,0.08);}
+
+/* ── MOBILE ── */
+@media(max-width:960px){
+  #main-nav{padding:0 24px;}
+  .nav-links,.nav-cta{display:none;}
+  .hamburger{display:flex;}
+  .section,.section-sm{padding:72px 24px;}
+  .hero-content{padding:0 24px;}
+  .hero-right{display:none;}
+  .drinks-grid{grid-template-columns:1fr;}
+  .drink-card.featured{aspect-ratio:3/4;grid-row:auto;}
+  .story-grid{grid-template-columns:1fr;gap:40px;}
+  .philo-row{grid-template-columns:1fr;}
+  .philo-block{border-right:none;border-bottom:1px solid var(--border);}
+  .menu-grid{grid-template-columns:1fr;}
+  .product-hero{grid-template-columns:1fr;gap:40px;padding:140px 24px 60px;}
+  .temp-options,.related-grid{grid-template-columns:1fr;}
+  .values-grid{grid-template-columns:1fr;}
+  .contact-grid{grid-template-columns:1fr;padding:60px 24px;}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:28px;}
+  .footer-bottom{flex-direction:column;gap:10px;}
+  .cta-btns{flex-direction:column;align-items:center;}
+  .about-hero,.contact-hero,.menu-hero{padding:140px 24px 60px;}
+  .about-content,.product-content{padding:60px 24px;}
+  footer{padding:48px 24px;}
+  #cursor,#cursor-ring{display:none;}
+  body{cursor:auto;}
+}
+@media(max-width:600px){
+  .footer-inner{grid-template-columns:1fr;}
+  .menu-card{padding:20px 16px;}
+}
+
+#mobile-nav{
+  display:none;position:fixed;inset:0;z-index:490;
+  background:rgba(12,11,8,0.97);backdrop-filter:blur(16px);
+  flex-direction:column;align-items:center;justify-content:center;gap:30px;
+}
+#mobile-nav.open{display:flex;}
+#mobile-nav a{
+  font-family:'Noto Serif TC',serif;font-size:1.9rem;font-weight:700;
+  color:var(--cream);text-decoration:none;letter-spacing:0.1em;transition:color 0.3s;
+}
+#mobile-nav a:hover{color:var(--gold-light);}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#" class="nav-brand" onclick="showPage('home');return false;">
+    茶の間
+    <span class="kanji">CHANOMA</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#" onclick="showPage('home');return false;" id="nav-home" class="active">首頁</a></li>
+    <li><a href="#" onclick="showPage('menu');return false;" id="nav-menu">飲品菜單</a></li>
+    <li><a href="#" onclick="showPage('about');return false;" id="nav-about">關於我們</a></li>
+    <li><a href="#" onclick="showPage('contact');return false;" id="nav-contact">聯絡資訊</a></li>
+  </ul>
+  <a href="#" class="nav-cta" onclick="showPage('contact');return false;">找到我們</a>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<div id="mobile-nav">
+  <a href="#" onclick="showPage('home');closeMN();return false;">首頁</a>
+  <a href="#" onclick="showPage('menu');closeMN();return false;">飲品菜單</a>
+  <a href="#" onclick="showPage('about');closeMN();return false;">關於我們</a>
+  <a href="#" onclick="showPage('contact');closeMN();return false;">聯絡資訊</a>
+</div>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="page-home" class="page active">
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-vline"></div>
+    <div class="hero-hline"></div>
+    <div class="hero-content">
+      <div class="hero-jp">JAPANESE MATCHA · SPECIALTY COFFEE · 台中西區</div>
+      <h1 class="hero-h1">
+        一杯<span class="matcha-word">抹茶</span>的<br>
+        <span class="gold-word">靜謐時光</span>
+      </h1>
+      <p class="hero-sub">手點抹茶 × 精品咖啡 × 和風深色美學</p>
+      <div class="hero-btns">
+        <a href="#" class="btn-gold" onclick="showPage('menu');return false;">探索飲品 →</a>
+        <a href="#" class="btn-outline-gold" onclick="showPage('about');return false;">關於茶の間</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-deco-ring"></div>
+      <div class="hero-deco-ring-2"></div>
+      <div class="hero-deco-inner">🍵</div>
+      <div class="hero-deco-tag hero-tag-t">手點抹茶 · 宇治茶葉</div>
+      <div class="hero-deco-tag hero-tag-b">台中西區 · 精品飲品</div>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-ln"></div>
+      <span>SCROLL TO DISCOVER</span>
+    </div>
+  </section>
+
+  <div class="marquee-bar">
+    <div class="marquee-inner">
+      <span class="marquee-item">宇治抹茶拿鐵 <span class="dot">◆</span></span>
+      <span class="marquee-item">手點薄茶 <span class="dot">◆</span></span>
+      <span class="marquee-item">焙茶歐蕾 <span class="dot">◆</span></span>
+      <span class="marquee-item">黑糖抹茶牛乳 <span class="dot">◆</span></span>
+      <span class="marquee-item">精品單品咖啡 <span class="dot">◆</span></span>
+      <span class="marquee-item">和風深色美學 <span class="dot">◆</span></span>
+      <span class="marquee-item">台中西區打卡 <span class="dot">◆</span></span>
+      <span class="marquee-item">日系咖啡廳 <span class="dot">◆</span></span>
+      <span class="marquee-item">宇治抹茶拿鐵 <span class="dot">◆</span></span>
+      <span class="marquee-item">手點薄茶 <span class="dot">◆</span></span>
+      <span class="marquee-item">焙茶歐蕾 <span class="dot">◆</span></span>
+      <span class="marquee-item">黑糖抹茶牛乳 <span class="dot">◆</span></span>
+      <span class="marquee-item">精品單品咖啡 <span class="dot">◆</span></span>
+      <span class="marquee-item">和風深色美學 <span class="dot">◆</span></span>
+      <span class="marquee-item">台中西區打卡 <span class="dot">◆</span></span>
+      <span class="marquee-item">日系咖啡廳 <span class="dot">◆</span></span>
+    </div>
+  </div>
+
+  <!-- Featured Drinks -->
+  <section class="drinks-section section">
+    <div class="max-w">
+      <div class="reveal">
+        <div class="label-tag">SIGNATURE DRINKS</div>
+        <h2 class="section-h2">招牌飲品</h2>
+      </div>
+      <div class="drinks-grid reveal reveal-d1">
+        <div class="drink-card featured" onclick="showProduct('matcha-latte')">
+          <div class="drink-bg"><div class="drink-bg-grad" style="background:radial-gradient(ellipse at 50% 35%,rgba(74,92,58,0.6),rgba(8,7,5,0.95));">🍵</div></div>
+          <div class="drink-overlay"></div>
+          <div class="drink-info">
+            <div class="drink-cat">SIGNATURE · 招牌</div>
+            <div class="drink-name">宇治抹茶拿鐵</div>
+            <div class="drink-desc">頂級宇治抹茶粉，以竹製茶筅手點，搭配低溫慢煮牛乳，奶香與茶香完美共鳴。</div>
+            <div class="drink-price">NT$ 180</div>
+            <a href="#" class="drink-more" onclick="showProduct('matcha-latte');event.stopPropagation();return false;">查看詳情 →</a>
+          </div>
+        </div>
+        <div class="drink-card" onclick="showProduct('hojicha')">
+          <div class="drink-bg"><div class="drink-bg-grad" style="background:radial-gradient(ellipse at 50% 35%,rgba(120,80,30,0.5),rgba(8,7,5,0.95));">🫖</div></div>
+          <div class="drink-overlay"></div>
+          <div class="drink-info">
+            <div class="drink-cat">ROASTED · 焙茶</div>
+            <div class="drink-name">焙茶歐蕾</div>
+            <div class="drink-desc">深度焙煎，焦香溫潤。</div>
+            <div class="drink-price">NT$ 160</div>
+            <a href="#" class="drink-more" onclick="showProduct('hojicha');event.stopPropagation();return false;">查看詳情 →</a>
+          </div>
+        </div>
+        <div class="drink-card" onclick="showProduct('black-sugar')">
+          <div class="drink-bg"><div class="drink-bg-grad" style="background:radial-gradient(ellipse at 50% 35%,rgba(50,30,10,0.7),rgba(8,7,5,0.95));">🧋</div></div>
+          <div class="drink-overlay"></div>
+          <div class="drink-info">
+            <div class="drink-cat">SPECIAL · 特選</div>
+            <div class="drink-name">黑糖抹茶牛乳</div>
+            <div class="drink-desc">手熬黑糖漿與抹茶層疊。</div>
+            <div class="drink-price">NT$ 165</div>
+            <a href="#" class="drink-more" onclick="showProduct('black-sugar');event.stopPropagation();return false;">查看詳情 →</a>
+          </div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-bg"><div class="drink-bg-grad" style="background:radial-gradient(ellipse at 50% 35%,rgba(40,55,30,0.6),rgba(8,7,5,0.95));">🍵</div></div>
+          <div class="drink-overlay"></div>
+          <div class="drink-info">
+            <div class="drink-cat">PURE · 純茶</div>
+            <div class="drink-name">手點薄茶</div>
+            <div class="drink-desc">最純粹的茶道體驗。</div>
+            <div class="drink-price">NT$ 200</div>
+          </div>
+        </div>
+        <div class="drink-card">
+          <div class="drink-bg"><div class="drink-bg-grad" style="background:radial-gradient(ellipse at 50% 35%,rgba(80,60,20,0.5),rgba(8,7,5,0.95));">☕</div></div>
+          <div class="drink-overlay"></div>
+          <div class="drink-info">
+            <div class="drink-cat">COFFEE · 咖啡</div>
+            <div class="drink-name">精品單品咖啡</div>
+            <div class="drink-desc">每週嚴選莊園豆。</div>
+            <div class="drink-price">NT$ 170</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:36px;" class="reveal">
+        <a href="#" class="btn-outline-gold" onclick="showPage('menu');return false;">查看完整菜單</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story -->
+  <section class="section story-section reveal" style="background:var(--ink-soft);">
+    <div class="story-grid">
+      <div class="story-visual">
+        <div class="story-visual-placeholder">🍵</div>
+        <div class="story-visual-grad"></div>
+        <div class="story-corner-gold"></div>
+        <div class="story-corner-dim"></div>
+      </div>
+      <div class="story-text">
+        <div class="label-tag">OUR STORY</div>
+        <h2 class="section-h2">茶の間<br>——靜謐之所</h2>
+        <p>「茶の間」在日文中，是家中最溫暖的那個角落。我們希望在台中西區，為你打造這樣一個空間——<strong>暗色的木質、燭光般的燈火、一杯手點抹茶</strong>，讓城市的喧囂在門口止步。</p>
+        <p>我們選用<strong>京都宇治產一番茶</strong>，以傳統竹製茶筅手點，保留茶葉最完整的香氣與甘味。咖啡則每週嚴選來自衣索比亞、哥斯大黎加的精品莊園豆。</p>
+        <div class="story-pills">
+          <span class="pill">宇治抹茶</span>
+          <span class="pill">手點薄茶</span>
+          <span class="pill">精品咖啡</span>
+          <span class="pill">和風空間</span>
+          <span class="pill">IG 打卡</span>
+        </div>
+        <a href="#" class="btn-gold" onclick="showPage('about');return false;">了解品牌故事 →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Philosophy -->
+  <section class="philosophy section-sm reveal">
+    <div class="philo-row max-w">
+      <div class="philo-block">
+        <div class="philo-num">一</div>
+        <div class="philo-title">器具即儀式</div>
+        <div class="philo-body">每一支茶筅手工製作，每一只茶碗來自日本窯場，工具本身就是體驗的一部分。</div>
+      </div>
+      <div class="philo-block">
+        <div class="philo-num">二</div>
+        <div class="philo-title">原料決定一切</div>
+        <div class="philo-body">只用京都宇治一番茶，只挑精品咖啡莊園豆，原料的品質是我們唯一不妥協的事。</div>
+      </div>
+      <div class="philo-block">
+        <div class="philo-num">三</div>
+        <div class="philo-title">空間即態度</div>
+        <div class="philo-body">深色木質、低調燈光、無壓的靜謐氛圍——空間本身就是我們對飲品文化的一種宣示。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reviews -->
+  <section class="section reveal" style="background:var(--ink-soft);">
+    <div class="max-w">
+      <div class="label-tag">GUEST VOICES</div>
+      <h2 class="section-h2">客人說的</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:48px;">
+        <div style="background:var(--ink-soft);padding:40px 36px;position:relative;transition:background 0.3s;" onmouseenter="this.style.background='var(--ink-warm)'" onmouseleave="this.style.background='var(--ink-soft)'">
+          <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:3rem;color:var(--gold);opacity:0.3;position:absolute;top:16px;left:24px;line-height:1;">"</div>
+          <div style="color:var(--gold);font-size:0.78rem;letter-spacing:3px;margin-bottom:16px;">★★★★★</div>
+          <p style="font-family:'Noto Serif TC',serif;font-size:0.98rem;line-height:2;color:var(--cream);margin-bottom:22px;">抹茶拿鐵是我喝過最香的，茶味很純不苦，而且空間真的超有氣氛，照片拍起來很美。</p>
+          <div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:var(--matcha);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">雅</div><div style="font-size:0.7rem;color:var(--text-muted);">雅婷 · Google Maps</div></div>
+        </div>
+        <div style="background:var(--ink-soft);padding:40px 36px;position:relative;transition:background 0.3s;" onmouseenter="this.style.background='var(--ink-warm)'" onmouseleave="this.style.background='var(--ink-soft)'">
+          <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:3rem;color:var(--gold);opacity:0.3;position:absolute;top:16px;left:24px;line-height:1;">"</div>
+          <div style="color:var(--gold);font-size:0.78rem;letter-spacing:3px;margin-bottom:16px;">★★★★★</div>
+          <p style="font-family:'Noto Serif TC',serif;font-size:0.98rem;line-height:2;color:var(--cream);margin-bottom:22px;">手點薄茶的體驗很特別，能在台灣喝到這種程度真的不容易。空間靜謐到讓我不想走。</p>
+          <div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:var(--matcha);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">健</div><div style="font-size:0.7rem;color:var(--text-muted);">健銘 · Google Maps</div></div>
+        </div>
+        <div style="background:var(--ink-soft);padding:40px 36px;position:relative;transition:background 0.3s;" onmouseenter="this.style.background='var(--ink-warm)'" onmouseleave="this.style.background='var(--ink-soft)'">
+          <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:3rem;color:var(--gold);opacity:0.3;position:absolute;top:16px;left:24px;line-height:1;">"</div>
+          <div style="color:var(--gold);font-size:0.78rem;letter-spacing:3px;margin-bottom:16px;">★★★★★</div>
+          <p style="font-family:'Noto Serif TC',serif;font-size:0.98rem;line-height:2;color:var(--cream);margin-bottom:22px;">黑糖抹茶牛乳層次分明，視覺上就很享受。焙茶歐蕾也很推，不喜歡抹茶的人也適合！</p>
+          <div style="display:flex;align-items:center;gap:10px;"><div style="width:34px;height:34px;border-radius:50%;background:var(--matcha);display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;">芷</div><div style="font-size:0.7rem;color:var(--text-muted);">芷萱 · Instagram 打卡</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section faq-section reveal">
+    <div class="max-w" style="max-width:740px;">
+      <div class="label-tag">FAQ</div>
+      <h2 class="section-h2">常見問題</h2>
+      <div class="faq-list">
+        <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">不懂茶道，可以喝手點薄茶嗎？<span class="faq-icon">+</span></div><div class="faq-a">當然可以！我們的茶師會為你說明手點薄茶的飲用方式，不需要任何茶道基礎，只需要放鬆心情享受即可。</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">有無咖啡因的選擇嗎？<span class="faq-icon">+</span></div><div class="faq-a">有！我們提供焙茶系列（低咖啡因）以及玄米茶系列，孕婦和對咖啡因敏感的客人皆適合。</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">飲品可以調整甜度嗎？<span class="faq-icon">+</span></div><div class="faq-a">可以！大部分飲品提供全糖、半糖、微糖、無糖四種選擇，點餐時告知即可。</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">營業時間和公休日？<span class="faq-icon">+</span></div><div class="faq-a">週二至週日 10:00–20:00，週一公休。不定期特休請關注我們的 Instagram。</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="cta-banner reveal">
+    <h2 class="cta-h2">今日，為自己留一杯<br><em>靜謐的</em><span class="gold-em">抹茶時光</span></h2>
+    <p class="cta-sub">台中市西區中山路二段88號 · 茶の間 CHANOMA</p>
+    <div class="cta-btns">
+      <a href="#" class="btn-gold" onclick="showPage('menu');return false;">查看飲品菜單</a>
+      <a href="#" class="btn-outline-gold" onclick="showPage('contact');return false;">找到我們</a>
+    </div>
+  </div>
+
+</div><!-- /home -->
+
+
+<!-- ══════════ MENU ══════════ -->
+<div id="page-menu" class="page">
+  <div class="menu-hero">
+    <div class="max-w">
+      <div class="label-tag">FULL MENU</div>
+      <h1 class="section-h2" style="font-size:clamp(2.5rem,5vw,4rem);">完整飲品菜單</h1>
+      <p style="margin-top:14px;color:var(--text-muted);font-size:0.88rem;letter-spacing:0.12em;">手點抹茶 · 精品咖啡 · 焙茶 · 季節限定</p>
+      <div class="menu-tabs">
+        <div class="menu-tab active" onclick="filterMenu('all',this)">全部</div>
+        <div class="menu-tab" onclick="filterMenu('matcha',this)">抹茶系列</div>
+        <div class="menu-tab" onclick="filterMenu('coffee',this)">咖啡系列</div>
+        <div class="menu-tab" onclick="filterMenu('hojicha',this)">焙茶 / 玄米</div>
+        <div class="menu-tab" onclick="filterMenu('season',this)">季節限定</div>
+        <div class="menu-tab" onclick="filterMenu('food',this)">和菓子</div>
+      </div>
+    </div>
+  </div>
+  <div class="max-w" style="padding:2px 60px 80px;">
+    <div class="menu-grid" id="menu-grid">
+
+      <div class="menu-card" data-cat="matcha" onclick="showProduct('matcha-latte')">
+        <div class="menu-img-placeholder">🍵</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">抹茶系列 · 招牌</div>
+          <div class="menu-name">宇治抹茶拿鐵</div>
+          <div class="menu-desc">頂級宇治抹茶粉手點，搭配低溫慢煮牛乳，奶香茶香完美共鳴。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 180</div><div class="menu-temp">冰 / 熱</div></div>
+          <div class="menu-link">查看詳情 →</div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="matcha" onclick="showProduct('black-sugar')">
+        <div class="menu-img-placeholder">🍵</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">抹茶系列 · 特選</div>
+          <div class="menu-name">黑糖抹茶牛乳</div>
+          <div class="menu-desc">手熬黑糖漿與宇治抹茶層層疊疊，視覺與味覺雙重享受。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 165</div><div class="menu-temp">冰</div></div>
+          <div class="menu-link">查看詳情 →</div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="matcha">
+        <div class="menu-img-placeholder">🍵</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">抹茶系列 · 純茶</div>
+          <div class="menu-name">手點薄茶</div>
+          <div class="menu-desc">以竹製茶筅手點，體驗最純粹的茶道儀式感。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 200</div><div class="menu-temp">熱</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="matcha">
+        <div class="menu-img-placeholder">🍵</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">抹茶系列 · 清爽</div>
+          <div class="menu-name">抹茶柚子氣泡</div>
+          <div class="menu-desc">抹茶與柚子酸香碰撞，氣泡清爽解暑，夏日首選。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 155</div><div class="menu-temp">冰</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="matcha">
+        <div class="menu-img-placeholder">🍵</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">抹茶系列 · 濃厚</div>
+          <div class="menu-name">濃厚抹茶冰磚拿鐵</div>
+          <div class="menu-desc">以凍成磚的濃縮抹茶慢慢融入牛乳，喝到最後依然濃郁。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 195</div><div class="menu-temp">冰</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="coffee">
+        <div class="menu-img-placeholder">☕</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">咖啡系列 · 精品</div>
+          <div class="menu-name">精品單品咖啡</div>
+          <div class="menu-desc">每週嚴選莊園豆，手沖呈現最純粹的產地風味。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 170</div><div class="menu-temp">冰 / 熱</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="coffee">
+        <div class="menu-img-placeholder">☕</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">咖啡系列 · 拿鐵</div>
+          <div class="menu-name">和栗拿鐵</div>
+          <div class="menu-desc">日本和栗糖漿與濃縮咖啡，秋冬暖心之選。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 175</div><div class="menu-temp">冰 / 熱</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="coffee">
+        <div class="menu-img-placeholder">☕</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">咖啡系列 · 濃縮</div>
+          <div class="menu-name">黑炭拿鐵</div>
+          <div class="menu-desc">活性炭牛乳與濃縮咖啡，純黑視覺，層次深邃。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 165</div><div class="menu-temp">冰</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="hojicha" onclick="showProduct('hojicha')">
+        <div class="menu-img-placeholder">🫖</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">焙茶系列 · 招牌</div>
+          <div class="menu-name">焙茶歐蕾</div>
+          <div class="menu-desc">高溫焙煎茶葉，焦香溫潤，低咖啡因，入夜也適合。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 160</div><div class="menu-temp">冰 / 熱</div></div>
+          <div class="menu-link">查看詳情 →</div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="hojicha">
+        <div class="menu-img-placeholder">🫖</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">玄米系列 · 清淡</div>
+          <div class="menu-name">玄米茶拿鐵</div>
+          <div class="menu-desc">玄米的穀物香氣與牛乳交融，無壓力的清新風味。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 155</div><div class="menu-temp">冰 / 熱</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="season">
+        <div class="menu-img-placeholder">🌸</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">季節限定 · 春</div>
+          <div class="menu-name">櫻花抹茶牛奶</div>
+          <div class="menu-desc">鹽漬櫻花搭配宇治抹茶，粉嫩春日限定，數量有限。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 210</div><div class="menu-temp">冰</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="season">
+        <div class="menu-img-placeholder">🌸</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">季節限定 · 秋</div>
+          <div class="menu-name">南瓜和栗抹茶</div>
+          <div class="menu-desc">南瓜泥與和栗奶蓋，秋季限定的溫暖層次。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 200</div><div class="menu-temp">熱</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="food">
+        <div class="menu-img-placeholder">🍡</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">和菓子 · 招牌</div>
+          <div class="menu-name">抹茶生菓子</div>
+          <div class="menu-desc">職人手作，每日限量，使用宇治抹茶與白豆沙。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 120</div><div class="menu-temp">每日限量</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="food">
+        <div class="menu-img-placeholder">🍡</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">和菓子 · 甜點</div>
+          <div class="menu-name">抹茶布丁</div>
+          <div class="menu-desc">濃厚抹茶卡士達，頂層淋上黑蜜，口感絲滑細膩。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 110</div><div class="menu-temp">冷藏</div></div>
+        </div>
+      </div>
+
+      <div class="menu-card" data-cat="food">
+        <div class="menu-img-placeholder">🍡</div>
+        <div class="menu-body">
+          <div class="menu-cat-label">和菓子 · 蛋糕</div>
+          <div class="menu-name">抹茶生乳卷</div>
+          <div class="menu-desc">每日新鮮製作，生乳奶油輕柔包覆濃郁抹茶蛋糕體。</div>
+          <div class="menu-footer"><div class="menu-price">NT$ 140</div><div class="menu-temp">每日限量</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /menu -->
+
+
+<!-- ══════════ PRODUCT ══════════ -->
+<div id="page-product" class="page">
+  <div class="product-hero" id="product-hero-content"></div>
+  <div class="product-content" id="product-body-content"></div>
+</div>
+
+
+<!-- ══════════ ABOUT ══════════ -->
+<div id="page-about" class="page">
+  <div class="about-hero">
+    <div class="max-w">
+      <nav class="breadcrumb"><a href="#" onclick="showPage('home');return false;">首頁</a><span class="sep">/</span><span>關於我們</span></nav>
+      <div class="label-tag">OUR STORY</div>
+      <h1 class="section-h2" style="font-size:clamp(2.5rem,5vw,4rem);">茶の間的故事</h1>
+      <p style="margin-top:14px;color:var(--text-muted);font-size:0.88rem;letter-spacing:0.12em;">從一杯抹茶開始的靜謐哲學</p>
+    </div>
+  </div>
+  <div class="about-content">
+    <p>在台中西區，有一個刻意讓你放慢腳步的地方。<strong>茶の間 CHANOMA</strong>——這個名字來自日文「茶の間」，意思是家中最溫暖、最日常的那個角落。</p>
+    <h2>為什麼是抹茶？</h2>
+    <p>創辦人旅居京都兩年，被宇治的茶園和町家中那種靜謐的飲茶文化深深吸引。回台後，她決定把這種感覺帶回台中——<strong>不是表演給人看的茶道</strong>，而是一種真實的、日常的生活方式。</p>
+    <p>我們選用<strong>宇治一番茶</strong>——也就是最早摘採、最嫩的茶葉所製成的抹茶，香氣細膩、回甘悠長。每一批茶粉都直接從宇治合作茶農進口，確保品質。</p>
+    <div class="values-grid">
+      <div class="value-block"><span class="value-icon">🌱</span><div class="value-title">茶葉溯源</div><div class="value-body">與宇治茶農直接合作，每批抹茶粉附原產地證明。</div></div>
+      <div class="value-block"><span class="value-icon">🔥</span><div class="value-title">手工炭焙</div><div class="value-body">焙茶由職人手工炭焙，保留最完整的香氣層次。</div></div>
+      <div class="value-block"><span class="value-icon">🥢</span><div class="value-title">器具美學</div><div class="value-body">竹製茶筅、手作茶碗，工具本身就是體驗的一部分。</div></div>
+    </div>
+    <h2>空間的設計哲學</h2>
+    <p>我們特意選擇深色調——黑色、深褐、霧金——因為這些顏色讓人沉靜。<strong>沒有過度裝飾</strong>，只有恰到好處的留白，讓你的注意力回到那杯茶本身。</p>
+    <p>每一首背景音樂都是精選的日本爵士或古典箏曲，音量低到只是一種存在感，不打擾你的對話，也不打擾你的獨處。</p>
+    <h2>我們相信的事</h2>
+    <p>一杯好茶，不需要太多說明。它自己會說話——在你第一口的時候，在茶香飄散的瞬間，在你放下手機、只是靜靜坐著的那幾分鐘裡。</p>
+    <p><strong>這就是茶の間存在的理由。</strong></p>
+  </div>
+  <div class="cta-banner">
+    <h2 class="cta-h2">親自來感受<br><em>這杯茶的</em><span class="gold-em">溫度</span></h2>
+    <p class="cta-sub">台中市西區中山路二段88號</p>
+    <div class="cta-btns">
+      <a href="#" class="btn-gold" onclick="showPage('menu');return false;">查看飲品菜單</a>
+      <a href="#" class="btn-outline-gold" onclick="showPage('contact');return false;">聯絡資訊</a>
+    </div>
+  </div>
+</div><!-- /about -->
+
+
+<!-- ══════════ CONTACT ══════════ -->
+<div id="page-contact" class="page">
+  <div class="contact-hero">
+    <div class="max-w">
+      <nav class="breadcrumb"><a href="#" onclick="showPage('home');return false;">首頁</a><span class="sep">/</span><span>聯絡資訊</span></nav>
+      <div class="label-tag">VISIT US</div>
+      <h1 class="section-h2" style="font-size:clamp(2.5rem,5vw,4rem);">來訪茶の間</h1>
+      <p style="margin-top:14px;color:var(--text-muted);font-size:0.88rem;letter-spacing:0.12em;">台中市西區中山路二段88號</p>
+    </div>
+  </div>
+  <div class="contact-grid">
+    <div>
+      <div class="info-block">
+        <div class="info-label">地址</div>
+        <div class="info-val">台中市西區中山路二段88號<br>茶の間 CHANOMA</div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">營業時間</div>
+        <div class="hours-grid">
+          <span class="h-day">週二 ─ 週五</span><span class="h-time">10:00 – 20:00</span>
+          <span class="h-day">週六 ─ 週日</span><span class="h-time">09:30 – 21:00</span>
+          <span class="h-day">週一</span><span class="h-time">公休</span>
+        </div>
+      </div>
+      <div class="info-block">
+        <div class="info-label">聯絡方式</div>
+        <div class="info-val" style="font-size:0.82rem;color:var(--text-muted);">
+          Instagram：@chanoma.tc<br>
+          Google Maps 搜尋「茶の間 CHANOMA」
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px;">
+        <a href="https://maps.google.com/" target="_blank" class="btn-gold">Google 地圖導航</a>
+        <a href="#" class="btn-outline-gold">撥打電話</a>
+      </div>
+    </div>
+    <div class="contact-map">
+      <!-- 替換為你的 Google Maps 嵌入碼 -->
+      <div style="width:100%;height:100%;background:var(--ink-warm);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+        <div style="font-size:3.5rem;animation:float-s 3s ease-in-out infinite;filter:drop-shadow(0 4px 20px rgba(184,150,62,0.4));">📍</div>
+        <div style="font-size:0.7rem;letter-spacing:0.2em;color:var(--text-muted);">地圖位置示意</div>
+      </div>
+      <div class="map-caption">台中市西區 · 中山路二段88號</div>
+    </div>
+  </div>
+  <section class="section faq-section" style="border-top:1px solid var(--border);">
+    <div class="max-w" style="max-width:740px;">
+      <div class="label-tag">FAQ</div>
+      <h2 class="section-h2">常見問題</h2>
+      <div class="faq-list">
+        <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">需要預約嗎？<span class="faq-icon">+</span></div><div class="faq-a">一般時段無需預約，直接前往即可。週末下午為高峰時段，建議提早或避開尖峰。如有特殊需求（如包場、茶道體驗課程），請提前 DM Instagram 聯絡。</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">有提供外帶嗎？<span class="faq-icon">+</span></div><div class="faq-a">有！大部分飲品提供外帶，但手點薄茶建議在店內體驗，風味最佳。</div></div>
+        <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">附近有停車場嗎？<span class="faq-icon">+</span></div><div class="faq-a">店面附近有路邊停車格，步行3分鐘有公共停車場。也非常推薦騎 YouBike 或搭乘公車前往，台中火車站附近多線公車可到達。</div></div>
+      </div>
+    </div>
+  </section>
+</div><!-- /contact -->
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner max-w">
+    <div>
+      <div class="footer-logo">
+        茶の間
+        <span class="en">CHANOMA</span>
+      </div>
+      <p class="footer-bio">台中西區日系抹茶咖啡廳，手點宇治抹茶、精品咖啡、和風甜品，極致深色美學空間。</p>
+      <div class="social-row">
+        <a href="#" class="social-btn" title="Instagram">IG</a>
+        <a href="#" class="social-btn" title="Google Maps">📍</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>飲品</h4>
+      <ul>
+        <li><a href="#" onclick="showProduct('matcha-latte');return false;">宇治抹茶拿鐵</a></li>
+        <li><a href="#" onclick="showProduct('hojicha');return false;">焙茶歐蕾</a></li>
+        <li><a href="#" onclick="showProduct('black-sugar');return false;">黑糖抹茶牛乳</a></li>
+        <li><a href="#" onclick="showPage('menu');return false;">查看全部菜單</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>關於</h4>
+      <ul>
+        <li><a href="#" onclick="showPage('about');return false;">品牌故事</a></li>
+        <li><a href="#" onclick="showPage('contact');return false;">聯絡資訊</a></li>
+        <li><a href="#" onclick="showPage('contact');return false;">交通方式</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>茶の間</h4>
+      <ul>
+        <li><a href="#">西區中山路二段88號</a></li>
+        <li><a href="#">週二–五 10:00–20:00</a></li>
+        <li><a href="#">週六–日 09:30–21:00</a></li>
+        <li><a href="#">週一公休</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom max-w">
+    <span>© 2025 茶の間 CHANOMA · 台中市西區中山路二段88號</span>
+    <span>台中抹茶 · 日系咖啡廳 · 精品飲品</span>
+  </div>
+</footer>
+
+
+<script>
+// ── CURSOR ──
+const cur=document.getElementById('cursor'),curR=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function loop(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;curR.style.left=rx+'px';curR.style.top=ry+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('a,button,.drink-card,.menu-card,.faq-q').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='14px';cur.style.height='14px';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='8px';cur.style.height='8px';});
+});
+
+// ── NAV ──
+const nav=document.getElementById('main-nav');
+window.addEventListener('scroll',()=>{nav.classList.toggle('solid',window.scrollY>40);});
+
+// ── HAMBURGER ──
+document.getElementById('hamburger').addEventListener('click',()=>{document.getElementById('mobile-nav').classList.toggle('open');});
+function closeMN(){document.getElementById('mobile-nav').classList.remove('open');}
+
+// ── PAGES ──
+const PAGES=['home','menu','product','about','contact'];
+function showPage(id){
+  PAGES.forEach(p=>document.getElementById('page-'+p).classList.toggle('active',p===id));
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  const el=document.getElementById('nav-'+id);if(el)el.classList.add('active');
+  const M={
+    home:{title:'茶の間 CHANOMA｜日系抹茶咖啡廳・台中精品飲品',desc:'台中頂級日系抹茶咖啡廳，手點抹茶、精品咖啡、和風甜品，極致深色美學空間。'},
+    menu:{title:'完整菜單｜茶の間 CHANOMA・台中抹茶咖啡',desc:'宇治抹茶拿鐵、焙茶歐蕾、黑糖抹茶牛乳，台中西區精品茶飲推薦。'},
+    about:{title:'品牌故事｜茶の間 CHANOMA',desc:'從京都宇治出發的茶飲哲學，手點抹茶與精品咖啡的靜謐美學。'},
+    contact:{title:'茶の間 CHANOMA｜聯絡與交通資訊',desc:'台中市西區中山路二段88號，週二至日10:00–20:00。'},
+  };
+  const m=M[id]||M.home;
+  document.getElementById('page-title').textContent=m.title;
+  document.getElementById('page-desc').setAttribute('content',m.desc);
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(runReveal,200);
+}
+
+// ── PRODUCT DATA ──
+const products={
+  'matcha-latte':{
+    emoji:'🍵',
+    cat:'抹茶系列 · 招牌',name:'宇治抹茶拿鐵',en:'UJIMATCHA LATTE',
+    tags:['宇治一番茶','手點','低溫牛乳'],goldTags:['每日限量點製'],
+    intensity:4,price:'NT$ 180',temp:'冰 / 熱',
+    desc:'選用<strong>京都宇治一番茶</strong>研磨而成的頂級抹茶粉，以竹製茶筅手工點製，保留最完整的抹茶香氣與泡沫質感。搭配<strong>低溫慢煮牛乳</strong>，奶香細緻不蓋過茶香，兩者在口中完美共鳴。',
+    why:'我們的抹茶拿鐵之所以特別，在於那個「手點」的過程——不是機器攪拌，而是人手以特定角度、速度將抹茶粉與熱水打發，形成細膩的泡沫。這個步驟決定了整杯飲品的香氣釋放方式。',
+    pair:['抹茶生菓子','抹茶布丁'],
+    related:['hojicha','black-sugar'],
+  },
+  'hojicha':{
+    emoji:'🫖',
+    cat:'焙茶系列 · 招牌',name:'焙茶歐蕾',en:'HOJICHA AU LAIT',
+    tags:['手工炭焙','低咖啡因','溫潤焦香'],goldTags:['入夜適合'],
+    intensity:2,price:'NT$ 160',temp:'冰 / 熱',
+    desc:'以<strong>高溫炭火焙煎</strong>的焙茶為基底，焦香中帶著溫潤的木質調性。因高溫焙煎過程中大部分咖啡因已揮發，<strong>低咖啡因</strong>讓你在傍晚或睡前也能安心享用。搭配香醇牛乳，是今日最溫柔的一杯。',
+    why:'焙茶的魅力在於那個「焙」字——把普通綠茶或番茶高溫炭焙，轉化出完全不同的風味輪廓。不苦不澀，只有焦糖般的溫暖香氣，是許多不喜歡抹茶苦味的客人最後愛上的選擇。',
+    pair:['和栗拿鐵','抹茶生菓子'],
+    related:['matcha-latte','black-sugar'],
+  },
+  'black-sugar':{
+    emoji:'🧋',
+    cat:'抹茶系列 · 特選',name:'黑糖抹茶牛乳',en:'BROWN SUGAR MATCHA',
+    tags:['手熬黑糖','宇治抹茶','層次分明'],goldTags:['視覺享受','打卡必點'],
+    intensity:3,price:'NT$ 165',temp:'冰',
+    desc:'以<strong>手熬沖繩黑糖漿</strong>鋪底，輕輕倒入冰牛乳，最上層疊上手點宇治抹茶，形成深褐、乳白、翠綠的<strong>三層漸層</strong>。拍完照片再輕輕攪拌，讓三種風味在口中交融——甘、甜、茶香，層層遞進。',
+    why:'這杯是我們最多客人特地來拍照的一款。但我們更在意的是它喝起來的感覺——黑糖的焦甜在底部，牛乳的清爽在中間，抹茶的苦香在最後，每一口的比例都略有不同，每一口都是驚喜。',
+    pair:['抹茶生菓子','抹茶生乳卷'],
+    related:['matcha-latte','hojicha'],
+  },
+};
+const relatedMap={
+  'matcha-latte':{name:'宇治抹茶拿鐵',emoji:'🍵',price:'NT$180'},
+  'hojicha':{name:'焙茶歐蕾',emoji:'🫖',price:'NT$160'},
+  'black-sugar':{name:'黑糖抹茶牛乳',emoji:'🧋',price:'NT$165'},
+};
+
+function showProduct(id){
+  const p=products[id];if(!p)return;
+  let dots='';
+  for(let i=0;i<5;i++){const on=i<p.intensity?(i>=p.intensity-1&&p.intensity>=4?'on hi':'on'):'';dots+=`<div class="i-dot ${on}"></div>`;}
+  let relHtml='';
+  p.related.forEach(rid=>{const r=relatedMap[rid];relHtml+=`<div class="related-item" onclick="showProduct('${rid}')"><div class="related-thumb">${r.emoji}</div><div><div class="related-n">${r.name}</div><div class="related-p">${r.price}</div></div></div>`;});
+  let ftags=p.tags.map(t=>`<span class="flavor-tag">${t}</span>`).join('');
+  let gtags=(p.goldTags||[]).map(t=>`<span class="flavor-tag gold-tag">${t}</span>`).join('');
+
+  document.getElementById('product-hero-content').innerHTML=`
+    <div class="product-visual"><div class="product-visual-placeholder">${p.emoji}</div></div>
+    <div>
+      <nav class="breadcrumb"><a href="#" onclick="showPage('home');return false;">首頁</a><span class="sep">/</span><a href="#" onclick="showPage('menu');return false;">飲品菜單</a><span class="sep">/</span><span>${p.name}</span></nav>
+      <div class="label-tag">${p.cat}</div>
+      <h1 class="product-h1">${p.name}</h1>
+      <div class="product-en">${p.en}</div>
+      <div class="flavor-tags">${ftags}${gtags}</div>
+      <div class="intensity-meter">
+        <div class="intensity-label">茶感濃度 INTENSITY</div>
+        <div class="intensity-dots">${dots}</div>
+      </div>
+      <p class="product-desc-text">${p.desc}</p>
+      <div class="product-price-big">${p.price} <span style="font-size:0.9rem;color:var(--text-muted);letter-spacing:0.15em;">${p.temp}</span></div>
+      <div class="product-actions">
+        <a href="#" class="btn-gold" onclick="showPage('contact');return false;">來店品嚐</a>
+        <a href="#" class="btn-outline-gold" onclick="showPage('menu');return false;">返回菜單</a>
+      </div>
+    </div>`;
+
+  document.getElementById('product-body-content').innerHTML=`
+    <div class="product-sec"><h2>為什麼值得專程來喝？</h2><p>${p.why}</p></div>
+    <div class="product-sec"><h2>溫度選擇</h2><div class="temp-options"><div class="temp-card">🧊 <strong style="color:var(--cream)">冰飲</strong><br>加入特製冰塊，保持低溫不稀釋，推薦春夏季節。</div><div class="temp-card">🔥 <strong style="color:var(--cream)">熱飲</strong><br>65°C 最佳飲用溫度，秋冬暖心首選，保溫杯自帶折抵10元。</div></div></div>
+    <div class="product-sec"><h2>推薦搭配</h2><p style="margin-bottom:16px;">與以下和菓子搭配，風味更完整：${p.pair.join('、')}</p></div>
+    <div class="product-sec"><h2>你可能也喜歡</h2><div class="related-grid">${relHtml}</div></div>`;
+
+  document.getElementById('page-title').textContent=`${p.name}｜${p.en} - 茶の間`;
+  document.getElementById('page-desc').setAttribute('content',p.desc.replace(/<[^>]*>/g,'').slice(0,150));
+  PAGES.forEach(pg=>document.getElementById('page-'+pg).classList.remove('active'));
+  document.getElementById('page-product').classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  document.getElementById('nav-menu').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(runReveal,200);
+}
+
+// ── MENU FILTER ──
+function filterMenu(cat,el){
+  document.querySelectorAll('.menu-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  document.querySelectorAll('.menu-card').forEach(c=>{c.style.display=(cat==='all'||c.dataset.cat===cat)?'':'none';});
+}
+
+// ── FAQ ──
+function toggleFAQ(el){
+  const item=el.closest('.faq-item');const was=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!was)item.classList.add('open');
+}
+
+// ── REVEAL ──
+function runReveal(){
+  const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('vis'),i*80);obs.unobserve(e.target);}});},{threshold:0.1});
+  document.querySelectorAll('.reveal:not(.vis)').forEach(el=>obs.observe(el));
+}
+runReveal();
+window.addEventListener('scroll',runReveal);
+</script>
+</body>
+</html>

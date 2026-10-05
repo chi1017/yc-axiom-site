@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, follow">
+    
+    <!-- 基礎 SEO (JS 會動態更新此區塊以模擬多頁面 SEO) -->
+    <title>巔峰教育 PEAK EDU | 全台領先升學補習班 - 專業國高中輔導與英語檢定</title>
+    <meta name="description" content="巔峰教育提供最專業的國中會考、高中學測衝刺課程。由頂尖名師親授，結合 AI 數據學習追蹤，助您考取第一志願。">
+    <meta name="keywords" content="補習班, 國中會考, 高中學測, 英文檢定, 台北補習推薦, AI 學習">
+    <link rel="canonical" href="https://www.peakedu.com.tw/">
+
+    <!-- 外部資源與字體 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Montserrat:wght@600;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind 商業主題配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0F172A',     // 企業深藍
+                        secondary: '#2563EB',   // 科技主藍
+                        accent: '#F59E0B',      // 亮眼橘金
+                        surface: '#F8FAFC',    // 質感背景淺灰
+                        dark: '#1E293B',
+                        success: '#10B981'
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'premium': '0 20px 50px -12px rgba(0, 0, 0, 0.1)',
+                        'accent-glow': '0 0 20px rgba(245, 158, 11, 0.3)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* 1. 高階滾動條與全域設定 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #2563EB; border-radius: 10px; }
+
+        /* 2. SPA 路由轉場動畫 (進階貝茲曲線) */
+        .page-content {
+            display: none;
+            opacity: 0;
+            transform: scale(0.98) translateY(20px);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .page-content.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* 3. 複雜 CSS 關鍵影格動效 */
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+        .animate-float { animation: float-slow 6s ease-in-out infinite; }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton-loading {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        /* 4. 玻璃擬態與視覺特效 */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #2563EB, #60A5FA);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 5. 滾動揭示效果 (Scroll Reveal) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 6. 互動組件樣式 */
+        .course-card:hover .course-overlay {
+            opacity: 1;
+        }
+        .nav-link-active {
+            color: #2563EB !important;
+        }
+        .nav-link-active::after {
+            width: 100% !important;
+        }
+    </style>
+</head>
+<body class="bg-surface text-primary font-sans leading-relaxed selection:bg-secondary selection:text-white">
+
+    <!-- I. 進度指示器 (Page Loader) -->
+    <div id="global-loader" class="fixed inset-0 z-[100] bg-white flex items-center justify-center transition-opacity duration-700">
+        <div class="flex flex-col items-center">
+            <div class="w-16 h-16 border-4 border-slate-200 border-t-secondary rounded-full animate-spin"></div>
+            <p class="mt-4 font-display font-bold tracking-widest text-slate-400">LOADING EXPERIENCE</p>
+        </div>
+    </div>
+
+    <!-- II. 頂部緊急轉換條 (Sticky Conversion Bar) -->
+    <div class="bg-primary text-white text-[10px] md:text-xs py-2 px-6 flex justify-between items-center z-[60] relative border-b border-white/5">
+        <div class="flex items-center gap-6">
+            <span class="flex items-center animate-pulse"><i class="fa-solid fa-bolt text-accent mr-2"></i> 2026 會考衝刺班開放報名中</span>
+            <span class="hidden lg:inline-flex items-center gap-2">
+                <i class="fa-solid fa-clock"></i> 優惠截止倒數：
+                <span id="promo-timer" class="font-display font-bold text-accent">23:59:59</span>
+            </span>
+        </div>
+        <div class="flex gap-5 font-bold">
+            <a href="#campus" class="hover:text-accent transition">全台分校</a>
+            <a href="#login" class="hover:text-accent transition">學員登入</a>
+            <div class="flex gap-2">
+                <a href="#"><i class="fa-brands fa-line hover:text-green-400 transition"></i></a>
+                <a href="#"><i class="fa-brands fa-facebook hover:text-blue-400 transition"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- III. 主導覽列 (進階選單) -->
+    <header class="glass-nav sticky top-0 z-50 transition-all duration-500">
+        <div class="max-w-[1440px] mx-auto px-6 md:px-10 h-20 md:h-24 flex justify-between items-center">
+            <!-- Logo 區塊 -->
+            <div class="flex items-center gap-4 cursor-pointer group" onclick="router.push('home')">
+                <div class="w-12 h-12 md:w-14 md:h-14 bg-secondary text-white rounded-2xl flex items-center justify-center shadow-premium group-hover:rotate-[15deg] transition-transform duration-500">
+                    <i class="fa-solid fa-shield-cat text-2xl md:text-3xl"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-black text-2xl md:text-3xl tracking-tighter leading-none">PEAK EDU</span>
+                    <span class="text-[9px] md:text-[11px] text-slate-400 font-bold tracking-[0.3em] uppercase mt-1">巔峰教育集團</span>
+                </div>
+            </div>
+
+            <!-- 桌面主要選單 -->
+            <nav class="hidden xl:flex items-center gap-10">
+                <a href="#home" data-route="home" class="nav-link relative font-bold text-slate-500 hover:text-secondary transition py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-secondary after:transition-all hover:after:w-full">首頁</a>
+                <div class="relative group">
+                    <a href="#courses" data-route="courses" class="nav-link font-bold text-slate-500 hover:text-secondary transition flex items-center gap-1 py-2">精選課程 <i class="fa-solid fa-chevron-down text-[10px]"></i></a>
+                    <!-- 巨型選單模擬 -->
+                    <div class="absolute top-full left-0 w-64 bg-white shadow-premium rounded-2xl p-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all translate-y-2 group-hover:translate-y-0 border border-slate-100">
+                        <a href="#courses" class="block p-3 hover:bg-slate-50 rounded-xl transition">國中部會考班</a>
+                        <a href="#courses" class="block p-3 hover:bg-slate-50 rounded-xl transition">高中部學測班</a>
+                        <a href="#courses" class="block p-3 hover:bg-slate-50 rounded-xl transition">雙語國際專班</a>
+                        <a href="#courses" class="block p-3 hover:bg-slate-50 rounded-xl transition">AI 個別指導</a>
+                    </div>
+                </div>
+                <a href="#teachers" data-route="teachers" class="nav-link relative font-bold text-slate-500 hover:text-secondary transition py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-secondary after:transition-all hover:after:w-full">金牌名師</a>
+                <a href="#results" data-route="results" class="nav-link relative font-bold text-slate-500 hover:text-secondary transition py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-secondary after:transition-all hover:after:w-full">升學榜單</a>
+                <a href="#about" data-route="about" class="nav-link relative font-bold text-slate-500 hover:text-secondary transition py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-secondary after:transition-all hover:after:w-full">品牌故事</a>
+                <a href="#blog" data-route="blog" class="nav-link relative font-bold text-slate-500 hover:text-secondary transition py-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-secondary after:transition-all hover:after:w-full">教育專欄</a>
+            </nav>
+
+            <!-- 功能操作區 -->
+            <div class="flex items-center gap-4 md:gap-8">
+                <!-- 購物車 -->
+                <button onclick="shop.toggleCart()" class="relative p-3 bg-slate-100 text-slate-600 rounded-full hover:bg-secondary hover:text-white transition duration-300 group">
+                    <i class="fa-solid fa-cart-plus text-xl"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-accent text-white text-[10px] w-6 h-6 rounded-full flex items-center justify-center font-bold border-2 border-white group-hover:scale-110 transition">0</span>
+                </button>
+                <!-- 預約按鈕 -->
+                <a href="#contact" class="hidden sm:flex bg-secondary text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-blue-200 hover:bg-primary hover:shadow-none transition-all items-center gap-3 active:scale-95">
+                    <i class="fa-solid fa-calendar-check text-lg"></i> 立即試聽
+                </a>
+                <!-- 行動版切換 -->
+                <button id="menu-btn" class="xl:hidden text-2xl text-slate-800 p-2"><i class="fa-solid fa-bars-staggered"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- IV. 行動版選單彈窗 -->
+    <div id="mobile-menu" class="fixed inset-0 z-[100] bg-primary translate-x-full transition-transform duration-500 p-10 flex flex-col justify-between xl:hidden">
+        <div>
+            <div class="flex justify-between items-center mb-16">
+                <span class="text-white font-display font-black text-2xl">MENU</span>
+                <button id="menu-close" class="text-white text-3xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <nav class="flex flex-col gap-8">
+                <a href="#home" class="mobile-link text-3xl font-black text-slate-400 hover:text-white transition">01. 首頁</a>
+                <a href="#courses" class="mobile-link text-3xl font-black text-slate-400 hover:text-white transition">02. 精選課程</a>
+                <a href="#teachers" class="mobile-link text-3xl font-black text-slate-400 hover:text-white transition">03. 金牌師資</a>
+                <a href="#results" class="mobile-link text-3xl font-black text-slate-400 hover:text-white transition">04. 榜單查詢</a>
+                <a href="#contact" class="mobile-link text-3xl font-black text-slate-400 hover:text-white transition">05. 聯絡預約</a>
+            </nav>
+        </div>
+        <div class="text-slate-500 text-sm">
+            <p>巔峰教育集團 &copy; 2026</p>
+            <p>台北市信義區忠孝東路五段 123 號</p>
+        </div>
+    </div>
+
+    <!-- V. 主要內容區域 (SPA 容器) -->
+    <main id="app-view">
+        
+        <!-- 1. 首頁 (Home) - 約 800 行邏輯基礎 -->
+        <section id="view-home" class="page-content active">
+            <!-- Hero: 視差與動態效果 -->
+            <div class="relative min-h-[95vh] flex items-center bg-primary overflow-hidden">
+                <!-- 背景層 -->
+                <div class="absolute inset-0 z-0">
+                    <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-secondary rounded-full blur-[180px] opacity-20 animate-pulse"></div>
+                    <div class="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-accent rounded-full blur-[150px] opacity-10"></div>
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+                </div>
+                
+                <div class="max-w-[1440px] mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10 py-20">
+                    <div class="reveal">
+                        <div class="inline-flex items-center gap-3 py-2 px-5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-8">
+                            <span class="flex h-2 w-2 rounded-full bg-accent animate-ping"></span>
+                            <span class="text-white text-xs font-bold tracking-widest uppercase">New: 2026 寒假預購專案</span>
+                        </div>
+                        <h1 class="text-5xl md:text-8xl font-display font-black text-white mb-10 leading-[1] tracking-tighter">
+                            超越 <span class="text-gradient">想像</span><br>定義你的卓越
+                        </h1>
+                        <p class="text-xl text-slate-400 mb-12 max-w-xl leading-relaxed">
+                            我們不僅教授課本內容，更致力於培養解決問題的思維。結合 <span class="text-white font-bold">AI 弱點診斷</span> 與一線名師，讓學習不再是盲目的苦功，而是精準的自我超越。
+                        </p>
+                        <div class="flex flex-wrap gap-6">
+                            <button onclick="router.push('courses')" class="bg-secondary hover:bg-blue-700 text-white px-12 py-6 rounded-[24px] font-black text-xl shadow-premium transition-all transform hover:-translate-y-1 active:scale-95">探索所有課程</button>
+                            <div class="flex items-center gap-4">
+                                <div class="flex -space-x-4">
+                                    <img src="https://i.pravatar.cc/100?u=1" class="w-12 h-12 rounded-full border-4 border-primary" alt="User">
+                                    <img src="https://i.pravatar.cc/100?u=2" class="w-12 h-12 rounded-full border-4 border-primary" alt="User">
+                                    <img src="https://i.pravatar.cc/100?u=3" class="w-12 h-12 rounded-full border-4 border-primary" alt="User">
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold text-sm">15,000+ 位學員</p>
+                                    <p class="text-slate-500 text-xs font-medium italic">目前正在巔峰學習中</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 右側複雜動效區 -->
+                    <div class="relative reveal lg:block hidden">
+                        <div class="animate-float relative z-10">
+                            <div class="absolute -inset-4 bg-gradient-to-r from-secondary to-accent opacity-30 blur-3xl rounded-[60px]"></div>
+                            <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=2070&auto=format&fit=crop" alt="補習班現場" class="rounded-[50px] shadow-premium border-[12px] border-white/5 relative z-10 w-full object-cover aspect-video lg:aspect-square">
+                            
+                            <!-- 浮動數據卡片 1 -->
+                            <div class="absolute top-10 -left-20 glass-nav p-8 rounded-[30px] shadow-premium border border-white/20 animate-bounce transition-all hover:scale-105 group">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-16 h-16 bg-success/20 text-success rounded-2xl flex items-center justify-center text-3xl"><i class="fa-solid fa-chart-line"></i></div>
+                                    <div>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">成績增長率</p>
+                                        <p class="text-3xl font-black text-primary">+145%</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 浮動數據卡片 2 -->
+                            <div class="absolute -bottom-10 -right-10 bg-white p-8 rounded-[30px] shadow-premium animate-pulse delay-700">
+                                <div class="flex items-center gap-5">
+                                    <div class="w-16 h-16 bg-accent/20 text-accent rounded-2xl flex items-center justify-center text-3xl"><i class="fa-solid fa-trophy"></i></div>
+                                    <div>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">第一志願錄取</p>
+                                        <p class="text-3xl font-black text-primary">98.2%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features: 多元優勢區塊 -->
+            <div class="py-32 bg-white relative">
+                <div class="max-w-[1440px] mx-auto px-6">
+                    <div class="text-center mb-24 reveal">
+                        <h2 class="text-accent font-display font-black tracking-[0.4em] uppercase text-sm mb-6">Our Advantages</h2>
+                        <h3 class="text-4xl md:text-6xl font-black mb-8">為何 <span class="text-secondary">巔峰</span> 是補教界的黃金標竿？</h3>
+                        <p class="text-slate-500 max-w-2xl mx-auto text-lg font-medium">我們深耕教育十五年，將「傳統教學」與「現代科技」完美融合，打造出獨一無二的學習生態系統。</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                        <!-- 優勢 1 -->
+                        <div class="group p-12 rounded-[50px] bg-slate-50 hover:bg-primary transition-all duration-700 reveal shadow-sm hover:shadow-premium">
+                            <div class="w-20 h-20 bg-blue-100 text-secondary rounded-3xl flex items-center justify-center text-4xl mb-10 group-hover:bg-secondary group-hover:text-white group-hover:rotate-[360deg] transition-all duration-1000">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                            <h4 class="text-2xl font-black mb-6 group-hover:text-white transition-colors">AI 智能弱點診斷</h4>
+                            <p class="text-slate-500 group-hover:text-slate-400 transition-colors leading-relaxed">利用大數據分析每位學員的解題數據，精準抓出知識盲點，為每人量身打造專屬補強講義，效率提升 3 倍。</p>
+                        </div>
+                        <!-- 優勢 2 -->
+                        <div class="group p-12 rounded-[50px] bg-slate-50 hover:bg-primary transition-all duration-700 reveal shadow-sm hover:shadow-premium" style="transition-delay: 100ms;">
+                            <div class="w-20 h-20 bg-blue-100 text-secondary rounded-3xl flex items-center justify-center text-4xl mb-10 group-hover:bg-secondary group-hover:text-white group-hover:rotate-[360deg] transition-all duration-1000">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <h4 class="text-2xl font-black mb-6 group-hover:text-white transition-colors">頂尖名師親自授課</h4>
+                            <p class="text-slate-500 group-hover:text-slate-400 transition-colors leading-relaxed">絕非播放錄影帶！所有核心班級皆由各科主任親自領軍，當場解決所有疑惑，讓互動學習發揮最大價值。</p>
+                        </div>
+                        <!-- 優勢 3 -->
+                        <div class="group p-12 rounded-[50px] bg-slate-50 hover:bg-primary transition-all duration-700 reveal shadow-sm hover:shadow-premium" style="transition-delay: 200ms;">
+                            <div class="w-20 h-20 bg-blue-100 text-secondary rounded-3xl flex items-center justify-center text-4xl mb-10 group-hover:bg-secondary group-hover:text-white group-hover:rotate-[360deg] transition-all duration-1000">
+                                <i class="fa-solid fa-shield-heart"></i>
+                            </div>
+                            <h4 class="text-2xl font-black mb-6 group-hover:text-white transition-colors">24/7 全方位輔導</h4>
+                            <p class="text-slate-500 group-hover:text-slate-400 transition-colors leading-relaxed">除了正課，我們提供線上預約問問題服務與實體 K 書中心，輔導助教全程陪讀，家長隨時能掌握最新進度。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats: 數據儀表板 -->
+            <div class="bg-secondary py-28 relative overflow-hidden">
+                <div class="absolute inset-0 opacity-10 flex items-center justify-center">
+                    <span class="text-[300px] font-black text-white select-none">PEAK</span>
+                </div>
+                <div class="max-w-[1440px] mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-16 text-center text-white relative z-10 reveal">
+                    <div class="flex flex-col items-center">
+                        <div class="mb-4 p-4 bg-white/10 rounded-2xl"><i class="fa-solid fa-clock-rotate-left text-3xl"></i></div>
+                        <p class="text-6xl font-black mb-3 counter" data-target="15">0</p>
+                        <p class="text-blue-100 font-bold uppercase tracking-[0.2em] text-xs">年教育根基</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="mb-4 p-4 bg-white/10 rounded-2xl"><i class="fa-solid fa-medal text-3xl"></i></div>
+                        <p class="text-6xl font-black mb-3 counter" data-target="98">0</p>
+                        <p class="text-blue-100 font-bold uppercase tracking-[0.2em] text-xs">學員滿意度 (%)</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="mb-4 p-4 bg-white/10 rounded-2xl"><i class="fa-solid fa-users-viewfinder text-3xl"></i></div>
+                        <p class="text-6xl font-black mb-3 counter" data-target="350">0</p>
+                        <p class="text-blue-100 font-bold uppercase tracking-[0.2em] text-xs">專業教研團隊</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="mb-4 p-4 bg-white/10 rounded-2xl"><i class="fa-solid fa-location-dot text-3xl"></i></div>
+                        <p class="text-6xl font-black mb-3 counter" data-target="12">0</p>
+                        <p class="text-blue-100 font-bold uppercase tracking-[0.2em] text-xs">全台直營校區</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 精選課程 (Courses) - 進階篩選與偽購課 -->
+        <section id="view-courses" class="page-content bg-slate-50 py-32">
+            <div class="max-w-[1440px] mx-auto px-6">
+                <div class="flex flex-col lg:flex-row justify-between items-end mb-20 gap-10 reveal">
+                    <div class="max-w-2xl">
+                        <h2 class="text-accent font-display font-black tracking-[0.4em] uppercase text-sm mb-6">Our Curriculum</h2>
+                        <h3 class="text-4xl md:text-6xl font-black mb-8">為不同階段的你<br>定制專屬成長路徑</h3>
+                        <p class="text-slate-500 text-xl font-medium leading-relaxed">從國中會考、高中學測到多元英文檢定，巔峰提供一條龍的學習支持，確保每一步都精準穩健。</p>
+                    </div>
+                    <!-- 商業級篩選器 -->
+                    <div class="flex flex-wrap gap-4 bg-white p-2 rounded-[25px] shadow-sm border border-slate-100">
+                        <button onclick="shop.filter('all')" class="filter-tag active px-8 py-4 rounded-[20px] font-bold text-sm transition-all bg-secondary text-white">所有課程</button>
+                        <button onclick="shop.filter('junior')" class="filter-tag px-8 py-4 rounded-[20px] font-bold text-sm transition-all hover:bg-slate-100 text-slate-500">國中部</button>
+                        <button onclick="shop.filter('senior')" class="filter-tag px-8 py-4 rounded-[20px] font-bold text-sm transition-all hover:bg-slate-100 text-slate-500">高中部</button>
+                        <button onclick="shop.filter('exam')" class="filter-tag px-8 py-4 rounded-[20px] font-bold text-sm transition-all hover:bg-slate-100 text-slate-500">英語/國際</button>
+                    </div>
+                </div>
+
+                <!-- 課程列表網格 -->
+                <div id="course-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                    <!-- JS 動態生成內容 -->
+                </div>
+
+                <!-- CTA 橫幅 -->
+                <div class="mt-24 bg-primary rounded-[50px] p-12 md:p-20 flex flex-col md:flex-row items-center justify-between gap-12 reveal">
+                    <div class="text-center md:text-left">
+                        <h4 class="text-3xl md:text-5xl font-black text-white mb-6">不確定適合哪種課程？</h4>
+                        <p class="text-slate-400 text-xl">現在就預約 <span class="text-accent font-bold">15 分鐘線上面談</span>，讓專家為您分析。</p>
+                    </div>
+                    <button onclick="router.push('contact')" class="bg-white text-primary px-12 py-6 rounded-2xl font-black text-xl hover:bg-accent hover:text-white transition-all shadow-xl shadow-white/5 whitespace-nowrap">立即免費諮詢</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 金牌師資 (Teachers) - 精選名師介紹 -->
+        <section id="view-teachers" class="page-content py-32 bg-white">
+            <div class="max-w-[1440px] mx-auto px-6">
+                <div class="text-center mb-24 reveal">
+                    <h2 class="text-accent font-display font-black tracking-[0.4em] uppercase text-sm mb-6">Master Teachers</h2>
+                    <h3 class="text-4xl md:text-6xl font-black mb-8">用專業實力<br>撐起你的學霸夢</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
+                    <!-- 教師 1 -->
+                    <div class="reveal group">
+                        <div class="relative rounded-[40px] overflow-hidden mb-10 shadow-premium">
+                            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop" class="w-full aspect-[4/5] object-cover transition-transform duration-1000 group-hover:scale-110" alt="Teacher">
+                            <div class="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent opacity-80"></div>
+                            <div class="absolute bottom-8 left-8 right-8 text-white">
+                                <p class="text-accent font-black tracking-widest text-[10px] uppercase mb-2">數學科首席</p>
+                                <h4 class="text-3xl font-black">張國強 主任</h4>
+                                <div class="mt-4 flex gap-2">
+                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold">台大數學碩士</span>
+                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold">20年教職</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-slate-500 font-medium italic leading-relaxed">「我從不教學生背公式，我教的是數學背後的宇宙邏輯。一旦邏輯通了，任何難題都能迎刃而解。」</p>
+                    </div>
+                    <!-- 教師 2 -->
+                    <div class="reveal group" style="transition-delay: 150ms;">
+                        <div class="relative rounded-[40px] overflow-hidden mb-10 shadow-premium">
+                            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1976&auto=format&fit=crop" class="w-full aspect-[4/5] object-cover transition-transform duration-1000 group-hover:scale-110" alt="Teacher">
+                            <div class="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent opacity-80"></div>
+                            <div class="absolute bottom-8 left-8 right-8 text-white">
+                                <p class="text-accent font-black tracking-widest text-[10px] uppercase mb-2">英文科首席</p>
+                                <h4 class="text-3xl font-black">林雅芳 老師</h4>
+                                <div class="mt-4 flex gap-2">
+                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold">美國哥大碩士</span>
+                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold">TOEIC 滿分</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-slate-500 font-medium italic leading-relaxed">「語言是一種力量。透過我的結構化寫作法，我能讓學生在短時間內從不敢開口到寫出讓教授驚豔的高分文章。」</p>
+                    </div>
+                    <!-- 教師 3 -->
+                    <div class="reveal group" style="transition-delay: 300ms;">
+                        <div class="relative rounded-[40px] overflow-hidden mb-10 shadow-premium">
+                            <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?q=80&w=1987&auto=format&fit=crop" class="w-full aspect-[4/5] object-cover transition-transform duration-1000 group-hover:scale-110" alt="Teacher">
+                            <div class="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent opacity-80"></div>
+                            <div class="absolute bottom-8 left-8 right-8 text-white">
+                                <p class="text-accent font-black tracking-widest text-[10px] uppercase mb-2">理化科首席</p>
+                                <h4 class="text-3xl font-black">陳俊傑 老師</h4>
+                                <div class="mt-4 flex gap-2">
+                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold">清大物理學系</span>
+                                    <span class="bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold">素養題專家</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-slate-500 font-medium italic leading-relaxed">「科學不應是艱澀的。我喜歡將複雜的物理現象轉化為幽默的生活實例，讓孩子們在笑聲中掌握核心原理。」</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 品牌故事 (About) - 品牌理念與環境 -->
+        <section id="view-about" class="page-content py-32 bg-surface">
+            <div class="max-w-[1440px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                <div class="relative reveal">
+                    <div class="absolute top-[-50px] right-[-50px] w-full h-full border-4 border-secondary rounded-[60px] -z-10 translate-x-8 translate-y-8"></div>
+                    <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop" class="rounded-[60px] shadow-premium w-full object-cover aspect-square" alt="Brand Story">
+                </div>
+                <div class="reveal">
+                    <h2 class="text-accent font-display font-black tracking-[0.4em] uppercase text-sm mb-6">Our Philosophy</h2>
+                    <h3 class="text-4xl md:text-6xl font-black mb-8 leading-tight">不只是補習班<br>更是夢想的孵化器</h3>
+                    <p class="text-slate-600 text-xl mb-12 leading-relaxed font-medium">
+                        巔峰教育成立於 2011 年，由一群對教育充滿熱忱的頂尖學者共同創立。我們始終相信，教育的真諦不在於填鴨式的灌輸，而在於點燃學習的火焰。
+                    </p>
+                    <div class="space-y-8">
+                        <div class="flex gap-6 items-start">
+                            <div class="w-14 h-14 shrink-0 bg-white rounded-2xl flex items-center justify-center text-secondary shadow-sm text-2xl"><i class="fa-solid fa-heart-pulse"></i></div>
+                            <div>
+                                <h5 class="text-xl font-bold mb-2">以人為本的陪伴</h5>
+                                <p class="text-slate-500">我們關心學生的成績，更關心他們的心靈成長與抗壓力發展。</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-6 items-start">
+                            <div class="w-14 h-14 shrink-0 bg-white rounded-2xl flex items-center justify-center text-secondary shadow-sm text-2xl"><i class="fa-solid fa-rocket"></i></div>
+                            <div>
+                                <h5 class="text-xl font-bold mb-2">持續創新的技術</h5>
+                                <p class="text-slate-500">首創 AI 學習路徑，讓科技成為孩子最堅強的學習後盾。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 聯絡預約 (Contact) - 預約表單與校區 -->
+        <section id="view-contact" class="page-content py-32 bg-primary text-white">
+            <div class="max-w-[1440px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+                <div class="reveal">
+                    <h2 class="text-4xl md:text-7xl font-black mb-10 leading-tight">準備好踏出<br><span class="text-secondary">卓越</span>的第一步？</h2>
+                    <p class="text-slate-400 text-xl mb-16 max-w-lg">專業課程顧問將於 24 小時內與您聯繫，協助您進行免費的能力檢測與課程規劃。</p>
+                    <div class="space-y-10">
+                        <div class="flex items-center gap-8">
+                            <div class="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center text-blue-400 text-3xl"><i class="fa-solid fa-phone-volume"></i></div>
+                            <div>
+                                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">諮詢專線</p>
+                                <p class="text-2xl font-black">(02) 2345-6789</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-8">
+                            <div class="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center text-green-400 text-3xl"><i class="fa-brands fa-line"></i></div>
+                            <div>
+                                <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-1">官方 LINE</p>
+                                <p class="text-2xl font-black">@PEAKEDU_TW</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 表單卡片 -->
+                <div class="bg-white rounded-[50px] p-12 md:p-16 text-primary shadow-premium reveal">
+                    <h4 class="text-3xl font-black text-center mb-10">預約免費試聽</h4>
+                    <form id="booking-form" class="space-y-8">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">學生姓名</label>
+                                <input type="text" required placeholder="請輸入姓名" class="w-full bg-slate-100 border-none px-6 py-4 rounded-2xl focus:ring-2 focus:ring-secondary outline-none transition">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">聯絡電話</label>
+                                <input type="tel" required placeholder="0912-345-678" class="w-full bg-slate-100 border-none px-6 py-4 rounded-2xl focus:ring-2 focus:ring-secondary outline-none transition">
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">目前就讀年級</label>
+                            <select class="w-full bg-slate-100 border-none px-6 py-4 rounded-2xl focus:ring-2 focus:ring-secondary outline-none transition appearance-none">
+                                <option>國中一年級</option>
+                                <option>國中二年級</option>
+                                <option>國中三年級</option>
+                                <option>高中一年級</option>
+                                <option>高中二年級</option>
+                                <option>高中三年級</option>
+                            </select>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">感興趣的課程</label>
+                            <div class="flex flex-wrap gap-3">
+                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2 rounded-xl hover:bg-slate-200 transition">
+                                    <input type="checkbox" class="accent-secondary w-4 h-4"> <span class="text-sm font-bold">數學</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2 rounded-xl hover:bg-slate-200 transition">
+                                    <input type="checkbox" class="accent-secondary w-4 h-4"> <span class="text-sm font-bold">英文</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2 rounded-xl hover:bg-slate-200 transition">
+                                    <input type="checkbox" class="accent-secondary w-4 h-4"> <span class="text-sm font-bold">理化</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-4 py-2 rounded-xl hover:bg-slate-200 transition">
+                                    <input type="checkbox" class="accent-secondary w-4 h-4"> <span class="text-sm font-bold">AI 個別</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-secondary text-white py-6 rounded-3xl font-black text-xl hover:bg-primary hover:shadow-2xl transition-all transform active:scale-95 shadow-lg shadow-blue-100">送出預約申請</button>
+                        <p class="text-center text-slate-400 text-[10px] font-medium leading-relaxed">我們重視您的隱私。點擊送出即表示您同意接收巔峰教育相關課程資訊。</p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- VI. 虛擬購物車側邊欄 -->
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full md:w-[500px] bg-white shadow-premium z-[100] translate-x-full transition-transform duration-700 ease-in-out">
+        <div class="p-10 flex flex-col h-full">
+            <div class="flex justify-between items-center mb-12">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-cart-shopping text-2xl text-secondary"></i>
+                    <h3 class="text-3xl font-black">預選清單</h3>
+                </div>
+                <button onclick="shop.toggleCart()" class="text-slate-300 hover:text-red-500 text-3xl transition"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div id="cart-items" class="flex-grow overflow-y-auto space-y-6">
+                <!-- 空購物車狀態 -->
+                <div id="cart-empty" class="text-center py-20 text-slate-300">
+                    <i class="fa-solid fa-box-open text-7xl mb-6 opacity-20"></i>
+                    <p class="text-lg font-bold">目前還沒有選擇任何課程</p>
+                    <button onclick="shop.toggleCart(); router.push('courses')" class="mt-4 text-secondary font-black underline underline-offset-8">去逛逛課程吧</button>
+                </div>
+            </div>
+
+            <div class="mt-10 pt-10 border-t border-slate-100 space-y-8">
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 font-bold uppercase tracking-widest text-xs">估計總學費</span>
+                    <span id="cart-total" class="text-4xl font-black text-secondary">$0</span>
+                </div>
+                <button onclick="shop.checkout()" class="w-full bg-primary text-white py-6 rounded-3xl font-black text-xl hover:bg-secondary transition shadow-premium">確認預選並前往專業諮詢</button>
+                <p class="text-center text-slate-400 text-xs italic">預選僅供保留名額與折扣，不需立即付費。</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- VII. Footer: 完整企業連結與 SEO 地圖 -->
+    <footer class="bg-white border-t border-slate-100 pt-32 pb-20">
+        <div class="max-w-[1440px] mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-20 mb-24">
+            <div>
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="w-10 h-10 bg-secondary text-white rounded-xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-shield-cat"></i></div>
+                    <span class="font-display font-black text-2xl tracking-tighter">PEAK EDU</span>
+                </div>
+                <p class="text-slate-500 font-medium leading-relaxed mb-10">
+                    全台升學教育首選品牌。我們堅持用最高標準的師資與科技，守護每位學子走向理想的大學之路。
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center hover:bg-secondary hover:text-white transition shadow-sm"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center hover:bg-secondary hover:text-white transition shadow-sm"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center hover:bg-secondary hover:text-white transition shadow-sm"><i class="fa-brands fa-youtube"></i></a>
+                    <a href="#" class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center hover:bg-secondary hover:text-white transition shadow-sm"><i class="fa-brands fa-line"></i></a>
+                </div>
+            </div>
+            <div>
+                <h5 class="font-black text-xl mb-10 underline decoration-secondary decoration-4 underline-offset-8">核心學程</h5>
+                <ul class="space-y-5 text-slate-500 font-bold">
+                    <li><a href="#courses" class="hover:text-secondary transition">國中會考總複習</a></li>
+                    <li><a href="#courses" class="hover:text-secondary transition">高中學測衝刺班</a></li>
+                    <li><a href="#courses" class="hover:text-secondary transition">高職統測專班</a></li>
+                    <li><a href="#courses" class="hover:text-secondary transition">全方位英語聽說讀寫</a></li>
+                    <li><a href="#courses" class="hover:text-secondary transition">AI 1對1個別指導</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-black text-xl mb-10 underline decoration-secondary decoration-4 underline-offset-8">分校據點</h5>
+                <ul class="space-y-5 text-slate-500 font-bold">
+                    <li><a href="#" class="hover:text-secondary transition">台北站前總校</a></li>
+                    <li><a href="#" class="hover:text-secondary transition">板橋府中校區</a></li>
+                    <li><a href="#" class="hover:text-secondary transition">桃園中正校區</a></li>
+                    <li><a href="#" class="hover:text-secondary transition">台中一中校區</a></li>
+                    <li><a href="#" class="hover:text-secondary transition">高雄站前分部</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="font-black text-xl mb-10 underline decoration-secondary decoration-4 underline-offset-8">重要資訊</h5>
+                <ul class="space-y-5 text-slate-500 font-bold">
+                    <li><a href="#" class="hover:text-secondary transition">最新錄取榜單查詢</a></li>
+                    <li><a href="#" class="hover:text-secondary transition">招生說明會預約</a></li>
+                    <li><a href="#" class="hover:text-secondary transition">常見問題 FAQ</a></li>
+                    <li><a href="#" class="hover:text-secondary transition">隱私權與條款政策</a></li>
+                    <li><a href="#" class="hover:text-secondary transition">加入我們的教職團隊</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-[1440px] mx-auto px-6 pt-12 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="text-slate-400 text-sm font-bold">
+                &copy; 2026 巔峰教育集團 PEAK EDU. All Rights Reserved. 
+            </div>
+            <div class="flex gap-8 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                <span>北市補教社字第 88888 號</span>
+                <span>全站 SSL 加密保護</span>
+                <span>100% 合格師資認證</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- VIII. 核心 JavaScript (SPA 路由 / SEO / 狀態 / 動畫) -->
+    <script>
+        /**
+         * 1. 商業虛擬數據庫 (模擬後端 API)
+         */
+        const DATABASE = {
+            courses: [
+                { id: 1, type: 'junior', title: '2026 國中會考：全科戰鬥衝刺班', price: 32800, img: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=600', tags: ['會考', '小班制'] },
+                { id: 2, type: 'senior', title: '高中學測：數學 A 頂標養成計畫', price: 18500, img: 'https://images.unsplash.com/photo-1596495578065-6e0763fa1178?auto=format&fit=crop&w=600', tags: ['學測', '數學A'] },
+                { id: 3, type: 'exam', title: 'GEPT 全民英檢：中高級高分保證班', price: 15000, img: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600', tags: ['檢定', '保證班'] },
+                { id: 4, type: 'junior', title: '國二理化：直觀式解題實驗室', price: 9600, img: 'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=600', tags: ['理化', '素養'] },
+                { id: 5, type: 'senior', title: '學測英文：高階閱讀與寫作工坊', price: 16800, img: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600', tags: ['英文', '寫作'] },
+                { id: 6, type: 'exam', title: 'SAT/AP：北美名校國際留學專班', price: 45000, img: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=600', tags: ['國際部', '留學'] }
+            ],
+            seo: {
+                home: { title: '巔峰教育 | 全台頂尖升學補習首選', desc: '超越想像的學習體驗，名師與 AI 結合，助您考取第一志願。' },
+                courses: { title: '精選課程 | 國中會考、高中學測專班', desc: '針對各階段大考量身打造的專業教學計畫，全科戰鬥衝刺。' },
+                teachers: { title: '金牌師資 | 台北名師團隊介紹', desc: '匯集台清交名校首席，平均 15 年以上教學經驗。' },
+                results: { title: '光榮榜單 | 錄取率高達 98% 的秘密', desc: '查看學長姐成功的軌跡，下一位金榜題名就是你。' },
+                about: { title: '品牌理念 | 點燃學習之火的教育初衷', desc: '巔峰教育創辦故事，了解我們如何定義新世代的教育。' },
+                blog: { title: '教育專欄 | 最新升學趨勢與讀書方法', desc: '定期更新教育快訊，提供家長與學生最實用的讀書策略。' },
+                contact: { title: '聯絡預約 | 免費諮詢名師試聽', desc: '立即開啟改變的第一步，預約專業顧問規劃學習路徑。' }
+            }
+        };
+
+        /**
+         * 2. SPA 路由系統 (核心控制器)
+         */
+        const router = {
+            push(routeId) {
+                // 視覺重置
+                document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
+                const target = document.getElementById(`view-${routeId}`);
+                if (target) {
+                    target.classList.add('active');
+                }
+
+                // 導航鏈結同步
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('nav-link-active');
+                    if (link.dataset.route === routeId) link.classList.add('nav-link-active');
+                });
+
+                // 動態 SEO 更新
+                const seoData = DATABASE.seo[routeId] || DATABASE.seo.home;
+                document.title = `${seoData.title} | PEAK EDU`;
+                document.querySelector('meta[name="description"]').setAttribute('content', seoData.desc);
+
+                // 更新網址 Hash 與 捲動至頂
+                window.location.hash = routeId;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // 隱藏手機選單
+                document.getElementById('mobile-menu').classList.add('translate-x-full');
+
+                // 觸發該頁面的顯影初始化
+                setTimeout(revealOnScroll, 100);
+            },
+            init() {
+                const hash = window.location.hash.replace('#', '') || 'home';
+                this.push(hash);
+            }
+        };
+
+        /**
+         * 3. 購物車邏輯 (State Management)
+         */
+        const shop = {
+            cart: [],
+            toggleCart() {
+                document.getElementById('cart-drawer').classList.toggle('translate-x-full');
+            },
+            add(id) {
+                const item = DATABASE.courses.find(c => c.id === id);
+                if (this.cart.find(c => c.id === id)) return alert('已在預選清單中囉！');
+                
+                this.cart.push(item);
+                this.updateUI();
+                
+                // 動畫效果
+                const btn = document.querySelector(`[onclick="shop.add(${id})"]`);
+                if (btn) {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> 已選入';
+                    btn.classList.replace('bg-primary', 'bg-success');
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.replace('bg-success', 'bg-primary');
+                    }, 2000);
+                }
+            },
+            remove(id) {
+                this.cart = this.cart.filter(c => c.id !== id);
+                this.updateUI();
+            },
+            updateUI() {
+                const countEl = document.getElementById('cart-count');
+                const listEl = document.getElementById('cart-items');
+                const totalEl = document.getElementById('cart-total');
+                const emptyEl = document.getElementById('cart-empty');
+
+                countEl.innerText = this.cart.length;
+                
+                if (this.cart.length === 0) {
+                    listEl.innerHTML = '';
+                    emptyEl.classList.remove('hidden');
+                    totalEl.innerText = '$0';
+                    return;
+                }
+
+                emptyEl.classList.add('hidden');
+                listEl.innerHTML = this.cart.map(item => `
+                    <div class="flex items-center gap-6 bg-slate-50 p-6 rounded-[30px] border border-slate-100 group">
+                        <img src="${item.img}" class="w-20 h-20 rounded-2xl object-cover shadow-sm">
+                        <div class="flex-grow">
+                            <h5 class="font-black text-sm mb-1">${item.title}</h5>
+                            <p class="text-secondary font-black">$${item.price.toLocaleString()}</p>
+                        </div>
+                        <button onclick="shop.remove(${item.id})" class="text-slate-300 hover:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                `).join('');
+
+                const sum = this.cart.reduce((acc, curr) => acc + curr.price, 0);
+                totalEl.innerText = `$${sum.toLocaleString()}`;
+            },
+            filter(type) {
+                const grid = document.getElementById('course-grid');
+                const filtered = type === 'all' ? DATABASE.courses : DATABASE.courses.filter(c => c.type === type);
+                
+                grid.innerHTML = filtered.map(course => `
+                    <div class="course-card bg-white rounded-[50px] overflow-hidden shadow-sm hover:shadow-premium transition-all duration-700 border border-slate-50 group reveal">
+                        <div class="h-72 overflow-hidden relative">
+                            <img src="${course.img}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                                <button onclick="shop.add(${course.id})" class="bg-white text-primary p-4 rounded-full hover:bg-secondary hover:text-white transition"><i class="fa-solid fa-cart-plus"></i></button>
+                                <button onclick="router.push('contact')" class="bg-white text-primary p-4 rounded-full hover:bg-accent hover:text-white transition"><i class="fa-solid fa-eye"></i></button>
+                            </div>
+                            <div class="absolute top-6 left-6 flex gap-2">
+                                ${course.tags.map(t => `<span class="bg-white/90 backdrop-blur-md px-4 py-2 rounded-full text-[10px] font-black uppercase text-secondary shadow-sm">${t}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="p-10 md:p-14">
+                            <h4 class="text-2xl font-black mb-6 leading-tight group-hover:text-secondary transition-colors">${course.title}</h4>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">早鳥優惠價</p>
+                                    <p class="text-3xl font-black text-primary">$${course.price.toLocaleString()}</p>
+                                </div>
+                                <button onclick="shop.add(${course.id})" class="bg-primary text-white px-8 py-4 rounded-2xl font-bold hover:bg-secondary transition active:scale-90">加入預選</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // 更新標籤樣式
+                document.querySelectorAll('.filter-tag').forEach(tag => {
+                    tag.classList.remove('bg-secondary', 'text-white');
+                    tag.classList.add('text-slate-500');
+                    if (tag.innerText.includes(type === 'all' ? '所有' : type === 'junior' ? '國中' : type === 'senior' ? '高中' : '英語')) {
+                        tag.classList.add('bg-secondary', 'text-white');
+                        tag.classList.remove('text-slate-500');
+                    }
+                });
+
+                revealOnScroll();
+            },
+            checkout() {
+                if (this.cart.length === 0) return alert('預選清單是空的喔！');
+                alert('感謝預選！專業顧問將優先為您保留名額與 85 折優惠。');
+                this.cart = [];
+                this.updateUI();
+                this.toggleCart();
+            }
+        };
+
+        /**
+         * 4. 滾動動畫與計數器引擎
+         */
+        function revealOnScroll() {
+            const elements = document.querySelectorAll('.reveal');
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 80) {
+                    el.classList.add('active');
+                    // 檢查是否包含計數器
+                    const counter = el.querySelector('.counter');
+                    if (counter && !counter.dataset.animated) {
+                        animateCounter(counter);
+                    }
+                }
+            });
+        }
+
+        function animateCounter(el) {
+            const target = parseInt(el.dataset.target);
+            let current = 0;
+            const duration = 2000;
+            const increment = target / (duration / 16);
+            
+            el.dataset.animated = "true";
+            const update = () => {
+                current += increment;
+                if (current < target) {
+                    el.innerText = Math.floor(current);
+                    requestAnimationFrame(update);
+                } else {
+                    el.innerText = target;
+                }
+            };
+            update();
+        }
+
+        /**
+         * 5. 初始化與事件監聽
+         */
+        window.addEventListener('scroll', () => {
+            revealOnScroll();
+            // Navbar 捲動縮小效果
+            const nav = document.querySelector('header');
+            if (window.scrollY > 100) {
+                nav.classList.add('h-16', 'md:h-20', 'shadow-premium');
+            } else {
+                nav.classList.remove('h-16', 'md:h-20', 'shadow-premium');
+            }
+        });
+
+        window.onload = () => {
+            // 模擬載入動畫
+            setTimeout(() => {
+                document.getElementById('global-loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('global-loader').style.display = 'none';
+                }, 700);
+            }, 800);
+
+            // 初始化各模組
+            router.init();
+            shop.filter('all');
+            
+            // 倒數計時器
+            setInterval(() => {
+                const now = new Date();
+                const hours = String(23 - now.getHours()).padStart(2, '0');
+                const mins = String(59 - now.getMinutes()).padStart(2, '0');
+                const secs = String(59 - now.getSeconds()).padStart(2, '0');
+                document.getElementById('promo-timer').innerText = `${hours}:${mins}:${secs}`;
+            }, 1000);
+        };
+
+        // 手機版選單控制器
+        document.getElementById('menu-btn').onclick = () => document.getElementById('mobile-menu').classList.remove('translate-x-full');
+        document.getElementById('menu-close').onclick = () => document.getElementById('mobile-menu').classList.add('translate-x-full');
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.onclick = (e) => {
+                const route = e.target.getAttribute('href').replace('#', '');
+                router.push(route);
+            }
+        });
+
+        // 監聽 Popstate 以支援瀏覽器前後退
+        window.onpopstate = () => router.init();
+
+        // 表單處理
+        document.getElementById('booking-form').onsubmit = (e) => {
+            e.preventDefault();
+            alert('送出成功！專員將於 24 小時內聯絡您。');
+            e.target.reset();
+        };
+
+    </script>
+</body>
+</html>
