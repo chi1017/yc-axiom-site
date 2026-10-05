@@ -570,7 +570,7 @@
         .works-list { display: flex; flex-direction: column; gap: 16px; }
         .work-item {
             background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
-            display: grid; grid-template-columns: 84px 1fr auto; align-items: center; gap: 32px;
+            display: grid; grid-template-columns: 220px 1fr auto; align-items: center; gap: 32px;
             padding: 36px 40px; transition: all 0.35s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .work-item.hidden { display: none !important; }
@@ -584,7 +584,7 @@
            faint number floating in the row — same teal-on-dark language as
            the rest of the site, no invented photography. */
         .work-cover {
-            width: 84px; height: 84px; border-radius: 6px; flex-shrink: 0;
+            width: 220px; height: 88px; border-radius: 6px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
             position: relative; overflow: hidden; transition: border-color 0.3s ease;
             background:
@@ -599,6 +599,12 @@
         .work-cover::before { top: 6px; left: 6px; border-width: 1.5px 0 0 1.5px; }
         .work-cover::after  { bottom: 6px; right: 6px; border-width: 0 1.5px 1.5px 0; }
 
+        /* Website screenshot covers (real homepage captures, 2026-10-05) */
+        .work-cover--img { background: var(--surface-2); }
+        .work-cover--img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        .work-item:hover .work-cover--img img { transform: scale(1.05); }
+        .work-cover--img::before, .work-cover--img::after { z-index: 2; }
+        .work-cover--img .work-num { position: absolute; left: 8px; top: 8px; z-index: 2; font-size: 11px; letter-spacing: 0.1em; padding: 3px 7px; border-radius: 3px; background: rgba(11, 10, 9, 0.72); color: var(--text-bright); }
         .work-num { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 800; font-size: 36px; color: rgba(255, 255, 255, 0.85); line-height: 1; letter-spacing: 0.04em; position: relative; z-index: 1; }
         .work-info { min-width: 0; }
         .work-eyebrow { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 600; font-weight: 700; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
@@ -794,6 +800,7 @@
             .tech-stack-grid { grid-template-columns: 1fr; }
             .work-item { grid-template-columns: 1fr; padding: 24px; gap: 16px; }
             .work-item .work-cover { width: 56px; height: 56px; }
+            .work-item .work-cover--img { width: 100%; height: auto; aspect-ratio: 5 / 2; }
             .work-item .work-num { font-size: 26px; }
             .work-link { width: 100%; text-align: center; }
         }
@@ -894,6 +901,16 @@
 @media (max-width: 700px) { .plan-card--wide .plan-items { grid-template-columns: 1fr; } }
 
 /* Featured Cases — Bento Grid */
+.bento-card--img { background: var(--surface-2); }
+.bento-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; z-index: 0; transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1); }
+.bento-card--img:hover .bento-bg { transform: scale(1.04); }
+.bento-card--img::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(11, 10, 9, 0.97) 0%, rgba(11, 10, 9, 0.84) 40%, rgba(11, 10, 9, 0.38) 100%); }
+.bento-card--img > :not(.bento-bg) { position: relative; z-index: 2; }
+.bento-card--img > .bento-num, .bento-card--img > .bento-badge { position: absolute; }
+.bento-card--img:hover { background: var(--surface-2); }
+.shot-figure { max-width: 960px; margin: 40px 0 8px; }
+.shot-figure img { display: block; width: 100%; height: auto; border: 1px solid var(--border-active); border-radius: 6px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); }
+.shot-figure figcaption { margin-top: 12px; font-size: 12px; letter-spacing: 0.06em; color: var(--text-dim); }
 .bento-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1115,7 +1132,8 @@
         <div class="section-eyebrow reveal">Selected Work</div>
         <h2 class="section-title reveal">精選案例</h2>
         <div class="bento-grid">
-            <div class="bento-card bento-card--large reveal tilt-card">
+            <div class="bento-card bento-card--large bento-card--img reveal tilt-card">
+                <img class="bento-bg" src="images/works/real-shooting.webp" alt="" width="1200" height="480" loading="lazy" decoding="async">
                 <span class="bento-num">16</span>
                 <span class="bento-badge">真實案例</span>
                 <div class="bento-eyebrow">品牌模組 [æ] · 商業攝影</div>
@@ -1123,7 +1141,8 @@
                 <p class="bento-desc">高雄左營「小方光影設計」官方品牌網站。20 年資歷、國際獲獎攝影團隊，涵蓋作品集分類、影片作品與三地工作室資訊。</p>
                 <a href="https://www.shooting.com.tw/" target="_blank" rel="noopener" class="bento-link magnetic">查看網站 →</a>
             </div>
-            <div class="bento-card bento-card--wide reveal tilt-card">
+            <div class="bento-card bento-card--wide bento-card--img reveal tilt-card">
+                <img class="bento-bg" src="images/works/real-imassage.webp" alt="" width="1200" height="480" loading="lazy" decoding="async">
                 <span class="bento-num">17</span>
                 <span class="bento-badge">真實案例</span>
                 <div class="bento-eyebrow">維運模組 [æ] · 網站遷移</div>
@@ -1131,13 +1150,15 @@
                 <p class="bento-desc">因應 Weebly 台灣服務終止，將既有網站完整搬遷至 WordPress，保留原有內容同時換來更高客製彈性。</p>
                 <button class="bento-link magnetic" onclick="showPage('case-imassage')">查看完整案例 →</button>
             </div>
-            <div class="bento-card reveal tilt-card">
+            <div class="bento-card bento-card--img reveal tilt-card">
+                <img class="bento-bg" src="images/works/demo-furniture.webp" alt="" width="1200" height="480" loading="lazy" decoding="async">
                 <span class="bento-num">13</span>
                 <div class="bento-eyebrow">品牌模組 [æ] · 居家家具</div>
                 <h3 class="bento-title">AURA CASA 義式家具</h3>
                 <a href="https://chi1017.github.io/yc-axiom-site/demo/furniture.html" target="_blank" rel="noopener" class="bento-link magnetic">查看網站 →</a>
             </div>
-            <div class="bento-card reveal tilt-card">
+            <div class="bento-card bento-card--img reveal tilt-card">
+                <img class="bento-bg" src="images/works/demo-restaurant.webp" alt="" width="1200" height="480" loading="lazy" decoding="async">
                 <span class="bento-num">07</span>
                 <div class="bento-eyebrow">店家模組 [æ] · 精緻餐飲</div>
                 <h3 class="bento-title">餐廳</h3>
@@ -1563,7 +1584,7 @@
             </div>
 
             <div class="work-item reveal tilt-card" data-category="ecommerce">
-                <div class="work-cover"><div class="work-num">05</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-ecommerce.webp" alt="MUJI Select 生活選物 電商範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">05</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">品牌模組 [æ] · 生活選物</div>
                     <h3 class="work-title">電商</h3>
@@ -1579,7 +1600,7 @@
             </div>
 
             <div class="work-item reveal tilt-card" data-category="brand store">
-                <div class="work-cover"><div class="work-num">06</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-diving.webp" alt="DeepBlue 潛水中心範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">06</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">店家模組 [æ] · 運動休閒</div>
                     <h3 class="work-title">潛水</h3>
@@ -1595,7 +1616,7 @@
             </div>
 
             <div class="work-item reveal tilt-card" data-category="store">
-                <div class="work-cover"><div class="work-num">07</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-restaurant.webp" alt="L'ESSENCE 餐廳範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">07</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">店家模組 [æ] · 精緻餐飲</div>
                     <h3 class="work-title">餐廳</h3>
@@ -1627,7 +1648,7 @@
             </div>
 
             <div class="work-item reveal tilt-card" data-category="brand">
-                <div class="work-cover"><div class="work-num">09</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-factory.webp" alt="Time Weaving 觀光工廠範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">09</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">品牌模組 [æ] · 觀光旅遊</div>
                     <h3 class="work-title">觀光工廠</h3>
@@ -1643,7 +1664,7 @@
             </div>
 
             <div class="work-item reveal tilt-card" data-category="store">
-                <div class="work-cover"><div class="work-num">10</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-kindergarten.webp" alt="心萌幼兒園範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">10</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">店家模組 [æ] · 幼兒教育</div>
                     <h3 class="work-title">心萌幼兒園</h3>
@@ -1658,7 +1679,7 @@
                 <a href="https://chi1017.github.io/yc-axiom-site/demo/kindergarten.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
             </div>
             <div class="work-item reveal tilt-card" data-category="brand store">
-                <div class="work-cover"><div class="work-num">11</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-car-detailing.webp" alt="AURA 頂級汽車美容範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">11</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">店家模組 [æ] · 汽車美容</div>
                     <h3 class="work-title">AURA 頂級汽車美容</h3>
@@ -1673,7 +1694,7 @@
                 <a href="https://chi1017.github.io/yc-axiom-site/demo/car-detailing.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
             </div>
             <div class="work-item reveal tilt-card" data-category="brand store">
-                <div class="work-cover"><div class="work-num">12</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-cafe.webp" alt="Komorebi 木漏れ日珈琲範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">12</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">店家模組 [æ] · 日系咖啡</div>
                     <h3 class="work-title">Komorebi 木漏れ日珈琲</h3>
@@ -1688,7 +1709,7 @@
                 <a href="https://chi1017.github.io/yc-axiom-site/demo/cafe.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
             </div>
             <div class="work-item reveal tilt-card" data-category="brand">
-                <div class="work-cover"><div class="work-num">13</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-furniture.webp" alt="AURA CASA 義式家具範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">13</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">品牌模組 [æ] · 居家家具</div>
                     <h3 class="work-title">AURA CASA 義式家具</h3>
@@ -1703,7 +1724,7 @@
                 <a href="https://chi1017.github.io/yc-axiom-site/demo/furniture.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
             </div>
             <div class="work-item reveal tilt-card" data-category="brand store">
-                <div class="work-cover"><div class="work-num">14</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-bakery.webp" alt="Maison de Rêve 夢幻烘焙範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">14</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">店家模組 [æ] · 精品烘焙</div>
                     <h3 class="work-title">Maison de Rêve 夢幻烘焙</h3>
@@ -1718,7 +1739,7 @@
                 <a href="https://chi1017.github.io/yc-axiom-site/demo/bakery.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
             </div>
             <div class="work-item reveal tilt-card" data-category="brand store">
-                <div class="work-cover"><div class="work-num">15</div></div>
+                <div class="work-cover work-cover--img"><img src="images/works/demo-medical.webp" alt="AURA 預防醫學中心範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">15</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">品牌模組 [æ] · 預防醫學</div>
                     <h3 class="work-title">AURA 預防醫學中心</h3>
@@ -1733,7 +1754,7 @@
                 <a href="https://chi1017.github.io/yc-axiom-site/demo/medical.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
             </div>
             <div class="work-item reveal tilt-card" data-category="real brand store" style="border-left: 3px solid var(--accent); background: rgba(0,210,200,0.02);">
-                <div class="work-cover" style="background: linear-gradient(135deg, rgba(0,210,200,0.32), rgba(0,210,200,0.08)); border-color: rgba(0,210,200,0.4);"><div class="work-num" style="color: var(--accent);">16</div></div>
+                <div class="work-cover work-cover--img" style="background: linear-gradient(135deg, rgba(0,210,200,0.32), rgba(0,210,200,0.08)); border-color: rgba(0,210,200,0.4);"><img src="images/works/real-shooting.webp" alt="小方光影設計官方網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num" style="color: var(--accent);">16</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">品牌模組 [æ] · 商業攝影</div>
                     <h3 class="work-title">攝影工作室</h3>
@@ -1753,7 +1774,7 @@
             </div>
 
             <div class="work-item reveal tilt-card" data-category="real store" style="border-left: 3px solid var(--accent); background: rgba(0,210,200,0.02);">
-                <div class="work-cover" style="background: linear-gradient(135deg, rgba(0,210,200,0.32), rgba(0,210,200,0.08)); border-color: rgba(0,210,200,0.4);"><div class="work-num" style="color: var(--accent);">17</div></div>
+                <div class="work-cover work-cover--img" style="background: linear-gradient(135deg, rgba(0,210,200,0.32), rgba(0,210,200,0.08)); border-color: rgba(0,210,200,0.4);"><img src="images/works/real-imassage.webp" alt="iMassage 專業按摩官方網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num" style="color: var(--accent);">17</div></div>
                 <div class="work-info">
                     <div class="work-eyebrow">維運模組 [æ] · 網站遷移</div>
                     <h3 class="work-title">按摩工作室</h3>
@@ -1788,6 +1809,7 @@
         <div class="page-header-glow" aria-hidden="true"></div>
         <p class="section-eyebrow reveal">Case Study / 真實交案 01</p>
         <h2 class="section-title reveal decode-text" data-original="iMassage 按摩工作室網站遷移實錄.">iMassage 按摩工作室<br>網站遷移實錄.</h2>
+        <figure class="shot-figure reveal"><img src="images/works/real-imassage.webp" alt="iMassage 專業按摩官方網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><figcaption>搬遷至 WordPress 後的 iMassage 官網首頁 · imassage.tw · 截圖日期 2026/10/05</figcaption></figure>
 
         <div class="reveal" style="max-width:760px; margin-top:32px;">
             <p style="font-size:17px; color:var(--text); line-height:1.9;">
@@ -1952,6 +1974,7 @@
         <div class="page-header-glow" aria-hidden="true"></div>
         <p class="section-eyebrow reveal">Article / 真實案例</p>
         <h2 class="section-title reveal decode-text" data-original="iMassage 官網遷移實錄.">iMassage 官網遷移實錄.</h2>
+        <figure class="shot-figure reveal"><img src="images/works/real-imassage.webp" alt="iMassage 專業按摩官方網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><figcaption>搬遷至 WordPress 後的 iMassage 官網首頁 · imassage.tw · 截圖日期 2026/10/05</figcaption></figure>
         <div class="article-meta reveal" style="margin-top:20px;">
             <span>✦ 真實案例</span>
             <span>網站遷移 / WordPress</span>
@@ -1999,6 +2022,7 @@
         <div class="page-header-glow" aria-hidden="true"></div>
         <p class="section-eyebrow reveal">Article / 真實案例</p>
         <h2 class="section-title reveal decode-text" data-original="小方光影設計網站案例.">小方光影設計<br>網站案例.</h2>
+        <figure class="shot-figure reveal"><img src="images/works/real-shooting.webp" alt="小方光影設計官方網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><figcaption>小方光影設計官網首頁 · shooting.com.tw · 截圖日期 2026/10/05</figcaption></figure>
         <div class="article-meta reveal" style="margin-top:20px;">
             <span>✦ 真實案例</span>
             <span>品牌形象網站 / 商業攝影</span>
