@@ -20,6 +20,7 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="YC AXIOM [æ]">
     <meta name="theme-color" content="#5FA396">
+    <script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="YC AXIOM [æ] | 商業品牌網頁設計與工程">
     <meta name="twitter:description" content="為店家、餐飲、教育、觀光產業打造高質感品牌網站。UI/UX 設計、SEO 優化、完整交付。">
@@ -341,7 +342,7 @@
             background: rgba(95, 163, 150, 0.05); border: 1px solid rgba(95, 163, 150, 0.35);
             padding: 10px 22px; cursor: pointer; border-radius: 2px; transition: all 0.3s ease;
         }
-        .nav-cta:hover { background: var(--accent); color: var(--black); box-shadow: 0 0 24px var(--accent-glow); }
+        .nav-cta:hover { background: var(--accent); color: var(--on-accent); box-shadow: 0 0 24px var(--accent-glow); }
 
         /* Mobile Nav */
         .hamburger {
@@ -447,7 +448,7 @@
         .hero-btns { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; z-index: 2; }
         .btn-primary {
             font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 600; font-size: 14px; font-weight: 700;
-            letter-spacing: 0.3em; text-transform: uppercase; background: var(--accent); color: var(--black);
+            letter-spacing: 0.3em; text-transform: uppercase; background: var(--accent); color: var(--on-accent);
             border: none; padding: 16px 42px; cursor: pointer; border-radius: 2px; transition: all 0.3s ease;
             box-shadow: 0 0 20px var(--accent-glow);
         }
@@ -618,7 +619,7 @@
             background: rgba(95, 163, 150, 0.05); border: 1px solid rgba(95, 163, 150, 0.3); padding: 12px 24px; cursor: pointer; text-decoration: none; transition: all 0.25s;
             white-space: nowrap; flex-shrink: 0; border-radius: 2px;
         }
-        .work-link:hover { background: var(--accent); color: var(--black); box-shadow: 0 0 20px var(--accent-glow); }
+        .work-link:hover { background: var(--accent); color: var(--on-accent); box-shadow: 0 0 20px var(--accent-glow); }
 
         /* ── FAQ ACCORDION ── */
         .faq-section { margin-top: 80px; }
@@ -657,7 +658,7 @@
 
         .btn-submit {
             width: 100%; font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 600; font-size: 14px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
-            background: var(--accent); color: var(--black); border: none; padding: 16px; cursor: pointer; border-radius: 2px; transition: all 0.3s;
+            background: var(--accent); color: var(--on-accent); border: none; padding: 16px; cursor: pointer; border-radius: 2px; transition: all 0.3s;
             box-shadow: 0 0 20px var(--accent-glow); margin-top: 10px;
         }
         .btn-submit:hover { box-shadow: 0 0 40px var(--accent-glow); }
@@ -1011,6 +1012,75 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 }
     </style>
 <noscript><style>#page-loader{display:none!important}</style></noscript>
+<style id="theme-css">
+/* ── Theme toggle (dark = default brand look, light = opt-in) ── */
+:root { color-scheme: dark; --on-accent: #0B0A09; }
+.nav-right { display: flex; align-items: center; gap: 12px; }
+.theme-toggle {
+    display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 0;
+    background: transparent; color: var(--accent); border: 1px solid var(--border-active); border-radius: 2px; cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.theme-toggle:hover { background: var(--accent-dim); border-color: var(--accent); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
+html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease !important;
+}
+
+:root[data-theme="light"] {
+    color-scheme: light;
+    --black: #F6F3EC;
+    --surface: #FFFFFF;
+    --surface-2: #F1EDE3;
+    --surface-hover: #ECE7DA;
+    --border: rgba(40, 34, 24, 0.12);
+    --border-active: rgba(47, 122, 109, 0.5);
+    --accent: #2F7A6D;
+    --accent-dim: rgba(47, 122, 109, 0.08);
+    --accent-glow: rgba(47, 122, 109, 0.16);
+    --text: #3A362E;
+    --text-dim: #6B655A;
+    --text-bright: #14110D;
+    --on-accent: #FFFFFF;
+}
+[data-theme="light"] nav { background: rgba(246, 243, 236, 0.88); }
+[data-theme="light"] #mobile-menu { background: rgba(246, 243, 236, 0.97); }
+[data-theme="light"] #form-modal { background: rgba(20, 17, 13, 0.55); }
+[data-theme="light"] .nav-logo-sub, [data-theme="light"] .loader-sub { color: rgba(47, 122, 109, 0.95); }
+[data-theme="light"] .hero-h1 { text-shadow: none; }
+[data-theme="light"] .btn-secondary { background: rgba(0, 0, 0, 0.02); }
+[data-theme="light"] .btn-secondary:hover { border-color: rgba(0, 0, 0, 0.3); background: rgba(0, 0, 0, 0.05); }
+[data-theme="light"] .work-tag, [data-theme="light"] .form-chip { background: rgba(0, 0, 0, 0.03); }
+[data-theme="light"] .form-chip:hover, [data-theme="light"] .form-chip.selected { background: rgba(47, 122, 109, 0.1); }
+[data-theme="light"] .matrix-table tr:hover { background: rgba(0, 0, 0, 0.03); }
+[data-theme="light"] .marquee-wrap { background: rgba(40, 34, 24, 0.04); }
+[data-theme="light"] .loader-bar { background: rgba(40, 34, 24, 0.1); }
+[data-theme="light"] .stat-card, [data-theme="light"] .tech-item, [data-theme="light"] .process-flow-card,
+[data-theme="light"] .price-item, [data-theme="light"] .plan-card, [data-theme="light"] .work-item,
+[data-theme="light"] .service-card, [data-theme="light"] .about-features, [data-theme="light"] .form-box,
+[data-theme="light"] .contact-info-box, [data-theme="light"] .matrix-table-wrap, [data-theme="light"] .faq-item,
+[data-theme="light"] .cta-banner, [data-theme="light"] .article-card { box-shadow: 0 4px 18px rgba(40, 34, 24, 0.07); }
+[data-theme="light"] .service-card:hover, [data-theme="light"] .work-item:hover { box-shadow: 0 10px 28px rgba(40, 34, 24, 0.12); }
+[data-theme="light"] .seo-tool-frame { box-shadow: 0 20px 50px rgba(40, 34, 24, 0.15); }
+[data-theme="light"] .shot-figure img { box-shadow: 0 16px 40px rgba(40, 34, 24, 0.18); }
+/* Cards that sit on top of a dark photo overlay keep the light-on-dark text colours */
+[data-theme="light"] .bento-card--img,
+[data-theme="light"] .work-cover--img {
+    --text: #DDD8CE; --text-dim: #B9B3A3; --text-bright: #F5F2EA; --accent: #5FA396;
+}
+/* Logo strokes: the white ring would vanish on a light background */
+[data-theme="light"] linearGradient[id^="ringGrad"] stop:nth-child(1) { stop-color: #4A453B; }
+[data-theme="light"] linearGradient[id^="ringGrad"] stop:nth-child(2) { stop-color: #2F2B24; }
+[data-theme="light"] linearGradient[id^="ringGrad"] stop:nth-child(3) { stop-color: #14110D; }
+[data-theme="light"] linearGradient[id^="yGrad"] stop:nth-child(1) { stop-color: #4FA596; }
+[data-theme="light"] linearGradient[id^="yGrad"] stop:nth-child(2) { stop-color: #2F7A6D; }
+[data-theme="light"] linearGradient[id^="yGrad"] stop:nth-child(3) { stop-color: #1F5A4F; }
+@media (max-width: 900px) { .nav-right { gap: 8px; } .theme-toggle { width: 38px; height: 38px; } }
+@media (prefers-reduced-motion: reduce) { html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after { transition: none !important; } }
+</style>
 </head>
 <body>
 
@@ -1085,9 +1155,16 @@ html.is-loading, html.is-loading body { overflow: hidden; }
             <li><button onclick="showPage('contact')" id="nav-contact" class="nav-link">聯絡</button></li>
         </ul>
 
-        <button onclick="showPage('contact')" class="nav-cta magnetic">啟動協議</button>
+        <div class="nav-right">
+            <button onclick="showPage('contact')" class="nav-cta magnetic">啟動協議</button>
 
-        <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
     </div>
 </nav>
 
@@ -3174,6 +3251,34 @@ html.is-loading, html.is-loading body { overflow: hidden; }
     window.addEventListener('scroll', function(){
         if(!ticking){ window.requestAnimationFrame(update); ticking = true; }
     }, {passive: true});
+})();
+</script>
+
+<script>
+/* Theme toggle: dark (default) / light, remembered per visitor */
+(function () {
+    var root = document.documentElement;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    function current() { return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+    function sync() {
+        var light = current() === 'light';
+        var btn = document.getElementById('theme-toggle');
+        if (btn) {
+            var label = light ? '切換為深色模式' : '切換為淺色模式';
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', label);
+        }
+        if (meta) meta.setAttribute('content', light ? '#F6F3EC' : '#5FA396');
+    }
+    window.toggleTheme = function () {
+        var next = current() === 'light' ? 'dark' : 'light';
+        root.classList.add('theme-anim');
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('yc-theme', next); } catch (e) {}
+        sync();
+        setTimeout(function () { root.classList.remove('theme-anim'); }, 400);
+    };
+    sync();
 })();
 </script>
 </body></html>
