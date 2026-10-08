@@ -867,6 +867,14 @@
         .logo-mark--hero svg { width: 60%; height: 60%; }
         .logo-mark--nav svg { width: 72%; height: 72%; }
 
+        /* Hero 3D monogram — pure CSS 3D, built lazily by JS; the flat SVG stays as the fallback */
+        .logo-mark--hero { position: relative; }
+        .logo3d-scene { position: absolute; left: 19%; top: 19%; width: 62%; height: 62%; perspective: 700px; pointer-events: none; }
+        .logo3d-obj { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; opacity: 0; transition: opacity .8s ease; will-change: transform; }
+        .logo3d-layer, .logo-mark--hero .logo3d-layer { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+        .logo-mark--hero.is-3d .logo3d-obj { opacity: 1; }
+        .logo-mark--hero.is-3d > svg:first-child { opacity: 0; transition: opacity .8s ease; }
+
         /* Home Core Services Preview */
         .home-services-grid {
             display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 48px;
@@ -1193,7 +1201,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
             <div class="hero-logo-ring"></div>
             <div class="hero-logo-ring-2"></div>
             <div class="hero-logo-frame">
-                <div class="logo-mark logo-mark--hero" aria-label="YC AXIOM Logo"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-hero" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-hero" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-hero" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-hero)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-hero)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-hero)" stroke-width="4" stroke-linecap="round" filter="url(#glow-hero)"/></svg></div>
+                <div class="logo-mark logo-mark--hero" aria-label="YC AXIOM Logo"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-hero" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-hero" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-hero" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-hero)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-hero)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-hero)" stroke-width="4" stroke-linecap="round" filter="url(#glow-hero)"/></svg><svg width="0" height="0" style="position:absolute;width:0;height:0" aria-hidden="true" focusable="false"><defs><linearGradient id="ringGrad3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".45" stop-color="#F5F2EA"/><stop offset="1" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CD2C2"/><stop offset=".48" stop-color="#5FA396"/><stop offset="1" stop-color="#3C7A6D"/></linearGradient><g id="ring3d"><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad3d)" stroke-width="2.2" stroke-linecap="round"/></g><g id="y3d"><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad3d)" stroke-width="4" stroke-linecap="round"/></g></defs></svg><div class="logo3d-scene" aria-hidden="true"><div class="logo3d-obj" id="logo3dObj"></div></div></div>
             </div>
         </div>
 
@@ -3279,6 +3287,77 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
         setTimeout(function () { root.classList.remove('theme-anim'); }, 400);
     };
     sync();
+})();
+</script>
+<script>
+/* Hero 3D monogram: lazy, idle-built, pauses off-screen, skipped for reduced-motion. Flat SVG is the fallback. */
+(function(){
+    var mark = document.querySelector('.logo-mark--hero');
+    var obj = document.getElementById('logo3dObj');
+    if(!mark || !obj) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    var built = false, running = false, visible = false, rafId = null;
+    var rx = 0, ry = 0, tx = 0, ty = 0, t0 = 0, pointerOn = false, px = 0, py = 0;
+
+    function build(){
+        if(built) return; built = true;
+        var html = '', i, n, z, b;
+        n = 10;
+        for(i = 0; i < n; i++){
+            z = -14 + i * 2.6; b = (0.45 + 0.55 * (i / (n - 1))).toFixed(2);
+            html += '<svg class="logo3d-layer" viewBox="0 0 64 64" fill="none" style="transform:translateZ(' + z.toFixed(1) + 'px);filter:brightness(' + b + ')"><use href="#ring3d"/></svg>';
+        }
+        n = 12;
+        for(i = 0; i < n; i++){
+            z = 18 + i * 2.4; b = (0.4 + 0.6 * (i / (n - 1))).toFixed(2);
+            html += '<svg class="logo3d-layer" viewBox="0 0 64 64" fill="none" style="transform:translateZ(' + z.toFixed(1) + 'px);filter:brightness(' + b + ')' + (i === n - 1 ? ' drop-shadow(0 0 4px rgba(95,163,150,.7))' : '') + '"><use href="#y3d"/></svg>';
+        }
+        obj.innerHTML = html;
+        // 3D layers are in the DOM; reveal on the next frame so the cross-fade runs
+        requestAnimationFrame(function(){ mark.classList.add('is-3d'); });
+    }
+
+    function loop(t){
+        if(!running) return;
+        if(!t0) t0 = t;
+        if(pointerOn && !coarse){
+            ty = px * 40; tx = -py * 22;
+        } else {
+            ty = Math.sin((t - t0) / 1700) * 18;
+            tx = Math.cos((t - t0) / 2300) * 6;
+        }
+        rx += (tx - rx) * 0.08; ry += (ty - ry) * 0.08;
+        obj.style.transform = 'rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
+        rafId = requestAnimationFrame(loop);
+    }
+    function start(){ if(running || !visible || document.hidden) return; running = true; rafId = requestAnimationFrame(loop); }
+    function stop(){ running = false; if(rafId){ cancelAnimationFrame(rafId); rafId = null; } }
+
+    if(!coarse){
+        window.addEventListener('pointermove', function(e){
+            var r = mark.getBoundingClientRect();
+            if(!r.width) return;
+            px = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
+            py = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
+            pointerOn = true;
+        }, {passive: true});
+        document.addEventListener('pointerleave', function(){ pointerOn = false; });
+    }
+    document.addEventListener('visibilitychange', function(){ document.hidden ? stop() : start(); });
+
+    function init(){
+        if(!('IntersectionObserver' in window)) return;
+        var io = new IntersectionObserver(function(es){
+            visible = es[0].isIntersecting;
+            if(visible){
+                (window.requestIdleCallback || function(f){ setTimeout(f, 200); })(function(){ build(); start(); });
+            } else stop();
+        }, {threshold: 0.1});
+        io.observe(mark);
+    }
+    if(document.readyState === 'complete') init(); else window.addEventListener('load', init);
 })();
 </script>
 </body></html>
