@@ -1153,7 +1153,8 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
   .line-float { display: inline-flex; align-items: center; gap: 8px; position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 55; min-height: 52px; padding: 0 20px 0 16px; border-radius: 999px; background: #06C755; color: #08130c; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
   footer { padding-bottom: 96px; }
 }
-body.on-seo
+body.on-seo .line-float { display: none; }
+
 /* ═══════════════════════════════════════════════════════════
    REDESIGN — 深色沉穩（墨黑 / 深咖啡 / 暖灰 + 黃銅）
    ═══════════════════════════════════════════════════════════ */
@@ -1520,10 +1521,17 @@ nav, .rh-cap, .rh-promises, .rh-case, .rh-services, .rh-bar, .btn-secondary, .na
     body::before { animation: none; }
 }
 
-/* ── 桌機懸浮：LINE / Threads / Instagram（≤1024px 沿用原本的手機 LINE 按鈕）── */
-.social-float { display: none; }
+/* ── 懸浮：LINE / Threads / Instagram ──
+   桌機：三顆方形按鈕直排；手機/平板：原本的 LINE 膠囊按鈕在最下面，Threads、IG 疊在它上方 ── */
+.social-float { display: flex; flex-direction: column; gap: 8px; position: fixed; right: 16px; bottom: calc(16px + 52px + 8px + env(safe-area-inset-bottom, 0px)); z-index: 55; }
+.social-float .sf-line { display: none; }
 @media (min-width: 1025px) {
-    .social-float { display: flex; flex-direction: column; gap: 8px; position: fixed; right: 20px; bottom: 24px; z-index: 55; }
+    .social-float { right: 20px; bottom: 24px; }
+    .social-float .sf-line { display: grid; }
+    body.on-seo .social-float { display: none; }
+}
+body.on-seo .social-float { display: none; }
+@media (min-width: 0px) {
     .sf { position: relative; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 2px; text-decoration: none; color: var(--text-bright);
         background: rgba(14, 20, 20, 0.62); border: 1px solid rgba(255, 255, 255, 0.16); border-top-color: rgba(255, 255, 255, 0.3);
         -webkit-backdrop-filter: blur(12px) saturate(1.4); backdrop-filter: blur(12px) saturate(1.4);
@@ -1532,18 +1540,18 @@ nav, .rh-cap, .rh-promises, .rh-case, .rh-services, .rh-bar, .btn-secondary, .na
     .sf:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 3px; }
     .sf-line { background: #06C755; color: #08130c; border-color: rgba(255, 255, 255, 0.3); }
     .sf-line:hover, .sf-line:focus-visible { background: #1FD36A; border-color: rgba(255, 255, 255, 0.55); }
+}
+@media (hover: hover) and (min-width: 1025px) {
     .sf::after { content: attr(data-tip); position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%) translateX(6px); opacity: 0; pointer-events: none;
         white-space: nowrap; font: 600 13px/1 var(--f-ui); padding: 8px 10px; border-radius: 2px; color: var(--text-bright);
         background: rgba(10, 14, 14, 0.9); border: 1px solid rgba(255, 255, 255, 0.14); transition: opacity .18s ease, transform .18s ease; }
     .sf:hover::after, .sf:focus-visible::after { opacity: 1; transform: translateY(-50%) translateX(0); }
-    body.on-seo .social-float { display: none; }
 }
 [data-theme="light"] .sf { background: rgba(255, 255, 255, 0.82); color: #14312c; border-color: rgba(20, 50, 45, 0.18); }
 [data-theme="light"] .sf-line { background: #06C755; color: #08130c; }
 [data-theme="light"] .sf::after { background: rgba(255, 255, 255, 0.95); color: #14312c; border-color: rgba(20, 50, 45, 0.18); }
 @media (prefers-reduced-motion: reduce) { .sf, .sf::after { transition: none; } }
 @media (prefers-contrast: more) { .sf { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--solid-bg); border-color: rgba(255, 255, 255, 0.6); } }
- .line-float { display: none; }
 </style>
 </head>
 <body>
