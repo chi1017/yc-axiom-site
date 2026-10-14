@@ -1106,6 +1106,21 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 /* contact-page text links: 44px touch area on phones */
 @media (max-width: 768px), (pointer: coarse) { .contact-info-item a { display: inline-block; padding: 14px 0; } .contact-info-item { margin-bottom: 8px; } }
 [data-theme="light"] .pricing-tab.active { color: #25675b; }
+/* ── Batch 2: LINE + contact CTA ── */
+.btn-line { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 56px; padding: 0 20px; background: #06C755; color: #08130c; border-radius: 2px; text-decoration: none; font-weight: 700; font-size: 15px; letter-spacing: 0.06em; transition: filter .2s, box-shadow .2s; box-sizing: border-box; }
+.btn-line:hover { filter: brightness(1.08); box-shadow: 0 0 24px rgba(6, 199, 85, 0.35); }
+.btn-line:focus-visible, .line-float:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 3px; }
+.contact-cta-box { align-self: start; }
+.contact-cta-lead { font-size: 15px; line-height: 1.8; color: var(--text-dim); margin-bottom: 20px; }
+.contact-cta-divider { display: flex; align-items: center; gap: 14px; margin: 32px 0 24px; color: var(--text-dim); font-size: 13px; letter-spacing: 0.2em; }
+.contact-cta-divider::before, .contact-cta-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.contact-cta-form { width: 100%; display: block; text-decoration: none; text-align: center; box-sizing: border-box; }
+.line-float { display: none; }
+@media (max-width: 1024px) {
+  .line-float { display: inline-flex; align-items: center; gap: 8px; position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 55; min-height: 52px; padding: 0 20px 0 16px; border-radius: 999px; background: #06C755; color: #08130c; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+  footer { padding-bottom: 96px; }
+}
+body.on-seo .line-float { display: none; }
 </style>
 </head>
 <body>
@@ -2601,73 +2616,23 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
         <h2 class="section-title reveal decode-text" data-original="啟動你的專案評估.">啟動你的<br>專案評估.</h2>
 
         <div class="contact-grid" style="margin-top: 64px;">
-            <!-- Interactive Form -->
-            <div class="form-box reveal tilt-card">
-                <h4 aria-level="3">專案需求評估表單</h4>
-                <form id="consultation-form" onsubmit="handleFormSubmit(event)">
-                    
-                    <div class="form-group">
-                        <label class="form-label">01. 專案需求類型 <span>*</span></label>
-                        <div class="form-chips" id="group-type">
-                            <div class="form-chip selected" data-default="" tabindex="0" role="button" aria-pressed="true" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">單頁品牌形象 (Landing Page)</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">標準多頁品牌網站</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">品牌電商 / 購物系統</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">UI/UX 介面設計 (Figma)</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">SEO &amp; 效能優化</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">資料清洗 / ETL 整理</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">市場情報 / 競品分析</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">02. 預期預算區間 (TWD) <span>*</span></label>
-                        <div class="form-chips" id="group-budget">
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">$3,000 – $15,000</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">$15,000 – $28,000</div>
-                            <div class="form-chip selected" data-default="" tabindex="0" role="button" aria-pressed="true" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">$32,000 – $60,000</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">$60,000 – $150,000</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">依需求彈性討論</div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">03. 預計上線時間 <span>*</span></label>
-                        <div class="form-chips" id="group-timeline">
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">1 個月內 (急件)</div>
-                            <div class="form-chip selected" data-default="" tabindex="0" role="button" aria-pressed="true" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">1 - 2 個月</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">3 個月以上</div>
-                            <div class="form-chip" tabindex="0" role="button" aria-pressed="false" onclick="toggleChip(this)" onkeydown="chipKeydown(event,this)">籌備階段討論中</div>
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div class="form-group">
-                            <label class="form-label" for="inp-name">姓名 / 稱呼 <span>*</span></label>
-                            <input type="text" id="inp-name" class="form-input" placeholder="例如：陳先生 / Alex" required="">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="inp-email">電子郵件 E-mail <span>*</span></label>
-                            <input type="email" id="inp-email" class="form-input" placeholder="example@domain.com" required="">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="inp-contact">寶號 / LINE ID / 聯絡電話</label>
-                        <input type="text" id="inp-contact" class="form-input" placeholder="例如：小方光影設計 / LINE: @example">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="inp-msg">專案細節與其他說明</label>
-                        <textarea id="inp-msg" class="form-textarea" rows="4" placeholder="請簡述您的品牌產業類型、期望參考的網站風格，或具體需要的功能..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-submit magnetic">傳送評估單至 AXIOM →</button>
-                </form>
+            <!-- Contact CTA (LINE + Google Form) -->
+            <div class="form-box contact-cta-box reveal tilt-card">
+                <h4 aria-level="3">最快的聯絡方式</h4>
+                <p class="contact-cta-lead">加 LINE 直接說明你的需求，建構師會在 24 小時內回覆。免費諮詢、免費報價，不用先填一大堆表單。</p>
+                <a class="btn-line magnetic" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>用 LINE 聯絡　@788cblaq</span></a>
+                <div class="contact-cta-divider"><span>或者</span></div>
+                <p class="contact-cta-lead">已經確定要合作？填寫完整的需求問卷（約 8–12 分鐘），一次把品牌調性與需求說清楚，減少來回修改的時間。不確定的欄位可以先填「不確定」。</p>
+                <a class="btn-secondary magnetic contact-cta-form" href="https://forms.gle/fuvoujuHqNtrMmYK7" target="_blank" rel="noopener">填寫網站建置需求表 ↗</a>
             </div>
 
             <!-- Sidebar Info -->
             <div class="contact-sidebar reveal">
                 <div class="contact-info-box tilt-card">
+                    <div class="contact-info-item">
+                        <p class="label">LINE</p>
+                        <a href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">@788cblaq</a>
+                    </div>
                     <div class="contact-info-item">
                         <p class="label">官方電子郵件 / E-Mail</p>
                         <a href="mailto:ycaxiom@gmail.com">ycaxiom@gmail.com</a>
@@ -2686,37 +2651,18 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
                     </div>
                 </div>
 
-                <div class="contact-info-box tilt-card">
-                    <p class="label" style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-weight:700; font-size:12px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px;">正式合作 / Project Brief</p>
-                    <h5 aria-level="3" style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:18px; font-weight:700; color:var(--text-bright); margin-bottom:12px;">網站建置需求表</h5>
-                    <p style="font-size:14px; color:var(--text-dim); line-height:1.7; margin-bottom:20px;">確定要合作了嗎？填寫完整的需求問卷（約 8–12 分鐘），讓我一次抓準你的品牌調性與需求，減少來回修改的時間。不確定的欄位可以先填「不確定」，討論時再一起釐清。</p>
-                    <a href="https://forms.gle/fuvoujuHqNtrMmYK7" target="_blank" rel="noopener" class="btn-secondary magnetic" style="width:100%; text-decoration:none; display:block; text-align:center; box-sizing:border-box;">填寫需求表 ↗</a>
-                </div>
-
                 <div class="contact-info-box tilt-card" style="background: rgba(0,210,200,0.03); border-color: rgba(0,210,200,0.2);">
                     <h5 aria-level="3" style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); margin-bottom:12px;">24小時快速回應承諾</h5>
-                    <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">送出需求單後，會自動帶出一封寫好的郵件草稿，您按下「傳送」內容才會真正寄達 ycaxiom@gmail.com。信件送達後，建構師將於 24 小時內親自審閱並回覆初步可行性評估與預估時程表。</p>
+                    <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">無論是 LINE 訊息、需求表或 Email，建構師都會在 24 小時內親自審閱，並回覆初步可行性評估與預估時程表。</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Form Submission Modal -->
-<div id="form-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
-    <div class="modal-content">
-        <div class="modal-icon">✦</div>
-        <div class="modal-title" id="modal-title-text">已為您開啟郵件軟體</div>
-        <div class="modal-desc">請在剛剛跳出的郵件視窗中確認內容並按下「傳送」，需求單才會真的送達 ycaxiom@gmail.com。如果沒有跳出任何視窗（手機瀏覽器或 FB / IG 內建瀏覽器常見），可以直接複製下方內容寄出，或按按鈕重新嘗試開啟信箱。</div>
-        <div style="display:flex; flex-direction:column; gap:12px;">
-            <button type="button" onclick="copyFormContent()" id="modal-copy-btn" class="btn-secondary magnetic" style="width:100%;">複製需求內容</button>
-            <a id="modal-mailto-link" href="#" class="btn-secondary magnetic" style="width:100%; text-decoration:none; display:block; text-align:center; box-sizing:border-box;">重新開啟信箱寄送</a>
-            <button type="button" onclick="closeModal()" id="modal-close-btn" class="btn-primary magnetic" style="width: 100%;">確定關閉</button>
-        </div>
-    </div>
-</div>
-
 </main>
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
 
 <!-- ── FOOTER ── -->
 <footer>
@@ -3012,151 +2958,6 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
             toggleFaq(element);
         }
     }
-
-    /* ── Form Chip System ── */
-    function toggleChip(chip) {
-        const parent = chip.parentElement;
-        parent.querySelectorAll('.form-chip').forEach(c => {
-            c.classList.remove('selected');
-            c.setAttribute('aria-pressed', 'false');
-        });
-        chip.classList.add('selected');
-        chip.setAttribute('aria-pressed', 'true');
-    }
-
-    function chipKeydown(e, chip) {
-        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-            e.preventDefault();
-            toggleChip(chip);
-        }
-    }
-
-    function resetChips() {
-        document.querySelectorAll('.form-chips').forEach(group => {
-            group.querySelectorAll('.form-chip').forEach(c => {
-                c.classList.remove('selected');
-                c.setAttribute('aria-pressed', 'false');
-            });
-            const def = group.querySelector('.form-chip[data-default]');
-            if (def) {
-                def.classList.add('selected');
-                def.setAttribute('aria-pressed', 'true');
-            }
-        });
-    }
-
-    /* ── Form Dispatch to Email Mechanism ── */
-    let lastFormPlainText = '';
-    let lastFocusedBeforeModal = null;
-
-    function buildFormPlainText() {
-        const type = document.querySelector('#group-type .selected')?.innerText || '未選擇';
-        const budget = document.querySelector('#group-budget .selected')?.innerText || '未選擇';
-        const timeline = document.querySelector('#group-timeline .selected')?.innerText || '未選擇';
-        const name = document.getElementById('inp-name').value;
-        const email = document.getElementById('inp-email').value;
-        const contact = document.getElementById('inp-contact').value || '未填寫';
-        const msg = document.getElementById('inp-msg').value || '無額外備註';
-
-        return `【YC AXIOM [æ] 專案需求評估單】\n\n` +
-            `▸ 01. 專案類型：${type}\n` +
-            `▸ 02. 預期預算：${budget}\n` +
-            `▸ 03. 預計時程：${timeline}\n\n` +
-            `-----------------------------------\n` +
-            `▸ 稱呼 / 姓名：${name}\n` +
-            `▸ 聯絡 Email：${email}\n` +
-            `▸ 公司寶號 / LINE ID：${contact}\n` +
-            `▸ 需求與備註細節：\n${msg}\n\n` +
-            `發送時間：${new Date().toLocaleString()}`;
-    }
-
-    function buildMailtoLink(name, plainText) {
-        const mailSubject = encodeURIComponent(`【YC AXIOM 官網需求評估】${name || ''} 的專案諮詢`);
-        const mailBody = encodeURIComponent(plainText);
-        return `mailto:ycaxiom@gmail.com?subject=${mailSubject}&body=${mailBody}`;
-    }
-
-    function handleFormSubmit(e) {
-        e.preventDefault();
-
-        const name = document.getElementById('inp-name').value;
-        const plainText = buildFormPlainText();
-        lastFormPlainText = plainText;
-        const mailtoLink = buildMailtoLink(name, plainText);
-
-        document.getElementById('modal-mailto-link').href = mailtoLink;
-
-        // Attempt to open the visitor's mail client. This can silently fail
-        // (no mail client configured, mobile browser, FB/IG in-app browser),
-        // so the modal below never claims the message was actually sent —
-        // only that we tried to open the mail app, with a copy fallback.
-        lastFocusedBeforeModal = document.activeElement;
-        window.location.href = mailtoLink;
-
-        document.getElementById('form-modal').classList.add('open');
-        const closeBtn = document.getElementById('modal-close-btn');
-        if (closeBtn) closeBtn.focus();
-
-        document.getElementById('consultation-form').reset();
-        resetChips();
-    }
-
-    async function copyFormContent() {
-        const btn = document.getElementById('modal-copy-btn');
-        const text = lastFormPlainText || buildFormPlainText();
-        let ok = false;
-        try {
-            await navigator.clipboard.writeText(text);
-            ok = true;
-        } catch (err) {
-            try {
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                ta.style.position = 'fixed';
-                ta.style.opacity = '0';
-                document.body.appendChild(ta);
-                ta.focus();
-                ta.select();
-                ok = document.execCommand('copy');
-                document.body.removeChild(ta);
-            } catch (err2) { ok = false; }
-        }
-        if (btn) {
-            const original = btn.innerText;
-            btn.innerText = ok ? '已複製！可貼到 Email 或訊息' : '複製失敗，請手動選取';
-            setTimeout(() => { btn.innerText = original; }, 2200);
-        }
-    }
-
-    function closeModal() {
-        document.getElementById('form-modal').classList.remove('open');
-        if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === 'function') {
-            lastFocusedBeforeModal.focus();
-        }
-    }
-
-    /* ── Modal: Escape to close + basic focus trap ── */
-    document.addEventListener('keydown', (e) => {
-        const modal = document.getElementById('form-modal');
-        if (!modal.classList.contains('open')) return;
-        if (e.key === 'Escape') {
-            closeModal();
-            return;
-        }
-        if (e.key === 'Tab') {
-            const focusable = modal.querySelectorAll('button, a[href]');
-            if (!focusable.length) return;
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first.focus();
-            }
-        }
-    });
 
     /* ── Pricing Tabs ── */
     function switchTab(id) {
