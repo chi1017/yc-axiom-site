@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        page: function () {
+            var path = location.pathname;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.href, page_path: path, page_title: document.title });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: (a.classList.contains('line-float') || a.closest('.social-float')) ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>網頁設計作品集｜真實交案與範例網站 - YC AXIOM</title>
+<meta name="description" content="瀏覽 YC AXIOM 的網頁設計作品集：包含小方光影設計、iMassage 等真實交案，以及餐飲、教育、美容、家具等產業的範例網站，看看我們能為你的品牌做到什麼程度。">
+<meta name="author" content="YC AXIOM">
+<link rel="icon" type="image/png" href="https://chi1017.github.io/yc-axiom-site/favicon-32.png">
+<link rel="apple-touch-icon" href="https://chi1017.github.io/yc-axiom-site/apple-touch-icon.png">
+<link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/works/">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="網頁設計作品集｜真實交案與範例網站 - YC AXIOM">
+<meta property="og:description" content="瀏覽 YC AXIOM 的網頁設計作品集：包含小方光影設計、iMassage 等真實交案，以及餐飲、教育、美容、家具等產業的範例網站，看看我們能為你的品牌做到什麼程度。">
+<meta property="og:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta property="og:url" content="https://chi1017.github.io/yc-axiom-site/works/">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="YC AXIOM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="網頁設計作品集｜真實交案與範例網站 - YC AXIOM">
+<meta name="twitter:description" content="瀏覽 YC AXIOM 的網頁設計作品集：包含小方光影設計、iMassage 等真實交案，以及餐飲、教育、美容、家具等產業的範例網站，看看我們能為你的品牌做到什麼程度。">
+<meta name="twitter:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta name="theme-color" content="#5FA396">
+<script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/site.css?v=2026-10-14">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://chi1017.github.io/yc-axiom-site/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "作品集",
+      "item": "https://chi1017.github.io/yc-axiom-site/works/"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="頁面載入中">
+    <div class="loader-mark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="ringGrad-load" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient>
+                <linearGradient id="yGrad-load" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="50"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient>
+                <filter id="glow-load" filterUnits="userSpaceOnUse" x="-8" y="-8" width="80" height="80"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path class="loader-draw loader-ring" pathLength="1" d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-load)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y1" pathLength="1" d="M18,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y2" pathLength="1" d="M46,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+        </svg>
+    </div>
+    <div class="loader-text">
+        <div class="loader-name">YC AXIOM</div>
+        <div class="loader-sub">[品牌與工程]</div>
+    </div>
+    <div class="loader-bar"></div>
+</div>
+<script>
+(function () {
+    var root = document.documentElement, loader = document.getElementById('page-loader');
+    if (!loader) return;
+    try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
+    root.classList.add('is-loading');
+    var start = Date.now(), MIN = 1700, MAX = 5000, closed = false;
+    function close() {
+        if (closed) return; closed = true;
+        loader.classList.add('is-done');
+        root.classList.remove('is-loading');
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 900);
+    }
+    function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+})();
+</script>
+
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor Elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-follower"></div>
+
+
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-inner">
+        <a href="../" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
+            <div class="nav-logo-img">
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+            </div>
+            <div class="nav-logo-text">
+                <div class="nav-logo-name">YC AXIOM</div>
+                <div class="nav-logo-sub">[品牌與工程]</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="../" class="nav-link">首頁</a></li>
+            <li><a href="../about/" class="nav-link">關於</a></li>
+            <li><a href="../services/" class="nav-link">服務項目</a></li>
+            <li><a href="../works/" class="nav-link active" aria-current="page">作品集</a></li>
+            <li><a href="../articles/" class="nav-link">文章</a></li>
+            <li><a href="../seo/" class="nav-link">SEO 工具</a></li>
+            <li><a href="../pricing/" class="nav-link">定價</a></li>
+            <li><a href="../contact/" class="nav-link">聯絡</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="../contact/" class="nav-cta magnetic">免費諮詢</a>
+
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu">
+    <button class="mobile-close" onclick="toggleMobileMenu()" aria-label="關閉選單">✕</button>
+    <a class="mobile-nav-btn" href="../">首頁</a>
+    <a class="mobile-nav-btn" href="../about/">關於</a>
+    <a class="mobile-nav-btn" href="../services/">服務項目</a>
+    <a class="mobile-nav-btn" href="../works/">作品集</a>
+    <a class="mobile-nav-btn" href="../articles/">文章</a>
+    <a class="mobile-nav-btn" href="../seo/">SEO 工具</a>
+    <a class="mobile-nav-btn" href="../pricing/">定價</a>
+    <a class="mobile-nav-btn" href="../contact/">聯絡</a>
+</div>
+
+
+<main>
+<section id="page-works" class="page showing active">
+    <div class="container section-pad">
+        <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../">首頁</a><span aria-hidden="true">›</span><span aria-current="page">作品集</span></div>
+        
+        <p class="section-eyebrow reveal">Portfolio / 作品集</p>
+        <h1 class="section-title reveal decode-text" data-original="品牌網站設計案例.">品牌網站<br>設計案例.</h1>
+
+        <p class="works-note reveal"><span class="work-badge work-badge--real">✦ 真實交案</span> 為實際客戶的案件；<span class="work-badge">範例網站</span> 為 YC AXIOM 自主設計的示範網站，不是客戶案件，用來展示各產業的設計與功能。</p>
+        <!-- Portfolio Filter Bar -->
+        <div class="works-filter-bar reveal">
+            <button class="works-filter-btn active magnetic" onclick="filterWorks('all', this)">全部 ALL</button>
+            <button class="works-filter-btn magnetic" onclick="filterWorks('brand', this)">品牌形象</button>
+            <button class="works-filter-btn magnetic" onclick="filterWorks('ecommerce', this)">一頁式 / 電商</button>
+            <button class="works-filter-btn magnetic" onclick="filterWorks('store', this)">實體店家 / 服務</button>
+            <button class="works-filter-btn magnetic" onclick="filterWorks('real', this)">✦ 真實交案</button>
+        </div>
+
+        <!-- List -->
+        <div class="works-list">
+
+            <div class="work-item reveal tilt-card" data-category="real brand store" style="border-left: 3px solid var(--accent); background: rgba(0,210,200,0.02);">
+                <div class="work-cover work-cover--img" style="background: linear-gradient(135deg, rgba(0,210,200,0.32), rgba(0,210,200,0.08)); border-color: rgba(0,210,200,0.4);"><img srcset="../images/works/real-shooting-600.webp 600w, ../images/works/real-shooting-900.webp 900w, ../images/works/real-shooting.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/real-shooting.webp" alt="小方光影設計官方網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num" style="color: var(--accent);">01</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">品牌網站 · 商業攝影</div>
+                    <h3 class="work-title">攝影工作室</h3>
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,210,200,0.1); border:1px solid rgba(0,210,200,0.3); padding:3px 10px; margin-bottom:12px; border-radius:2px;">
+                        <span style="color:var(--accent); font-size:12px;">✦</span>
+                        <span style="font-family:var(--f-ui); font-weight:700; font-size:12px; letter-spacing:0.1em; color:var(--accent);">真實交案</span>
+                    </div>
+                    <p class="work-desc">高雄左營「小方光影設計」官方品牌網站。20年資歷、國際獲獎攝影團隊，涵蓋攝影作品集分類、影片作品、團隊介紹、攝影教學課程與三地工作室資訊。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">完整多頁網站</span>
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">作品集展示</span>
+                        <span class="work-tag">SEO 優化</span>
+                    </div>
+                </div>
+                <a href="../works/xiaofang/" class="work-link magnetic" style="border-color: var(--accent);">查看完整案例 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="real store" style="border-left: 3px solid var(--accent); background: rgba(0,210,200,0.02);">
+                <div class="work-cover work-cover--img" style="background: linear-gradient(135deg, rgba(0,210,200,0.32), rgba(0,210,200,0.08)); border-color: rgba(0,210,200,0.4);"><img srcset="../images/works/real-imassage-600.webp 600w, ../images/works/real-imassage-900.webp 900w, ../images/works/real-imassage.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/real-imassage.webp" alt="iMassage 專業按摩官方網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num" style="color: var(--accent);">02</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">網站維運 · 網站遷移</div>
+                    <h3 class="work-title">按摩工作室</h3>
+                    <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(0,210,200,0.1); border:1px solid rgba(0,210,200,0.3); padding:3px 10px; margin-bottom:12px; border-radius:2px;">
+                        <span style="color:var(--accent); font-size:12px;">✦</span>
+                        <span style="font-family:var(--f-ui); font-weight:700; font-size:12px; letter-spacing:0.1em; color:var(--accent);">真實交案</span>
+                    </div>
+                    <p class="work-desc">「iMassage 專業按摩」官網遷移紀實。因應 Weebly 台灣服務終止，將既有網站完整搬遷至 WordPress，保留原有內容與服務資訊，同時換來更高的客製彈性。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">網站健檢</span>
+                        <span class="work-tag">無痛搬家</span>
+                        <span class="work-tag">客製彈性</span>
+                        <span class="work-tag">自動化備份</span>
+                    </div>
+                </div>
+                <a href="../works/imassage/" class="work-link magnetic" style="border-color: var(--accent); font-family:inherit; cursor:pointer;">查看完整案例 →</a>
+            </div><div class="work-item reveal tilt-card" data-category="ecommerce">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-fashion-600.webp 600w, ../images/works/demo-fashion-900.webp 900w, ../images/works/demo-fashion.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-fashion.webp" alt="MUJI'N 服飾店 範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">03</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">品牌網站 · 一頁式電商</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">服飾店</h3>
+                    <p class="work-desc">極簡時尚品牌的完整電商體驗。涵蓋購物車系統、商品詳細頁、聯絡表單與全站 SEO 優化。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">一頁式電商</span>
+                        <span class="work-tag">SEO 優化</span>
+                        <span class="work-tag">購物車系統</span>
+                        <span class="work-tag">RWD</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/fashion.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-salon-600.webp 600w, ../images/works/demo-salon-900.webp 900w, ../images/works/demo-salon.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-salon.webp" alt="髮廊範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">04</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 品牌形象</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">髮廊</h3>
+                    <p class="work-desc">精緻美髮沙龍的品牌形象網站。融合現代日系美學，涵蓋服務介紹、作品集、顧客評價與線上預約導流。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">作品展示</span>
+                        <span class="work-tag">顧客評價</span>
+                        <span class="work-tag">預約導流</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/salon.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-drink-600.webp 600w, ../images/works/demo-drink-900.webp 900w, ../images/works/demo-drink.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-drink.webp" alt="飲料店範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">05</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 日系美學</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">飲料店</h3>
+                    <p class="work-desc">融合日系抹茶與精品咖啡美學的品牌形象網站。以沉靜視覺呈現飲品菜單、品牌故事與門市導引。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">日系美學</span>
+                        <span class="work-tag">菜單展示</span>
+                        <span class="work-tag">品牌故事</span>
+                        <span class="work-tag">到店導引</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/drink.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="brand">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-edu-600.webp 600w, ../images/works/demo-edu-900.webp 900w, ../images/works/demo-edu.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-edu.webp" alt="補習班範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">06</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">品牌網站 · 教育機構</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">補習班</h3>
+                    <p class="work-desc">全台領先升學補習班的完整品牌網站。整合 AI 弱點診斷、名師介紹、課程列表與線上預約報名系統。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">教育品牌</span>
+                        <span class="work-tag">課程展示</span>
+                        <span class="work-tag">線上預約</span>
+                        <span class="work-tag">AI 整合</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/edu.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="ecommerce">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-ecommerce-600.webp 600w, ../images/works/demo-ecommerce-900.webp 900w, ../images/works/demo-ecommerce.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-ecommerce.webp" alt="MUJI Select 生活選物 電商範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">07</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">品牌網站 · 生活選物</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">電商</h3>
+                    <p class="work-desc">精選生活選物電商網站。涵蓋商品分類瀏覽、購物車系統、結帳流程與訂單確認，讓整段購物過程溫潤而有質感。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">電商</span>
+                        <span class="work-tag">購物車</span>
+                        <span class="work-tag">商品分類</span>
+                        <span class="work-tag">結帳流程</span>
+                    </div>
+                </div>
+                <a href="https://vermillion-torte-1a0342.netlify.app/" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="brand store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-diving-600.webp 600w, ../images/works/demo-diving-900.webp 900w, ../images/works/demo-diving.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-diving.webp" alt="DeepBlue 潛水中心範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">08</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 運動休閒</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">潛水</h3>
+                    <p class="work-desc">專業 PADI 五星潛水中心品牌網站。涵蓋課程介紹、國內外潛水行程、教練團隊展示與線上預約諮詢系統。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">課程展示</span>
+                        <span class="work-tag">行程介紹</span>
+                        <span class="work-tag">線上預約</span>
+                    </div>
+                </div>
+                <a href="https://vocal-gingersnap-7326da.netlify.app/" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-restaurant-600.webp 600w, ../images/works/demo-restaurant-900.webp 900w, ../images/works/demo-restaurant.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-restaurant.webp" alt="L'ESSENCE 餐廳範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">09</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 精緻餐飲</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">餐廳</h3>
+                    <p class="work-desc">法式精緻餐廳 L'ESSENCE 官方品牌網站。融合米其林美學，涵蓋旬味菜單展示、主廚推薦、品牌故事與線上訂位系統。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">菜單展示</span>
+                        <span class="work-tag">線上訂位</span>
+                        <span class="work-tag">法式美學</span>
+                    </div>
+                </div>
+                <a href="https://clever-buttercream-9a6bc7.netlify.app/" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-pet-600.webp 600w, ../images/works/demo-pet-900.webp 900w, ../images/works/demo-pet.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-pet.webp" alt="寵物美容範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">10</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 寵物服務</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">寵物美容</h3>
+                    <p class="work-desc">專業犬貓美容 SPA「茸茸」品牌網站。涵蓋服務項目與價目、美容作品集、Before/After 展示與 LINE 線上預約諮詢系統。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">作品集展示</span>
+                        <span class="work-tag">服務價目</span>
+                        <span class="work-tag">線上預約</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/pet.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="brand">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-factory-600.webp 600w, ../images/works/demo-factory-900.webp 900w, ../images/works/demo-factory.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-factory.webp" alt="Time Weaving 觀光工廠範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">11</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">品牌網站 · 觀光旅遊</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">觀光工廠</h3>
+                    <p class="work-desc">百年紡織品牌「時光織造」觀光工廠官方網站。涵蓋體驗行程介紹、園區導覽地圖、品牌歷史故事與線上參訪預約系統。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">體驗行程</span>
+                        <span class="work-tag">園區導覽</span>
+                        <span class="work-tag">線上預約</span>
+                    </div>
+                </div>
+                <a href="https://famous-swan-9ec489.netlify.app/" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+
+            <div class="work-item reveal tilt-card" data-category="store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-kindergarten-600.webp 600w, ../images/works/demo-kindergarten-900.webp 900w, ../images/works/demo-kindergarten.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-kindergarten.webp" alt="心萌幼兒園範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">12</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 幼兒教育</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">心萌幼兒園</h3>
+                    <p class="work-desc">溫馨童趣的幼兒園品牌網站。涵蓋教育理念、課程特色、師資陣容與常見問題，建立信任感的招生入口。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">課程展示</span>
+                        <span class="work-tag">招生導流</span>
+                        <span class="work-tag">RWD</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/kindergarten.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+            <div class="work-item reveal tilt-card" data-category="brand store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-car-detailing-600.webp 600w, ../images/works/demo-car-detailing-900.webp 900w, ../images/works/demo-car-detailing.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-car-detailing.webp" alt="AURA 頂級汽車美容範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">13</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 汽車美容</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">AURA 頂級汽車美容</h3>
+                    <p class="work-desc">質感汽車美容品牌網站。涵蓋服務項目、價格方案、線上預約與作品實績，凸顯專業與精緻工藝感。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">服務價目</span>
+                        <span class="work-tag">線上預約</span>
+                        <span class="work-tag">作品實績</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/car-detailing.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+            <div class="work-item reveal tilt-card" data-category="brand store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-cafe-600.webp 600w, ../images/works/demo-cafe-900.webp 900w, ../images/works/demo-cafe.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-cafe.webp" alt="Komorebi 木漏れ日珈琲範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">14</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 日系咖啡</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">Komorebi 木漏れ日珈琲</h3>
+                    <p class="work-desc">日系選物咖啡廳多頁式網站。涵蓋線上菜單、品牌故事、選物商品與門市資訊，營造靜謐沉浸的品牌氛圍。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">多頁式網站</span>
+                        <span class="work-tag">菜單展示</span>
+                        <span class="work-tag">選物商品</span>
+                        <span class="work-tag">品牌故事</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/cafe.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+            <div class="work-item reveal tilt-card" data-category="brand">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-furniture-600.webp 600w, ../images/works/demo-furniture-900.webp 900w, ../images/works/demo-furniture.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-furniture.webp" alt="AURA CASA 義式家具範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">15</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">品牌網站 · 居家家具</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">AURA CASA 義式家具</h3>
+                    <p class="work-desc">義式極簡美學家具品牌網站。以大幅質感攝影與細膩排版，完整呈現產品系列、品牌理念與精品電商體驗。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">產品型錄</span>
+                        <span class="work-tag">質感攝影</span>
+                        <span class="work-tag">電商體驗</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/furniture.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+            <div class="work-item reveal tilt-card" data-category="brand store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-bakery-600.webp 600w, ../images/works/demo-bakery-900.webp 900w, ../images/works/demo-bakery.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-bakery.webp" alt="Maison de Rêve 夢幻烘焙範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">16</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">店家網站 · 精品烘焙</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">Maison de Rêve 夢幻烘焙</h3>
+                    <p class="work-desc">夢幻系精品烘焙坊品牌網站。涵蓋商品展示、品牌故事與訂購導引，用細膩視覺傳遞手作甜點的溫度。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">商品展示</span>
+                        <span class="work-tag">訂購導引</span>
+                        <span class="work-tag">視覺設計</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/bakery.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+            <div class="work-item reveal tilt-card" data-category="brand store">
+                <div class="work-cover work-cover--img"><img srcset="../images/works/demo-medical-600.webp 600w, ../images/works/demo-medical-900.webp 900w, ../images/works/demo-medical.webp 1200w" sizes="(max-width: 700px) 300px, 218px" src="../images/works/demo-medical.webp" alt="AURA 預防醫學中心範例網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><div class="work-num">17</div></div>
+                <div class="work-info">
+                    <div class="work-eyebrow">品牌網站 · 預防醫學</div>
+                    <span class="work-badge">範例網站</span>
+                    <h3 class="work-title">AURA 預防醫學中心</h3>
+                    <p class="work-desc">高端預防醫學中心品牌網站。以沉穩專業的視覺語彙建立信任感，涵蓋服務項目、專業團隊與預約諮詢入口。</p>
+                    <div class="work-tags">
+                        <span class="work-tag">品牌形象</span>
+                        <span class="work-tag">專業信任感</span>
+                        <span class="work-tag">服務項目</span>
+                        <span class="work-tag">預約諮詢</span>
+                    </div>
+                </div>
+                <a href="https://chi1017.github.io/yc-axiom-site/demo/medical.html" class="work-link magnetic" target="_blank" rel="noopener">進入作品 →</a>
+            </div>
+            
+
+        </div>
+
+        <div class="cta-banner reveal" style="margin-top: 56px;">
+            <p>Contact / 聯絡我們</p>
+            <h3>有新的品牌想上線嗎？<br><span>讓我們一起把它做出來。</span></h3>
+            <a href="../contact/" class="btn-ghost magnetic">免費諮詢</a>
+        </div>
+    
+        <div class="sp-related reveal"><h2 class="sp-h2 sp-h2--sm">相關連結</h2><ul><li><a href="../works/xiaofang/">小方光影設計網站案例 →</a></li><li><a href="../works/imassage/">iMassage 網站遷移案例 →</a></li><li><a href="../services/brand-website/">品牌形象網站 →</a></li><li><a href="../taichung-web-design/">台中網頁設計 →</a></li><li><a href="../pricing/">定價 →</a></li></ul></div>
+    </div>
+</section>
+</main>
+
+
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
+<div class="social-float" role="group" aria-label="社群與聯絡">
+    <a class="sf sf-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）" data-tip="LINE 諮詢"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg></a>
+    <a class="sf sf-threads" href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Threads（@ycaxiom）" data-tip="Threads"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M16.8 11.2c-.3-3.4-2.3-5.1-5.2-5.1-2.9 0-5 2-5 5.9 0 3.9 2.1 6.1 5.2 6.1 2.7 0 4.3-1.5 4.3-3.4 0-1.9-1.6-3-3.7-3-1.8 0-2.7.9-2.7 1.9 0 1 .8 1.7 2 1.7 1.7 0 3-1 3-3.8"/></svg></a>
+    <a class="sf sf-ig" href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Instagram（@ycaxiom）" data-tip="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="3.9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.1" fill="currentColor"/></svg></a>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-nav">
+            <a href="../">首頁</a>
+            <a href="../about/">關於</a>
+            <a href="../services/">服務項目</a>
+            <a href="../works/">作品集</a>
+            <a href="../articles/">文章</a>
+            <a href="../seo/">SEO 工具</a>
+            <a href="../pricing/">定價</a>
+            <a href="../contact/">聯絡</a>
+        </div>
+        <div class="footer-services" aria-label="服務與地區"><a href="../services/brand-website/">品牌形象網站</a><a href="../services/ecommerce-website/">品牌電商網站</a><a href="../services/seo-performance/">SEO 與效能調校</a><a href="../services/custom-system/">全客製多頁與系統</a><a href="../services/data-cleaning/">商業資料清洗與整理</a><a href="../services/market-intelligence/">市場情報與競品分析</a><a href="../taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程</div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            現正接案中 · 台灣在地服務
+        </div>
+    </div>
+</footer>
+<script src="../assets/site.js?v=2026-10-14" defer></script>
+</body>
+</html>

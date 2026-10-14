@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        page: function () {
+            var path = location.pathname;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.href, page_path: path, page_title: document.title });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: (a.classList.contains('line-float') || a.closest('.social-float')) ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小方光影設計官方網站案例：用一個網站承載 20 年攝影資歷 - YC AXIOM</title>
+<meta name="description" content="高雄左營小方光影設計官方網站的建置紀錄：如何用一個品牌形象網站呈現 20 年資歷、國際獲獎團隊、攝影作品集、影片作品與三地工作室資訊。想做類似的品牌網站，歡迎 LINE 免費諮詢。">
+<meta name="author" content="YC AXIOM">
+<link rel="icon" type="image/png" href="https://chi1017.github.io/yc-axiom-site/favicon-32.png">
+<link rel="apple-touch-icon" href="https://chi1017.github.io/yc-axiom-site/apple-touch-icon.png">
+<link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/articles/xiaofang-brand-website/">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="小方光影設計官方網站案例：用一個網站承載 20 年攝影資歷 - YC AXIOM">
+<meta property="og:description" content="高雄左營小方光影設計官方網站的建置紀錄：如何用一個品牌形象網站呈現 20 年資歷、國際獲獎團隊、攝影作品集、影片作品與三地工作室資訊。想做類似的品牌網站，歡迎 LINE 免費諮詢。">
+<meta property="og:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta property="og:url" content="https://chi1017.github.io/yc-axiom-site/articles/xiaofang-brand-website/">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="YC AXIOM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="小方光影設計官方網站案例：用一個網站承載 20 年攝影資歷 - YC AXIOM">
+<meta name="twitter:description" content="高雄左營小方光影設計官方網站的建置紀錄：如何用一個品牌形象網站呈現 20 年資歷、國際獲獎團隊、攝影作品集、影片作品與三地工作室資訊。想做類似的品牌網站，歡迎 LINE 免費諮詢。">
+<meta name="twitter:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta name="theme-color" content="#5FA396">
+<script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../../assets/site.css?v=2026-10-14">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://chi1017.github.io/yc-axiom-site/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "文章",
+      "item": "https://chi1017.github.io/yc-axiom-site/articles/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "小方光影設計網站案例",
+      "item": "https://chi1017.github.io/yc-axiom-site/articles/xiaofang-brand-website/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "小方光影設計官方網站：如何用一個網站承載 20 年攝影資歷與三地工作室",
+  "description": "高雄左營的國際獲獎商業攝影團隊，20 年資歷、三個工作室據點與自己的攝影教學課程，網站架構如何把這些內容分類清楚、對搜尋引擎友善。",
+  "author": {
+    "@type": "Organization",
+    "name": "YC AXIOM"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "YC AXIOM",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://chi1017.github.io/yc-axiom-site/og-image.png"
+    }
+  },
+  "mainEntityOfPage": "https://chi1017.github.io/yc-axiom-site/articles/xiaofang-brand-website/",
+  "image": "https://chi1017.github.io/yc-axiom-site/og-image.png",
+  "url": "https://chi1017.github.io/yc-axiom-site/articles/xiaofang-brand-website/",
+  "datePublished": "2026-10-05",
+  "dateModified": "2026-10-14"
+}
+</script>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="頁面載入中">
+    <div class="loader-mark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="ringGrad-load" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient>
+                <linearGradient id="yGrad-load" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="50"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient>
+                <filter id="glow-load" filterUnits="userSpaceOnUse" x="-8" y="-8" width="80" height="80"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path class="loader-draw loader-ring" pathLength="1" d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-load)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y1" pathLength="1" d="M18,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y2" pathLength="1" d="M46,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+        </svg>
+    </div>
+    <div class="loader-text">
+        <div class="loader-name">YC AXIOM</div>
+        <div class="loader-sub">[品牌與工程]</div>
+    </div>
+    <div class="loader-bar"></div>
+</div>
+<script>
+(function () {
+    var root = document.documentElement, loader = document.getElementById('page-loader');
+    if (!loader) return;
+    try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
+    root.classList.add('is-loading');
+    var start = Date.now(), MIN = 1700, MAX = 5000, closed = false;
+    function close() {
+        if (closed) return; closed = true;
+        loader.classList.add('is-done');
+        root.classList.remove('is-loading');
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 900);
+    }
+    function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+})();
+</script>
+
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor Elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-follower"></div>
+
+
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-inner">
+        <a href="../../" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
+            <div class="nav-logo-img">
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+            </div>
+            <div class="nav-logo-text">
+                <div class="nav-logo-name">YC AXIOM</div>
+                <div class="nav-logo-sub">[品牌與工程]</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="../../" class="nav-link">首頁</a></li>
+            <li><a href="../../about/" class="nav-link">關於</a></li>
+            <li><a href="../../services/" class="nav-link">服務項目</a></li>
+            <li><a href="../../works/" class="nav-link">作品集</a></li>
+            <li><a href="../../articles/" class="nav-link active" aria-current="page">文章</a></li>
+            <li><a href="../../seo/" class="nav-link">SEO 工具</a></li>
+            <li><a href="../../pricing/" class="nav-link">定價</a></li>
+            <li><a href="../../contact/" class="nav-link">聯絡</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="../../contact/" class="nav-cta magnetic">免費諮詢</a>
+
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu">
+    <button class="mobile-close" onclick="toggleMobileMenu()" aria-label="關閉選單">✕</button>
+    <a class="mobile-nav-btn" href="../../">首頁</a>
+    <a class="mobile-nav-btn" href="../../about/">關於</a>
+    <a class="mobile-nav-btn" href="../../services/">服務項目</a>
+    <a class="mobile-nav-btn" href="../../works/">作品集</a>
+    <a class="mobile-nav-btn" href="../../articles/">文章</a>
+    <a class="mobile-nav-btn" href="../../seo/">SEO 工具</a>
+    <a class="mobile-nav-btn" href="../../pricing/">定價</a>
+    <a class="mobile-nav-btn" href="../../contact/">聯絡</a>
+</div>
+
+
+<main>
+<section id="page-article-xiaofang" class="page showing active">
+    <div class="container section-pad">
+        <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../../">首頁</a><span aria-hidden="true">›</span><a href="../../articles/">文章</a><span aria-hidden="true">›</span><span aria-current="page">小方光影設計網站案例</span></div>
+        
+        <p class="section-eyebrow reveal">Article / 真實案例</p>
+        <h1 class="section-title reveal decode-text" data-original="小方光影設計網站案例.">小方光影設計<br>網站案例.</h1>
+        <figure class="shot-figure reveal"><img srcset="../../images/works/real-shooting-600.webp 600w, ../../images/works/real-shooting-900.webp 900w, ../../images/works/real-shooting.webp 1200w" sizes="(max-width: 1000px) 100vw, 960px" src="../../images/works/real-shooting.webp" alt="小方光影設計官方網站首頁截圖" width="1200" height="480" loading="lazy" decoding="async"><figcaption>小方光影設計官網首頁 · shooting.com.tw · 截圖日期 2026/10/05</figcaption></figure>
+        <div class="article-meta reveal" style="margin-top:20px;">
+            <span>✦ 真實案例</span>
+            <span>品牌形象網站 / 商業攝影</span>
+            <span>閱讀時間約 6 分鐘</span>
+        </div>
+
+        <div class="article-body reveal">
+            <p>小方光影設計是一個位於高雄左營的商業攝影團隊，成軍將近 20 年，團隊拿過國際攝影獎項，同時經營三個地點的工作室。這樣的資歷放在同業裡並不常見，但也帶出一個很實際的問題：20 年累積下來的作品、影片、教學課程、三個工作室的資訊，要怎麼放進同一個網站，還讓人看得懂、找得到？這是我們接下這個案子時，最先要解決的課題。</p>
+
+            <h2>20 年資歷，要怎麼放進一個網站裡</h2>
+            <p>資歷深的工作室常見的網站問題不是「內容不夠」，而是「內容太多、太雜」。作品集橫跨不同拍攝類型，還有影片作品、教學課程、團隊介紹、三個工作室的據點資訊——如果全部塞進同一個頁面，訪客反而會不知道該從哪裡開始看。我們的做法是先把內容盤點清楚，依照訪客最常見的幾種需求（想看作品、想了解團隊、想上課、想知道工作室在哪）重新拆分成獨立的頁面架構，而不是硬塞進一頁式網站裡。</p>
+
+            <h2>用分類架構，讓不同類型的客戶各自找到路</h2>
+            <p>攝影工作室的網站，最終目的是讓對的客人快速找到他要的東西：新人想找婚紀作品，品牌想找商業形象作品，學生想找攝影課程資訊，這幾種訪客要看的內容完全不一樣。網站最後採用完整多頁架構，把攝影作品集依類型分類展示，影片作品另外獨立呈現，團隊介紹、攝影教學課程與三個工作室的資訊也各自有清楚的頁面，讓每種訪客都能照自己的需求找到對應的內容，而不用從頭滑過所有東西。</p>
+
+            <h2>影片作品與跨裝置瀏覽</h2>
+            <p>攝影工作室的作品說服力，很大一部分來自影片——拍攝花絮、動態作品往往比靜態相片更能展現團隊的手法與現場氛圍。網站把影片作品獨立成一個區塊呈現，不跟靜態作品集混在一起，同時整站採用響應式設計，確保不管是在手機上滑動瀏覽作品集，還是在桌機上仔細端詳細節，畫面跟操作都能維持一致的品質。這對經常需要在手機上把作品連結直接傳給客人參考的攝影師來說，是很實際的需求，也是我們每個案子都會落實的基本規格。</p>
+
+            <h2>三地工作室與教學課程：不只是拍照，還是品牌事業</h2>
+            <p>三個工作室據點跟自己的教學課程，代表這已經不只是接案拍照，而是一個有規模的品牌事業。網站在資訊架構上也反映了這件事：工作室資訊需要清楚交代地點、方便客人判斷該找哪一個據點；教學課程則需要獨立的介紹頁面，呈現課程內容與定位，跟接案拍攝的商業攝影作品集區隔開來，避免混在一起讓訪客搞不清楚這個品牌到底在做什麼。</p>
+
+            <h2>團隊介紹：把 20 年資歷變成信任感</h2>
+            <p>對客人來說，願意把重要場合（婚紗、商業形象、品牌宣傳）交給一個攝影團隊，很大一部分是建立在信任上。20 年資歷、國際獲獎紀錄，這些都是實實在在的優勢，但如果只是條列在「關於我們」的一小段文字裡，很容易被訪客滑過去。網站把團隊介紹獨立成專屬頁面，讓資歷、得獎紀錄與團隊成員有足夠的篇幅被好好呈現，而不是被壓縮成首頁角落的一句話。</p>
+
+            <h2>SEO 與長期能見度</h2>
+            <p>案子裡也包含全站的 SEO 優化，讓網站架構本身對搜尋引擎友善——包括頁面的語意化結構、清楚的標題階層，讓「高雄商業攝影」「左營婚紗攝影」這類客人真正會搜尋的字詞，能對應到網站上正確的內容頁面，而不是全部擠在同一個首頁裡互相稀釋。對經營多年、口碑已經累積一定基礎的工作室來說，這是把既有的品牌資歷，轉換成長期自然搜尋流量的關鍵一步，也比從零開始經營一個新品牌要更快看到效果。</p>
+
+            <h2>給攝影工作室與創意工作者的建議</h2>
+            <p>如果你也是資歷深、作品量大的攝影工作室或創意工作者，網站規劃上有幾件事值得優先考慮：先盤點內容再決定架構，不要急著套版；把不同類型的作品或服務拆開呈現，而不是全部塞進同一頁；如果有多個據點或額外的服務（像教學課程），給它們各自獨立、講得清楚的頁面。內容夠多、夠好，架構清楚，才有辦法真正被看見、被記住。</p>
+        </div>
+
+        <div class="cta-banner reveal" style="margin-top:64px;">
+            <p>Live Result / 實際成果</p>
+            <h3>想看完整網站的樣子嗎？<br><span>直接到小方光影設計官網逛逛。</span></h3>
+            <a href="https://www.shooting.com.tw/" target="_blank" rel="noopener" class="btn-ghost magnetic" style="text-decoration:none; display:inline-block;">前往小方光影設計官網 ↗</a>
+        </div>
+
+        <div class="reveal" style="margin-top:40px; display:flex; gap:16px; flex-wrap:wrap;">
+            <a href="../../articles/" class="btn-secondary magnetic">← 返回文章列表</a>
+            <a href="../../contact/" class="btn-primary magnetic">我也想要一個這樣的網站 →</a>
+        </div>
+    
+        <div class="sp-related reveal"><h2 class="sp-h2 sp-h2--sm">相關連結</h2><ul><li><a href="../../works/xiaofang/">小方光影設計案例摘要 →</a></li><li><a href="../../services/brand-website/">品牌形象網站 →</a></li><li><a href="../../services/custom-system/">全客製多頁與系統 →</a></li><li><a href="../../articles/">更多文章 →</a></li></ul></div>
+    </div>
+</section>
+</main>
+
+
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
+<div class="social-float" role="group" aria-label="社群與聯絡">
+    <a class="sf sf-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）" data-tip="LINE 諮詢"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg></a>
+    <a class="sf sf-threads" href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Threads（@ycaxiom）" data-tip="Threads"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M16.8 11.2c-.3-3.4-2.3-5.1-5.2-5.1-2.9 0-5 2-5 5.9 0 3.9 2.1 6.1 5.2 6.1 2.7 0 4.3-1.5 4.3-3.4 0-1.9-1.6-3-3.7-3-1.8 0-2.7.9-2.7 1.9 0 1 .8 1.7 2 1.7 1.7 0 3-1 3-3.8"/></svg></a>
+    <a class="sf sf-ig" href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Instagram（@ycaxiom）" data-tip="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="3.9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.1" fill="currentColor"/></svg></a>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-nav">
+            <a href="../../">首頁</a>
+            <a href="../../about/">關於</a>
+            <a href="../../services/">服務項目</a>
+            <a href="../../works/">作品集</a>
+            <a href="../../articles/">文章</a>
+            <a href="../../seo/">SEO 工具</a>
+            <a href="../../pricing/">定價</a>
+            <a href="../../contact/">聯絡</a>
+        </div>
+        <div class="footer-services" aria-label="服務與地區"><a href="../../services/brand-website/">品牌形象網站</a><a href="../../services/ecommerce-website/">品牌電商網站</a><a href="../../services/seo-performance/">SEO 與效能調校</a><a href="../../services/custom-system/">全客製多頁與系統</a><a href="../../services/data-cleaning/">商業資料清洗與整理</a><a href="../../services/market-intelligence/">市場情報與競品分析</a><a href="../../taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程</div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            現正接案中 · 台灣在地服務
+        </div>
+    </div>
+</footer>
+<script src="../../assets/site.js?v=2026-10-14" defer></script>
+</body>
+</html>
