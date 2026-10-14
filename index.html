@@ -605,7 +605,7 @@
         .work-cover--img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
         .work-item:hover .work-cover--img img { transform: scale(1.05); }
         .work-cover--img::before, .work-cover--img::after { z-index: 2; }
-        .work-cover--img .work-num { position: absolute; left: 8px; top: 8px; z-index: 2; font-size: 11px; letter-spacing: 0.1em; padding: 3px 7px; border-radius: 3px; background: rgba(11, 10, 9, 0.72); color: var(--text-bright); }
+        .work-cover--img .work-num { position: absolute; left: 8px; top: 8px; z-index: 2; font-size: 12px; letter-spacing: 0.1em; padding: 3px 7px; border-radius: 3px; background: rgba(11, 10, 9, 0.72); color: var(--text-bright); }
         .work-num { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 800; font-size: 36px; color: rgba(255, 255, 255, 0.85); line-height: 1; letter-spacing: 0.04em; position: relative; z-index: 1; }
         .work-info { min-width: 0; }
         .work-eyebrow { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 600; font-weight: 700; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
@@ -691,7 +691,7 @@
             letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-dim); transition: color 0.2s;
         }
         .footer-nav button:hover { color: var(--accent); }
-        .footer-copy { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 600; font-size: 13px; color: var(--text-dim); letter-spacing: 0.05em; opacity: 0.7; }
+        .footer-copy { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 600; font-size: 13px; color: var(--text-dim); letter-spacing: 0.05em; }
         .footer-status { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 600; font-weight: 600; font-size: 13px; color: var(--accent); letter-spacing: 0.05em; opacity: 0.85; display: flex; align-items: center; gap: 8px; }
         .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; box-shadow: 0 0 6px var(--accent); }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
@@ -948,11 +948,11 @@
 }
 .bento-card:not(.bento-card--large) .bento-num { display: none; }
 .bento-badge {
-    position: absolute; top: 18px; right: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    position: absolute; top: 18px; right: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
     text-transform: uppercase; color: var(--accent); border: 1px solid rgba(95, 163, 150, 0.3);
     background: rgba(95, 163, 150, 0.08); padding: 4px 10px; border-radius: 20px;
 }
-.bento-eyebrow { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; opacity: 0.85; }
+.bento-eyebrow { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
 .bento-title { font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 700; color: var(--text-bright); margin-bottom: 8px; line-height: 1.3; }
 .bento-card--large .bento-title { font-size: 26px; }
 .bento-card--wide .bento-title { font-size: 19px; }
@@ -1088,6 +1088,24 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 [data-theme="light"] linearGradient[id^="yGrad"] stop:nth-child(3) { stop-color: #1F5A4F; }
 @media (max-width: 900px) { .nav-right { gap: 8px; } .theme-toggle { width: 38px; height: 38px; } }
 @media (prefers-reduced-motion: reduce) { html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after { transition: none !important; } }
+
+/* ── Audit batch 1: layout / touch targets / a11y ── */
+/* .section-pad's `padding: Npx 0` shorthand wiped .container's side gutters on every sub-page
+   below ~1320px; restore them without changing the >=1320px layout. */
+@media (max-width: 1319px) { .container.section-pad { padding-left: 40px; padding-right: 40px; } }
+@media (max-width: 768px)  { .container.section-pad { padding-left: 20px; padding-right: 20px; } }
+/* The featured services card used `grid-column: span 3` with higher specificity than the
+   responsive rules, creating 3 implicit columns inside the 1-column mobile/tablet grid. */
+@media (max-width: 1024px) { .services-grid .service-card.service-card--featured { grid-column: 1 / -1; } }
+/* 44px minimum touch targets on phones/tablets */
+@media (max-width: 768px), (pointer: coarse) {
+  .bento-link, .btn-ghost, .works-filter-btn, .form-chip { min-height: 44px; display: inline-flex; align-items: center; }
+  .bento-link { padding-block: 10px; }
+  .works-filter-btn, .form-chip { justify-content: center; }
+}
+/* contact-page text links: 44px touch area on phones */
+@media (max-width: 768px), (pointer: coarse) { .contact-info-item a { display: inline-block; padding: 14px 0; } .contact-info-item { margin-bottom: 8px; } }
+[data-theme="light"] .pricing-tab.active { color: #25675b; }
 </style>
 </head>
 <body>
@@ -1142,9 +1160,9 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 <!-- ── NAV ── -->
 <nav>
     <div class="nav-inner">
-        <a href="#" onclick="showPage('home'); return false;" class="nav-logo magnetic" aria-label="YC AXIOM 首頁">
+        <a href="#" onclick="showPage('home'); return false;" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
             <div class="nav-logo-img">
-                <div class="logo-mark logo-mark--nav" aria-label="YC AXIOM Logo"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
             </div>
             <div class="nav-logo-text">
                 <div class="nav-logo-name">YC AXIOM</div>
@@ -1201,7 +1219,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
             <div class="hero-logo-ring"></div>
             <div class="hero-logo-ring-2"></div>
             <div class="hero-logo-frame">
-                <div class="logo-mark logo-mark--hero" aria-label="YC AXIOM Logo"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-hero" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-hero" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-hero" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-hero)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-hero)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-hero)" stroke-width="4" stroke-linecap="round" filter="url(#glow-hero)"/></svg><svg width="0" height="0" style="position:absolute;width:0;height:0" aria-hidden="true" focusable="false"><defs><linearGradient id="ringGrad3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".45" stop-color="#F5F2EA"/><stop offset="1" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CD2C2"/><stop offset=".48" stop-color="#5FA396"/><stop offset="1" stop-color="#3C7A6D"/></linearGradient><g id="ring3d"><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad3d)" stroke-width="2.2" stroke-linecap="round"/></g><g id="y3d"><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad3d)" stroke-width="4" stroke-linecap="round"/></g></defs></svg><div class="logo3d-scene" aria-hidden="true"><div class="logo3d-obj" id="logo3dObj"></div></div></div>
+                <div class="logo-mark logo-mark--hero" role="img" aria-label="YC AXIOM Logo"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-hero" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-hero" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-hero" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-hero)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-hero)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-hero)" stroke-width="4" stroke-linecap="round" filter="url(#glow-hero)"/></svg><svg width="0" height="0" style="position:absolute;width:0;height:0" aria-hidden="true" focusable="false"><defs><linearGradient id="ringGrad3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".45" stop-color="#F5F2EA"/><stop offset="1" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8CD2C2"/><stop offset=".48" stop-color="#5FA396"/><stop offset="1" stop-color="#3C7A6D"/></linearGradient><g id="ring3d"><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad3d)" stroke-width="2.2" stroke-linecap="round"/></g><g id="y3d"><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad3d)" stroke-width="4" stroke-linecap="round"/></g></defs></svg><div class="logo3d-scene" aria-hidden="true"><div class="logo3d-obj" id="logo3dObj"></div></div></div>
             </div>
         </div>
 
@@ -1358,7 +1376,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
                 </div>
 
                 <!-- Modern Tech Stack Breakdown -->
-                <h4 style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.4em; text-transform:uppercase; color:var(--accent); margin-bottom:16px;">前端工程規格標準</h4>
+                <h4 aria-level="3" style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:13px; font-weight:700; letter-spacing:0.4em; text-transform:uppercase; color:var(--accent); margin-bottom:16px;">前端工程規格標準</h4>
                 <div class="tech-stack-grid">
                     <div class="tech-item reveal tilt-card">
                         <div class="tech-title">01. 語意化結構</div>
@@ -1388,21 +1406,21 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
             </div>
 
             <div class="about-features reveal tilt-card">
-                <h4>四大品質承諾 / Guarantees</h4>
+                <h4 aria-level="3">四大品質承諾 / Guarantees</h4>
                 <div class="feature-item">
-                    <h5>100% 原始碼自主權</h5>
+                    <h5 aria-level="4">100% 原始碼自主權</h5>
                     <p>專案完成驗收後，完整交付 HTML / CSS / JS 檔案與設計稿，無維護年費綁定，所有權完全歸您所有。</p>
                 </div>
                 <div class="feature-item">
-                    <h5>全裝置極速響應 (RWD)</h5>
+                    <h5 aria-level="4">全裝置極速響應 (RWD)</h5>
                     <p>針對 iPhone、Android、平板與 4K 桌機進行像素級調校，確保跨螢幕表現極致流暢。</p>
                 </div>
                 <div class="feature-item">
-                    <h5>Google 友善 SEO 架構</h5>
+                    <h5 aria-level="4">Google 友善 SEO 架構</h5>
                     <p>內建 Open Graph、Meta 標籤與 Schema 結構化資料，從開工第一天即做好自然搜尋爬取準備。</p>
                 </div>
                 <div class="feature-item">
-                    <h5>透明化階段交付</h5>
+                    <h5 aria-level="4">透明化階段交付</h5>
                     <p>提供清晰的預覽開發連結與測試環境，每個階段審核後才進行下一步，進度 100% 可掌控。</p>
                 </div>
             </div>
@@ -1996,27 +2014,27 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
             <h3 style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:44px; color:var(--text-bright); margin-bottom:32px;">遷移前要處理的事.</h3>
             <div class="about-features tilt-card">
                 <div class="feature-item">
-                    <h5>服務項目頁面搬遷</h5>
+                    <h5 aria-level="4">服務項目頁面搬遷</h5>
                     <p>把原本在 Weebly 上的按摩項目、價目與介紹頁面，逐一搬到 WordPress，內容不打折扣。</p>
                 </div>
                 <div class="feature-item">
-                    <h5>品牌識別與版面重建</h5>
+                    <h5 aria-level="4">品牌識別與版面重建</h5>
                     <p>在 WordPress 重新建立基礎版面與品牌色彩，讓網站風格延續原本的識別。</p>
                 </div>
                 <div class="feature-item">
-                    <h5>聯絡與預約資訊校對</h5>
+                    <h5 aria-level="4">聯絡與預約資訊校對</h5>
                     <p>電話、地址、營業時間等聯絡資訊逐項核對，確保搬家後客人還是找得到正確資訊。</p>
                 </div>
                 <div class="feature-item">
-                    <h5>網域與連結接軌</h5>
+                    <h5 aria-level="4">網域與連結接軌</h5>
                     <p>處理網域轉接，讓原本的網址能順利導向新的 WordPress 網站，舊連結不失效。</p>
                 </div>
                 <div class="feature-item">
-                    <h5>SEO 基礎設定</h5>
+                    <h5 aria-level="4">SEO 基礎設定</h5>
                     <p>補上基本的 meta 資訊與網站地圖，讓搜尋引擎能重新收錄遷移後的新網站。</p>
                 </div>
                 <div class="feature-item">
-                    <h5>上線前完整檢查</h5>
+                    <h5 aria-level="4">上線前完整檢查</h5>
                     <p>逐頁核對排版與連結，確認搬家後網站在各裝置上都能正常瀏覽。</p>
                 </div>
             </div>
@@ -2585,7 +2603,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
         <div class="contact-grid" style="margin-top: 64px;">
             <!-- Interactive Form -->
             <div class="form-box reveal tilt-card">
-                <h4>專案需求評估表單</h4>
+                <h4 aria-level="3">專案需求評估表單</h4>
                 <form id="consultation-form" onsubmit="handleFormSubmit(event)">
                     
                     <div class="form-group">
@@ -2670,13 +2688,13 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
 
                 <div class="contact-info-box tilt-card">
                     <p class="label" style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-weight:700; font-size:12px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); margin-bottom:10px;">正式合作 / Project Brief</p>
-                    <h5 style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:18px; font-weight:700; color:var(--text-bright); margin-bottom:12px;">網站建置需求表</h5>
+                    <h5 aria-level="3" style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:18px; font-weight:700; color:var(--text-bright); margin-bottom:12px;">網站建置需求表</h5>
                     <p style="font-size:14px; color:var(--text-dim); line-height:1.7; margin-bottom:20px;">確定要合作了嗎？填寫完整的需求問卷（約 8–12 分鐘），讓我一次抓準你的品牌調性與需求，減少來回修改的時間。不確定的欄位可以先填「不確定」，討論時再一起釐清。</p>
                     <a href="https://forms.gle/fuvoujuHqNtrMmYK7" target="_blank" rel="noopener" class="btn-secondary magnetic" style="width:100%; text-decoration:none; display:block; text-align:center; box-sizing:border-box;">填寫需求表 ↗</a>
                 </div>
 
                 <div class="contact-info-box tilt-card" style="background: rgba(0,210,200,0.03); border-color: rgba(0,210,200,0.2);">
-                    <h5 style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); margin-bottom:12px;">24小時快速回應承諾</h5>
+                    <h5 aria-level="3" style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); margin-bottom:12px;">24小時快速回應承諾</h5>
                     <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">送出需求單後，會自動帶出一封寫好的郵件草稿，您按下「傳送」內容才會真正寄達 ycaxiom@gmail.com。信件送達後，建構師將於 24 小時內親自審閱並回覆初步可行性評估與預估時程表。</p>
                 </div>
             </div>
