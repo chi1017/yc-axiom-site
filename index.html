@@ -2653,10 +2653,10 @@ body.on-seo .line-float { display: none; }
             <div class="form-box contact-cta-box reveal tilt-card">
                 <h4 aria-level="3">最快的聯絡方式</h4>
                 <p class="contact-cta-lead">加 LINE 直接說明你的需求，我們會在 24 小時內回覆。免費諮詢、免費報價，不用先填一大堆表單。</p>
-                <a class="btn-line magnetic" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>用 LINE 聯絡　@788cblaq</span></a>
+                <a class="btn-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>用 LINE 聯絡　@788cblaq</span></a>
                 <div class="contact-cta-divider"><span>或者</span></div>
                 <p class="contact-cta-lead">已經確定要合作？填寫完整的需求問卷（約 8–12 分鐘），一次把品牌調性與需求說清楚，減少來回修改的時間。不確定的欄位可以先填「不確定」。</p>
-                <a class="btn-secondary magnetic contact-cta-form" href="https://forms.gle/fuvoujuHqNtrMmYK7" target="_blank" rel="noopener">填寫網站建置需求表 ↗</a>
+                <a class="btn-secondary contact-cta-form" href="https://forms.gle/fuvoujuHqNtrMmYK7" target="_blank" rel="noopener">填寫網站建置需求表 ↗</a>
             </div>
 
             <!-- Sidebar Info -->
@@ -2849,8 +2849,13 @@ body.on-seo .line-float { display: none; }
        not a wobble. */
     const TILT_MAX = 3.5;
     document.querySelectorAll('.tilt-card').forEach(card => {
+        // Cards that contain links/buttons/fields stay still: a tilting, moving target made them jittery and hard to click.
+        if (card.querySelector('a, button, input, textarea, select')) return;
+        // Measure once on enter: re-measuring a rotated card every move feeds back into the tilt and makes it shake.
+        let rect = null;
+        card.addEventListener('mouseenter', () => { rect = card.getBoundingClientRect(); });
         card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
+            if (!rect) rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             const centerX = rect.width / 2;
