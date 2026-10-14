@@ -433,11 +433,11 @@
         .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite; }
 
         .hero-h1 {
-            font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 800; font-size: clamp(72px, 12vw, 150px);
-            line-height: 0.9; letter-spacing: 0.03em; color: var(--text-bright); margin-bottom: 12px;
+            font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif; font-weight: 800; font-size: clamp(46px, 11vw, 136px);
+            line-height: 1.02; letter-spacing: 0.01em; color: var(--text-bright); margin-bottom: 20px;
             text-shadow: 0 0 30px rgba(0, 0, 0, 0.8); z-index: 2;
         }
-        .hero-h1 .accent { color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
+        .hero-h1 .accent { color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); font-size: 0.5em; font-weight: 600; letter-spacing: 0.04em; margin-left: 0.12em; vertical-align: 0.42em; }
 
         .hero-sub {
             font-size: clamp(16px, 1.8vw, 20px); font-weight: 300; color: var(--text-dim);
@@ -1228,7 +1228,7 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
             商業品牌網頁設計工作室
         </div>
 
-        <h1 class="hero-h1 reveal decode-text" data-original="YC AXIOM [æ]">YC AXIOM <span class="accent">[æ]</span></h1>
+        <h1 class="hero-h1 reveal decode-text" data-keep-html data-original="YC AXIOM [æ]">YC AXIOM <span class="accent">[æ]</span></h1>
 
         <p class="hero-sub reveal">
             專注為商業品牌打造<strong>高質感數位門面。</strong><br>
@@ -2744,8 +2744,13 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
        Previously a character-scramble "decode" effect — replaced with a
        quiet fade + rise so headings feel considered rather than glitchy. */
     function decodeTextEffect(element) {
-        const originalText = element.dataset.original || element.innerText;
-        element.innerText = originalText;
+        if (element.hasAttribute('data-keep-html')) {
+            // keep inner markup (e.g. the accent-coloured [æ]) instead of flattening it to plain text
+            if (!element.dataset.html) element.dataset.html = element.innerHTML;
+            element.innerHTML = element.dataset.html;
+        } else {
+            element.innerText = element.dataset.original || element.innerText;
+        }
         element.style.transition = 'none';
         element.style.opacity = '0';
         element.style.transform = 'translateY(10px)';
