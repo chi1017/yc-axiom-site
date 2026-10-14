@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        page: function () {
+            var path = location.pathname;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.href, page_path: path, page_title: document.title });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: (a.classList.contains('line-float') || a.closest('.social-float')) ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聯絡 YC AXIOM｜台中網頁設計免費諮詢與報價</title>
+<meta name="description" content="想做網站或改版？加 LINE @788cblaq 或寄信到 ycaxiom@gmail.com，YC AXIOM 提供台中與全台網頁設計免費諮詢與報價，我們會在 24 小時內回覆，不用先填一大堆表單。">
+<meta name="author" content="YC AXIOM">
+<link rel="icon" type="image/png" href="https://chi1017.github.io/yc-axiom-site/favicon-32.png">
+<link rel="apple-touch-icon" href="https://chi1017.github.io/yc-axiom-site/apple-touch-icon.png">
+<link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/contact/">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="聯絡 YC AXIOM｜台中網頁設計免費諮詢與報價">
+<meta property="og:description" content="想做網站或改版？加 LINE @788cblaq 或寄信到 ycaxiom@gmail.com，YC AXIOM 提供台中與全台網頁設計免費諮詢與報價，我們會在 24 小時內回覆，不用先填一大堆表單。">
+<meta property="og:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta property="og:url" content="https://chi1017.github.io/yc-axiom-site/contact/">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="YC AXIOM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="聯絡 YC AXIOM｜台中網頁設計免費諮詢與報價">
+<meta name="twitter:description" content="想做網站或改版？加 LINE @788cblaq 或寄信到 ycaxiom@gmail.com，YC AXIOM 提供台中與全台網頁設計免費諮詢與報價，我們會在 24 小時內回覆，不用先填一大堆表單。">
+<meta name="twitter:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta name="theme-color" content="#5FA396">
+<script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/site.css?v=2026-10-14">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://chi1017.github.io/yc-axiom-site/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "聯絡",
+      "item": "https://chi1017.github.io/yc-axiom-site/contact/"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="頁面載入中">
+    <div class="loader-mark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="ringGrad-load" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient>
+                <linearGradient id="yGrad-load" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="50"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient>
+                <filter id="glow-load" filterUnits="userSpaceOnUse" x="-8" y="-8" width="80" height="80"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path class="loader-draw loader-ring" pathLength="1" d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-load)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y1" pathLength="1" d="M18,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y2" pathLength="1" d="M46,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+        </svg>
+    </div>
+    <div class="loader-text">
+        <div class="loader-name">YC AXIOM</div>
+        <div class="loader-sub">[品牌與工程]</div>
+    </div>
+    <div class="loader-bar"></div>
+</div>
+<script>
+(function () {
+    var root = document.documentElement, loader = document.getElementById('page-loader');
+    if (!loader) return;
+    try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
+    root.classList.add('is-loading');
+    var start = Date.now(), MIN = 1700, MAX = 5000, closed = false;
+    function close() {
+        if (closed) return; closed = true;
+        loader.classList.add('is-done');
+        root.classList.remove('is-loading');
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 900);
+    }
+    function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+})();
+</script>
+
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor Elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-follower"></div>
+
+
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-inner">
+        <a href="../" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
+            <div class="nav-logo-img">
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+            </div>
+            <div class="nav-logo-text">
+                <div class="nav-logo-name">YC AXIOM</div>
+                <div class="nav-logo-sub">[品牌與工程]</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="../" class="nav-link">首頁</a></li>
+            <li><a href="../about/" class="nav-link">關於</a></li>
+            <li><a href="../services/" class="nav-link">服務項目</a></li>
+            <li><a href="../works/" class="nav-link">作品集</a></li>
+            <li><a href="../articles/" class="nav-link">文章</a></li>
+            <li><a href="../seo/" class="nav-link">SEO 工具</a></li>
+            <li><a href="../pricing/" class="nav-link">定價</a></li>
+            <li><a href="../contact/" class="nav-link active" aria-current="page">聯絡</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="../contact/" class="nav-cta magnetic">免費諮詢</a>
+
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu">
+    <button class="mobile-close" onclick="toggleMobileMenu()" aria-label="關閉選單">✕</button>
+    <a class="mobile-nav-btn" href="../">首頁</a>
+    <a class="mobile-nav-btn" href="../about/">關於</a>
+    <a class="mobile-nav-btn" href="../services/">服務項目</a>
+    <a class="mobile-nav-btn" href="../works/">作品集</a>
+    <a class="mobile-nav-btn" href="../articles/">文章</a>
+    <a class="mobile-nav-btn" href="../seo/">SEO 工具</a>
+    <a class="mobile-nav-btn" href="../pricing/">定價</a>
+    <a class="mobile-nav-btn" href="../contact/">聯絡</a>
+</div>
+
+
+<main>
+<section id="page-contact" class="page showing active">
+    <div class="container section-pad">
+        <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../">首頁</a><span aria-hidden="true">›</span><span aria-current="page">聯絡</span></div>
+        
+        <p class="section-eyebrow reveal">Contact / 聯絡我們</p>
+        <h1 class="section-title reveal decode-text" data-original="免費諮詢，說說你的想法.">免費諮詢，<br>說說你的想法.</h1>
+
+        <div class="contact-grid" style="margin-top: 64px;">
+            <!-- Contact CTA (LINE + Google Form) -->
+            <div class="form-box contact-cta-box reveal tilt-card">
+                <h4 aria-level="3">最快的聯絡方式</h4>
+                <p class="contact-cta-lead">加 LINE 直接說明你的需求，我們會在 24 小時內回覆。免費諮詢、免費報價，不用先填一大堆表單。</p>
+                <a class="btn-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>用 LINE 聯絡　@788cblaq</span></a>
+                <div class="contact-cta-divider"><span>或者</span></div>
+                <p class="contact-cta-lead">已經確定要合作？填寫完整的需求問卷（約 8–12 分鐘），一次把品牌調性與需求說清楚，減少來回修改的時間。不確定的欄位可以先填「不確定」。</p>
+                <a class="btn-secondary contact-cta-form" href="https://forms.gle/fuvoujuHqNtrMmYK7" target="_blank" rel="noopener">填寫網站建置需求表 ↗</a>
+            </div>
+
+            <!-- Sidebar Info -->
+            <div class="contact-sidebar reveal">
+                <div class="contact-info-box tilt-card">
+                    <div class="contact-info-item">
+                        <p class="label">LINE</p>
+                        <a href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">@788cblaq</a>
+                    </div>
+                    <div class="contact-info-item">
+                        <p class="label">官方電子郵件 / E-Mail</p>
+                        <a href="mailto:ycaxiom@gmail.com">ycaxiom@gmail.com</a>
+                    </div>
+                    <div class="contact-info-item">
+                        <p class="label">Instagram</p>
+                        <a href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener">@ycaxiom</a>
+                    </div>
+                    <div class="contact-info-item">
+                        <p class="label">Threads</p>
+                        <a href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener">@ycaxiom</a>
+                    </div>
+                    <div class="contact-info-item">
+                        <p class="label">服務時間 / Availability</p>
+                        <p style="font-family:var(--f-ui); font-size:14px; color:var(--text-bright);">Mon – Sat · 10:00–20:00</p>
+                    </div>
+                </div>
+
+                <div class="contact-info-box tilt-card" style="background: rgba(0,210,200,0.03); border-color: rgba(0,210,200,0.2);">
+                    <h5 aria-level="3" style="font-family:var(--f-ui); font-size:14px; font-weight:700; letter-spacing: 0.05em; text-transform:uppercase; color:var(--accent); margin-bottom:12px;">24小時快速回應承諾</h5>
+                    <p style="font-size:14px; color:var(--text-dim); line-height:1.7;">無論是 LINE 訊息、需求表或 Email，我們都會在 24 小時內親自審閱，並回覆初步可行性評估與預估時程表。</p>
+                </div>
+            </div>
+        </div>
+    
+        <div class="sp-related reveal"><h2 class="sp-h2 sp-h2--sm">相關連結</h2><ul><li><a href="../services/">服務項目 →</a></li><li><a href="../pricing/">定價與方案 →</a></li><li><a href="../works/">作品集 →</a></li><li><a href="../taichung-web-design/">台中網頁設計 →</a></li></ul></div>
+    </div>
+</section>
+</main>
+
+
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
+<div class="social-float" role="group" aria-label="社群與聯絡">
+    <a class="sf sf-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）" data-tip="LINE 諮詢"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg></a>
+    <a class="sf sf-threads" href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Threads（@ycaxiom）" data-tip="Threads"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M16.8 11.2c-.3-3.4-2.3-5.1-5.2-5.1-2.9 0-5 2-5 5.9 0 3.9 2.1 6.1 5.2 6.1 2.7 0 4.3-1.5 4.3-3.4 0-1.9-1.6-3-3.7-3-1.8 0-2.7.9-2.7 1.9 0 1 .8 1.7 2 1.7 1.7 0 3-1 3-3.8"/></svg></a>
+    <a class="sf sf-ig" href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Instagram（@ycaxiom）" data-tip="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="3.9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.1" fill="currentColor"/></svg></a>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-nav">
+            <a href="../">首頁</a>
+            <a href="../about/">關於</a>
+            <a href="../services/">服務項目</a>
+            <a href="../works/">作品集</a>
+            <a href="../articles/">文章</a>
+            <a href="../seo/">SEO 工具</a>
+            <a href="../pricing/">定價</a>
+            <a href="../contact/">聯絡</a>
+        </div>
+        <div class="footer-services" aria-label="服務與地區"><a href="../services/brand-website/">品牌形象網站</a><a href="../services/ecommerce-website/">品牌電商網站</a><a href="../services/seo-performance/">SEO 與效能調校</a><a href="../services/custom-system/">全客製多頁與系統</a><a href="../services/data-cleaning/">商業資料清洗與整理</a><a href="../services/market-intelligence/">市場情報與競品分析</a><a href="../taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程</div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            現正接案中 · 台灣在地服務
+        </div>
+    </div>
+</footer>
+<script src="../assets/site.js?v=2026-10-14" defer></script>
+</body>
+</html>

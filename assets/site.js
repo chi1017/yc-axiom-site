@@ -1,0 +1,471 @@
+
+    /* ── Heading entrance ──
+       Previously a character-scramble "decode" effect — replaced with a
+       quiet fade + rise so headings feel considered rather than glitchy. */
+    function decodeTextEffect(element) {
+        if (element.hasAttribute('data-keep-html')) {
+            // keep inner markup (e.g. the accent-coloured word) instead of flattening it to plain text
+            if (!element.dataset.html) element.dataset.html = element.innerHTML;
+            element.innerHTML = element.dataset.html;
+        } else {
+            element.innerText = element.dataset.original || element.innerText;
+        }
+        element.style.transition = 'none';
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(10px)';
+        void element.offsetHeight;
+        element.style.transition = 'opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1)';
+        requestAnimationFrame(() => {
+            element.style.opacity = '1';
+            element.style.transform = 'translateY(0)';
+        });
+    }
+
+    /* ── Magnetic Physics Buttons ──
+       Toned down further: low pull strength + a tight clamp, so it reads as
+       a faint nudge toward the cursor rather than the button swinging. */
+    if (window.innerWidth > 1024) {
+        const MAG_STRENGTH = 0.12;
+        const MAG_MAX = 7;
+        document.querySelectorAll('.magnetic').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                const tx = Math.max(-MAG_MAX, Math.min(MAG_MAX, x * MAG_STRENGTH));
+                const ty = Math.max(-MAG_MAX, Math.min(MAG_MAX, y * MAG_STRENGTH));
+                btn.style.transform = `translate(${tx}px, ${ty}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = `translate(0px, 0px)`;
+            });
+        });
+    }
+
+    /* ── Retina / High-DPI Hero Particle Canvas ── */
+    const canvas = document.getElementById('hero-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouseX = 0, mouseY = 0;
+        
+        function resizeCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            const width = canvas.parentElement.clientWidth;
+            const height = canvas.parentElement.clientHeight;
+            
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        window.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        const displayWidth = () => canvas.parentElement.clientWidth;
+        const displayHeight = () => canvas.parentElement.clientHeight;
+
+        for (let i = 0; i < 50; i++) {
+            particles.push({
+                x: Math.random() * displayWidth(),
+                y: Math.random() * displayHeight(),
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                size: Math.random() * 2 + 1
+            });
+        }
+
+        function drawParticles() {
+            const w = displayWidth();
+            const h = displayHeight();
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(95, 163, 150, 0.6)';
+            ctx.strokeStyle = 'rgba(95, 163, 150, 0.08)';
+
+            particles.forEach((p, i) => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > w) p.vx *= -1;
+                if (p.y < 0 || p.y > h) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.stroke();
+                    }
+                }
+
+                // Interactive Mouse Distort
+                const mDist = Math.hypot(p.x - mouseX, p.y - mouseY);
+                if (mDist < 100) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = 'rgba(95, 163, 150, 0.25)';
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(mouseX, mouseY);
+                    ctx.stroke();
+                }
+            });
+            requestAnimationFrame(drawParticles);
+        }
+        drawParticles();
+    }
+
+    /* ── 3D Card Tilt Effect ──
+       Kept intentionally understated: divisor pushed way up and each axis
+       hard-clamped to ±TILT_MAX degrees, so even a wide card (about-features,
+       form-box) never rotates further than a faint tilt — a hint of depth,
+       not a wobble. */
+    const TILT_MAX = 3.5;
+    document.querySelectorAll('.tilt-card').forEach(card => {
+        // Cards that contain links/buttons/fields stay still: a tilting, moving target made them jittery and hard to click.
+        if (card.querySelector('a, button, input, textarea, select')) return;
+        // Measure once on enter: re-measuring a rotated card every move feeds back into the tilt and makes it shake.
+        let rect = null;
+        card.addEventListener('mouseenter', () => { rect = card.getBoundingClientRect(); });
+        card.addEventListener('mousemove', (e) => {
+            if (!rect) rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = Math.max(-TILT_MAX, Math.min(TILT_MAX, (y - centerY) / 42));
+            const rotateY = Math.max(-TILT_MAX, Math.min(TILT_MAX, (centerX - x) / 42));
+
+            card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+        });
+    });
+
+    /* ── Number Counter Animation ── */
+    function animateCounters() {
+        document.querySelectorAll('.counter').forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            let count = 0;
+            const speed = Math.max(1, target / 30);
+            
+            const updateCount = () => {
+                count += speed;
+                if (count < target) {
+                    counter.innerText = Math.ceil(count);
+                    setTimeout(updateCount, 35);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+            updateCount();
+        });
+    }
+
+    /* ── Scroll Progress Bar ── */
+    window.addEventListener('scroll', () => {
+        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.getElementById('scroll-progress').style.width = scrolled + '%';
+    });
+
+    /* ── IntersectionObserver Scroll Reveal & Text Decode Trigger ── */
+    let counterTriggered = false;
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+                if (!counterTriggered && entry.target.querySelector('.counter')) {
+                    animateCounters();
+                    counterTriggered = true;
+                }
+                const decodeEl = entry.target.querySelector('.decode-text');
+                if (decodeEl && !decodeEl.dataset.decoded) {
+                    decodeTextEffect(decodeEl);
+                    decodeEl.dataset.decoded = "true";
+                }
+            }
+        });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    /* ── Custom Cursor Motion ── */
+    const cursorDot = document.getElementById('cursor-dot');
+    const cursorFollower = document.getElementById('cursor-follower');
+
+    if (window.innerWidth > 1024) {
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            cursorFollower.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 400, fill: "forwards" });
+        });
+
+        /* Mouse events inside the embedded SEO tool iframe never reach this page, so the
+           decorative cursor would freeze at the iframe's edge — hide it while over the tool
+           (and while the pointer is outside the window). */
+        const hideCursor = () => { cursorDot.style.opacity = '0'; cursorFollower.style.opacity = '0'; };
+        const showCursor = () => { cursorDot.style.opacity = ''; cursorFollower.style.opacity = ''; };
+        const seoToolFrame = document.getElementById('seoToolFrame');
+        if (seoToolFrame) {
+            seoToolFrame.addEventListener('mouseenter', hideCursor);
+            seoToolFrame.addEventListener('mouseleave', showCursor);
+        }
+        document.documentElement.addEventListener('mouseleave', hideCursor);
+        document.documentElement.addEventListener('mouseenter', showCursor);
+
+        document.querySelectorAll('a, button, .form-chip, .work-item, .faq-item, .tilt-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorFollower.style.transform = 'translate(-50%, -50%) scale(1.4)';
+                cursorFollower.style.borderColor = 'var(--accent)';
+                cursorFollower.style.backgroundColor = 'rgba(95, 163, 150, 0.05)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorFollower.style.transform = 'translate(-50%, -50%) scale(1)';
+                cursorFollower.style.borderColor = 'rgba(95, 163, 150, 0.4)';
+                cursorFollower.style.backgroundColor = 'transparent';
+            });
+        });
+    }
+
+    /* ── Portfolio Filter System ── */
+    function filterWorks(category, btn) {
+        document.querySelectorAll('.works-filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const items = document.querySelectorAll('.work-item');
+        items.forEach(item => {
+            const categories = item.dataset.category.split(' ');
+            if (category === 'all' || categories.includes(category)) {
+                item.classList.remove('hidden');
+                item.classList.add('fade-in');
+            } else {
+                item.classList.add('hidden');
+                item.classList.remove('fade-in');
+            }
+        });
+    }
+
+    /* ── FAQ Accordion ── */
+    function toggleFaq(element) {
+        const item = element.parentElement;
+        const open = item.classList.toggle('open');
+        element.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
+    function faqKeydown(e, element) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            toggleFaq(element);
+        }
+    }
+
+    /* ── Pricing Tabs ── */
+    function switchTab(id) {
+        document.querySelectorAll('.pricing-tab').forEach((t, i) => {
+            t.classList.toggle('active', ['list','buyout','monthly'][i] === id);
+        });
+        document.querySelectorAll('.pricing-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('tab-' + id).classList.add('active');
+    }
+
+    /* ── Page Navigation ── */
+    /* ── SEO tool: auto-size the embedded tool so it scrolls with the page (no inner scrollbar) ── */
+    (function () {
+        var fr = document.getElementById('seoToolFrame');
+        if (!fr) return;
+        var raf = 0;
+        function sendViewport() {
+            raf = 0;
+            if (!fr.contentWindow) return;
+            var r = fr.getBoundingClientRect();
+            var top = Math.max(0, 96 - r.top);
+            var bottom = Math.min(r.height, window.innerHeight - r.top);
+            fr.contentWindow.postMessage({ type: 'seo-viewport', top: top, height: Math.max(0, bottom - top) }, '*');
+        }
+        function queue() { if (!raf) raf = requestAnimationFrame(sendViewport); }
+        window.addEventListener('scroll', queue, { passive: true });
+        window.addEventListener('resize', queue);
+        window.addEventListener('message', function (e) {
+            if (e.source !== fr.contentWindow || !e.data || e.data.type !== 'seo-tool-height') return;
+            var h = Math.ceil(e.data.height);
+            if (h > 200) fr.style.height = h + 'px';
+            queue();
+        });
+        fr.addEventListener('load', queue);
+    })();
+
+    
+    /* ── Page load: tracking + heading entrance ── */
+    (function () {
+        function ready() {
+            if (window.ycTrack) window.ycTrack.page();
+            var active = document.querySelector('.page.active');
+            var h = active && active.id !== 'page-home' && active.querySelector('.decode-text');
+            if (h && typeof decodeTextEffect === 'function') decodeTextEffect(h);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready); else ready();
+    })();
+
+    function toggleMobileMenu() {
+        const m = document.getElementById('mobile-menu');
+        m.classList.toggle('open');
+        document.body.style.overflow = m.classList.contains('open') ? 'hidden' : '';
+    }
+
+;
+
+(function(){
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var hero = document.querySelector('#page-home .hero');
+    var frame = hero ? hero.querySelector('.hero-logo-frame') : null;
+    var ring2 = hero ? hero.querySelector('.hero-logo-ring-2') : null;
+
+    var glows = Array.prototype.slice.call(document.querySelectorAll('.page-header-glow'));
+
+    if(!frame && !ring2 && !glows.length) return;
+
+    var ticking = false;
+    function update(){
+        var y = window.scrollY || window.pageYOffset;
+
+        if(hero){
+            var heroH = hero.offsetHeight;
+            if(y < heroH){
+                if(frame) frame.style.transform = 'translateZ(0) translateY(' + (y * 0.12).toFixed(2) + 'px)';
+                if(ring2) ring2.style.transform = 'translateY(' + (y * 0.22).toFixed(2) + 'px)';
+            }
+        }
+
+        for(var i = 0; i < glows.length; i++){
+            var g = glows[i];
+            if(g.offsetParent === null) continue; // hidden (inactive) page — skip
+            if(y < 640){
+                g.style.transform = 'translateY(' + (y * 0.18).toFixed(2) + 'px)';
+            }
+        }
+
+        ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+        if(!ticking){ window.requestAnimationFrame(update); ticking = true; }
+    }, {passive: true});
+})();
+
+;
+
+/* Theme toggle: dark (default) / light, remembered per visitor */
+(function () {
+    var root = document.documentElement;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    function current() { return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+    function sync() {
+        var light = current() === 'light';
+        var btn = document.getElementById('theme-toggle');
+        if (btn) {
+            var label = light ? '切換為深色模式' : '切換為淺色模式';
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', label);
+        }
+        if (meta) meta.setAttribute('content', light ? '#F6F3EC' : '#5FA396');
+    }
+    window.toggleTheme = function () {
+        var next = current() === 'light' ? 'dark' : 'light';
+        root.classList.add('theme-anim');
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('yc-theme', next); } catch (e) {}
+        sync();
+        setTimeout(function () { root.classList.remove('theme-anim'); }, 400);
+    };
+    sync();
+})();
+
+;
+
+/* Hero 3D monogram: lazy, idle-built, pauses off-screen, skipped for reduced-motion. Flat SVG is the fallback. */
+(function(){
+    var mark = document.querySelector('.logo-mark--hero');
+    var obj = document.getElementById('logo3dObj');
+    if(!mark || !obj) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    var built = false, running = false, visible = false, rafId = null;
+    var rx = 0, ry = 0, tx = 0, ty = 0, t0 = 0, pointerOn = false, px = 0, py = 0;
+
+    function build(){
+        if(built) return; built = true;
+        var html = '', i, n, z, b;
+        n = 10;
+        for(i = 0; i < n; i++){
+            z = -14 + i * 2.6; b = (0.45 + 0.55 * (i / (n - 1))).toFixed(2);
+            html += '<svg class="logo3d-layer" viewBox="0 0 64 64" fill="none" style="transform:translateZ(' + z.toFixed(1) + 'px);filter:brightness(' + b + ')"><use href="#ring3d"/></svg>';
+        }
+        n = 12;
+        for(i = 0; i < n; i++){
+            z = 18 + i * 2.4; b = (0.4 + 0.6 * (i / (n - 1))).toFixed(2);
+            html += '<svg class="logo3d-layer" viewBox="0 0 64 64" fill="none" style="transform:translateZ(' + z.toFixed(1) + 'px);filter:brightness(' + b + ')' + (i === n - 1 ? ' drop-shadow(0 0 4px rgba(95,163,150,.7))' : '') + '"><use href="#y3d"/></svg>';
+        }
+        obj.innerHTML = html;
+        // 3D layers are in the DOM; reveal on the next frame so the cross-fade runs
+        requestAnimationFrame(function(){ mark.classList.add('is-3d'); });
+    }
+
+    function loop(t){
+        if(!running) return;
+        if(!t0) t0 = t;
+        if(pointerOn && !coarse){
+            ty = px * 40; tx = -py * 22;
+        } else {
+            ty = Math.sin((t - t0) / 1700) * 18;
+            tx = Math.cos((t - t0) / 2300) * 6;
+        }
+        rx += (tx - rx) * 0.08; ry += (ty - ry) * 0.08;
+        obj.style.transform = 'rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
+        rafId = requestAnimationFrame(loop);
+    }
+    function start(){ if(running || !visible || document.hidden) return; running = true; rafId = requestAnimationFrame(loop); }
+    function stop(){ running = false; if(rafId){ cancelAnimationFrame(rafId); rafId = null; } }
+
+    if(!coarse){
+        window.addEventListener('pointermove', function(e){
+            var r = mark.getBoundingClientRect();
+            if(!r.width) return;
+            px = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2)));
+            py = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height / 2)) / (window.innerHeight / 2)));
+            pointerOn = true;
+        }, {passive: true});
+        document.addEventListener('pointerleave', function(){ pointerOn = false; });
+    }
+    document.addEventListener('visibilitychange', function(){ document.hidden ? stop() : start(); });
+
+    function init(){
+        if(!('IntersectionObserver' in window)) return;
+        var io = new IntersectionObserver(function(es){
+            visible = es[0].isIntersecting;
+            if(visible){
+                (window.requestIdleCallback || function(f){ setTimeout(f, 200); })(function(){ build(); start(); });
+            } else stop();
+        }, {threshold: 0.1});
+        io.observe(mark);
+    }
+    if(document.readyState === 'complete') init(); else window.addEventListener('load', init);
+})();
