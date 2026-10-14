@@ -1,6 +1,39 @@
 <!DOCTYPE html>
 <html lang="zh-TW" class="scroll-smooth"><head>
     <meta charset="UTF-8">
+    <!-- Google Analytics 4 (loaded after page load so it never competes with first paint) -->
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        // The site is a single HTML file that swaps "pages" with showPage(), so page views are sent by hand
+        page: function (id) {
+            var path = location.pathname + '#' + id;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.origin + path, page_path: path, page_title: document.title + ' | ' + id });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: a.classList.contains('line-float') ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YC AXIOM [æ] | 商業品牌網頁設計與工程</title>
     <meta name="description" content="YC AXIOM [æ] 專注於商業品牌網頁設計與前端工程，為店家、餐飲、教育、觀光等各類型產業打造高質感品牌網站。">
@@ -3022,12 +3055,14 @@ body.on-seo .line-float { display: none; }
         if (window.history && window.history.replaceState) {
             try { window.history.replaceState(null, '', '#' + id); } catch (e) {}
         }
+        if (window.ycTrack) window.ycTrack.page(id);
     }
 
     /* ── Deep-link routing: open directly to the page named in the URL hash ── */
     (function routeFromHash() {
         const id = (location.hash || '').replace('#', '');
         if (id && document.getElementById('page-' + id)) showPage(id);
+        else if (window.ycTrack) window.ycTrack.page('home');
     })();
     window.addEventListener('hashchange', function () {
         const id = (location.hash || '').replace('#', '');
