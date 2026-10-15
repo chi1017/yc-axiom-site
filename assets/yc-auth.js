@@ -136,12 +136,13 @@
   };
   // 完整問題清單（修正清單用）：actions 依優先度，再補 fail / warn 檢查項；以標題為 key
   YC.issueKey = function (t) { return String(t || '').trim().toLowerCase().replace(/\s+/g, ' ').slice(0, 120); };
-  YC.issueList = function (r) {
-    var out = [], seen = {};
+  // type = 'geo' 時 key 加上 "geo:" 前綴：同一個網站的 SEO／AI 可見度共用 sites.fixed_issues，前綴避免兩邊同名項目互相覆蓋
+  YC.issueList = function (r, type) {
+    var out = [], seen = {}, pre = type === 'geo' ? 'geo:' : '';
     var rank = { high: 0, medium: 1, mid: 1, low: 2 };
     var acts = ((r && r.actions) || []).slice().sort(function (a, b) { return (rank[a.priority] != null ? rank[a.priority] : 3) - (rank[b.priority] != null ? rank[b.priority] : 3); });
     function add(title, detail, level) {
-      var k = YC.issueKey(title); if (!k || seen[k]) return; seen[k] = 1;
+      var k = pre + YC.issueKey(title); if (!YC.issueKey(title) || seen[k]) return; seen[k] = 1;
       out.push({ key: k, title: String(title).slice(0, 120), detail: String(detail || '').slice(0, 300), level: level || 'medium' });
     }
     acts.forEach(function (a) { if (a.title) add(a.title, a.detail, a.priority); });
@@ -158,7 +159,10 @@
     }
     return JSON.parse(JSON.stringify(copy));
   }
-  YC.saveScan = async function (rawUrl, report) {
+  // type：'seo'（預設）或 'geo'。seo 不送 type 欄位，由資料庫預設值 'seo' 補上（資料庫尚未升級時也能運作）
+  YC.saveScan = async function (rawUrl, report, type) {
+    type = type === 'geo' ? 'geo' : 'seo';
+    if (report == null || report.score == null || !isFinite(report.score)) throw new Error('沒有可儲存的分數');
     var url = YC.normalizeUrl(rawUrl);
     if (!url) throw new Error('網址格式不正確');
     var uid = YC.session.user.id, c = YC.client;
@@ -170,16 +174,18 @@
       if (ins.error) throw ins.error;
       siteId = ins.data.id;
     }
-    var sc = await c.from('scans').insert({ site_id: siteId, score: Math.max(0, Math.min(100, Math.round(report.score))), top_issues: YC.topIssues(report, 3), report: slimReport(report) }).select('id').single();
+    var row = { site_id: siteId, score: Math.max(0, Math.min(100, Math.round(report.score))), top_issues: YC.topIssues(report, 3), report: slimReport(report) };
+    if (type === 'geo') row.type = 'geo';
+    var sc = await c.from('scans').insert(row).select('id').single();
     if (sc.error) throw sc.error;
     // 重新檢測後仍有問題的項目，取消「已修正」打勾
     try {
-      var present = {}; YC.issueList(report).forEach(function (i) { present[i.key] = 1; });
+      var present = {}; YC.issueList(report, type).forEach(function (i) { present[i.key] = 1; });
       var next = {}, changed = false;
       Object.keys(fixed).forEach(function (k) { if (present[k]) changed = true; else next[k] = fixed[k]; });
       if (changed) await c.from('sites').update({ fixed_issues: next }).eq('id', siteId);
     } catch (e) { console.warn('reset fixed', e); }
-    return { siteId: siteId, scanId: sc.data.id, url: url };
+    return { siteId: siteId, scanId: sc.data.id, url: url, type: type };
   };
 
   // ── UI：樣式 ──
@@ -311,7 +317,7 @@
       var mail = (YC.session.user.email || '會員');
       host.innerHTML = '<button class="hist-toggle" id="yc-me" aria-haspopup="true">👤 <span style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:bottom">' + esc(mail) + '</span></button>' +
         '<div class="yc-menu-pop" role="menu"><div class="yc-mail">' + esc(mail) + '</div>' +
-        '<a href="' + esc(YC.url('seo/dashboard/')) + '" target="_top">會員專區</a>' +
+        '<a href="' + esc(YC.url('dashboard/')) + '" target="_top">會員專區</a>' +
         (YC.isAdmin() ? '<a href="' + esc(YC.url('admin/')) + '" target="_top">管理後台</a>' : '') +
         '<a href="' + esc(YC.url('privacy/')) + '" target="_blank" rel="noopener">隱私權政策</a>' +
         '<button id="yc-logout">登出</button></div>';

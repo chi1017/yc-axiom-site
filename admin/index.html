@@ -246,7 +246,7 @@
 .adm-tools input[type=search] { min-width: 240px; flex: 1; max-width: 360px; }
 .adm-count { font-size: 13px; color: var(--text-dim); margin-left: auto; }
 .adm-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
-.adm-table { width: 100%; border-collapse: collapse; min-width: 1080px; font-size: 13.5px; }
+.adm-table { width: 100%; border-collapse: collapse; min-width: 1500px; font-size: 13.5px; }
 .adm-table th { text-align: left; font-size: 12px; font-weight: 600; color: var(--text-dim); padding: 11px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; background: var(--surface); }
 .adm-table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
 .adm-table tr:last-child td { border-bottom: 0; }
@@ -259,6 +259,7 @@
 .adm-url a { color: var(--accent); word-break: break-all; }
 .adm-score { font: 800 22px var(--f-ui); }
 .adm-num { text-align: center; }
+.adm-table td.adm-score.sc-good { color: #34d399; } .adm-table td.adm-score.sc-mid { color: #fbbf24; } .adm-table td.adm-score.sc-bad { color: #f87171; }
 .adm-time { white-space: nowrap; font-size: 12.5px; color: var(--text-dim); }
 .adm-issues { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.7; color: var(--text); min-width: 200px; }
 .adm-st { min-width: 96px; font-weight: 700; }
@@ -276,6 +277,8 @@
 .adm-scans { display: flex; flex-wrap: wrap; gap: 8px; }
 .adm-scan { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; background: transparent; color: var(--text-dim); font: 12.5px var(--f-ui); cursor: pointer; }
 .adm-scan b { font: 800 16px var(--f-ui); }
+.adm-type { font-style: normal; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 3px; border: 1px solid var(--border); color: var(--text-dim); }
+.adm-type.geo { color: var(--accent); border-color: rgba(95,163,150,.5); }
 .adm-scan:hover, .adm-scan[aria-current="true"] { border-color: var(--accent); color: var(--text-bright); }
 .adm-rep-head { display: flex; gap: 20px; align-items: center; margin-bottom: 14px; }
 .adm-rep-score { font: 800 56px var(--f-ui); line-height: 1; }
@@ -345,7 +348,7 @@
 <script>window.YC_BASE = '../';</script>
 <script src="../assets/supabase-config.js?v=2026-10-15"></script>
 <script src="../assets/vendor/supabase-2.117.2.min.js"></script>
-<script src="../assets/yc-auth.js?v=2026-10-15"></script>
-<script src="../assets/admin.js?v=2026-10-15"></script>
+<script src="../assets/yc-auth.js?v=2026-10-16"></script>
+<script src="../assets/admin.js?v=2026-10-16"></script>
 </body>
 </html>

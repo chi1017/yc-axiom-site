@@ -7,7 +7,8 @@
   var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var STATUS = { not_contacted: '未聯絡', contacted: '已聯絡', negotiating: '洽談中', won: '已成交', not_fit: '不適合' };
   var STATUS_KEYS = Object.keys(STATUS);
-  var state = { rows: [], q: '', status: 'all', score: 'all', sort: 'last_desc', detail: null, loaded: false };
+  var state = { rows: [], q: '', status: 'all', score: 'all', geoScore: 'all', sort: 'last_desc', detail: null, loaded: false };
+  var DISCLAIMER = '這些是提高被 AI 引用機會的因素，無法保證被 AI 推薦。';
 
   function scCls(n) { return n >= 80 ? 'sc-good' : (n >= 60 ? 'sc-mid' : 'sc-bad'); }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
@@ -34,8 +35,7 @@
   }
 
   // ── 篩選 / 排序 ──
-  function scoreOk(r) {
-    var f = state.score, s = r.latest_score;
+  function scoreOk(r, f, s) {
     if (f === 'all') return true;
     if (f === 'none') return s == null;
     if (s == null) return false;
@@ -48,16 +48,20 @@
     var q = state.q.trim().toLowerCase();
     var rows = state.rows.filter(function (r) {
       if (state.status !== 'all' && r.status !== state.status) return false;
-      if (!scoreOk(r)) return false;
-      if (q && (String(r.email).toLowerCase().indexOf(q) < 0 && String(r.site_url || '').toLowerCase().indexOf(q) < 0 && String(r.notes || '').toLowerCase().indexOf(q) < 0)) return false;
+      if (!scoreOk(r, state.score, r.latest_score) || !scoreOk(r, state.geoScore, r.geo_score)) return false;
+
+      if (q && (String(r.email).toLowerCase().indexOf(q) < 0 && String(r.site_url || r.geo_site_url || '').toLowerCase().indexOf(q) < 0 && String(r.notes || '').toLowerCase().indexOf(q) < 0)) return false;
       return true;
     });
     var t = function (x) { return x ? +new Date(x) : 0; };
+    var lastAny = function (r) { return Math.max(t(r.last_scan_at), t(r.geo_scanned_at)); };      // SEO 與 AI 可見度中較新的一次
     var by = {
-      last_desc: function (a, b) { return t(b.last_scan_at) - t(a.last_scan_at); },
-      last_asc: function (a, b) { return (a.last_scan_at ? t(a.last_scan_at) : Infinity) - (b.last_scan_at ? t(b.last_scan_at) : Infinity); },
+      last_desc: function (a, b) { return lastAny(b) - lastAny(a); },
+      last_asc: function (a, b) { return (lastAny(a) || Infinity) - (lastAny(b) || Infinity); },
       score_asc: function (a, b) { return (a.latest_score == null ? 999 : a.latest_score) - (b.latest_score == null ? 999 : b.latest_score); },
       score_desc: function (a, b) { return (b.latest_score == null ? -1 : b.latest_score) - (a.latest_score == null ? -1 : a.latest_score); },
+      geo_asc: function (a, b) { return (a.geo_score == null ? 999 : a.geo_score) - (b.geo_score == null ? 999 : b.geo_score); },
+      geo_desc: function (a, b) { return (b.geo_score == null ? -1 : b.geo_score) - (a.geo_score == null ? -1 : a.geo_score); },
       joined_desc: function (a, b) { return t(b.created_at) - t(a.created_at); }
     };
     return rows.sort(by[state.sort] || by.last_desc);
@@ -75,8 +79,9 @@
   }
   function chips() {
     var n = state.rows.length, low = state.rows.filter(function (r) { return r.latest_score != null && r.latest_score < 70; }).length;
-    var fresh = state.rows.filter(function (r) { return r.status === 'not_contacted' && r.latest_score != null; }).length;
-    return '<div class="adm-chips"><div><b>' + n + '</b><span>會員總數</span></div><div><b class="sc-bad">' + low + '</b><span>最新分數低於 70</span></div><div><b>' + fresh + '</b><span>有檢測、尚未聯絡</span></div></div>';
+    var lowGeo = state.rows.filter(function (r) { return r.geo_score != null && r.geo_score < 70; }).length;
+    var fresh = state.rows.filter(function (r) { return r.status === 'not_contacted' && (r.latest_score != null || r.geo_score != null); }).length;
+    return '<div class="adm-chips"><div><b>' + n + '</b><span>會員總數</span></div><div><b class="sc-bad">' + low + '</b><span>SEO 最新分數低於 70</span></div><div><b class="sc-bad">' + lowGeo + '</b><span>AI 可見度低於 70</span></div><div><b>' + fresh + '</b><span>有檢測、尚未聯絡</span></div></div>';
   }
   function statusSelect(r, cls) {
     return '<select class="adm-st st-' + esc(r.status) + ' ' + (cls || '') + '" data-id="' + esc(r.member_id) + '" aria-label="跟進狀態">' +
@@ -90,14 +95,16 @@
         '<div class="adm-tools">' +
         '<input type="search" id="f-q" placeholder="搜尋 Email、網址、備註" value="' + esc(state.q) + '">' +
         '<select id="f-status"><option value="all">狀態：全部</option>' + STATUS_KEYS.map(function (k) { return '<option value="' + k + '">' + STATUS[k] + '</option>'; }).join('') + '</select>' +
-        '<select id="f-score"><option value="all">分數：全部</option><option value="lt70">低於 70</option><option value="70_79">70–79</option><option value="ge80">80 以上</option><option value="none">尚未檢測</option></select>' +
-        '<select id="f-sort"><option value="last_desc">最後檢測：新到舊</option><option value="last_asc">最後檢測：舊到新</option><option value="score_asc">分數：低到高</option><option value="score_desc">分數：高到低</option><option value="joined_desc">註冊時間：新到舊</option></select>' +
+        '<select id="f-score"><option value="all">SEO 分數：全部</option><option value="lt70">SEO 低於 70</option><option value="70_79">SEO 70–79</option><option value="ge80">SEO 80 以上</option><option value="none">SEO 尚未檢測</option></select>' +
+        '<select id="f-geo"><option value="all">AI 分數：全部</option><option value="lt70">AI 低於 70</option><option value="70_79">AI 70–79</option><option value="ge80">AI 80 以上</option><option value="none">AI 尚未檢測</option></select>' +
+        '<select id="f-sort"><option value="last_desc">最後檢測：新到舊</option><option value="last_asc">最後檢測：舊到新</option><option value="score_asc">SEO 分數：低到高</option><option value="score_desc">SEO 分數：高到低</option><option value="geo_asc">AI 分數：低到高</option><option value="geo_desc">AI 分數：高到低</option><option value="joined_desc">註冊時間：新到舊</option></select>' +
         '<span id="a-count" class="adm-count"></span></div>' +
-        '<div class="adm-wrap"><table class="adm-table"><thead><tr><th>Email／登入方式</th><th>網站</th><th>分數</th><th>前 3 大問題</th><th>次數</th><th>最後檢測</th><th>跟進狀態</th><th>備註</th></tr></thead><tbody id="a-tbody"></tbody></table></div>';
-      document.getElementById('f-status').value = state.status; document.getElementById('f-score').value = state.score; document.getElementById('f-sort').value = state.sort;
+        '<div class="adm-wrap"><table class="adm-table"><thead><tr><th>Email／登入方式</th><th>網站</th><th>SEO 分</th><th>AI 分</th><th>SEO 前 3 大問題</th><th>AI 前 3 大問題</th><th>次數</th><th>最後檢測</th><th>跟進狀態</th><th>備註</th></tr></thead><tbody id="a-tbody"></tbody></table></div>';
+      document.getElementById('f-status').value = state.status; document.getElementById('f-score').value = state.score; document.getElementById('f-geo').value = state.geoScore; document.getElementById('f-sort').value = state.sort;
       document.getElementById('f-q').oninput = function () { state.q = this.value; drawRows(); };
       document.getElementById('f-status').onchange = function () { state.status = this.value; drawRows(); };
       document.getElementById('f-score').onchange = function () { state.score = this.value; drawRows(); };
+      document.getElementById('f-geo').onchange = function () { state.geoScore = this.value; drawRows(); };
       document.getElementById('f-sort').onchange = function () { state.sort = this.value; drawRows(); };
     }
     drawRows();
@@ -106,16 +113,21 @@
     var rows = view(), tb = document.getElementById('a-tbody'); if (!tb) return;
     document.getElementById('a-chips').innerHTML = chips();
     document.getElementById('a-count').textContent = '顯示 ' + rows.length + ' / ' + state.rows.length + ' 位';
-    if (!rows.length) { tb.innerHTML = '<tr><td colspan="8" class="adm-none">沒有符合條件的會員</td></tr>'; return; }
+    if (!rows.length) { tb.innerHTML = '<tr><td colspan="10" class="adm-none">沒有符合條件的會員</td></tr>'; return; }
     tb.innerHTML = rows.map(function (r) {
       var issues = (r.top_issues || []).map(function (i) { return '<li>' + esc(i.title) + '</li>'; }).join('');
+      var gIssues = (r.geo_top_issues || []).map(function (i) { return '<li>' + esc(i.title) + '</li>'; }).join('');
+      var site = r.site_url || r.geo_site_url || '';
+      var lastAt = [r.last_scan_at, r.geo_scanned_at].filter(Boolean).sort().pop();
       return '<tr data-id="' + esc(r.member_id) + '">' +
         '<td><a href="#" class="adm-mem" data-id="' + esc(r.member_id) + '">' + esc(r.email) + '</a><div class="adm-sub"><span class="adm-badge">' + (r.provider === 'google' ? 'Google' : 'Email') + '</span>' + (r.consented_at ? '' : '<span class="adm-badge warn">未同意</span>') + '<span>' + esc(fmtD(r.created_at)) + ' 註冊</span></div></td>' +
-        '<td class="adm-url">' + (r.site_url ? '<a href="' + esc(r.site_url) + '" target="_blank" rel="noopener noreferrer">' + esc(r.site_url.replace(/^https?:\/\//, '')) + '</a>' + (r.site_count > 1 ? '<div class="adm-sub">共 ' + r.site_count + ' 個網站</div>' : '') : '<span class="adm-sub">—</span>') + '</td>' +
+        '<td class="adm-url">' + (site ? '<a href="' + esc(site) + '" target="_blank" rel="noopener noreferrer">' + esc(site.replace(/^https?:\/\//, '')) + '</a>' + (r.site_count > 1 ? '<div class="adm-sub">共 ' + r.site_count + ' 個網站</div>' : '') : '<span class="adm-sub">—</span>') + '</td>' +
         '<td class="adm-score ' + (r.latest_score != null ? scCls(r.latest_score) : '') + '">' + (r.latest_score != null ? r.latest_score : '—') + '</td>' +
+        '<td class="adm-score ' + (r.geo_score != null ? scCls(r.geo_score) : '') + '">' + (r.geo_score != null ? r.geo_score : '—') + '</td>' +
         '<td>' + (issues ? '<ol class="adm-issues">' + issues + '</ol>' : '<span class="adm-sub">—</span>') + '</td>' +
-        '<td class="adm-num">' + (r.scan_count || 0) + '</td>' +
-        '<td class="adm-time">' + (r.last_scan_at ? esc(fmtDT(r.last_scan_at)) : '—') + '</td>' +
+        '<td>' + (gIssues ? '<ol class="adm-issues">' + gIssues + '</ol>' : '<span class="adm-sub">—</span>') + '</td>' +
+        '<td class="adm-num">SEO ' + (r.scan_count || 0) + '<br>AI ' + (r.geo_scan_count || 0) + '</td>' +
+        '<td class="adm-time">' + (lastAt ? esc(fmtDT(lastAt)) : '—') + '</td>' +
         '<td>' + statusSelect(r) + '</td>' +
         '<td>' + notesBox(r, 2) + '</td></tr>';
     }).join('');
@@ -164,9 +176,10 @@
   // ── CSV ──
   function exportCsv() {
     var rows = view(), q = function (v) { v = v == null ? '' : String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
-    var head = ['Email', '登入方式', '網站', '最新分數', '前3大問題', '檢測次數', '最後檢測', '跟進狀態', '備註'];
+    var head = ['Email', '登入方式', '網站', 'SEO最新分數', 'SEO前3大問題', 'AI可見度最新分數', 'AI前3大問題', 'SEO檢測次數', 'AI檢測次數', '最後檢測', '跟進狀態', '備註'];
     var lines = [head.map(q).join(',')].concat(rows.map(function (r) {
-      return [r.email, r.provider, r.site_url, r.latest_score, (r.top_issues || []).map(function (i) { return i.title; }).join(' / '), r.scan_count, r.last_scan_at ? fmtDT(r.last_scan_at) : '', STATUS[r.status], r.notes].map(q).join(',');
+      var lastAt = [r.last_scan_at, r.geo_scanned_at].filter(Boolean).sort().pop();
+      return [r.email, r.provider, r.site_url || r.geo_site_url, r.latest_score, (r.top_issues || []).map(function (i) { return i.title; }).join(' / '), r.geo_score, (r.geo_top_issues || []).map(function (i) { return i.title; }).join(' / '), r.scan_count, r.geo_scan_count || 0, lastAt ? fmtDT(lastAt) : '', STATUS[r.status], r.notes].map(q).join(',');
     }));
     var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'yc-axiom-members.csv'; document.body.appendChild(a); a.click(); a.remove();
@@ -184,8 +197,10 @@
       if (s.error) throw s.error;
       var sites = s.data || [], scans = [];
       if (sites.length) {
-        var sc = await YC.client.from('scans').select('id,site_id,score,top_issues,scanned_at').in('site_id', sites.map(function (x) { return x.id; })).order('scanned_at', { ascending: false }).limit(1000);
-        if (sc.error) throw sc.error; scans = sc.data || [];
+        var ids = sites.map(function (x) { return x.id; });
+        var sc = await YC.client.from('scans').select('id,site_id,type,score,top_issues,scanned_at').in('site_id', ids).order('scanned_at', { ascending: false }).limit(1000);
+        if (sc.error) sc = await YC.client.from('scans').select('id,site_id,score,top_issues,scanned_at').in('site_id', ids).order('scanned_at', { ascending: false }).limit(1000);   // 資料庫尚未升級（無 type 欄位）
+        if (sc.error) throw sc.error; scans = (sc.data || []).map(function (x) { x.type = x.type === 'geo' ? 'geo' : 'seo'; return x; });
       }
       r._sites = sites; r._scans = scans;
     } catch (e) { main.innerHTML = '<div class="mem-card mem-empty"><h2>讀取失敗</h2><p>' + esc(e.message || e) + '</p><button class="m-btn" id="a-back0">回列表</button></div>'; document.getElementById('a-back0').onclick = drawList; return; }
@@ -203,7 +218,7 @@
       (sites.length ? sites.map(function (st) {
         var ss = scans.filter(function (x) { return x.site_id === st.id; }), fx = Object.keys(st.fixed_issues || {}).length;
         return '<div class="adm-site"><div class="adm-site-h"><a href="' + esc(st.url) + '" target="_blank" rel="noopener noreferrer">' + esc(st.url) + '</a><span class="adm-sub">已勾選修正 ' + fx + ' 項</span></div><div class="adm-scans">' +
-          (ss.length ? ss.map(function (x) { return '<button class="adm-scan" data-id="' + esc(x.id) + '"><b class="' + scCls(x.score) + '">' + x.score + '</b><span>' + esc(fmtDT(x.scanned_at)) + '</span></button>'; }).join('') : '<span class="adm-sub">尚無檢測</span>') + '</div></div>';
+          (ss.length ? ss.map(function (x) { return '<button class="adm-scan" data-id="' + esc(x.id) + '"><em class="adm-type ' + x.type + '">' + (x.type === 'geo' ? 'AI' : 'SEO') + '</em><b class="' + scCls(x.score) + '">' + x.score + '</b><span>' + esc(fmtDT(x.scanned_at)) + '</span></button>'; }).join('') : '<span class="adm-sub">尚無檢測</span>') + '</div></div>';
       }).join('') : '<p class="chk-note">這位會員還沒有檢測紀錄。</p>') +
       '<div id="a-report"></div></div>';
     document.getElementById('a-back').onclick = drawList;
@@ -216,16 +231,18 @@
     Array.prototype.forEach.call(document.querySelectorAll('.adm-scan'), function (b) { b.setAttribute('aria-current', String(b.getAttribute('data-id') === scanId)); });
     box.innerHTML = '<h3 class="m-h3">檢測報告</h3><p class="chk-note">載入中…</p>';
     var res = await YC.client.from('scans').select('id,score,scanned_at,report').eq('id', scanId).maybeSingle();
+    var sType = (scans.filter(function (x) { return x.id === scanId; })[0] || {}).type === 'geo' ? 'geo' : 'seo';
     if (!res.data) { box.innerHTML = '<h3 class="m-h3">檢測報告</h3><p class="chk-note">讀取失敗。</p>'; return; }
     var rep = res.data.report || {}, sc = res.data;
-    var checks = rep.checks || [];
+    var checks = sType === 'geo' ? (rep.items || []).filter(function (i) { return i.status === 'pass' || i.status === 'warn' || i.status === 'fail'; }).map(function (i) { return { title: i.title, status: i.status, detail: i.note }; }) : (rep.checks || []);
     var groups = [['fail', '需修復'], ['warn', '警告'], ['pass', '通過']].map(function (g) {
       var items = checks.filter(function (c) { return c.status === g[0]; });
       return items.length ? '<h4 class="adm-h4">' + g[1] + '（' + items.length + '）</h4><ul class="adm-checks st-' + g[0] + '">' + items.map(function (c) { return '<li><b>' + esc(c.title) + '</b>' + (c.detail ? '<small>' + esc(c.detail) + '</small>' : '') + '</li>'; }).join('') + '</ul>' : '';
     }).join('');
-    var acts = YC.issueList(rep);
+    var acts = YC.issueList(rep, sType);
     box.innerHTML = '<h3 class="m-h3">檢測報告</h3>' +
-      '<div class="adm-rep-head"><div class="adm-rep-score ' + scCls(sc.score) + '">' + sc.score + '</div><div><b>' + esc(rep.scoreTitle || '') + '</b><div class="adm-sub">' + esc(fmtDT(sc.scanned_at)) + '</div><p class="adm-sum">' + esc(rep.summary || '') + '</p></div></div>' +
+      '<div class="adm-rep-head"><div class="adm-rep-score ' + scCls(sc.score) + '">' + sc.score + '</div><div><b>' + (sType === 'geo' ? 'AI 可見度（GEO）・' + esc(rep.gradeLabel || '') : esc(rep.scoreTitle || '')) + '</b><div class="adm-sub">' + esc(fmtDT(sc.scanned_at)) + '</div><p class="adm-sum">' + esc(sType === 'geo' ? DISCLAIMER : (rep.summary || '')) + '</p></div></div>' +
+      (sType === 'geo' && (rep.categories || []).length ? '<div class="adm-metrics">' + rep.categories.map(function (c) { return '<span class="mp ' + (c.score == null ? '' : (c.score >= 80 ? 'pass' : (c.score >= 50 ? 'warn' : 'fail'))) + '">' + esc(c.id + '. ' + c.name) + ' ' + (c.countedMax ? Math.round(c.earned * 10) / 10 + '/' + c.countedMax : '—') + '</span>'; }).join('') + '</div>' : '') +
       ((rep.metrics || []).length ? '<div class="adm-metrics">' + rep.metrics.map(function (m) { return '<span class="mp ' + esc(m.status) + '">' + (m.status === 'pass' ? '✓' : (m.status === 'warn' ? '!' : '✗')) + ' ' + esc(m.label) + '</span>'; }).join('') + '</div>' : '') +
       (acts.length ? '<h4 class="adm-h4">改善建議（' + acts.length + '）</h4><ol class="adm-acts">' + acts.map(function (a) { return '<li><span class="lv ' + (a.level === 'high' ? '' : (a.level === 'low' ? 'l' : 'm')) + '">' + (a.level === 'high' ? '高' : (a.level === 'low' ? '低' : '中')) + '</span><span><b>' + esc(a.title) + '</b>' + (a.detail ? '<small>' + esc(a.detail) + '</small>' : '') + '</span></li>'; }).join('') + '</ol>' : '') +
       groups + '<details class="adm-raw"><summary>原始報告資料（JSON）</summary><pre>' + esc(JSON.stringify(rep, null, 2)).slice(0, 200000) + '</pre></details>';

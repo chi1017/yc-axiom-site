@@ -225,8 +225,12 @@ function switchSource(m) {
   $('paneUrl').classList.toggle('active', m !== 'html'); $('paneHtml').classList.toggle('active', m === 'html');
 }
 
-// ── 抓取（公開 CORS Proxy，與 SEO 工具相同）──
+// ── 抓取：優先走本站自己的抓取服務（Supabase Edge Function fetch-page），連不上才退回公開 CORS Proxy ──
+var OWN_ERR = { host_not_allowed: '這個網址不能檢測（內網或本機位址）', dns_failed: '找不到這個網域，請確認網址拼寫', bad_url: '網址格式不正確', bad_protocol: '只支援 http／https 網址', bad_host: '網址格式不正確', port_not_allowed: '不支援這個連接埠', credentials_not_allowed: '網址不可包含帳號密碼', too_many_redirects: '網站轉址次數過多', rate_limited: '查詢太頻繁，請稍等一分鐘再試', timeout: '網站回應逾時', fetch_failed: '連不上這個網站', origin_not_allowed: '目前的網頁來源不被允許' };
+var proxyErr = '';
+function ownBase() { var c = window.YC_CONFIG; return c && c.supabaseUrl ? String(c.supabaseUrl).replace(/\/$/, '') + '/functions/v1/fetch-page?url=' : null; }
 var PROXIES = [
+  function (u) { var b = ownBase(); if (!b) return null; return { own: true, ep: b + encodeURIComponent(u), parse: function (r) { return r.json().then(function (j) { return { code: (j.status && j.status.http_code) || 0, text: j.contents || '' }; }); } }; },
   function (u) { return { ep: 'https://api.allorigins.win/get?url=' + encodeURIComponent(u), parse: function (r) { return r.json().then(function (j) { return { code: (j.status && j.status.http_code) || 200, text: j.contents || '' }; }); } }; },
   function (u) { return { ep: 'https://corsproxy.io/?' + encodeURIComponent(u), parse: function (r) { return r.text().then(function (t) { return { code: r.status, text: t }; }); } }; },
   function (u) { return { ep: 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u), parse: function (r) { return r.text().then(function (t) { return { code: r.status, text: t }; }); } }; }
@@ -237,11 +241,18 @@ function fetchWithTimeout(url, ms) {
 }
 // 回傳 { code, text } 或 null（所有 Proxy 都失敗）。404／410 視為確定的結果，不再換 Proxy。
 async function proxyGet(url, ms) {
+  proxyErr = '';
   for (var i = 0; i < PROXIES.length; i++) {
     try {
-      var p = PROXIES[i](url);
+      var p = PROXIES[i](url); if (!p) continue;
       var resp = await fetchWithTimeout(p.ep, ms);
+      if (p.own && !resp.ok) {
+        var ec = ''; try { ec = (await resp.json()).error || ''; } catch (e2) { /* 略過 */ }
+        if (ec) { proxyErr = OWN_ERR[ec] || ec; return null; }     // 明確的失敗原因，不必再試公開 Proxy
+        throw new Error('own proxy unavailable');
+      }
       var out = await p.parse(resp);
+      if (p.own) return out;                                        // 本站服務：目標網站的狀態碼照實回報
       if (out.code === 404 || out.code === 410) return { code: out.code, text: '' };
       if (out.code >= 200 && out.code < 300) return out;
     } catch (e) { /* 換下一個 Proxy */ }
@@ -252,6 +263,7 @@ async function fetchAux(url, kind) {
   var r = await proxyGet(url, 9000);
   if (!r) return { status: 'unknown', text: '' };
   if (r.code === 404 || r.code === 410) return { status: 'none', text: '' };
+  if (r.code < 200 || r.code >= 300) return { status: 'unknown', text: '' };
   var head = (r.text || '').slice(0, 600);
   if (/<\s*(!doctype|html|head|body)\b/i.test(head)) return { status: 'none', text: '' };   // 網站把不存在的檔案導向首頁（回 200 的 HTML）
   return { status: 'ok', text: r.text || '' };
@@ -272,8 +284,8 @@ async function runUrl() {
   try {
     setStatus('loading', '⟳ 正在抓取網頁…');
     var page = await proxyGet(url, 12000);
-    if (!page) { setStatus('error', '✗ 無法抓取這個網址（網站可能擋住轉送服務）。請確認網址，或改用「貼上或上傳 HTML」。'); return; }
-    if (page.code >= 400 || !page.text || page.text.length <= 200) { setStatus('error', '✗ 抓到的內容太少或網頁不存在（' + (page.code || '無內容') + '）。請確認網址，或改用「貼上或上傳 HTML」。'); return; }
+    if (!page) { setStatus('error', proxyErr ? '✗ 無法抓取：' + proxyErr + '。請確認網址，或改用「貼上或上傳 HTML」。' : '✗ 無法抓取這個網址（網站可能擋住了自動檢測，或抓取服務暫時無法使用）。請確認網址，或改用「貼上或上傳 HTML」。'); return; }
+    if (page.code >= 400 || !page.text || page.text.length <= 200) { setStatus('error', '✗ 抓到的內容太少或網頁不存在（' + (page.code || '無內容') + '）。' + ([401, 403, 429, 503].indexOf(page.code) >= 0 ? '網站可能擋掉了自動檢測。' : '') + '請確認網址，或改用「貼上或上傳 HTML」。'); return; }
     var origin = new URL(url).origin;
     setStatus('loading', '⟳ 正在讀取 robots.txt 與 llms.txt…');
     var aux = await Promise.all([fetchAux(origin + '/robots.txt'), fetchAux(origin + '/llms.txt')]);
@@ -385,8 +397,8 @@ function shareReport() { return; }
 <script>window.YC_BASE = './';</script>
 <script src="assets/supabase-config.js?v=2026-10-15"></script>
 <script src="assets/vendor/supabase-2.117.2.min.js"></script>
-<script src="assets/yc-auth.js?v=2026-10-15"></script>
-<script src="assets/geo-tool-members.js?v=2026-10-15"></script>
+<script src="assets/yc-auth.js?v=2026-10-16"></script>
+<script src="assets/geo-tool-members.js?v=2026-10-16"></script>
 <script src="assets/cross-links.js?v=2026-10-15"></script>
 </body>
 </html>

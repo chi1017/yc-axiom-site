@@ -85,7 +85,7 @@
     var results = document.getElementById('results'); if (!results) return;
     var b = document.getElementById('yc-saved');
     if (!b) { b = document.createElement('div'); b.id = 'yc-saved'; var hero = results.querySelector('.score-hero'); if (hero) hero.insertAdjacentElement('beforebegin', b); else results.insertBefore(b, results.firstChild); }
-    b.innerHTML = '✓ 已儲存到你的會員紀錄。<a href="' + esc(YC.url('seo/dashboard/')) + '" target="_top">前往會員專區看分數變化 →</a>';
+    b.innerHTML = '✓ 已儲存到你的會員紀錄。<a href="' + esc(YC.url('dashboard/')) + '" target="_top">前往會員專區看分數變化 →</a>';
     b.style.display = 'block';
   }
   async function maybeSave(r) {

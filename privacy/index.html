@@ -192,19 +192,19 @@
         <p class="section-eyebrow reveal">Privacy / 隱私權政策</p>
         <h1 class="section-title reveal">隱私權政策<br>你的資料怎麼被使用.</h1>
         <div class="article-meta reveal" style="margin-top:20px;">
-            <span>適用：SEO 檢測工具會員與本站瀏覽</span>
+            <span>適用：SEO／GEO 檢測工具會員與本站瀏覽</span>
             <span>更新：2026/10/15</span>
             <span>版本：2026-10-15-v1</span>
         </div>
 
         <div class="article-body reveal">
-            <p>YC AXIOM（以下稱「我們」）是台中的網頁設計工作室。你在本站使用免費的 SEO 檢測工具、登入成為會員時，會留下一些資料。這份說明用白話講清楚：我們蒐集什麼、為什麼要、放在哪裡、放多久，以及你怎麼把它刪掉。內容同時作為個人資料保護法第 8 條的告知事項。</p>
+            <p>YC AXIOM（以下稱「我們」）是台中的網頁設計工作室。你在本站使用免費的 SEO 檢測與 GEO（AI 可見度）檢測工具、登入成為會員時，會留下一些資料。這份說明用白話講清楚：我們蒐集什麼、為什麼要、放在哪裡、放多久，以及你怎麼把它刪掉。內容同時作為個人資料保護法第 8 條的告知事項。</p>
 
             <h2>一、我們蒐集哪些資料</h2>
             <ul>
                 <li><strong>登入資料：</strong>你的 Email 與登入方式（Google）。登入由 Google 驗證，我們不會收到也不會儲存你的 Google 密碼；本站沒有密碼登入。Google 可能一併回傳姓名、頭像網址等基本資料，由驗證服務一併保存，但我們不使用這些欄位。</li>
                 <li><strong>同意紀錄：</strong>你同意的時間，以及同意當時的政策版本。</li>
-                <li><strong>檢測資料：</strong>登入後你以「網址」檢測的網站網址、每次檢測的分數、完整檢測報告，以及你在修正清單中勾選「已修正」的項目。</li>
+                <li><strong>檢測資料：</strong>登入後你以「網址」檢測（SEO 或 GEO／AI 可見度）的網站網址、每次檢測的類型與分數、完整檢測報告，以及你在修正清單中勾選「已修正」的項目。</li>
                 <li><strong>跟進紀錄（僅站主可見）：</strong>我們與你聯絡的進度狀態與內部備註。</li>
                 <li><strong>一般瀏覽資料：</strong>本站使用 Google Analytics 4 統計頁面瀏覽，以及 LINE、表單、Email 連結的點擊次數，用來了解哪些內容有幫助。這些是匿名統計，不會與你的會員資料合併。</li>
             </ul>
@@ -214,7 +214,7 @@
             <ul>
                 <li>提供會員功能：保存檢測紀錄、顯示分數變化、管理修正清單、讓你下載完整報告。</li>
                 <li>在你同意的範圍內，寄送檢測報告與網站改善建議；站主也可能依你的檢測結果，透過你的登入 Email 或你主動使用的 LINE 與你聯絡，提供免費的改善建議。你可以隨時要求停止聯絡。</li>
-                <li>內部通知：新會員第一次檢測分數偏低時，系統會寄一封通知給站主（信件內含會員 Email 與檢測網址），以便評估是否提供協助。</li>
+                <li>內部通知：新會員第一次 SEO 或 AI 可見度檢測分數偏低時，系統會各寄一封通知給站主（信件內含會員 Email 與檢測網址），以便評估是否提供協助。</li>
                 <li>維護服務安全與改善工具。</li>
             </ul>
             <p><strong>我們寄信的對象只有你登入用的 Email。</strong>我們不會寄信到被檢測網站上找到的任何聯絡信箱，也不會出售你的資料、不會把資料提供給第三方做行銷。</p>
@@ -226,7 +226,7 @@
                 <li><strong>Google：</strong>提供「使用 Google 帳號登入」；以及本站使用的 Google Analytics 4 統計。若你使用 PageSpeed 功能，被檢測的網址會送到 Google PageSpeed Insights。</li>
                 <li><strong>Resend：</strong>寄送上述給站主的內部通知信。</li>
                 <li><strong>GitHub Pages：</strong>本站網頁的託管服務。</li>
-                <li><strong>公開代理服務：</strong>「網址」模式需要透過公開的代理服務（目前為 allorigins.win、corsproxy.io、codetabs.com）取得網頁原始碼，因此這些服務會收到你輸入的網址。如果不希望網址經過它們，可改用「上傳 HTML 檔」。</li>
+                <li><strong>網頁抓取服務：</strong>「網址」模式會把你輸入的網址送到本站自己的抓取服務（部署在上述 Supabase，只負責代為取得網頁原始碼；GEO 檢測還會一併取得該網站的 robots.txt 與 llms.txt）。本站不會把這些網址與你的會員帳號連結，也不另外儲存，但平台的系統紀錄可能包含請求網址。只有在這個服務暫時無法使用時，才會退回使用公開的代理服務（allorigins.win、corsproxy.io、codetabs.com），這些服務會收到你輸入的網址。如果不希望網址經過任何服務，可改用「上傳 HTML 檔」。</li>
                 <li><strong>cdnjs（Cloudflare）：</strong>匯出 PDF 時載入所需的函式庫。</li>
             </ul>
 
@@ -241,10 +241,10 @@
             <h2>五、你的權利與如何刪除帳號</h2>
             <p>依個人資料保護法，你可以向我們請求查詢或閱覽、製給複製本、補充或更正、停止蒐集處理利用，以及刪除你的個人資料。</p>
             <ul>
-                <li><strong>自己刪除（最快）：</strong>登入後前往<a href="../seo/dashboard/">會員專區</a>，最下方按「刪除我的帳號與所有資料」，確認後立即生效。也可以只刪除單一網站的紀錄。</li>
+                <li><strong>自己刪除（最快）：</strong>登入後前往<a href="../dashboard/">會員專區</a>，最下方按「刪除我的帳號與所有資料」，確認後立即生效。也可以只刪除單一網站的紀錄。</li>
                 <li><strong>請我們代為處理：</strong>以你登入用的 Email 寄信到 <a href="mailto:ycaxiom@gmail.com">ycaxiom@gmail.com</a>，或透過 <a href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">LINE 官方帳號</a> 告知，我們確認是本人後盡快處理。</li>
             </ul>
-            <p>不同意提供資料不會影響你使用基本的 SEO 檢測；但沒有登入就無法查看完整報告，也不會保存檢測紀錄。</p>
+            <p>不同意提供資料不會影響你使用基本的 SEO 與 GEO 檢測；但沒有登入就無法查看完整報告，也不會保存檢測紀錄。</p>
 
             <h2>六、我們如何保護你的資料</h2>
             <ul>

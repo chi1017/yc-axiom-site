@@ -2038,14 +2038,34 @@ function switchSource(tab, mode) {
 //  URL FETCH
 // ═══════════════════════════════════════════════════════
 // ── timeout-safe fetch helper (replaces AbortSignal.timeout for broad compatibility) ──
-function fetchWithTimeout(url, ms) {
+function rawFetch(url, ms) {
   const ac = new AbortController();
   const tid = setTimeout(() => ac.abort(), ms);
   return fetch(url, { signal: ac.signal }).finally(() => clearTimeout(tid));
 }
+// 抓網頁優先走本站自己的抓取服務（Supabase Edge Function fetch-page，回傳格式與 allorigins 相同）；
+// 只有它連不上時才退回公開代理。目標網站的狀態碼（404、403…）放在 status.http_code，不算失敗。
+const AO_PREFIX = 'https://api.allorigins.win/get?url=';
+const OWN_ERR = { host_not_allowed:'這個網址不能檢測（內網或本機位址）', dns_failed:'找不到這個網域，請確認網址拼寫', bad_url:'網址格式不正確', bad_protocol:'只支援 http／https 網址', bad_host:'網址格式不正確', port_not_allowed:'不支援這個連接埠', credentials_not_allowed:'網址不可包含帳號密碼', too_many_redirects:'網站轉址次數過多', rate_limited:'查詢太頻繁，請稍等一分鐘再試', timeout:'網站回應逾時', fetch_failed:'連不上這個網站', origin_not_allowed:'目前的網頁來源不被允許' };
+function ownProxyBase() {
+  const c = window.YC_CONFIG;
+  return c && c.supabaseUrl ? String(c.supabaseUrl).replace(/\/$/, '') + '/functions/v1/fetch-page?url=' : null;
+}
+async function fetchWithTimeout(url, ms) {
+  const own = ownProxyBase();
+  if (own && url.indexOf(AO_PREFIX) === 0) {
+    try {
+      const r = await rawFetch(own + url.slice(AO_PREFIX.length), ms);
+      if (r.ok) return r;
+      let code = ''; try { code = (await r.json()).error || ''; } catch (_) {}
+      if (code) { const e = new Error(OWN_ERR[code] || ('服務回應 ' + r.status)); e.definitive = true; throw e; }
+    } catch (e) { if (e && e.definitive) throw e; }
+  }
+  return rawFetch(url, ms);
+}
 
 const PROXIES = [
-  u => ({ ep:`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, parse: async r=>{const j=await r.json();return j.contents;} }),
+  u => ({ ep:`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, parse: async r=>{const j=await r.json();const c=j.status&&j.status.http_code;if(c>=400){const e=new Error(`網站回應 HTTP ${c}`+(c===401||c===403||c===429||c===503?'（網站可能擋掉了自動檢測）':''));e.definitive=true;throw e;}return j.contents;} }),
   u => ({ ep:`https://corsproxy.io/?${encodeURIComponent(u)}`,              parse: async r=>r.text() }),
   u => ({ ep:`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, parse: async r=>r.text() }),
 ];
@@ -2076,14 +2096,14 @@ async function fetchUrl(tab) {
   let html=null, lastErr='';
   for(let i=0;i<PROXIES.length;i++){
     try{
-      setUrlStatus(tab,'loading',`⟳ 嘗試 Proxy ${i+1}/${PROXIES.length}...`);
+      setUrlStatus(tab,'loading',i===0?'⟳ 正在抓取網頁…':`⟳ 嘗試備用服務 ${i}/${PROXIES.length-1}...`);
       const {ep,parse}=PROXIES[i](url);
       const resp=await fetchWithTimeout(ep, 12000);
       if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const t=await parse(resp);
       if(t&&t.length>200){html=t;break;}
       throw new Error('回應內容過短');
-    }catch(e){lastErr=e.message;html=null;}
+    }catch(e){lastErr=e.message;html=null;if(e.definitive)break;}
   }
   btn.disabled=false; icon.textContent='⬇';
   if(!html){setUrlStatus(tab,'error',`✗ 無法抓取（${lastErr}）。請確認網址或改用「上傳檔案」。`);return;}
@@ -6485,8 +6505,8 @@ function shareReport() {
 <script>window.YC_BASE = './';</script>
 <script src="assets/supabase-config.js?v=2026-10-15"></script>
 <script src="assets/vendor/supabase-2.117.2.min.js"></script>
-<script src="assets/yc-auth.js?v=2026-10-15"></script>
-<script src="assets/seo-tool-members.js?v=2026-10-15"></script>
+<script src="assets/yc-auth.js?v=2026-10-16"></script>
+<script src="assets/seo-tool-members.js?v=2026-10-16"></script>
 <script src="assets/cross-links.js?v=2026-10-15"></script>
 </body>
 </html>
