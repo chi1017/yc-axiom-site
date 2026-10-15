@@ -152,7 +152,7 @@
             <li><a href="../services/" class="nav-link">服務項目</a></li>
             <li><a href="../works/" class="nav-link">作品集</a></li>
             <li><a href="../articles/" class="nav-link">文章</a></li>
-            <li><a href="../seo/" class="nav-link active" aria-current="page">SEO 工具</a></li>
+            <li class="nav-dd"><a href="../seo/" class="nav-link active" aria-current="page" aria-haspopup="true">SEO 工具</a><ul class="nav-sub"><li><a href="../seo/" aria-current="page">SEO 檢測</a></li><li><a href="../geo/">GEO 檢測<small>AI 可見度</small></a></li></ul></li>
             <li><a href="../pricing/" class="nav-link">定價</a></li>
             <li><a href="../contact/" class="nav-link">聯絡</a></li>
         </ul>
@@ -178,7 +178,8 @@
     <a class="mobile-nav-btn" href="../services/">服務項目</a>
     <a class="mobile-nav-btn" href="../works/">作品集</a>
     <a class="mobile-nav-btn" href="../articles/">文章</a>
-    <a class="mobile-nav-btn" href="../seo/">SEO 工具</a>
+    <a class="mobile-nav-btn" href="../seo/">SEO 檢測</a>
+    <a class="mobile-nav-btn" href="../geo/">GEO 檢測</a>
     <a class="mobile-nav-btn" href="../pricing/">定價</a>
     <a class="mobile-nav-btn" href="../contact/">聯絡</a>
 </div>
@@ -197,7 +198,7 @@
         <div class="seo-tool-frame">
             <div class="seo-tool-iframe-inner">
                 <div class="seo-tool-loading"><span class="seo-tool-spinner"></span>工具載入中…</div>
-                <iframe id="seoToolFrame" scrolling="no" src="../seo-tool.html" title="SEO 分析工具 v18 Pro" loading="lazy" allow="clipboard-write" onload="this.parentElement.classList.add('loaded')"></iframe>
+                <iframe id="seoToolFrame" scrolling="no" src="../seo-tool.html" title="SEO 分析工具 v18 Pro" loading="lazy" allow="clipboard-write" onload="this.parentElement.classList.add('loaded')"></iframe><script>(function(){var f=document.getElementById('seoToolFrame');if(f&&location.search){f.setAttribute('src',f.getAttribute('src')+location.search);}})();</script>
             </div>
         </div>
     </div>
