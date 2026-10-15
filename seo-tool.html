@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SEO Analyzer Pro — 深度 SEO 分析工具</title>
-<meta name="description" content="YC AXIOM 提供的中文 SEO 分析工具：技術 SEO 健診、關鍵字覆蓋分析、Schema 結構化資料檢查、PDF／JSON 報告匯出，純前端運作、資料不外傳。">
+<meta name="description" content="YC AXIOM 提供的中文 SEO 分析工具：技術 SEO 健診、關鍵字覆蓋分析、Schema 結構化資料檢查、PDF／JSON 報告匯出，分析在瀏覽器本機執行，登入會員才保存紀錄。">
 <link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/seo/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="SEO Analyzer Pro — 深度 SEO 分析工具 | YC AXIOM">
-<meta property="og:description" content="YC AXIOM 提供的中文 SEO 分析工具：技術 SEO 健診、關鍵字覆蓋分析、Schema 結構化資料檢查、PDF／JSON 報告匯出，純前端運作、資料不外傳。">
+<meta property="og:description" content="YC AXIOM 提供的中文 SEO 分析工具：技術 SEO 健診、關鍵字覆蓋分析、Schema 結構化資料檢查、PDF／JSON 報告匯出，分析在瀏覽器本機執行，登入會員才保存紀錄。">
 <meta property="og:url" content="https://chi1017.github.io/yc-axiom-site/seo/">
 <meta property="og:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -1378,7 +1378,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
       <span style="opacity:0.6">⚙</span> 設定
     </button>
     <div class="v-badge">v18</div>
-    <div class="offline-badge">離線可用</div>
+    <div class="offline-badge">本機分析</div>
   </div>
 </header>
 
@@ -1429,7 +1429,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
   </div>
 
   <div class="hero fade-up fade-up-1">
-    <div class="hero-eyebrow">免費工具・純前端・離線可用</div>
+    <div class="hero-eyebrow">免費工具・瀏覽器本機分析・登入可存紀錄</div>
     <h1>SEO 分析工具</h1>
     <p>輸入網址或上傳 HTML，一次深度分析 40+ 項 SEO 規則<br>
        <span style="color:var(--accent2);opacity:0.8">PageSpeed · Schema · TF-IDF · 爬蟲 · SERP · 競爭分析</span></p>
@@ -1442,8 +1442,8 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
       </div>
       <div class="hero-feat">
         <div class="hf-icon">⚡</div>
-        <div class="hf-title">完全離線・零資料外傳</div>
-        <div class="hf-desc">所有運算在本機瀏覽器執行，不傳任何資料到伺服器。可存成單一 HTML 檔隨身攜帶使用。</div>
+        <div class="hf-title">本機分析・登入才保存</div>
+        <div class="hf-desc">分析運算在你的瀏覽器執行；未登入不會保存任何資料。登入會員後才保存檢測紀錄，並可隨時刪除帳號與全部資料。</div>
       </div>
       <div class="hero-feat">
         <div class="hf-icon">📊</div>
@@ -1491,7 +1491,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
 
   <div class="notice">
     <span>⚡</span>
-    <span>純前端分析引擎：所有運算在你的瀏覽器本機執行，<strong>不會傳送任何資料到外部</strong>。URL 模式透過公開 Proxy 抓取頁面原始碼。</span>
+    <span>分析引擎在你的瀏覽器本機執行，<strong>未登入時不會保存任何資料</strong>；登入會員後才會保存檢測紀錄。URL 模式透過公開 Proxy 抓取頁面原始碼。</span>
   </div>
 
   <div id="historyPanel">
@@ -5467,7 +5467,7 @@ async function exportPDF(){
 
   <!-- Footer -->
   <div style="text-align:center;padding-top:16px;border-top:1px solid #1A1815;font-size:11px;color:#555;">
-    ${escHtml(brand)} · SEO Analyzer v15 Pro · ${dateStr} · 零資料外傳
+    ${escHtml(brand)} · SEO Analyzer v15 Pro · ${dateStr} · YC AXIOM 免費 SEO 檢測
   </div>
 
 </div>
@@ -6442,7 +6442,7 @@ function shareReport() {
           <span id="footerBrandText">SEO Analyzer</span>
           <span style="font-family:'Noto Sans TC',sans-serif;font-weight:400;font-size:11px;color:var(--text3);letter-spacing:0;margin-left:2px">Pro</span>
         </div>
-        <p>專為中文網站設計的深度 SEO 分析工具。純前端架構，完全離線可用，不傳送任何資料。</p>
+        <p>專為中文網站設計的深度 SEO 分析工具。分析在瀏覽器本機執行；登入會員後才會保存檢測紀錄。</p>
       </div>
 
       <div class="footer-cols">
@@ -6459,7 +6459,7 @@ function shareReport() {
         <div class="footer-col">
           <h4>工具特色</h4>
           <ul>
-            <li><span>⚡</span>完全離線可用</li>
+            <li><span>⚡</span>瀏覽器本機分析</li>
             <li><span>🏢</span>18 種產業模板</li>
             <li><span>📄</span>PDF / JSON 匯出</li>
             <li><span>🕐</span>歷史趨勢追蹤</li>
@@ -6475,12 +6475,17 @@ function shareReport() {
       </div>
       <div class="footer-pills">
         <span class="footer-pill"><span class="dot"></span>純前端架構</span>
-        <span class="footer-pill"><span class="dot"></span>零資料外傳</span>
+        <span class="footer-pill"><span class="dot"></span>登入才保存紀錄</span>
         <span class="footer-pill"><span class="dot dot-v"></span>55+ 項規則</span>
       </div>
     </div>
   </div>
 </footer>
 
+<script>window.YC_BASE = './';</script>
+<script src="assets/supabase-config.js?v=2026-10-15"></script>
+<script src="assets/vendor/supabase-2.117.2.min.js"></script>
+<script src="assets/yc-auth.js?v=2026-10-15"></script>
+<script src="assets/seo-tool-members.js?v=2026-10-15"></script>
 </body>
 </html>

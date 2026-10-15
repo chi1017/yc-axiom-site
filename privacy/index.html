@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        page: function () {
+            var path = location.pathname;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.href, page_path: path, page_title: document.title });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: (a.classList.contains('line-float') || a.closest('.social-float')) ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隱私權政策｜SEO 檢測工具會員與資料使用說明 - YC AXIOM</title>
+<meta name="description" content="YC AXIOM 隱私權政策：說明 SEO 檢測工具會員登入時蒐集哪些資料、使用目的、保存期間、委外處理的服務商，以及如何自行刪除帳號與全部資料，也提供聯絡方式讓你查詢或更正個人資料。">
+<meta name="author" content="YC AXIOM">
+<link rel="icon" type="image/png" href="https://chi1017.github.io/yc-axiom-site/favicon-32.png">
+<link rel="apple-touch-icon" href="https://chi1017.github.io/yc-axiom-site/apple-touch-icon.png">
+<link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/privacy/">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="隱私權政策｜SEO 檢測工具會員與資料使用說明 - YC AXIOM">
+<meta property="og:description" content="YC AXIOM 隱私權政策：說明 SEO 檢測工具會員登入時蒐集哪些資料、使用目的、保存期間、委外處理的服務商，以及如何自行刪除帳號與全部資料，也提供聯絡方式讓你查詢或更正個人資料。">
+<meta property="og:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta property="og:url" content="https://chi1017.github.io/yc-axiom-site/privacy/">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="YC AXIOM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="隱私權政策｜SEO 檢測工具會員與資料使用說明 - YC AXIOM">
+<meta name="twitter:description" content="YC AXIOM 隱私權政策：說明 SEO 檢測工具會員登入時蒐集哪些資料、使用目的、保存期間、委外處理的服務商，以及如何自行刪除帳號與全部資料，也提供聯絡方式讓你查詢或更正個人資料。">
+<meta name="twitter:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta name="theme-color" content="#5FA396">
+<script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../assets/site.css?v=2026-10-15">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://chi1017.github.io/yc-axiom-site/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "隱私權政策",
+      "item": "https://chi1017.github.io/yc-axiom-site/privacy/"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="頁面載入中">
+    <div class="loader-mark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="ringGrad-load" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient>
+                <linearGradient id="yGrad-load" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="50"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient>
+                <filter id="glow-load" filterUnits="userSpaceOnUse" x="-8" y="-8" width="80" height="80"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path class="loader-draw loader-ring" pathLength="1" d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-load)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y1" pathLength="1" d="M18,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y2" pathLength="1" d="M46,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+        </svg>
+    </div>
+    <div class="loader-text">
+        <div class="loader-name">YC AXIOM</div>
+        <div class="loader-sub">[品牌與工程]</div>
+    </div>
+    <div class="loader-bar"></div>
+</div>
+<script>
+(function () {
+    var root = document.documentElement, loader = document.getElementById('page-loader');
+    if (!loader) return;
+    try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
+    root.classList.add('is-loading');
+    var start = Date.now(), MIN = 1700, MAX = 5000, closed = false;
+    function close() {
+        if (closed) return; closed = true;
+        loader.classList.add('is-done');
+        root.classList.remove('is-loading');
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 900);
+    }
+    function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+})();
+</script>
+
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor Elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-follower"></div>
+
+
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-inner">
+        <a href="../" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
+            <div class="nav-logo-img">
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+            </div>
+            <div class="nav-logo-text">
+                <div class="nav-logo-name">YC AXIOM</div>
+                <div class="nav-logo-sub">[品牌與工程]</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="../" class="nav-link">首頁</a></li>
+            <li><a href="../about/" class="nav-link">關於</a></li>
+            <li><a href="../services/" class="nav-link">服務項目</a></li>
+            <li><a href="../works/" class="nav-link">作品集</a></li>
+            <li><a href="../articles/" class="nav-link">文章</a></li>
+            <li><a href="../seo/" class="nav-link">SEO 工具</a></li>
+            <li><a href="../pricing/" class="nav-link">定價</a></li>
+            <li><a href="../contact/" class="nav-link">聯絡</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="../contact/" class="nav-cta magnetic">免費諮詢</a>
+
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu">
+    <button class="mobile-close" onclick="toggleMobileMenu()" aria-label="關閉選單">✕</button>
+    <a class="mobile-nav-btn" href="../">首頁</a>
+    <a class="mobile-nav-btn" href="../about/">關於</a>
+    <a class="mobile-nav-btn" href="../services/">服務項目</a>
+    <a class="mobile-nav-btn" href="../works/">作品集</a>
+    <a class="mobile-nav-btn" href="../articles/">文章</a>
+    <a class="mobile-nav-btn" href="../seo/">SEO 工具</a>
+    <a class="mobile-nav-btn" href="../pricing/">定價</a>
+    <a class="mobile-nav-btn" href="../contact/">聯絡</a>
+</div>
+
+
+<main>
+<section id="page-privacy" class="page showing active">
+    <div class="container section-pad">
+        <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../">首頁</a><span aria-hidden="true">›</span><span aria-current="page">隱私權政策</span></div>
+        <p class="section-eyebrow reveal">Privacy / 隱私權政策</p>
+        <h1 class="section-title reveal">隱私權政策<br>你的資料怎麼被使用.</h1>
+        <div class="article-meta reveal" style="margin-top:20px;">
+            <span>適用：SEO 檢測工具會員與本站瀏覽</span>
+            <span>更新：2026/10/15</span>
+            <span>版本：2026-10-15-v1</span>
+        </div>
+
+        <div class="article-body reveal">
+            <p>YC AXIOM（以下稱「我們」）是台中的網頁設計工作室。你在本站使用免費的 SEO 檢測工具、登入成為會員時，會留下一些資料。這份說明用白話講清楚：我們蒐集什麼、為什麼要、放在哪裡、放多久，以及你怎麼把它刪掉。內容同時作為個人資料保護法第 8 條的告知事項。</p>
+
+            <h2>一、我們蒐集哪些資料</h2>
+            <ul>
+                <li><strong>登入資料：</strong>你的 Email 與登入方式（Google）。登入由 Google 驗證，我們不會收到也不會儲存你的 Google 密碼；本站沒有密碼登入。Google 可能一併回傳姓名、頭像網址等基本資料，由驗證服務一併保存，但我們不使用這些欄位。</li>
+                <li><strong>同意紀錄：</strong>你同意的時間，以及同意當時的政策版本。</li>
+                <li><strong>檢測資料：</strong>登入後你以「網址」檢測的網站網址、每次檢測的分數、完整檢測報告，以及你在修正清單中勾選「已修正」的項目。</li>
+                <li><strong>跟進紀錄（僅站主可見）：</strong>我們與你聯絡的進度狀態與內部備註。</li>
+                <li><strong>一般瀏覽資料：</strong>本站使用 Google Analytics 4 統計頁面瀏覽，以及 LINE、表單、Email 連結的點擊次數，用來了解哪些內容有幫助。這些是匿名統計，不會與你的會員資料合併。</li>
+            </ul>
+            <p>我們<strong>不蒐集</strong>密碼、信用卡或任何金融資料。未登入時，你輸入的網址與分析結果只在你的瀏覽器中處理，不會儲存到我們的資料庫；以「上傳 HTML 檔」方式檢測的內容，不論是否登入都不會儲存。</p>
+
+            <h2>二、我們為什麼使用這些資料</h2>
+            <ul>
+                <li>提供會員功能：保存檢測紀錄、顯示分數變化、管理修正清單、讓你下載完整報告。</li>
+                <li>在你同意的範圍內，寄送檢測報告與網站改善建議；站主也可能依你的檢測結果，透過你的登入 Email 或你主動使用的 LINE 與你聯絡，提供免費的改善建議。你可以隨時要求停止聯絡。</li>
+                <li>內部通知：新會員第一次檢測分數偏低時，系統會寄一封通知給站主（信件內含會員 Email 與檢測網址），以便評估是否提供協助。</li>
+                <li>維護服務安全與改善工具。</li>
+            </ul>
+            <p><strong>我們寄信的對象只有你登入用的 Email。</strong>我們不會寄信到被檢測網站上找到的任何聯絡信箱，也不會出售你的資料、不會把資料提供給第三方做行銷。</p>
+
+            <h2>三、資料放在哪裡、交給誰處理</h2>
+            <p>為了提供服務，資料會由以下服務商代為處理或儲存，資料可能在台灣以外的地區處理：</p>
+            <ul>
+                <li><strong>Supabase：</strong>會員驗證與資料庫（伺服器位於日本東京）。</li>
+                <li><strong>Google：</strong>提供「使用 Google 帳號登入」；以及本站使用的 Google Analytics 4 統計。若你使用 PageSpeed 功能，被檢測的網址會送到 Google PageSpeed Insights。</li>
+                <li><strong>Resend：</strong>寄送上述給站主的內部通知信。</li>
+                <li><strong>GitHub Pages：</strong>本站網頁的託管服務。</li>
+                <li><strong>公開代理服務：</strong>「網址」模式需要透過公開的代理服務（目前為 allorigins.win、corsproxy.io、codetabs.com）取得網頁原始碼，因此這些服務會收到你輸入的網址。如果不希望網址經過它們，可改用「上傳 HTML 檔」。</li>
+                <li><strong>cdnjs（Cloudflare）：</strong>匯出 PDF 時載入所需的函式庫。</li>
+            </ul>
+
+            <h2>四、保存多久</h2>
+            <ul>
+                <li>帳號存續期間，我們會保存你的資料。</li>
+                <li>你刪除帳號時，會立即從資料庫清除帳號、網站、檢測紀錄與同意紀錄，<strong>無法復原</strong>。</li>
+                <li>連續 24 個月沒有登入，系統會自動刪除該帳號與全部資料。</li>
+                <li>刪除後我們不再保有你的資料；若服務商的系統備份仍暫時存在，會依其備份週期自然淘汰。</li>
+            </ul>
+
+            <h2>五、你的權利與如何刪除帳號</h2>
+            <p>依個人資料保護法，你可以向我們請求查詢或閱覽、製給複製本、補充或更正、停止蒐集處理利用，以及刪除你的個人資料。</p>
+            <ul>
+                <li><strong>自己刪除（最快）：</strong>登入後前往<a href="../seo/dashboard/">會員專區</a>，最下方按「刪除我的帳號與所有資料」，確認後立即生效。也可以只刪除單一網站的紀錄。</li>
+                <li><strong>請我們代為處理：</strong>以你登入用的 Email 寄信到 <a href="mailto:ycaxiom@gmail.com">ycaxiom@gmail.com</a>，或透過 <a href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">LINE 官方帳號</a> 告知，我們確認是本人後盡快處理。</li>
+            </ul>
+            <p>不同意提供資料不會影響你使用基本的 SEO 檢測；但沒有登入就無法查看完整報告，也不會保存檢測紀錄。</p>
+
+            <h2>六、我們如何保護你的資料</h2>
+            <ul>
+                <li>全站使用 HTTPS 加密傳輸。</li>
+                <li>資料庫啟用逐列權限控管：會員只能讀寫自己的資料，彼此看不到。</li>
+                <li>管理後台僅限站主帳號，權限在資料庫層強制，不只是隱藏頁面。</li>
+                <li>服務金鑰與寄信金鑰只存放在伺服器端的密鑰管理，不會出現在網站程式碼中。</li>
+            </ul>
+            <p>沒有任何網路服務能保證絕對安全；若發生可能影響你的資料事件，我們會依法以你登入的 Email 通知你。</p>
+
+            <h2>七、Cookie 與瀏覽器儲存</h2>
+            <p>登入狀態會保存在你瀏覽器的本機儲存空間，以便你不用每次重新登入；檢測工具也會把最近的檢測摘要存在你自己的瀏覽器裡（只在你的裝置上，不會上傳）；Google Analytics 會使用 Cookie 做匿名統計。你可以隨時在瀏覽器中清除或停用它們，這可能讓你需要重新登入。</p>
+
+            <h2>八、政策更新</h2>
+            <p>政策內容有重大變更時，我們會更新版本與日期，並在你下次登入時重新取得你的同意。目前版本：2026-10-15-v1（2026/10/15）。</p>
+
+            <h2>九、聯絡方式</h2>
+            <p>對這份政策或你的資料有任何問題，請聯絡 YC AXIOM：<a href="mailto:ycaxiom@gmail.com">ycaxiom@gmail.com</a>，或 <a href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">LINE 官方帳號</a>。</p>
+        </div>
+    </div>
+</section>
+</main>
+
+
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
+<div class="social-float" role="group" aria-label="社群與聯絡">
+    <a class="sf sf-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）" data-tip="LINE 諮詢"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg></a>
+    <a class="sf sf-threads" href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Threads（@ycaxiom）" data-tip="Threads"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M16.8 11.2c-.3-3.4-2.3-5.1-5.2-5.1-2.9 0-5 2-5 5.9 0 3.9 2.1 6.1 5.2 6.1 2.7 0 4.3-1.5 4.3-3.4 0-1.9-1.6-3-3.7-3-1.8 0-2.7.9-2.7 1.9 0 1 .8 1.7 2 1.7 1.7 0 3-1 3-3.8"/></svg></a>
+    <a class="sf sf-ig" href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Instagram（@ycaxiom）" data-tip="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="3.9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.1" fill="currentColor"/></svg></a>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-nav">
+            <a href="../">首頁</a>
+            <a href="../about/">關於</a>
+            <a href="../services/">服務項目</a>
+            <a href="../works/">作品集</a>
+            <a href="../articles/">文章</a>
+            <a href="../seo/">SEO 工具</a>
+            <a href="../pricing/">定價</a>
+            <a href="../contact/">聯絡</a>
+        </div>
+        <div class="footer-services" aria-label="服務與地區"><a href="../services/brand-website/">品牌形象網站</a><a href="../services/ecommerce-website/">品牌電商網站</a><a href="../services/seo-performance/">SEO 與效能調校</a><a href="../services/custom-system/">全客製多頁與系統</a><a href="../services/data-cleaning/">商業資料清洗與整理</a><a href="../services/market-intelligence/">市場情報與競品分析</a><a href="../taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程<a class="footer-privacy" href="../privacy/">隱私權政策</a></div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            現正接案中 · 台灣在地服務
+        </div>
+    </div>
+</footer>
+<script src="../assets/site.js?v=2026-10-15" defer></script>
+</body>
+</html>
