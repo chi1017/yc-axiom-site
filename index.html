@@ -354,7 +354,7 @@
 <script>
 /* old single-page links (#about, #works ...) -> the new real pages */
 (function () {
-    var m = {"home": "", "about": "about/", "services": "services/", "works": "works/", "case-imassage": "works/imassage/", "articles": "articles/", "article-imassage": "articles/imassage-weebly-to-wordpress/", "article-xiaofang": "articles/xiaofang-brand-website/", "seo": "seo/", "pricing": "pricing/", "contact": "contact/", "svc-brand-website": "services/brand-website/", "svc-ecommerce": "services/ecommerce-website/", "svc-seo-performance": "services/seo-performance/", "svc-custom-system": "services/custom-system/", "svc-data-cleaning": "services/data-cleaning/", "svc-market-intelligence": "services/market-intelligence/", "case-xiaofang": "works/xiaofang/", "taichung": "taichung-web-design/", "privacy": "privacy/"}, h = (location.hash || '').replace('#', '');
+    var m = {"home": "", "about": "about/", "services": "services/", "works": "works/", "case-imassage": "works/imassage/", "articles": "articles/", "article-imassage": "articles/imassage-weebly-to-wordpress/", "article-xiaofang": "articles/xiaofang-brand-website/", "seo": "seo/", "pricing": "pricing/", "contact": "contact/", "svc-brand-website": "services/brand-website/", "svc-ecommerce": "services/ecommerce-website/", "svc-seo-performance": "services/seo-performance/", "svc-custom-system": "services/custom-system/", "svc-data-cleaning": "services/data-cleaning/", "svc-market-intelligence": "services/market-intelligence/", "case-xiaofang": "works/xiaofang/", "taichung": "taichung-web-design/", "privacy": "privacy/", "geo": "geo/"}, h = (location.hash || '').replace('#', '');
     if (h && m[h] !== undefined && h !== 'home') location.replace('./' + m[h]);
 })();
 </script></body>

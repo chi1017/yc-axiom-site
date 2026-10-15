@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO 檢測工具｜AI 可見度檢測 - YC AXIOM</title>
+<meta name="description" content="YC AXIOM 的免費 GEO 檢測工具：檢查網站是否容易被 ChatGPT、Perplexity、Google AI 摘要讀懂與引用，涵蓋 AI 爬蟲存取、內容可讀性、店家資料、問答內容、可信度與標題結構。">
+<link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/geo/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="GEO 檢測工具｜AI 可見度檢測 | YC AXIOM">
+<meta property="og:description" content="免費檢查你的網站是否容易被 ChatGPT、Perplexity、Google AI 摘要讀懂與引用。">
+<meta property="og:url" content="https://chi1017.github.io/yc-axiom-site/geo/">
+<meta property="og:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314120F'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%235FA396' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0A09;--bg2:#14120F;--bg3:#1A1815;--border:rgba(245,240,230,.08);--border2:rgba(245,240,230,.14);--accent:#5FA396;--accent2:#8CD2C2;--green:#10b981;--red:#ef4444;--gold:#f59e0b;--text:#DDD8CE;--text2:#9C9686;--text3:#6b6558;--radius:14px;--radius-sm:8px;}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.7;min-height:100vh}
+a{color:var(--accent2)}
+header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);gap:12px;flex-wrap:wrap}
+.logo{font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.badge-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.offline-badge{font-size:11px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:4px 12px;border-radius:20px;font-weight:500}
+.v-badge{font-size:11px;background:rgba(95,163,150,.15);border:1px solid rgba(95,163,150,.3);color:var(--accent2);padding:4px 10px;border-radius:20px;font-weight:600}
+.hist-toggle{display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--border);color:var(--text2);padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-size:13px;transition:all .2s}
+.hist-toggle:hover{border-color:var(--accent);color:var(--accent2);background:rgba(95,163,150,.08)}
+.main{max-width:960px;margin:0 auto;padding:40px 24px 70px}
+.hero{text-align:center;margin-bottom:32px}
+.hero h1{font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;letter-spacing:-.02em;color:#fff;margin-bottom:10px}
+.hero p{color:var(--text2);max-width:560px;margin:0 auto}
+.input-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;margin-bottom:22px}
+.tabs{display:flex;border-bottom:1px solid var(--border)}
+.tab-btn{flex:1;padding:12px 8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);font-family:inherit;font-size:13px;cursor:pointer}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.pane{display:none;padding:20px}.pane.active{display:block}
+.url-wrap{display:flex;align-items:center;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:10px}
+.url-wrap:focus-within{border-color:var(--accent)}
+.url-wrap span{padding:0 12px;color:var(--text3)}
+.url-wrap input{flex:1;min-width:0;background:none;border:0;padding:12px 12px 12px 0;font:14px inherit;font-family:inherit;color:var(--text);outline:none}
+textarea#htmlIn{width:100%;min-height:150px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font:12px/1.6 ui-monospace,Menlo,Consolas,monospace;padding:12px;margin-bottom:10px;resize:vertical}
+.field-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.field-row input[type=url]{flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font:13px inherit;font-family:inherit}
+.btn-run{width:100%;padding:13px;background:var(--accent);color:#0b0a09;border:0;border-radius:var(--radius-sm);font:700 15px 'Noto Sans TC',sans-serif;cursor:pointer}
+.btn-run:hover:not(:disabled){filter:brightness(1.08)}.btn-run:disabled{opacity:.55;cursor:not-allowed}
+.btn-sub{background:var(--bg3);border:1px solid var(--border2);color:var(--accent2);border-radius:var(--radius-sm);padding:9px 14px;font:13px 'Noto Sans TC',sans-serif;cursor:pointer}
+.btn-sub:hover{border-color:var(--accent)}
+.note{display:flex;gap:8px;background:rgba(95,163,150,.06);border:1px solid rgba(95,163,150,.15);border-radius:var(--radius-sm);padding:9px 12px;font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6}
+.status{display:none;font-size:13px;padding:9px 12px;border-radius:var(--radius-sm);margin-top:12px}
+.status.loading{display:block;background:rgba(95,163,150,.08);border:1px solid rgba(95,163,150,.2);color:var(--accent2)}
+.status.error{display:block;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:#f87171}
+.disclaimer{font-size:12px;color:var(--text3);text-align:center;margin:10px 0 0;line-height:1.7}
+/* results */
+#results{display:none}
+.score-hero{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:26px;display:flex;align-items:center;gap:26px;margin-bottom:18px;flex-wrap:wrap}
+.score-circle{position:relative;width:128px;height:128px;flex-shrink:0}
+.score-circle svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 34px 'Plus Jakarta Sans',sans-serif;color:#fff;line-height:1}
+.score-lbl{font-size:11px;font-weight:500;color:var(--text3);margin-top:4px}
+.score-info{flex:1;min-width:240px}
+.score-info h2{font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:21px;color:#fff;margin-bottom:4px}
+.score-info p{color:var(--text2);font-size:13px}
+.grade{display:inline-block;font-size:12px;font-weight:700;padding:2px 12px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.grade.good{background:rgba(16,185,129,.16);color:#34d399}.grade.fair{background:rgba(245,158,11,.16);color:#fbbf24}.grade.poor{background:rgba(239,68,68,.16);color:#f87171}.grade.na{background:var(--bg3);color:var(--text2)}
+.geo-cta{margin-top:14px;display:none;gap:10px;flex-wrap:wrap;align-items:center}
+.geo-cta.show{display:flex}
+.geo-cta a.line{background:#06C755;color:#fff;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:6px;font-size:14px}
+.geo-cta a.line:hover{filter:brightness(1.07)}
+.geo-cta .hint{font-size:12px;color:var(--text3)}
+.geo-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px}
+.geo-section h3{font-size:16px;color:#fff;margin-bottom:4px;font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif}
+.geo-section>.sub{font-size:12.5px;color:var(--text3);margin-bottom:14px}
+.cat-row{display:grid;grid-template-columns:150px 1fr 70px;gap:12px;align-items:center;padding:7px 0;font-size:13px}
+.cat-row .bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.cat-row .bar i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+.cat-row .bar i.mid{background:var(--gold)}.cat-row .bar i.low{background:var(--red)}
+.cat-row .pt{text-align:right;color:var(--text2);font-variant-numeric:tabular-nums}
+.cat-row .hint{grid-column:1/-1;font-size:11.5px;color:var(--text3);margin-top:-4px}
+.issue{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+.issue:first-of-type{border-top:0}
+.issue .lv{flex-shrink:0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;height:fit-content;margin-top:2px;background:rgba(239,68,68,.18);color:#f87171;white-space:nowrap}
+.issue .lv.medium{background:rgba(245,158,11,.18);color:#fbbf24}.issue .lv.low{background:rgba(95,163,150,.18);color:#7fd1c2}
+.issue b{display:block;color:var(--text);font-size:14px}
+.issue .loss{color:var(--text3);font-size:12px;font-weight:400;margin-left:6px}
+.issue p{font-size:13px;color:var(--text2);margin-top:4px}
+.issue p strong{color:var(--accent2);font-weight:500}
+.item{display:grid;grid-template-columns:78px 1fr auto;gap:4px 12px;padding:11px 0;border-top:1px solid var(--border);font-size:13px;align-items:start}
+.item:first-of-type{border-top:0}
+.chip{font-size:11px;font-weight:700;padding:2px 0;border-radius:4px;text-align:center;height:fit-content;margin-top:2px}
+.st-pass .chip{background:rgba(16,185,129,.16);color:#34d399}.st-warn .chip{background:rgba(245,158,11,.16);color:#fbbf24}.st-fail .chip{background:rgba(239,68,68,.16);color:#f87171}
+.st-na .chip,.st-unknown .chip{background:var(--bg3);color:var(--text3)}
+.item .t{color:var(--text);font-weight:500}.item .pts{color:var(--text3);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.item .n{grid-column:2/4;color:var(--text2);font-size:12.5px}
+.item .fixbox{grid-column:2/4;background:rgba(0,0,0,.2);border-radius:8px;padding:9px 12px;font-size:12.5px;color:var(--text2)}
+.item .fixbox b{color:var(--accent2);font-weight:500}
+.cat-title{font-size:13px;color:var(--accent2);font-weight:700;margin:18px 0 2px;letter-spacing:.04em}
+.cat-title:first-of-type{margin-top:0}
+.bots{display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.bots span{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 12px;color:var(--text2)}
+.bots span.blocked{border-color:rgba(239,68,68,.3);color:#f87171}.bots span.allowed{border-color:rgba(16,185,129,.25);color:#34d399}
+.actions-row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.sp-gate{display:none}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:#222;color:#fff;border:1px solid var(--border2);padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s;z-index:9999}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+html.embedded,html.embedded body{overflow:hidden}
+html.embedded body{min-height:0}
+html.embedded .hero{display:none}
+html.embedded .main{padding-top:24px}
+html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(--vh,600px) - 90px)}
+@media (max-width:640px){header{padding:14px 16px}.main{padding:24px 14px 50px}.score-hero{padding:18px;gap:16px}.cat-row{grid-template-columns:104px 1fr 56px}.item{grid-template-columns:62px 1fr}.item .pts{grid-column:2}.pane{padding:14px}}
+@media print{
+  body{background:#fff;color:#111}header,.input-card,.actions-row,.geo-cta,#yc-gate,.hero,.disclaimer.top,#toast{display:none!important}
+  #results{display:block!important}#results.yc-gated .geo-full{display:block!important}
+  .score-hero,.geo-section{background:#fff;border-color:#bbb;color:#111}.score-info h2,.geo-section h3,.score-num{color:#111}
+  .item .t,.issue b{color:#111}.item .n,.issue p,.cat-row .pt{color:#333}html.embedded,html.embedded body{overflow:visible}
+}
+</style>
+<script>
+(function () {
+  if (window.parent === window) return;
+  var de = document.documentElement;
+  de.classList.add('embedded');
+  function post() {
+    var b = document.body; if (!b) return;
+    var cs = getComputedStyle(b);
+    var h = b.getBoundingClientRect().height + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
+    parent.postMessage({ type: 'seo-tool-height', height: h }, '*');
+  }
+  function init() {
+    if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+    post(); setTimeout(post, 400); setTimeout(post, 1500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  window.addEventListener('message', function (e) {
+    if (e.source !== parent || !e.data || e.data.type !== 'seo-viewport') return;
+    de.style.setProperty('--vt', e.data.top + 'px');
+    de.style.setProperty('--vh', e.data.height + 'px');
+  });
+})();
+</script>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-dot"></div><span>AI 可見度檢測</span><span style="font-weight:400;font-size:11px;color:var(--text3)">GEO</span></div>
+  <div class="badge-wrap"><span class="offline-badge">瀏覽器本機分析</span><span class="v-badge">免費</span></div>
+</header>
+
+<div class="main">
+  <div class="hero">
+    <h1>GEO 檢測：AI 讀得懂你的網站嗎？</h1>
+    <p>越來越多人用 ChatGPT、Perplexity、Google AI 摘要找店家，這個工具檢查你的網站是否容易被 AI 讀懂與引用。</p>
+  </div>
+
+  <div class="input-card">
+    <div class="tabs" role="tablist">
+      <button class="tab-btn active" id="tabUrl" role="tab" onclick="switchSource('url')">輸入網址檢測</button>
+      <button class="tab-btn" id="tabHtml" role="tab" onclick="switchSource('html')">貼上或上傳 HTML</button>
+    </div>
+    <div class="pane active" id="paneUrl">
+      <div class="url-wrap"><span>🌐</span><input type="text" id="urlIn" placeholder="例如 https://你的網站.com" autocomplete="off" inputmode="url" aria-label="要檢測的網址"></div>
+      <div class="note"><span>ℹ️</span><span>檢測在你的瀏覽器中進行。網頁與 robots.txt 會透過公開的轉送服務（Proxy）取得；若網站有防爬蟲機制抓不到，可改用「貼上或上傳 HTML」。</span></div>
+      <button class="btn-run" id="runBtn" onclick="runUrl()">開始檢測 AI 可見度</button>
+    </div>
+    <div class="pane" id="paneHtml">
+      <div class="field-row"><input type="url" id="htmlBase" placeholder="（選填）這個頁面的網址，用於判斷路徑，例如 https://你的網站.com/"></div>
+      <textarea id="htmlIn" placeholder="貼上網頁的 HTML 原始碼…" aria-label="HTML 原始碼"></textarea>
+      <div class="field-row"><button class="btn-sub" onclick="document.getElementById('fileIn').click()">或選擇 .html 檔案</button><input type="file" id="fileIn" accept=".html,.htm,text/html" style="display:none"></div>
+      <div class="note"><span>ℹ️</span><span>用 HTML 原始碼檢測時，無法讀取網站的 robots.txt 與 llms.txt，這兩項不計分。</span></div>
+      <button class="btn-run" onclick="runHtml()">開始檢測</button>
+    </div>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </div>
+  <p class="disclaimer top" id="disclaimerTop"></p>
+
+  <div id="results" aria-live="polite">
+    <div class="score-hero">
+      <div class="score-circle">
+        <svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="9"/><circle id="scoreRing" cx="55" cy="55" r="46" fill="none" stroke="#5FA396" stroke-width="9" stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round" style="transition:stroke-dashoffset 1s ease"/></svg>
+        <div class="score-num"><span id="scoreNum">0</span><span class="score-lbl">AI 可見度</span></div>
+      </div>
+      <div class="score-info">
+        <h2><span id="scoreTitle">—</span><span class="grade na" id="gradeChip"></span></h2>
+        <p id="scoreSummary"></p>
+        <div class="geo-cta" id="geoCta"><a class="line" id="lineBtn" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">找 YC 幫你優化</a><span class="hint">分數低於 80 分，有不少可以改善的地方，歡迎 LINE 詢問。</span></div>
+      </div>
+    </div>
+
+    <div class="geo-full">
+      <div class="geo-section"><h3>各面向得分</h3><p class="sub">AI 可見度由六個面向組成，滿分 100 分。「無法判斷」與「不適用」的項目不計入分母。</p><div id="catRows"></div></div>
+      <div class="geo-section" id="issuesBox"><h3>優先處理清單</h3><p class="sub">依「失分最多」排序，先改上面的，效果最大。</p><div id="issueList"></div></div>
+      <div class="geo-section"><h3>逐項檢測結果</h3><p class="sub">通過＝拿滿分，警告＝拿一半，需修正＝0 分。</p><div id="itemList"></div></div>
+      <div class="geo-section"><h3>加分項與參考資訊</h3><div id="bonusBox"></div><div id="botsBox" style="margin-top:14px"></div></div>
+    </div>
+
+    <div class="actions-row" id="exportRow">
+      <button class="btn-sub" onclick="exportPDF()">⬇ 列印／存成 PDF</button>
+      <button class="btn-sub" onclick="exportJSON()">⬇ JSON</button>
+      <button class="btn-sub" onclick="exportCSV()">⬇ CSV</button>
+    </div>
+    <div id="crossLinks"></div>
+    <p class="disclaimer" id="disclaimerBottom"></p>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script src="assets/geo-engine.js"></script>
+<script>
+var DISCLAIMER = GEO.DISCLAIMER;
+['disclaimerTop', 'disclaimerBottom'].forEach(function (id) { document.getElementById(id).textContent = DISCLAIMER + '本工具檢查的是網站讓 AI 容易讀懂的條件，不是實際詢問 AI。'; });
+var currentReport = null;
+var tabState = { t1: { mode: 'url', label: '', html: '' } };
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function $(id) { return document.getElementById(id); }
+function showToast(msg, ms) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function () { t.classList.remove('show'); }, ms || 2500); }
+function setStatus(type, msg) { var s = $('status'); if (!type) { s.className = 'status'; s.textContent = ''; return; } s.className = 'status ' + type; s.textContent = msg; }
+
+function switchSource(m) {
+  tabState.t1.mode = m === 'html' ? 'html' : 'url';
+  $('tabUrl').classList.toggle('active', m !== 'html'); $('tabHtml').classList.toggle('active', m === 'html');
+  $('paneUrl').classList.toggle('active', m !== 'html'); $('paneHtml').classList.toggle('active', m === 'html');
+}
+
+// ── 抓取（公開 CORS Proxy，與 SEO 工具相同）──
+var PROXIES = [
+  function (u) { return { ep: 'https://api.allorigins.win/get?url=' + encodeURIComponent(u), parse: function (r) { return r.json().then(function (j) { return { code: (j.status && j.status.http_code) || 200, text: j.contents || '' }; }); } }; },
+  function (u) { return { ep: 'https://corsproxy.io/?' + encodeURIComponent(u), parse: function (r) { return r.text().then(function (t) { return { code: r.status, text: t }; }); } }; },
+  function (u) { return { ep: 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u), parse: function (r) { return r.text().then(function (t) { return { code: r.status, text: t }; }); } }; }
+];
+function fetchWithTimeout(url, ms) {
+  var ac = new AbortController(); var tid = setTimeout(function () { ac.abort(); }, ms);
+  return fetch(url, { signal: ac.signal }).then(function (r) { clearTimeout(tid); return r; }, function (e) { clearTimeout(tid); throw e; });
+}
+// 回傳 { code, text } 或 null（所有 Proxy 都失敗）。404／410 視為確定的結果，不再換 Proxy。
+async function proxyGet(url, ms) {
+  for (var i = 0; i < PROXIES.length; i++) {
+    try {
+      var p = PROXIES[i](url);
+      var resp = await fetchWithTimeout(p.ep, ms);
+      var out = await p.parse(resp);
+      if (out.code === 404 || out.code === 410) return { code: out.code, text: '' };
+      if (out.code >= 200 && out.code < 300) return out;
+    } catch (e) { /* 換下一個 Proxy */ }
+  }
+  return null;
+}
+async function fetchAux(url, kind) {
+  var r = await proxyGet(url, 9000);
+  if (!r) return { status: 'unknown', text: '' };
+  if (r.code === 404 || r.code === 410) return { status: 'none', text: '' };
+  var head = (r.text || '').slice(0, 600);
+  if (/<\s*(!doctype|html|head|body)\b/i.test(head)) return { status: 'none', text: '' };   // 網站把不存在的檔案導向首頁（回 200 的 HTML）
+  return { status: 'ok', text: r.text || '' };
+}
+
+function normalizeUrl(raw) {
+  raw = String(raw || '').trim(); if (!raw) return null;
+  if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+  try { var u = new URL(raw); if (!/^https?:$/.test(u.protocol) || !u.hostname || u.hostname.indexOf('.') < 0) return null; return u.href; } catch (e) { return null; }
+}
+
+var running = false;
+async function runUrl() {
+  if (running) return;
+  var url = normalizeUrl($('urlIn').value);
+  if (!url) { setStatus('error', '⚠ 請輸入正確的網址，例如 https://你的網站.com'); return; }
+  $('urlIn').value = url; running = true; $('runBtn').disabled = true;
+  try {
+    setStatus('loading', '⟳ 正在抓取網頁…');
+    var page = await proxyGet(url, 12000);
+    if (!page) { setStatus('error', '✗ 無法抓取這個網址（網站可能擋住轉送服務）。請確認網址，或改用「貼上或上傳 HTML」。'); return; }
+    if (page.code >= 400 || !page.text || page.text.length <= 200) { setStatus('error', '✗ 抓到的內容太少或網頁不存在（' + (page.code || '無內容') + '）。請確認網址，或改用「貼上或上傳 HTML」。'); return; }
+    var origin = new URL(url).origin;
+    setStatus('loading', '⟳ 正在讀取 robots.txt 與 llms.txt…');
+    var aux = await Promise.all([fetchAux(origin + '/robots.txt'), fetchAux(origin + '/llms.txt')]);
+    setStatus('loading', '⟳ 分析中…');
+    tabState.t1 = { mode: 'url', label: url, html: page.text };
+    finish(GEO.analyze({ url: url, html: page.text, mode: 'url', robots: aux[0], llms: aux[1] }));
+  } catch (e) { console.error(e); setStatus('error', '✗ 檢測時發生錯誤，請稍後再試。'); }
+  finally { running = false; $('runBtn').disabled = false; }
+}
+function runHtml() {
+  var html = $('htmlIn').value;
+  if (!html || html.trim().length < 50) { setStatus('error', '⚠ 請先貼上 HTML 原始碼，或選擇 .html 檔案。'); return; }
+  var base = normalizeUrl($('htmlBase').value) || 'https://example.invalid/';
+  tabState.t1 = { mode: 'html', label: '', html: html };
+  finish(GEO.analyze({ url: base, html: html, mode: 'html', robots: { status: 'unknown' }, llms: { status: 'unknown' } }));
+}
+$('fileIn').addEventListener('change', function (e) {
+  var f = e.target.files && e.target.files[0]; if (!f) return;
+  if (!/\.html?$/i.test(f.name)) { setStatus('error', '⚠ 請選擇 .html 或 .htm 檔案'); return; }
+  var rd = new FileReader(); rd.onload = function () { $('htmlIn').value = rd.result; showToast('已載入 ' + f.name); }; rd.readAsText(f); e.target.value = '';
+});
+$('urlIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') runUrl(); });
+
+function finish(r) {
+  setStatus(null);
+  renderResults(r);
+  var el = $('results'); if (el && el.scrollIntoView && window.parent === window) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── 顯示結果 ──
+var STATUS_TXT = { pass: '通過', warn: '警告', fail: '需修正', na: '不適用', unknown: '無法判斷' };
+function fmt(n) { return (Math.round(n * 10) / 10).toString(); }
+function renderResults(r) {
+  currentReport = r;
+  $('results').style.display = 'block';
+  $('scoreNum').textContent = r.score == null ? '—' : r.score;
+  var ring = $('scoreRing'); ring.style.strokeDashoffset = r.score == null ? 289 : 289 * (1 - r.score / 100);
+  ring.setAttribute('stroke', r.score == null ? '#6b6558' : (r.score >= 80 ? '#10b981' : (r.score >= 60 ? '#f59e0b' : '#ef4444')));
+  $('scoreTitle').textContent = r.score == null ? '無法評分' : 'AI 可見度 ' + r.score + ' 分';
+  var g = $('gradeChip'); g.className = 'grade ' + r.grade; g.textContent = r.gradeLabel;
+  var parts = [];
+  parts.push(r.mode === 'url' ? '檢測網址：' + r.url : '檢測來源：貼上的 HTML');
+  if (r.bonus) parts.push('含 llms.txt 加分 ' + r.bonus + ' 分');
+  var top = r.issues.length;
+  parts.push(top ? '共有 ' + top + ' 項可以改善' : '沒有明顯需要改善的項目');
+  $('scoreSummary').textContent = parts.join('　·　');
+  $('geoCta').classList.toggle('show', !!r.needHelp);
+
+  // 各面向
+  $('catRows').innerHTML = r.categories.map(function (c) {
+    var pct = c.score, cls = pct == null ? '' : (pct >= 80 ? '' : (pct >= 50 ? 'mid' : 'low'));
+    return '<div class="cat-row"><span>' + esc(c.id + '. ' + c.name) + '</span><div class="bar"><i class="' + cls + '" style="width:' + (pct == null ? 0 : pct) + '%"></i></div><span class="pt">' + (c.countedMax ? fmt(c.earned) + ' / ' + c.countedMax : '—') + '</span><span class="hint">' + esc(c.hint) + '</span></div>';
+  }).join('');
+
+  // 問題清單
+  $('issuesBox').style.display = r.issues.length ? '' : 'none';
+  var lvTxt = { high: '高', medium: '中', low: '低' };
+  $('issueList').innerHTML = r.issues.map(function (i) {
+    return '<div class="issue"><span class="lv ' + i.level + '">' + lvTxt[i.level] + '</span><div><b>' + esc(i.title) + '<span class="loss">失 ' + fmt(i.loss) + ' 分</span></b>' +
+      '<p>' + esc(i.note) + '</p>' + (i.why ? '<p>' + esc(i.why) + '</p>' : '') + '<p><strong>怎麼改：</strong>' + esc(i.fix) + '</p></div></div>';
+  }).join('');
+
+  // 逐項
+  var html = '';
+  r.categories.forEach(function (c) {
+    html += '<div class="cat-title">' + esc(c.id + '. ' + c.name) + '</div>';
+    r.items.filter(function (i) { return i.cat === c.id && !(i.id === 'a_meta' && false); }).forEach(function (i) {
+      var bad = i.status === 'warn' || i.status === 'fail';
+      html += '<div class="item st-' + i.status + '"><span class="chip">' + STATUS_TXT[i.status] + '</span><span class="t">' + esc(i.title) + '</span><span class="pts">' + (i.counted ? fmt(i.earned) + ' / ' + i.max : '不計分') + '</span>' +
+        '<span class="n">' + esc(i.note) + '</span>' +
+        (bad && i.fix && !(i.suppressIssue) && r.issues.length > 0 ? '<div class="fixbox"><b>怎麼改：</b>' + esc(i.fix) + '</div>' : '') + '</div>';
+    });
+  });
+  $('itemList').innerHTML = html;
+
+  // 加分與參考
+  var l = r.llms, lt = { found: '已加分', missing: '未加分（不扣分）', unknown: '無法判斷' };
+  $('bonusBox').innerHTML = '<div class="item st-' + (l.status === 'found' ? 'pass' : (l.status === 'unknown' ? 'unknown' : 'na')) + '"><span class="chip">' + esc(lt[l.status] || '') + '</span><span class="t">llms.txt（選擇性加分，最多 +3 分）</span><span class="pts">+' + l.bonus + '</span><span class="n">' + esc(l.note) + '</span></div>';
+  var stTxt = { allowed: '允許', blocked: '被擋', unknown: '未知' };
+  $('botsBox').innerHTML = '<div style="font-size:12.5px;color:var(--text3);margin-bottom:6px">其他常見 AI 爬蟲（僅供參考，不計分）</div><div class="bots">' + (r.extraBots || []).map(function (b) { return '<span class="' + b.state + '">' + esc(b.ua) + '：' + stTxt[b.state] + '</span>'; }).join('') + '</div>';
+  var cl = $('crossLinks'); if (window.onGeoResult) { try { window.onGeoResult(r, cl); } catch (e) { console.error(e); } }
+}
+
+// ── 匯出 ──
+function download(name, mime, text) {
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: mime })); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function stamp() { return new Date().toISOString().slice(0, 10); }
+function exportJSON() { if (!currentReport) return; download('geo-report-' + stamp() + '.json', 'application/json', JSON.stringify(currentReport, null, 2)); }
+function exportCSV() {
+  if (!currentReport) return;
+  var rows = [['面向', '項目', '狀態', '得分', '滿分', '說明', '怎麼改']];
+  currentReport.items.forEach(function (i) { rows.push([i.cat, i.title, STATUS_TXT[i.status], i.counted ? i.earned : '', i.max, i.note, i.status === 'warn' || i.status === 'fail' ? i.fix : '']); });
+  rows.push(['', 'AI 可見度總分', '', currentReport.score == null ? '' : currentReport.score, 100, DISCLAIMER, '']);
+  var csv = '﻿' + rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+  download('geo-report-' + stamp() + '.csv', 'text/csv;charset=utf-8', csv);
+}
+function exportPDF() { if (!currentReport) return; window.print(); }
+function copyText() { return; }
+function shareReport() { return; }
+
+// ── 網址參數 ?url=（SEO 工具／其他頁面帶入）──
+(function () {
+  var q = new URLSearchParams(location.search), u = normalizeUrl(q.get('url'));
+  if (u) { $('urlIn').value = u; window.__geoAutorun = u; setTimeout(runUrl, 400); }
+})();
+</script>
+<script>window.YC_BASE = './';</script>
+<script src="assets/supabase-config.js?v=2026-10-15"></script>
+<script src="assets/vendor/supabase-2.117.2.min.js"></script>
+<script src="assets/yc-auth.js?v=2026-10-15"></script>
+<script src="assets/geo-tool-members.js?v=2026-10-15"></script>
+</body>
+</html>
