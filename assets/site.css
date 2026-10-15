@@ -1382,6 +1382,7 @@ a.article-card { display: block; color: inherit; }
 .breadcrumb [aria-hidden] { opacity: .5; }
 .seo-tool-header .breadcrumb { margin-bottom: 20px; }
 h1.section-title { margin: 0; }
+.faq-item.open .faq-answer { max-height: 640px; }
 .sp-lede { max-width: 720px; margin-top: 28px; font-size: 17px; line-height: 1.95; color: var(--text); }
 .sp-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }
 .sp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
