@@ -226,7 +226,7 @@
                 <li><strong>Google：</strong>提供「使用 Google 帳號登入」；以及本站使用的 Google Analytics 4 統計。若你使用 PageSpeed 功能，被檢測的網址會送到 Google PageSpeed Insights。</li>
                 <li><strong>Resend：</strong>寄送上述給站主的內部通知信。</li>
                 <li><strong>GitHub Pages：</strong>本站網頁的託管服務。</li>
-                <li><strong>公開代理服務：</strong>「網址」模式需要透過公開的代理服務（目前為 allorigins.win、corsproxy.io、codetabs.com）取得網頁原始碼；GEO 檢測還會一併取得該網站的 robots.txt 與 llms.txt。因此這些服務會收到你輸入的網址。如果不希望網址經過它們，可改用「上傳 HTML 檔」。</li>
+                <li><strong>網頁抓取服務：</strong>「網址」模式會把你輸入的網址送到本站自己的抓取服務（部署在上述 Supabase，只負責代為取得網頁原始碼；GEO 檢測還會一併取得該網站的 robots.txt 與 llms.txt）。本站不會把這些網址與你的會員帳號連結，也不另外儲存，但平台的系統紀錄可能包含請求網址。只有在這個服務暫時無法使用時，才會退回使用公開的代理服務（allorigins.win、corsproxy.io、codetabs.com），這些服務會收到你輸入的網址。如果不希望網址經過任何服務，可改用「上傳 HTML 檔」。</li>
                 <li><strong>cdnjs（Cloudflare）：</strong>匯出 PDF 時載入所需的函式庫。</li>
             </ul>
 
