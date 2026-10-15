@@ -1369,6 +1369,24 @@ body.on-seo .social-float { display: none; }
 a.nav-link, a.nav-cta, a.btn-primary, a.btn-secondary, a.btn-ghost, a.mobile-nav-btn, a.rh-more, a.work-link, .footer-nav a, a.article-card { text-decoration: none; }
 a.nav-link, a.nav-cta, a.btn-primary, a.btn-secondary, a.btn-ghost, a.rh-more, a.work-link { display: inline-flex; align-items: center; justify-content: center; }
 a.mobile-nav-btn { display: block; text-align: left; }
+/* 手機選單：項目變多後，矮螢幕要能捲動、字級隨高度縮小（置中改用 auto margin，避免頂端被切掉） */
+#mobile-menu { overflow-y: auto; justify-content: flex-start; padding: 76px 0 32px; gap: clamp(10px, 2.6vh, 26px); }
+#mobile-menu a.mobile-nav-btn:first-of-type { margin-top: auto; }
+#mobile-menu a.mobile-nav-btn:last-of-type { margin-bottom: auto; }
+@media (max-height: 880px) { a.mobile-nav-btn { font-size: clamp(24px, 4.3vh, 42px); } #mobile-menu { padding-top: 64px; } }
+/* nav dropdown: SEO 檢測 / GEO 檢測 */
+.nav-links .nav-dd { position: relative; }
+.nav-links .nav-sub { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); min-width: 168px; margin: 0; padding: 14px 0 0; list-style: none; opacity: 0; visibility: hidden; transition: opacity .18s, visibility .18s; z-index: 60; }
+.nav-links .nav-sub::before { content: ''; position: absolute; inset: 14px 0 0 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 14px 34px rgba(0,0,0,.28); z-index: -1; }
+.nav-links .nav-dd:hover .nav-sub, .nav-links .nav-dd:focus-within .nav-sub { opacity: 1; visibility: visible; }
+.nav-links .nav-sub li { padding: 0 6px; }
+.nav-links .nav-sub li:first-child { padding-top: 6px; }
+.nav-links .nav-sub li:last-child { padding-bottom: 6px; }
+.nav-links .nav-sub a { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 9px 12px; border-radius: 7px; color: var(--text); font-size: 14px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.nav-links .nav-sub a small { font-size: 11px; font-weight: 400; color: var(--text-dim); }
+.nav-links .nav-sub a::after { display: none; }
+.nav-links .nav-sub a:hover, .nav-links .nav-sub a:focus-visible { background: var(--accent-dim); color: var(--accent); }
+.nav-links .nav-sub a[aria-current="page"] { color: var(--accent); }
 a.article-card { display: block; color: inherit; }
 .footer-nav a { color: inherit; font: inherit; }
 .rh-services li > a { display: grid; width: 100%; text-decoration: none; color: inherit; }
