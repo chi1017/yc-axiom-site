@@ -20,7 +20,8 @@
 
   // ── 初始化 ──
   YC.init = function () {
-    if (!YC.enabled || YC.client) return YC.client;
+    if (!YC.enabled) { if (!YC.ready) setTimeout(function () { emit('INIT'); }, 0); return null; }   // 未啟用：仍通知頁面「已就緒」，讓會員專區／管理後台顯示未開放，而不是一直載入中
+    if (YC.client) return YC.client;
     YC.client = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, {
       auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
     });
