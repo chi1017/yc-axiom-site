@@ -85,6 +85,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://chi1017.github.io/yc-axiom-site/services/geo-optimization/</loc>
+    <lastmod>2026-10-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://chi1017.github.io/yc-axiom-site/services/custom-system/</loc>
     <lastmod>2026-10-15</lastmod>
     <changefreq>monthly</changefreq>
