@@ -1491,7 +1491,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
 
   <div class="notice">
     <span>⚡</span>
-    <span>分析引擎在你的瀏覽器本機執行，<strong>未登入時不會保存任何資料</strong>；登入會員後才會保存檢測紀錄。URL 模式透過公開 Proxy 抓取頁面原始碼。</span>
+    <span>分析引擎在你的瀏覽器本機執行，<strong>未登入時不會保存任何資料</strong>；登入會員後才會保存檢測紀錄。URL 模式由本站的抓取服務代為取得頁面原始碼。</span>
   </div>
 
   <div id="historyPanel">
@@ -1526,7 +1526,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
           <button class="url-clear-btn" id="t1ClearBtn" onclick="clearUrl('t1')" style="display:none">×</button>
         </div>
         <div id="t1UrlStatus" class="url-status" style="display:none"></div>
-        <div class="url-proxy-note"><span>🔒</span><span>透過公開 CORS Proxy 抓取 HTML。若抓取失敗（SPA 或防爬），請在目標網站按 <strong>Ctrl+S</strong> 另存 HTML 後切換「上傳檔案」。</span></div>
+        <div class="url-proxy-note"><span>🔒</span><span>由本站的抓取服務抓取 HTML。若抓取失敗（SPA 或防爬），請在目標網站按 <strong>Ctrl+S</strong> 另存 HTML 後切換「上傳檔案」。</span></div>
         <button class="fetch-btn" id="t1FetchBtn" onclick="fetchUrl('t1')"><span id="t1FetchIcon">⬇</span> 抓取網頁</button>
         <div id="t1FetchedWrap" style="display:none">
           <div class="fetched-badge" id="t1FetchedBadge"></div>
@@ -3666,7 +3666,7 @@ async function checkRedirectChain(url) {
   }
 
   html += `<div style="margin-top:12px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text3)">
-    ℹ️ <strong style="color:var(--text2)">瀏覽器限制說明</strong>：因 CORS 政策，瀏覽器無法直接追蹤逐跳 HTTP 標頭。此結果透過公開 Proxy 取得，Proxy 已自動跟隨跳轉。如需完整逐跳鏈，請使用 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">curl -I -L URL</code> 或 Redirect Checker 工具。
+    ℹ️ <strong style="color:var(--text2)">瀏覽器限制說明</strong>：因 CORS 政策，瀏覽器無法直接追蹤逐跳 HTTP 標頭。此結果由本站的抓取服務取得，已自動跟隨跳轉。如需完整逐跳鏈，請使用 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">curl -I -L URL</code> 或 Redirect Checker 工具。
   </div>`;
 
   el.innerHTML = html;
