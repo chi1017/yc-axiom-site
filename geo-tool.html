@@ -162,7 +162,7 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
     </div>
     <div class="pane active" id="paneUrl">
       <div class="url-wrap"><span>🌐</span><input type="text" id="urlIn" placeholder="例如 https://你的網站.com" autocomplete="off" inputmode="url" aria-label="要檢測的網址"></div>
-      <div class="note"><span>ℹ️</span><span>檢測在你的瀏覽器中進行。網頁與 robots.txt 會透過公開的轉送服務（Proxy）取得；若網站有防爬蟲機制抓不到，可改用「貼上或上傳 HTML」。</span></div>
+      <div class="note"><span>ℹ️</span><span>檢測在你的瀏覽器中進行。網頁與 robots.txt 由本站的抓取服務代為取得；若網站有防爬蟲機制抓不到，可改用「貼上或上傳 HTML」。</span></div>
       <button class="btn-run" id="runBtn" onclick="runUrl()">開始檢測 AI 可見度</button>
     </div>
     <div class="pane" id="paneHtml">
