@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        page: function () {
+            var path = location.pathname;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.href, page_path: path, page_title: document.title });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: (a.classList.contains('line-float') || a.closest('.social-float')) ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 提及檢測｜免費檢查 ChatGPT 會不會推薦你的店 - YC AXIOM</title>
+<meta name="description" content="YC AXIOM 免費 AI 提及檢測：工具產生客人會問 AI 的問題，你把 ChatGPT、Perplexity、Gemini、Google AI 摘要的回答貼回來，就能看到品牌有沒有被推薦、排第幾，以及 AI 引用了哪些網站。">
+<meta name="author" content="YC AXIOM">
+<link rel="icon" type="image/png" href="https://chi1017.github.io/yc-axiom-site/favicon-32.png">
+<link rel="apple-touch-icon" href="https://chi1017.github.io/yc-axiom-site/apple-touch-icon.png">
+<link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/geo/ai-mentions/">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="AI 提及檢測｜免費檢查 ChatGPT 會不會推薦你的店 - YC AXIOM">
+<meta property="og:description" content="YC AXIOM 免費 AI 提及檢測：工具產生客人會問 AI 的問題，你把 ChatGPT、Perplexity、Gemini、Google AI 摘要的回答貼回來，就能看到品牌有沒有被推薦、排第幾，以及 AI 引用了哪些網站。">
+<meta property="og:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta property="og:url" content="https://chi1017.github.io/yc-axiom-site/geo/ai-mentions/">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="YC AXIOM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AI 提及檢測｜免費檢查 ChatGPT 會不會推薦你的店 - YC AXIOM">
+<meta name="twitter:description" content="YC AXIOM 免費 AI 提及檢測：工具產生客人會問 AI 的問題，你把 ChatGPT、Perplexity、Gemini、Google AI 摘要的回答貼回來，就能看到品牌有沒有被推薦、排第幾，以及 AI 引用了哪些網站。">
+<meta name="twitter:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta name="theme-color" content="#5FA396">
+<script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../../assets/site.css?v=2026-10-15b">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://chi1017.github.io/yc-axiom-site/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "GEO 檢測",
+      "item": "https://chi1017.github.io/yc-axiom-site/geo/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "AI 提及檢測",
+      "item": "https://chi1017.github.io/yc-axiom-site/geo/ai-mentions/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "AI 提及檢測工具",
+  "url": "https://chi1017.github.io/yc-axiom-site/geo/ai-mentions/",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "description": "YC AXIOM 免費 AI 提及檢測：工具產生客人會問 AI 的問題，你把 ChatGPT、Perplexity、Gemini、Google AI 摘要的回答貼回來，就能看到品牌有沒有被推薦、排第幾，以及 AI 引用了哪些網站。",
+  "inLanguage": "zh-TW",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "TWD"
+  },
+  "provider": {
+    "@type": "ProfessionalService",
+    "name": "YC AXIOM",
+    "@id": "https://chi1017.github.io/yc-axiom-site/#organization",
+    "url": "https://chi1017.github.io/yc-axiom-site/"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "AI 提及檢測和 GEO 檢測有什麼不同？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "GEO 檢測檢查官網的條件，例如 AI 爬蟲進不進得來、內容讀不讀得懂。AI 提及檢測則是實際看 AI 的回答：客人問「推薦哪一家」時，AI 有沒有提到你、排第幾。兩者一起用，可以知道問題出在官網還是站外。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "為什麼要我自己去問 AI，不能自動檢測嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "自動檢測需要付費串接各家 AI 的 API，用程式操作 AI 網頁版則違反使用條款。由你親自提問，免費、不違規，看到的也是一般客人實際會看到的回答。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "為什麼要用無痕視窗提問？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "如果你平常用自己的帳號跟 AI 聊過自己的品牌，AI 可能因為記得你而特別提到你，結果會不準。用無痕視窗、未登入，或 ChatGPT 的「暫時聊天」，比較接近一般客人看到的回答。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "結果每次都不一樣，正常嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "正常。AI 的回答會隨時間、地區與提問方式改變，所以這是當下的快照，不是固定排名。建議每個月用同一組問題再測一次，看趨勢比看單次結果更有意義。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "我貼上的回答會被傳到哪裡？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不會傳到任何地方。分析在你的瀏覽器裡進行，資料只暫存在這個瀏覽器，方便你下次回來繼續或和上次比較。"
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body class="on-seo">
+
+<!-- Page Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="頁面載入中">
+    <div class="loader-mark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="ringGrad-load" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient>
+                <linearGradient id="yGrad-load" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="50"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient>
+                <filter id="glow-load" filterUnits="userSpaceOnUse" x="-8" y="-8" width="80" height="80"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path class="loader-draw loader-ring" pathLength="1" d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-load)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y1" pathLength="1" d="M18,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y2" pathLength="1" d="M46,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+        </svg>
+    </div>
+    <div class="loader-text">
+        <div class="loader-name">YC AXIOM</div>
+        <div class="loader-sub">[品牌與工程]</div>
+    </div>
+    <div class="loader-bar"></div>
+</div>
+<script>
+(function () {
+    var root = document.documentElement, loader = document.getElementById('page-loader');
+    if (!loader) return;
+    try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
+    root.classList.add('is-loading');
+    var start = Date.now(), MIN = 1700, MAX = 5000, closed = false;
+    function close() {
+        if (closed) return; closed = true;
+        loader.classList.add('is-done');
+        root.classList.remove('is-loading');
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 900);
+    }
+    function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+})();
+</script>
+
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor Elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-follower"></div>
+
+
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-inner">
+        <a href="../../" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
+            <div class="nav-logo-img">
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+            </div>
+            <div class="nav-logo-text">
+                <div class="nav-logo-name">YC AXIOM</div>
+                <div class="nav-logo-sub">[品牌與工程]</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="../../" class="nav-link">首頁</a></li>
+            <li><a href="../../about/" class="nav-link">關於</a></li>
+            <li><a href="../../services/" class="nav-link">服務項目</a></li>
+            <li><a href="../../works/" class="nav-link">作品集</a></li>
+            <li><a href="../../articles/" class="nav-link">文章</a></li>
+            <li class="nav-dd"><a href="../../seo/" class="nav-link active" aria-current="page" aria-haspopup="true">SEO 工具</a><ul class="nav-sub"><li><a href="../../seo/">SEO 檢測</a></li><li><a href="../../geo/" aria-current="page">GEO 檢測<small>AI 可見度</small></a></li></ul></li>
+            <li><a href="../../pricing/" class="nav-link">定價</a></li>
+            <li><a href="../../contact/" class="nav-link">聯絡</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="../../contact/" class="nav-cta magnetic">免費諮詢</a>
+
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu">
+    <button class="mobile-close" onclick="toggleMobileMenu()" aria-label="關閉選單">✕</button>
+    <a class="mobile-nav-btn" href="../../">首頁</a>
+    <a class="mobile-nav-btn" href="../../about/">關於</a>
+    <a class="mobile-nav-btn" href="../../services/">服務項目</a>
+    <a class="mobile-nav-btn" href="../../works/">作品集</a>
+    <a class="mobile-nav-btn" href="../../articles/">文章</a>
+    <a class="mobile-nav-btn" href="../../seo/">SEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../geo/">GEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../pricing/">定價</a>
+    <a class="mobile-nav-btn" href="../../contact/">聯絡</a>
+</div>
+
+
+<main>
+<section id="page-geo-mentions" class="page showing active">
+    <div class="seo-tool-header container">
+        <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../../">首頁</a><span aria-hidden="true">›</span><a href="../">GEO 檢測</a><span aria-hidden="true">›</span><span aria-current="page">AI 提及檢測</span></div>
+        <p class="section-eyebrow">AI Mentions / 免費工具</p>
+        <h1 class="section-title decode-text" data-keep-html>AI 提及檢測<br>ChatGPT 會推薦你嗎.</h1>
+        <p>工具幫你準備 7 個客人真的會問 AI 的問題。你拿去問 ChatGPT、Perplexity、Gemini 或 Google，把回答貼回來，就能看到品牌有沒有被推薦、排第幾，以及 AI 引用了哪些網站。</p>
+        <p style="margin-top:10px;font-size:13px;">AI 的回答會隨時間與提問方式改變，結果是當下的快照，無法保證被 AI 推薦。</p>
+    </div>
+    <div class="seo-tool-frame-wrap">
+        <div class="seo-tool-frame">
+            <div class="seo-tool-iframe-inner">
+                <div class="seo-tool-loading"><span class="seo-tool-spinner"></span>工具載入中…</div>
+                <iframe id="seoToolFrame" scrolling="no" src="../../ai-mention-tool.html" title="AI 提及檢測工具" loading="lazy" allow="clipboard-write" onload="this.parentElement.classList.add('loaded')"></iframe>
+            </div>
+        </div>
+        <script>(function(){var f=document.getElementById('seoToolFrame');if(f&&location.search){f.setAttribute('src',f.getAttribute('src')+location.search);}})();</script>
+    </div>
+    <div class="container" style="padding-bottom:110px;max-width:1100px">
+        <h2 class="sp-h2 reveal">AI 提及檢測會看什麼？</h2>
+        <p class="sp-lede reveal" style="margin-top:0">GEO 檢測告訴你官網的條件好不好；AI 提及檢測則直接看結果：客人問 AI 的時候，你到底有沒有出現。</p>
+        <div class="sp-grid"><div class="sp-card reveal"><h3 class="sp-h3">推薦類問題</h3><p class="sp-deliver">例如「台中有推薦的網頁設計工作室嗎？」。看 AI 主動推薦時有沒有提到你、排第幾，這是最接近「客人用 AI 找店」的情境。</p></div><div class="sp-card reveal"><h3 class="sp-h3">品牌類問題</h3><p class="sp-deliver">直接問 AI「你知道某某店嗎？」。看 AI 認不認識你的品牌，回答是正確介紹，還是說找不到資訊。</p></div><div class="sp-card reveal"><h3 class="sp-h3">和對手比較</h3><p class="sp-deliver">填入想比較的同業，工具會算出在同一組回答裡，你和對手各被提到幾次。</p></div><div class="sp-card reveal"><h3 class="sp-h3">AI 引用的網站</h3><p class="sp-deliver">整理回答裡出現的網址。AI 常引用的評論平台、整理文章或媒體，就是值得讓品牌出現的地方。</p></div></div>
+        <h2 class="sp-h2 reveal">怎麼用？</h2>
+        <div class="sp-card reveal" style="margin-bottom:14px"><ol style="margin:0;padding-left:1.3em;line-height:2">
+            <li>填入店名、服務類型與地區，按「產生要問 AI 的問題」。</li>
+            <li>打開無痕視窗，按每一題旁邊的按鈕開啟 AI，提問後把完整回答複製回來。</li>
+            <li>貼上 5 個以上的回答，按「開始分析」。</li>
+            <li>照「建議先做的事」改善，一個月後用同一組問題再測一次。</li>
+        </ol></div>
+        <h2 class="sp-h2 reveal">常見問題</h2>
+        <div class="sp-card reveal" style="margin-bottom:14px"><h3 class="sp-h3" style="font-size:17px;letter-spacing:.02em;color:var(--text-bright)">AI 提及檢測和 GEO 檢測有什麼不同？</h3><p class="sp-deliver" style="margin:0">GEO 檢測檢查官網的條件，例如 AI 爬蟲進不進得來、內容讀不讀得懂。AI 提及檢測則是實際看 AI 的回答：客人問「推薦哪一家」時，AI 有沒有提到你、排第幾。兩者一起用，可以知道問題出在官網還是站外。</p></div><div class="sp-card reveal" style="margin-bottom:14px"><h3 class="sp-h3" style="font-size:17px;letter-spacing:.02em;color:var(--text-bright)">為什麼要我自己去問 AI，不能自動檢測嗎？</h3><p class="sp-deliver" style="margin:0">自動檢測需要付費串接各家 AI 的 API，用程式操作 AI 網頁版則違反使用條款。由你親自提問，免費、不違規，看到的也是一般客人實際會看到的回答。</p></div><div class="sp-card reveal" style="margin-bottom:14px"><h3 class="sp-h3" style="font-size:17px;letter-spacing:.02em;color:var(--text-bright)">為什麼要用無痕視窗提問？</h3><p class="sp-deliver" style="margin:0">如果你平常用自己的帳號跟 AI 聊過自己的品牌，AI 可能因為記得你而特別提到你，結果會不準。用無痕視窗、未登入，或 ChatGPT 的「暫時聊天」，比較接近一般客人看到的回答。</p></div><div class="sp-card reveal" style="margin-bottom:14px"><h3 class="sp-h3" style="font-size:17px;letter-spacing:.02em;color:var(--text-bright)">結果每次都不一樣，正常嗎？</h3><p class="sp-deliver" style="margin:0">正常。AI 的回答會隨時間、地區與提問方式改變，所以這是當下的快照，不是固定排名。建議每個月用同一組問題再測一次，看趨勢比看單次結果更有意義。</p></div><div class="sp-card reveal" style="margin-bottom:14px"><h3 class="sp-h3" style="font-size:17px;letter-spacing:.02em;color:var(--text-bright)">我貼上的回答會被傳到哪裡？</h3><p class="sp-deliver" style="margin:0">不會傳到任何地方。分析在你的瀏覽器裡進行，資料只暫存在這個瀏覽器，方便你下次回來繼續或和上次比較。</p></div>
+        <div class="sp-actions reveal"><a href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" class="btn-primary magnetic">LINE 詢問 AI 搜尋優化</a></div>
+        <div class="sp-related reveal"><h2 class="sp-h2 sp-h2--sm">相關連結</h2><ul><li><a href="../">GEO 檢測：官網 AI 讀不讀得懂 →</a></li><li><a href="../../services/geo-optimization/">GEO／AI 搜尋優化服務 →</a></li><li><a href="../../seo/">免費 SEO 分析工具 →</a></li><li><a href="../../contact/">聯絡我們 →</a></li></ul></div>
+    </div>
+</section>
+</main>
+
+
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
+<div class="social-float" role="group" aria-label="社群與聯絡">
+    <a class="sf sf-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）" data-tip="LINE 諮詢"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg></a>
+    <a class="sf sf-threads" href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Threads（@ycaxiom）" data-tip="Threads"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M16.8 11.2c-.3-3.4-2.3-5.1-5.2-5.1-2.9 0-5 2-5 5.9 0 3.9 2.1 6.1 5.2 6.1 2.7 0 4.3-1.5 4.3-3.4 0-1.9-1.6-3-3.7-3-1.8 0-2.7.9-2.7 1.9 0 1 .8 1.7 2 1.7 1.7 0 3-1 3-3.8"/></svg></a>
+    <a class="sf sf-ig" href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Instagram（@ycaxiom）" data-tip="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="3.9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.1" fill="currentColor"/></svg></a>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-nav">
+            <a href="../../">首頁</a>
+            <a href="../../about/">關於</a>
+            <a href="../../services/">服務項目</a>
+            <a href="../../works/">作品集</a>
+            <a href="../../articles/">文章</a>
+            <a href="../../seo/">SEO 工具</a>
+            <a href="../../pricing/">定價</a>
+            <a href="../../contact/">聯絡</a>
+        </div>
+        <div class="footer-services" aria-label="服務與地區"><a href="../../services/brand-website/">品牌形象網站</a><a href="../../services/ecommerce-website/">品牌電商網站</a><a href="../../services/seo-performance/">SEO 與效能調校</a><a href="../../services/geo-optimization/">GEO／AI 搜尋優化</a><a href="../../services/custom-system/">全客製多頁與系統</a><a href="../../services/data-cleaning/">商業資料清洗與整理</a><a href="../../services/market-intelligence/">市場情報與競品分析</a><a href="../../taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程<a class="footer-privacy" href="../../privacy/">隱私權政策</a></div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            現正接案中 · 台灣在地服務 · 服務時間：週一至週五 09:00–18:00
+        </div>
+    </div>
+</footer>
+<script src="../../assets/site.js?v=2026-10-15" defer></script>
+<script>window.YC_BASE = '../../';</script>
+<script src="../../assets/supabase-config.js?v=2026-10-15"></script>
+<script src="../../assets/vendor/supabase-2.117.2.min.js"></script>
+<script src="../../assets/yc-auth.js?v=2026-10-16"></script>
+</body>
+</html>
