@@ -1446,13 +1446,13 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
   <div class="hero fade-up fade-up-1">
     <div class="hero-eyebrow">免費工具・瀏覽器本機分析・登入可存紀錄</div>
     <h1>SEO 分析工具</h1>
-    <p>輸入網址或上傳 HTML，一次深度分析 <span class="js-rule-count"></span> SEO 規則<br>
+    <p>輸入網址或上傳 HTML，一次深度分析 <span class="js-rule-count">40+ 項</span> SEO 規則<br>
        <span style="color:var(--accent2);opacity:0.8">PageSpeed · Schema · TF-IDF · 爬蟲 · SERP · 競爭分析</span></p>
 
     <div class="hero-features">
       <div class="hero-feat">
         <div class="hf-icon">🔬</div>
-        <div class="hf-title"><span class="js-rule-count"></span>深度檢測</div>
+        <div class="hf-title"><span class="js-rule-count">40+ 項</span>深度檢測</div>
         <div class="hf-desc">Title、Meta、H1、Schema、Canonical、Hreflang、圖片優化⋯一次全掃描，逐項顯示通過 / 警告 / 失敗。</div>
       </div>
       <div class="hero-feat">
@@ -1705,7 +1705,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
     <div class="js-warn" id="jsWarn">⚠ <span>這個網站的內容由 JavaScript 產生，Google 會執行 JavaScript，所以以下結果可能不準確。</span></div>
     <div class="cwv-note">
       <span>ℹ️</span>
-      <span>此分析涵蓋 <strong>靜態 HTML 結構</strong>的 <span class="js-rule-count"></span> SEO 規則。<strong>Core Web Vitals（LCP、CLS、FID）、頁面速度</strong>等效能指標請另外使用 Google PageSpeed Insights 查看。</span>
+      <span>此分析涵蓋 <strong>靜態 HTML 結構</strong>的 <span class="js-rule-count">40+ 項</span> SEO 規則。<strong>Core Web Vitals（LCP、CLS、FID）、頁面速度</strong>等效能指標請另外使用 Google PageSpeed Insights 查看。</span>
     </div>
 
     <div class="score-hero">
@@ -5780,7 +5780,7 @@ window.renderResults = function(r) {
   // 實際檢查項目數（動態）與低分行動呼籲
   try {
     const totalChecks = (r.pass||0) + (r.warn||0) + (r.fail||0);
-    document.querySelectorAll('.js-rule-count').forEach(el => { el.textContent = totalChecks ? `${totalChecks} 項` : ''; });
+    document.querySelectorAll('.js-rule-count').forEach(el => { if (totalChecks) el.textContent = `${totalChecks} 項`; });
     const cta = document.getElementById('seoCta');
     const js = r.info && r.info.jsSite && r.info.jsSite.is;
     const jw=document.getElementById('jsWarn'), jsg=document.getElementById('jsSuggest');
@@ -6606,12 +6606,12 @@ function shareReport() {
 
     <div class="footer-bottom">
       <div class="footer-bottom-left">
-        © 2025 SEO Analyzer Pro · 版本 v18 · Ctrl+Enter 快速分析
+        © 2026 SEO Analyzer Pro · 版本 v18 · Ctrl+Enter 快速分析
       </div>
       <div class="footer-pills">
         <span class="footer-pill"><span class="dot"></span>純前端架構</span>
         <span class="footer-pill"><span class="dot"></span>登入才保存紀錄</span>
-        <span class="footer-pill"><span class="dot dot-v"></span><span class="js-rule-count"></span> SEO 規則</span>
+        <span class="footer-pill"><span class="dot dot-v"></span><span class="js-rule-count">40+ 項</span> SEO 規則</span>
       </div>
     </div>
   </div>
