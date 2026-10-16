@@ -193,7 +193,7 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
     </div>
 
     <div class="geo-full">
-      <div class="geo-section"><h3>各面向得分</h3><p class="sub">AI 可見度由六個面向組成，滿分 100 分。「無法判斷」與「不適用」的項目不計入分母。</p><div id="catRows"></div></div>
+      <div class="geo-section"><h3>各面向得分</h3><p class="sub">AI 可見度由七個面向組成，滿分 100 分。「無法判斷」與「不適用」的項目不計入分母。</p><div id="catRows"></div></div>
       <div class="geo-section" id="issuesBox"><h3>優先處理清單</h3><p class="sub">依「失分最多」排序，先改上面的，效果最大。</p><div id="issueList"></div></div>
       <div class="geo-section"><h3>逐項檢測結果</h3><p class="sub">通過＝拿滿分，警告＝拿一半，需修正＝0 分。</p><div id="itemList"></div></div>
       <div class="geo-section"><h3>加分項與參考資訊</h3><div id="bonusBox"></div><div id="botsBox" style="margin-top:14px"></div></div>
@@ -210,7 +210,7 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
 </div>
 <div id="toast" role="status"></div>
 
-<script src="assets/geo-engine.js"></script>
+<script src="assets/geo-engine.js?v=2026-10-16b"></script>
 <script>
 var DISCLAIMER = GEO.DISCLAIMER;
 ['disclaimerTop', 'disclaimerBottom'].forEach(function (id) { document.getElementById(id).textContent = DISCLAIMER + '本工具檢查的是網站讓 AI 容易讀懂的條件，不是實際詢問 AI。'; });

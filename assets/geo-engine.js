@@ -1,6 +1,6 @@
 /* YC AXIOM GEO（AI 可見度）檢測引擎
    純前端、無外部相依。輸入：網頁原始碼 + robots.txt + llms.txt 內容；輸出：分數、各項結果、前 3 大問題。
-   計分規則見「GEO檢測頁計畫」：A 爬蟲存取 20、B 內容可讀性 20、C 店家基本資料 20、D 問答式內容 15、E 可信度 10、F 標題結構 10，
+   計分規則：A 爬蟲存取 18、B 內容可讀性 18、C 店家基本資料 18、D 問答式內容 14、E 可信度 10、F 標題結構 10、G 內容格式 12，
    另有 llms.txt 加分（最多 +3）。通過＝滿分、警告＝一半、需修正＝0；「無法判斷」「不適用」不計入分母。
    這些是提高被 AI 引用機會的因素，無法保證被 AI 推薦。 */
 (function (root) {
@@ -105,34 +105,41 @@
   }
 
   var CATS = [
-    { id: 'A', name: 'AI 爬蟲存取', max: 20, hint: 'AI 的「搜尋機器人」能不能進到你的網站' },
-    { id: 'B', name: '內容可讀性', max: 20, hint: '不執行 JavaScript 時，AI 看到的是文章還是空白頁' },
-    { id: 'C', name: '店家基本資料', max: 20, hint: '店名、地址、電話、營業時間，AI 找得到嗎' },
-    { id: 'D', name: '問答式內容', max: 15, hint: '有沒有整理成 AI 容易直接引用的問與答' },
+    { id: 'A', name: 'AI 爬蟲存取', max: 18, hint: 'AI 與搜尋引擎的「搜尋機器人」能不能進到你的網站' },
+    { id: 'B', name: '內容可讀性', max: 18, hint: '不執行 JavaScript 時，AI 看到的是文章還是空白頁' },
+    { id: 'C', name: '店家基本資料', max: 18, hint: '店名、地址、電話、營業時間，AI 找得到嗎' },
+    { id: 'D', name: '問答式內容', max: 14, hint: '有沒有整理成 AI 容易直接引用的問與答' },
     { id: 'E', name: '可信度訊號', max: 10, hint: '作者、日期、真實案例與評價' },
-    { id: 'F', name: '標題結構', max: 10, hint: '標題層級清楚，AI 才抓得到重點' }
+    { id: 'F', name: '標題結構', max: 10, hint: '標題層級清楚，AI 才抓得到重點' },
+    { id: 'G', name: '內容格式', max: 12, hint: '條列、表格與具體數字，AI 最容易直接摘錄' }
   ];
-  var CAT_ORDER = { A: 0, C: 1, B: 2, D: 3, F: 4, E: 5 };   // 失分相同時的排序
+  var CAT_ORDER = { A: 0, C: 1, B: 2, D: 3, G: 4, F: 5, E: 6 };   // 失分相同時的排序
 
   // ═══════════════ A. AI 爬蟲 ═══════════════
   var BOTS = [
-    { id: 'a_oai', ua: 'OAI-SearchBot', max: 5, kind: 'search', title: 'ChatGPT 搜尋爬蟲（OAI-SearchBot）可讀取',
+    { id: 'a_oai', ua: 'OAI-SearchBot', max: 4, kind: 'search', title: 'ChatGPT 搜尋爬蟲（OAI-SearchBot）可讀取',
       why: 'OAI-SearchBot 是 ChatGPT 搜尋用來找網頁的爬蟲。被擋住的話，ChatGPT 搜尋就很難引用你的網站。',
       fix: '在網站的 robots.txt 加上「User-agent: OAI-SearchBot」與「Allow: /」，或移除對它的 Disallow 規則。' },
-    { id: 'a_perp', ua: 'PerplexityBot', max: 5, kind: 'search', title: 'Perplexity 搜尋爬蟲（PerplexityBot）可讀取',
+    { id: 'a_bing', ua: 'Bingbot', max: 4, kind: 'search', title: 'Bing 搜尋爬蟲（Bingbot）可讀取',
+      why: 'Bing 的索引是 Microsoft Copilot 的資料來源，ChatGPT 搜尋等 AI 服務也會參考 Bing 的搜尋結果。Bingbot 被擋住，這些 AI 就比較難找到你的網站。',
+      fix: '在 robots.txt 移除對 Bingbot 的 Disallow 規則（或加上「User-agent: Bingbot」與「Allow: /」），並到 Bing Webmaster Tools 提交網站地圖。' },
+    { id: 'a_perp', ua: 'PerplexityBot', max: 3, kind: 'search', title: 'Perplexity 搜尋爬蟲（PerplexityBot）可讀取',
       why: 'PerplexityBot 是 Perplexity 搜尋用的爬蟲。被擋住的話，Perplexity 的答案就不會引用你的網站。',
       fix: '在 robots.txt 加上「User-agent: PerplexityBot」與「Allow: /」，或移除對它的 Disallow 規則。' },
-    { id: 'a_gpt', ua: 'GPTBot', max: 4, kind: 'training', title: 'OpenAI 內容爬蟲（GPTBot）可讀取',
+    { id: 'a_claude_search', ua: 'Claude-SearchBot', max: 2, kind: 'search', title: 'Claude 搜尋爬蟲（Claude-SearchBot）可讀取',
+      why: 'Claude-SearchBot 是 Anthropic 為 Claude 的搜尋功能建立索引用的爬蟲。被擋住時，Claude 回答問題時比較難找到並引用你的網站。',
+      fix: '在 robots.txt 加上「User-agent: Claude-SearchBot」與「Allow: /」，或移除對它的 Disallow 規則。' },
+    { id: 'a_gpt', ua: 'GPTBot', max: 2, kind: 'training', title: 'OpenAI 內容爬蟲（GPTBot）可讀取',
       why: 'GPTBot 是 OpenAI 蒐集網頁內容（包含模型訓練）的爬蟲。擋掉它不一定影響 ChatGPT 搜尋的引用，要不要開放由你決定；若希望內容被 OpenAI 的產品理解與使用，就需要允許。',
       fix: '若願意開放，在 robots.txt 加上「User-agent: GPTBot」與「Allow: /」；若不想被用於訓練，保持封鎖也可以，但要知道這會降低在 OpenAI 產品中的可見度。' },
-    { id: 'a_claude', ua: 'ClaudeBot', max: 3, kind: 'training', title: 'Anthropic 爬蟲（ClaudeBot）可讀取',
-      why: 'ClaudeBot 是 Anthropic（Claude）蒐集網頁內容的爬蟲。被擋住時，Claude 比較難取得你網站的內容。',
-      fix: '在 robots.txt 加上「User-agent: ClaudeBot」與「Allow: /」，或移除對它的 Disallow 規則。' },
-    { id: 'a_gext', ua: 'Google-Extended', max: 3, kind: 'training', title: 'Google AI 使用許可（Google-Extended）',
+    { id: 'a_claude', ua: 'ClaudeBot', max: 1, kind: 'training', title: 'Anthropic 內容爬蟲（ClaudeBot）可讀取',
+      why: 'ClaudeBot 是 Anthropic 蒐集網頁內容（包含模型訓練）的爬蟲。擋掉它不一定影響 Claude 搜尋的引用，要不要開放由你決定。',
+      fix: '若願意開放，在 robots.txt 加上「User-agent: ClaudeBot」與「Allow: /」，或移除對它的 Disallow 規則。' },
+    { id: 'a_gext', ua: 'Google-Extended', max: 2, kind: 'training', title: 'Google AI 使用許可（Google-Extended）',
       why: 'Google-Extended 控制 Google 能否把你的內容用在 Gemini 等 AI 產品上。它不影響一般 Google 搜尋的排名。',
       fix: '若願意讓 Google 的 AI 使用內容，在 robots.txt 加上「User-agent: Google-Extended」與「Allow: /」，或移除對它的 Disallow 規則。' }
   ];
-  var EXTRA_BOTS = ['ChatGPT-User', 'Applebot-Extended', 'CCBot', 'Bytespider'];
+  var EXTRA_BOTS = ['ChatGPT-User', 'Claude-User', 'Perplexity-User', 'Applebot-Extended', 'CCBot', 'Bytespider'];
 
   function pathOf(url) { try { var u = new URL(url); return (u.pathname || '/') + (u.search || ''); } catch (e) { return '/'; } }
 
@@ -140,7 +147,7 @@
     var out = { noindex: false, nosnippet: false, maxSnippet0: false, raw: [] };
     qs(doc, 'meta[name]').forEach(function (m) {
       var name = (m.getAttribute('name') || '').toLowerCase();
-      if (!/^(robots|googlebot|bingbot|googlebot-news|gptbot|oai-searchbot|perplexitybot|claudebot)$/.test(name)) return;
+      if (!/^(robots|googlebot|bingbot|googlebot-news|gptbot|oai-searchbot|perplexitybot|claudebot|claude-searchbot)$/.test(name)) return;
       var c = (m.getAttribute('content') || '').toLowerCase();
       out.raw.push(name + ': ' + c);
       if (/(^|[\s,])noindex([\s,]|$)/.test(c) || /(^|[\s,])none([\s,]|$)/.test(c)) out.noindex = true;
@@ -203,7 +210,7 @@
     var status = words >= 600 ? 'pass' : (words >= 200 ? 'warn' : 'fail');
     var note = '不執行 JavaScript 時，這個頁面約有 ' + words + ' 個字（中文字與英文單字合計）。';
     if (extra.spaShell) note += ' 看起來內容要靠 JavaScript 才會出現，多數 AI 爬蟲不會執行 JavaScript，可能看到一個空白頁。';
-    items.push(item({ id: 'b_text', cat: 'B', title: '不用 JavaScript 也看得到足夠的文字', max: 12, status: status, note: note,
+    items.push(item({ id: 'b_text', cat: 'B', title: '不用 JavaScript 也看得到足夠的文字', max: 11, status: status, note: note,
       why: 'AI 爬蟲多半只讀網頁原始碼、不會跑 JavaScript。文字太少或要靠程式才會顯示，AI 就讀不到你在賣什麼、做什麼。',
       fix: '把主要介紹文字直接寫在 HTML 裡（服務內容、特色、流程、價格區間等，建議合計 600 字以上）。若網站用前端框架（React、Vue 等），請改用伺服器端渲染（SSR）或預先產生靜態頁面。' }));
 
@@ -222,11 +229,11 @@
       return true;
     });
     if (!imgs.length) {
-      items.push(item({ id: 'b_alt', cat: 'B', title: '圖片都有文字說明（alt）', max: 4, status: 'na', note: '頁面沒有圖片，這一項不計分。', why: '', fix: '' }));
+      items.push(item({ id: 'b_alt', cat: 'B', title: '圖片都有文字說明（alt）', max: 3, status: 'na', note: '頁面沒有圖片，這一項不計分。', why: '', fix: '' }));
     } else {
       var withAlt = imgs.filter(function (im) { return norm(im.getAttribute('alt')).length > 0; }).length;
       var ratio = withAlt / imgs.length;
-      items.push(item({ id: 'b_alt', cat: 'B', title: '圖片都有文字說明（alt）', max: 4, status: ratio >= 0.8 ? 'pass' : (ratio >= 0.4 ? 'warn' : 'fail'),
+      items.push(item({ id: 'b_alt', cat: 'B', title: '圖片都有文字說明（alt）', max: 3, status: ratio >= 0.8 ? 'pass' : (ratio >= 0.4 ? 'warn' : 'fail'),
         note: imgs.length + ' 張圖片中有 ' + withAlt + ' 張有 alt 文字（' + Math.round(ratio * 100) + '%）。',
         why: 'AI 看不懂圖片本身，只能靠 alt 文字知道圖在說什麼；店面、作品、菜單的圖片尤其需要。',
         fix: '替每張有意義的圖片補上簡短描述，例如 alt="台中西區咖啡店店內座位"。純裝飾圖片可留空白 alt。' }));
@@ -265,7 +272,7 @@
     var textAddr = RE_ADDR_TW.test(text) || RE_ADDR_TW2.test(text) || RE_ADDR_EN.test(text);
     var areaOnly = /服務(範圍|地區|據點|區域)|可到府|全台(灣)?可|全台(灣)?服務|台灣全區/.test(text) || biz.some(function (n) { return n.areaServed; });
     var addrStatus = (ldAddr || textAddr) ? 'pass' : (areaOnly ? 'warn' : 'fail');
-    items.push(item({ id: 'c_addr', cat: 'C', title: '看得到完整地址', max: 4, status: addrStatus,
+    items.push(item({ id: 'c_addr', cat: 'C', title: '看得到完整地址', max: 3, status: addrStatus,
       note: ldAddr && textAddr ? '頁面文字與結構化資料都有地址。' : (ldAddr ? '結構化資料有地址。' : (textAddr ? '頁面文字中有地址。' : (areaOnly ? '有提到服務地區，但沒有完整地址。' : '找不到地址。'))),
       why: '「附近」「台中哪裡有…」這類問題，AI 要靠地址才能判斷你是否符合；沒有地址就很難被推薦給在地客人。',
       fix: '在頁尾或聯絡頁用文字寫出完整地址（縣市、區、路名、門牌），並在結構化資料加上 address。若是無店面的工作室，至少寫明服務地區（areaServed）。' }));
@@ -276,7 +283,7 @@
     var textPhone = RE_PHONE.test(text.replace(/\d{4}-\d{2}-\d{2}/g, ''));
     var otherContact = qs(doc, 'a[href*="line.me"], a[href^="mailto:"]').length > 0 || /LINE\s*(ID)?[:：]?\s*@?\w+/i.test(text) || /[\w.+-]+@[\w-]+\.[\w.-]+/.test(text);
     var phoneStatus = (ldPhone || telLink || textPhone) ? 'pass' : (otherContact ? 'warn' : 'fail');
-    items.push(item({ id: 'c_phone', cat: 'C', title: '看得到聯絡電話', max: 4, status: phoneStatus,
+    items.push(item({ id: 'c_phone', cat: 'C', title: '看得到聯絡電話', max: 3, status: phoneStatus,
       note: (ldPhone || telLink || textPhone) ? '找到電話號碼' + (telLink ? '（含可點擊的 tel: 連結）' : '') + '。' : (otherContact ? '有 LINE 或 Email 可聯絡，但沒有電話。' : '找不到任何聯絡方式。'),
       why: '詢問「怎麼聯絡」「電話多少」時，AI 會直接引用頁面上的電話；沒有電話就只能請人自己去找。',
       fix: '用文字寫出電話（不要只放在圖片裡），並做成 <a href="tel:+886…"> 連結，同時填入結構化資料的 telephone。若沒有電話，至少清楚寫出 LINE／Email。' }));
@@ -354,7 +361,7 @@
     faqLd.forEach(function (n) { arr(n.mainEntity).forEach(function (q) { if (q && typesOf(q).indexOf('Question') >= 0 && q.acceptedAnswer) qCount++; }); });
     var microdata = qs(doc, '[itemtype*="FAQPage"]').length > 0;
     var fsStatus = (qCount >= 2 || microdata) ? 'pass' : (faqLd.length ? 'warn' : 'fail');
-    items.push(item({ id: 'd_faqschema', cat: 'D', title: '常見問題有加上 FAQPage 結構化資料', max: 5, status: fsStatus,
+    items.push(item({ id: 'd_faqschema', cat: 'D', title: '常見問題有加上 FAQPage 結構化資料', max: 4, status: fsStatus,
       note: qCount >= 2 ? '結構化資料中有 FAQPage，共 ' + qCount + ' 組問答。' : (microdata ? '找到 FAQPage 的 microdata 標記。' : (faqLd.length ? '有 FAQPage，但問答不足 2 組或格式不完整。' : (extra.hasFaq ? '頁面有常見問題，但沒有加 FAQPage 結構化資料。' : '沒有 FAQPage 結構化資料。'))),
       why: '把問答用 FAQPage 標記起來，等於直接把「題目與標準答案」交給 AI 與搜尋引擎，最容易被整段引用。',
       fix: '在頁面加入 FAQPage 的 JSON-LD，每一組含 Question（name）與 acceptedAnswer（text）；內容必須與頁面上看得到的問答一致。' }));
@@ -476,6 +483,51 @@
     return items;
   }
 
+  // ═══════════════ G. 內容格式 ═══════════════
+  // 只看正文：排除導覽列、頁首、頁尾與側欄，避免把選單當成條列內容
+  function inBody(e) { return !e.closest('nav,header,footer,aside,[role="navigation"],[role="banner"],[role="contentinfo"],template,noscript'); }
+  var RE_FACTS = [
+    /(NT\$|NTD|\$|＄)\s?\d[\d,]*/g,                                         // 價格
+    /\d[\d,]*\s?(元|塊|萬)/g,                                                // 價格（中文）
+    /\d+(\.\d+)?\s?(%|％)/g,                                                // 百分比
+    /\d+(\.\d+)?\s?(年|個月|週|天|小時|分鐘|秒|坪|公尺|公里|公斤|人|位|家|間|項|頁|次|件|款|堂|種|個據點)/g,   // 數量與單位
+    /(19|20)\d{2}\s?[年\/\-.]\s?\d{1,2}/g                                   // 日期
+  ];
+  function checkG(doc, text) {
+    var items = [];
+    var lists = qs(doc, 'ul,ol').filter(inBody).filter(function (l) {
+      return qs(l, ':scope > li').filter(function (li) { return tlen(li.textContent) >= 4; }).length >= 3;
+    });
+    var dls = qs(doc, 'dl').filter(inBody).filter(function (d) { return qs(d, 'dt').length >= 2; });
+    var lStatus = lists.length >= 2 ? 'pass' : ((lists.length === 1 || dls.length) ? 'warn' : 'fail');
+    items.push(item({ id: 'g_list', cat: 'G', title: '重點有整理成條列', max: 4, status: lStatus,
+      note: lists.length ? '正文中有 ' + lists.length + ' 組 3 項以上的條列清單' + (dls.length ? '，另有 ' + dls.length + ' 組定義清單' : '') + '。' : (dls.length ? '只有定義清單（dl），沒有一般條列。' : '正文中找不到 3 項以上的條列清單（選單與頁尾不算）。'),
+      why: 'AI 整理答案時，常常直接摘錄條列重點，例如「服務項目」「適合誰」「流程步驟」。整段文字擠在一起，AI 比較難切出重點。',
+      fix: '把服務項目、特色、流程、注意事項改寫成 <ul> 或 <ol> 條列，每項一句話講清楚。一頁至少 2 組，每組 3 項以上。' }));
+
+    var tables = qs(doc, 'table').filter(inBody).filter(function (t) {
+      var rows = qs(t, 'tr').length, cols = 0;
+      qs(t, 'tr').forEach(function (r) { cols = Math.max(cols, qs(r, ':scope > th, :scope > td').length); });
+      return rows >= 2 && cols >= 2;
+    });
+    var withHead = tables.filter(function (t) { return qs(t, 'th').length > 0; }).length;
+    var tStatus = tables.length ? (withHead ? 'pass' : 'warn') : 'warn';
+    items.push(item({ id: 'g_table', cat: 'G', title: '比較或價目資訊有用表格呈現', max: 3, status: tStatus,
+      note: tables.length ? '找到 ' + tables.length + ' 個表格' + (withHead ? '，且有表頭（th）。' : '，但沒有表頭（th），AI 不容易知道每一欄代表什麼。') : '沒有找到資料表格。如果這頁有價目、方案比較或規格，建議改成表格。',
+      why: '價目表、方案比較、營業時間這類資訊，用表格呈現時 AI 能直接讀出「哪個方案多少錢、包含什麼」，比散在段落裡更容易被正確引用。',
+      fix: '用 HTML <table> 呈現價目或方案比較，第一列用 <th> 寫欄位名稱（例如「方案」「價格」「適合對象」）。不要用圖片做價目表。' }));
+
+    var found = {};
+    RE_FACTS.forEach(function (re) { (text.match(re) || []).forEach(function (m) { found[m.replace(/\s/g, '')] = 1; }); });
+    var n = Object.keys(found).length;
+    var fStatus = n >= 6 ? 'pass' : (n >= 2 ? 'warn' : 'fail');
+    items.push(item({ id: 'g_facts', cat: 'G', title: '內容有具體數字（價格、時間、數量）', max: 5, status: fStatus,
+      note: '找到 ' + n + ' 個不重複的具體數字' + (n ? '，例如：' + Object.keys(found).slice(0, 4).join('、') : '') + '。',
+      why: '「價格約 NT$15,000 起、約 2–3 週完成」比「價格實惠、快速完成」更容易被 AI 引用。具體數字讓 AI 能直接回答客人的問題。',
+      fix: '把模糊的形容改成具體資訊：價格區間、製作天數、營業年資、服務過的客戶數、課程時數等。只寫真實的數字。' }));
+    return items;
+  }
+
   // ═══════════════ llms.txt 加分 ═══════════════
   function checkLlms(ctx) {
     var l = ctx.llms || { status: 'unknown' };
@@ -495,7 +547,7 @@
     var text = visibleText(doc);
     var items = [].concat(
       checkA(doc, ctx, extra), checkB(doc, extra), checkC(doc, extra, text, nodes),
-      checkD(doc, extra, nodes, text), checkE(doc, ctx, extra, nodes, text), checkF(doc, nodes));
+      checkD(doc, extra, nodes, text), checkE(doc, ctx, extra, nodes, text), checkF(doc, nodes), checkG(doc, text));
 
     var cats = CATS.map(function (c) {
       var its = items.filter(function (i) { return i.cat === c.id; });
@@ -523,7 +575,7 @@
     issues.forEach(function (i) { i.level = i.loss >= 5 ? 'high' : (i.loss >= 2.5 ? 'medium' : 'low'); delete i._idx; });
 
     return {
-      tool: 'geo', version: 1, url: ctx.url || '', mode: ctx.mode || 'url', scannedAt: new Date().toISOString(),
+      tool: 'geo', version: 2, url: ctx.url || '', mode: ctx.mode || 'url', scannedAt: new Date().toISOString(),
       score: score, baseScore: base, bonus: llms.bonus, grade: grade.key, gradeLabel: grade.label,
       needHelp: score != null && score < 80,
       categories: cats, items: items, issues: issues, llms: llms, extraBots: extra.extraBots || [],
