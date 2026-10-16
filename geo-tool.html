@@ -66,6 +66,8 @@ textarea#htmlIn{width:100%;min-height:150px;background:var(--bg3);border:1px sol
 .score-info p{color:var(--text2);font-size:13px}
 .grade{display:inline-block;font-size:12px;font-weight:700;padding:2px 12px;border-radius:20px;margin-left:8px;vertical-align:middle}
 .grade.good{background:rgba(16,185,129,.16);color:#34d399}.grade.fair{background:rgba(245,158,11,.16);color:#fbbf24}.grade.poor{background:rgba(239,68,68,.16);color:#f87171}.grade.na{background:var(--bg3);color:var(--text2)}
+#results{scroll-margin-top:76px}
+.js-note{display:flex;align-items:flex-start;gap:8px;background:rgba(245,158,11,0.09);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius);padding:11px 14px;font-size:13px;color:#fbbf24;margin-bottom:14px;line-height:1.6}
 .geo-cta{margin-top:14px;display:none;gap:10px;flex-wrap:wrap;align-items:center}
 .geo-cta.show{display:flex}
 .geo-cta a.line{background:#06C755;color:#fff;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:6px;font-size:14px}
@@ -177,6 +179,7 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
   <p class="disclaimer top" id="disclaimerTop"></p>
 
   <div id="results" aria-live="polite">
+    <div class="js-note" id="jsNote" style="display:none">⚠ <span>這個網站內容由 JavaScript 產生，許多 AI 爬蟲讀不到，這是影響 AI 可見度的主要原因。</span></div>
     <div class="score-hero">
       <div class="score-circle">
         <svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="9"/><circle id="scoreRing" cx="55" cy="55" r="46" fill="none" stroke="#5FA396" stroke-width="9" stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round" style="transition:stroke-dashoffset 1s ease"/></svg>
@@ -219,6 +222,40 @@ function $(id) { return document.getElementById(id); }
 function showToast(msg, ms) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function () { t.classList.remove('show'); }, ms || 2500); }
 function setStatus(type, msg) { var s = $('status'); if (!type) { s.className = 'status'; s.textContent = ''; return; } s.className = 'status ' + type; s.textContent = msg; }
 
+// 抓取失敗：錯誤訊息旁放「改用上傳 HTML」按鈕，點了切換到上傳分頁
+function setFetchFail(msg) {
+  var s = $('status'); s.className = 'status error'; s.textContent = '';
+  var sp = document.createElement('span'); sp.textContent = msg; s.appendChild(sp);
+  var b = document.createElement('button'); b.type = 'button'; b.className = 'btn-sub'; b.textContent = '改用上傳 HTML'; b.style.marginLeft = '12px';
+  b.onclick = function () { var u = normalizeUrl($('urlIn').value); if (u && !$('htmlBase').value) $('htmlBase').value = u; setStatus(null); switchSource('html'); $('htmlIn').focus(); };
+  s.appendChild(b);
+}
+// 清空上一次的分數與結果，避免失敗或重新檢測時還顯示上一個網站的結果
+function resetResults() {
+  currentReport = null;
+  $('results').style.display = 'none';
+  $('scoreNum').textContent = '0'; $('scoreTitle').textContent = '—'; $('scoreSummary').textContent = '';
+  $('scoreRing').style.strokeDashoffset = 289;
+  var g = $('gradeChip'); g.className = 'grade na'; g.textContent = '';
+  $('geoCta').classList.remove('show');
+  ['catRows', 'issueList', 'itemList', 'bonusBox', 'botsBox'].forEach(function (id) { var e = $(id); if (e) e.innerHTML = ''; });
+  var n = $('jsNote'); if (n) n.style.display = 'none';
+}
+// 偵測 JavaScript 渲染網站：可見文字少於 200 字，或偵測到前端框架且可見文字仍偏少
+function detectJsSite(html) {
+  var doc; try { doc = new DOMParser().parseFromString(html || '', 'text/html'); } catch (e) { return { is: false, textLen: 0, frameworks: [] }; }
+  var text = '';
+  if (doc.body) { var c = doc.body.cloneNode(true); c.querySelectorAll('script,style,noscript,svg,template').forEach(function (n) { n.remove(); }); text = c.textContent || ''; }
+  var textLen = text.replace(/\s+/g, ' ').trim().length, src = String(html || ''), fw = [];
+  if (/id=["']__next["']|__NEXT_DATA__/i.test(src)) fw.push('Next.js');
+  if (/id=["']__nuxt["']|window\.__NUXT__/i.test(src)) fw.push('Nuxt');
+  if (/data-reactroot|<div id=["']root["']>\s*<\/div>|react-dom|__REACT_DEVTOOLS/i.test(src)) fw.push('React');
+  if (/data-v-app|<div id=["']app["']>\s*<\/div>|vue(?:\.runtime)?(?:\.global)?(?:\.prod)?(?:\.min)?\.js/i.test(src)) fw.push('Vue');
+  if (/ng-version=|<app-root/i.test(src)) fw.push('Angular');
+  if (/___gatsby|id=["']svelte["']/i.test(src)) fw.push('Gatsby/Svelte');
+  return { is: textLen < 200 || (fw.length > 0 && textLen < 800), textLen: textLen, frameworks: fw };
+}
+
 function switchSource(m) {
   tabState.t1.mode = m === 'html' ? 'html' : 'url';
   $('tabUrl').classList.toggle('active', m !== 'html'); $('tabHtml').classList.toggle('active', m === 'html');
@@ -226,7 +263,7 @@ function switchSource(m) {
 }
 
 // ── 抓取：優先走本站自己的抓取服務（Supabase Edge Function fetch-page），連不上才退回公開 CORS Proxy ──
-var OWN_ERR = { host_not_allowed: '這個網址不能檢測（內網或本機位址）', dns_failed: '找不到這個網域，請確認網址拼寫', bad_url: '網址格式不正確', bad_protocol: '只支援 http／https 網址', bad_host: '網址格式不正確', port_not_allowed: '不支援這個連接埠', credentials_not_allowed: '網址不可包含帳號密碼', too_many_redirects: '網站轉址次數過多', rate_limited: '查詢太頻繁，請稍等一分鐘再試', timeout: '網站回應逾時', fetch_failed: '連不上這個網站', origin_not_allowed: '目前的網頁來源不被允許' };
+var OWN_ERR = { host_not_allowed: '這個網址不能檢測（內網或本機位址）', dns_failed: '找不到這個網域，請確認網址拼寫', bad_url: '網址格式不正確', bad_protocol: '只支援 http／https 網址', bad_host: '網址格式不正確', port_not_allowed: '不支援這個連接埠', credentials_not_allowed: '網址不可包含帳號密碼', too_many_redirects: '網站轉址次數過多', rate_limited: '查詢太頻繁，請稍等一分鐘再試', timeout: '網站回應逾時', fetch_failed: '我們的伺服器無法連到這個網站，可能被網站的安全設定擋住。你的網站本身不一定有問題，請改用『上傳 HTML』檢測。', origin_not_allowed: '目前的網頁來源不被允許' };
 var proxyErr = '';
 function ownBase() { var c = window.YC_CONFIG; return c && c.supabaseUrl ? String(c.supabaseUrl).replace(/\/$/, '') + '/functions/v1/fetch-page?url=' : null; }
 var PROXIES = [
@@ -281,11 +318,12 @@ async function runUrl() {
   var url = normalizeUrl($('urlIn').value);
   if (!url) { setStatus('error', '⚠ 請輸入正確的網址，例如 https://你的網站.com'); return; }
   $('urlIn').value = url; running = true; $('runBtn').disabled = true;
+  resetResults();
   try {
     setStatus('loading', '⟳ 正在抓取網頁…');
     var page = await proxyGet(url, 12000);
-    if (!page) { setStatus('error', proxyErr ? '✗ 無法抓取：' + proxyErr + '。請確認網址，或改用「貼上或上傳 HTML」。' : '✗ 無法抓取這個網址（網站可能擋住了自動檢測，或抓取服務暫時無法使用）。請確認網址，或改用「貼上或上傳 HTML」。'); return; }
-    if (page.code >= 400 || !page.text || page.text.length <= 200) { setStatus('error', '✗ 抓到的內容太少或網頁不存在（' + (page.code || '無內容') + '）。' + ([401, 403, 429, 503].indexOf(page.code) >= 0 ? '網站可能擋掉了自動檢測。' : '') + '請確認網址，或改用「貼上或上傳 HTML」。'); return; }
+    if (!page) { setFetchFail(proxyErr === OWN_ERR.fetch_failed ? '✗ ' + proxyErr : (proxyErr ? '✗ 無法抓取：' + proxyErr + '。請確認網址，或改用「上傳 HTML」檢測。' : '✗ 無法抓取這個網址（網站可能擋住了自動檢測，或抓取服務暫時無法使用）。請確認網址，或改用「上傳 HTML」檢測。')); return; }
+    if (page.code >= 400 || !page.text || page.text.length <= 200) { setFetchFail('✗ 抓到的內容太少或網頁不存在（' + (page.code || '無內容') + '）。' + ([401, 403, 429, 503].indexOf(page.code) >= 0 ? '網站可能擋掉了自動檢測。' : '') + '請確認網址，或改用「上傳 HTML」檢測。'); return; }
     var origin = new URL(url).origin;
     setStatus('loading', '⟳ 正在讀取 robots.txt 與 llms.txt…');
     var aux = await Promise.all([fetchAux(origin + '/robots.txt'), fetchAux(origin + '/llms.txt')]);
@@ -296,6 +334,7 @@ async function runUrl() {
   finally { running = false; $('runBtn').disabled = false; }
 }
 function runHtml() {
+  resetResults();
   var html = $('htmlIn').value;
   if (!html || html.trim().length < 50) { setStatus('error', '⚠ 請先貼上 HTML 原始碼，或選擇 .html 檔案。'); return; }
   var base = normalizeUrl($('htmlBase').value) || 'https://example.invalid/';
@@ -312,6 +351,8 @@ $('urlIn').addEventListener('keydown', function (e) { if (e.key === 'Enter') run
 function finish(r) {
   setStatus(null);
   renderResults(r);
+  var js = detectJsSite(tabState.t1 && tabState.t1.html);
+  var jn = $('jsNote'); if (jn) jn.style.display = js.is ? 'flex' : 'none';
   var el = $('results'); if (el && el.scrollIntoView && window.parent === window) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
