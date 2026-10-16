@@ -2808,10 +2808,12 @@ function switchCaTab(name, btn) {
 // ═══════════════════════════════════════════════════════
 //  SEO ANALYSIS ENGINE
 // ═══════════════════════════════════════════════════════
-// 偵測 JavaScript 渲染網站：可見文字少於 200 字，或偵測到前端框架且可見文字仍偏少
+// 偵測 JavaScript 渲染網站（SEO／GEO 兩個工具共用同一套標準，改動時兩邊要一起改）：
+// 可見文字（中文字＋英文單字，與 GEO 引擎算法相同）少於 200 字，或偵測到前端框架且少於 600 字（GEO 認定「足夠」的字數）
 function detectJsSite(html){
   let doc; try{ doc=new DOMParser().parseFromString(html||'','text/html'); }catch(e){ return {is:false,textLen:0,frameworks:[]}; }
-  const textLen=cleanBodyText(doc).replace(/\s+/g,' ').trim().length;
+  const vt=cleanBodyText(doc);
+  const textLen=(vt.match(/[\u3400-\u9fff\uf900-\ufaff]/g)||[]).length+(vt.match(/[A-Za-z]{2,}/g)||[]).length;
   const src=String(html||'');
   const fw=[];
   if(/id=["']__next["']|__NEXT_DATA__/i.test(src)) fw.push('Next.js');
@@ -2820,7 +2822,7 @@ function detectJsSite(html){
   if(/data-v-app|<div id=["']app["']>\s*<\/div>|vue(?:\.runtime)?(?:\.global)?(?:\.prod)?(?:\.min)?\.js/i.test(src)) fw.push('Vue');
   if(/ng-version=|<app-root/i.test(src)) fw.push('Angular');
   if(/___gatsby|id=["']svelte["']/i.test(src)) fw.push('Gatsby/Svelte');
-  const is = textLen<200 || (fw.length>0 && textLen<800);
+  const is = textLen<200 || (fw.length>0 && textLen<600);
   return {is,textLen,frameworks:fw};
 }
 function cleanBodyText(doc){
