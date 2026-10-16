@@ -1511,7 +1511,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
 
   <div id="historyPanel">
     <div class="hist-head">
-      <h3>📋 分析紀錄</h3>
+      <h3>📋 分析紀錄 <span style="font-size:11px;font-weight:400;color:var(--text3);margin-left:6px">僅本次有效，關閉網頁就清除</span></h3>
       <div style="display:flex;gap:12px;align-items:center">
         <button class="clear-btn" onclick="clearHistory()">清除全部</button>
       </div>
@@ -2030,7 +2030,12 @@ let uploadedFiles = [];
 let selectedIdx = -1;
 let currentReport = null;
 let abortController = null;
-let history = JSON.parse(localStorage.getItem('seo_hist_v8') || '[]');
+// 檢測紀錄、品牌設定、輸入欄位、忽略規則只存在 sessionStorage：關掉分頁／網頁就全部清除，不留在裝置上。
+// 登入會員的檢測紀錄存在資料庫（會員專區），不在這裡。
+const tmpStore = (() => { try { const s = window.sessionStorage; s.setItem('_yc_t', '1'); s.removeItem('_yc_t'); return s; } catch (e) { const m = {}; return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: k => { delete m[k]; } }; } })();
+// 清掉舊版留在 localStorage 的紀錄（舊版會把紀錄長期留在瀏覽器）
+['seo_hist_v8','seo_brand_v13','seo_ignore_v18','seo_biz_bizName','seo_biz_bizType'].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+let history = JSON.parse(tmpStore.getItem('seo_hist_v8') || '[]');
 const tabState = {
   t1: { mode:'url', html:null, label:'' },
   t2: { mode:'url', html:null, label:'' },
@@ -2302,7 +2307,7 @@ function renderHistory(){
     </div>`).join('');
 }
 function loadHist(i){document.getElementById('historyPanel').classList.remove('open');renderResults(history[i].report);}
-function clearHistory(){if(!confirm('確定清除所有紀錄？'))return;history=[];localStorage.setItem('seo_hist_v8','[]');updateHistCount();renderHistory();}
+function clearHistory(){if(!confirm('確定清除所有紀錄？'))return;history=[];tmpStore.setItem('seo_hist_v8','[]');updateHistCount();renderHistory();}
 function updateHistCount(){document.getElementById('histCount').textContent=history.length;}
 function scoreColor(s){return s>=80?'#10b981':s>=60?'#f59e0b':'#ef4444';}
 
@@ -3236,7 +3241,7 @@ async function runAnalysis(){
   if(compHtml){let cd='';try{cd=new URL(tabState.t3.label).hostname;}catch{}report._compReport=analyzeHTML(compHtml,keywords,'','',tabState.t3.label,cd);}
   history.push({score:report.score,name:bizName||sourceLabel||'未命名',date:new Date().toLocaleDateString('zh-TW',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),pass:report.pass,warn:report.warn,fail:report.fail,report});
   if(history.length>50)history.shift();
-  localStorage.setItem('seo_hist_v8',JSON.stringify(history));
+  tmpStore.setItem('seo_hist_v8',JSON.stringify(history));
   updateHistCount();
   setTimeout(()=>{
     prog.style.display='none';
@@ -5109,7 +5114,7 @@ function exportJSON(){
 // ═══════════════════════════════════════════════════════
 //  v13: WHITE-LABEL / BRAND SETTINGS
 // ═══════════════════════════════════════════════════════
-let brandSettings = JSON.parse(localStorage.getItem('seo_brand_v13') || '{"name":"SEO Analyzer","color":"#5FA396","contact":""}');
+let brandSettings = JSON.parse(tmpStore.getItem('seo_brand_v13') || '{"name":"SEO Analyzer","color":"#5FA396","contact":""}');
 
 function toggleWLPanel(){document.getElementById('wlPanel').classList.toggle('open');}
 
@@ -5118,7 +5123,7 @@ function applyBrand(){
   const color = document.getElementById('wlColor')?.value || '#5FA396';
   const contact = document.getElementById('wlContact')?.value || '';
   brandSettings = {name, color, contact};
-  localStorage.setItem('seo_brand_v13', JSON.stringify(brandSettings));
+  tmpStore.setItem('seo_brand_v13', JSON.stringify(brandSettings));
   document.getElementById('brandLogoText').textContent = name;
   const footerBrand = document.getElementById('footerBrandText');
   if(footerBrand) footerBrand.textContent = name;
@@ -5889,13 +5894,13 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// ── Auto-save bizName / bizType to localStorage ──
+// ── bizName / bizType 暫存（只存在本次分頁，關閉即清除）──
 ['bizName','bizType'].forEach(id => {
   const el = document.getElementById(id);
   if(!el) return;
-  const saved = localStorage.getItem('seo_biz_'+id);
+  const saved = tmpStore.getItem('seo_biz_'+id);
   if(saved) el.value = saved;
-  el.addEventListener('input', () => localStorage.setItem('seo_biz_'+id, el.value));
+  el.addEventListener('input', () => tmpStore.setItem('seo_biz_'+id, el.value));
 });
 
 // ── Highlight active tab with badge counts (if any issues) ──
@@ -5909,7 +5914,7 @@ function updateTabBadges(r) {
 // ═══════════════════════════════════════════════════════
 //  v18: IGNORE RULES
 // ═══════════════════════════════════════════════════════
-let ignoreRules = JSON.parse(localStorage.getItem('seo_ignore_v18') || '{}');
+let ignoreRules = JSON.parse(tmpStore.getItem('seo_ignore_v18') || '{}');
 
 function saveIgnoreRules() {
   const ids = ['ig_og','ig_twitter','ig_hreflang','ig_schema','ig_lazy','ig_srcset','ig_preload','ig_canonical'];
@@ -5917,7 +5922,7 @@ function saveIgnoreRules() {
     const el = document.getElementById(id);
     if(el) ignoreRules[id] = el.checked;
   });
-  localStorage.setItem('seo_ignore_v18', JSON.stringify(ignoreRules));
+  tmpStore.setItem('seo_ignore_v18', JSON.stringify(ignoreRules));
   const count = Object.values(ignoreRules).filter(Boolean).length;
   const el = document.getElementById('ignoreCount');
   if(el) el.textContent = count;
