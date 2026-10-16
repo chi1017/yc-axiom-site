@@ -241,19 +241,20 @@ function resetResults() {
   ['catRows', 'issueList', 'itemList', 'bonusBox', 'botsBox'].forEach(function (id) { var e = $(id); if (e) e.innerHTML = ''; });
   var n = $('jsNote'); if (n) n.style.display = 'none';
 }
-// 偵測 JavaScript 渲染網站：可見文字少於 200 字，或偵測到前端框架且可見文字仍偏少
+// 偵測 JavaScript 渲染網站（SEO／GEO 兩個工具共用同一套標準，改動時兩邊要一起改）：
+// 可見文字（中文字＋英文單字，與 GEO 引擎算法相同）少於 200 字，或偵測到前端框架且少於 600 字（GEO 認定「足夠」的字數）
 function detectJsSite(html) {
   var doc; try { doc = new DOMParser().parseFromString(html || '', 'text/html'); } catch (e) { return { is: false, textLen: 0, frameworks: [] }; }
   var text = '';
   if (doc.body) { var c = doc.body.cloneNode(true); c.querySelectorAll('script,style,noscript,svg,template').forEach(function (n) { n.remove(); }); text = c.textContent || ''; }
-  var textLen = text.replace(/\s+/g, ' ').trim().length, src = String(html || ''), fw = [];
+  var textLen = (text.match(/[\u3400-\u9fff\uf900-\ufaff]/g) || []).length + (text.match(/[A-Za-z]{2,}/g) || []).length, src = String(html || ''), fw = [];
   if (/id=["']__next["']|__NEXT_DATA__/i.test(src)) fw.push('Next.js');
   if (/id=["']__nuxt["']|window\.__NUXT__/i.test(src)) fw.push('Nuxt');
   if (/data-reactroot|<div id=["']root["']>\s*<\/div>|react-dom|__REACT_DEVTOOLS/i.test(src)) fw.push('React');
   if (/data-v-app|<div id=["']app["']>\s*<\/div>|vue(?:\.runtime)?(?:\.global)?(?:\.prod)?(?:\.min)?\.js/i.test(src)) fw.push('Vue');
   if (/ng-version=|<app-root/i.test(src)) fw.push('Angular');
   if (/___gatsby|id=["']svelte["']/i.test(src)) fw.push('Gatsby/Svelte');
-  return { is: textLen < 200 || (fw.length > 0 && textLen < 800), textLen: textLen, frameworks: fw };
+  return { is: textLen < 200 || (fw.length > 0 && textLen < 600), textLen: textLen, frameworks: fw };
 }
 
 function switchSource(m) {
