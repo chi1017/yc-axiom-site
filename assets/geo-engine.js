@@ -407,12 +407,23 @@
         fix: '在文章頁顯示發布日期與最後更新日期，並在 Article 結構化資料加上 datePublished 與 dateModified。' }));
     }
     var ldReview = nodes.some(function (n) { return typesOf(n).some(function (t) { return /^(Review|AggregateRating)$/.test(t); }) || n.review || n.aggregateRating; });
-    var secWords = /客戶評價|客戶見證|顧客評價|顧客見證|使用者評價|客戶回饋|顧客回饋|真實案例|成功案例|合作案例|客戶案例|案例分享|精選案例|精選作品|作品集|Testimonials?|Customer Reviews?|Case Stud(y|ies)|Portfolio/i;
+    // 案例／作品／評價：比對標題、導覽列、連結、按鈕與短文字區塊（不分大小寫），不只看 h1–h4
+    var proofZh = /作品|案例|評價|客戶回饋|顧客回饋|見證|得獎|好評/;
+    var proofEn = /\b(portfolio|testimonials?|case\s*stud(y|ies)|customer\s*reviews?|client\s*reviews?|reviews?)\b/i;
+    var proofEnExact = /^(our |my |selected |featured |recent |latest |view |see )?(works|cases|projects)( →| >|»)?$/i;
     var secExact = /^[\s\d.、：:\-–—·•]*(案例|作品|評價|見證|好評|客戶評價|Reviews?)[\s]*$/i;
-    var secHeading = qs(doc, 'h1,h2,h3,h4').some(function (h) { var t = norm(h.textContent); return secWords.test(t) || secExact.test(t); }) || qs(doc, '[class*="testimonial" i],[class*="review" i],[class*="portfolio" i],[class*="case-" i]').length > 0;
+    var proofHit = '';
+    qs(doc, 'h1,h2,h3,h4,h5,h6,a,button,[role="button"],[role="tab"],summary,label,nav li,nav span,li,p,span,div,figcaption').some(function (e) {
+      if (e.closest('template,noscript,script,style')) return false;
+      if (e.children.length > 3) return false;                       // 大容器不比對，只看短文字節點
+      var t = norm(e.textContent); if (!t || t.length > 24) return false;
+      if (proofZh.test(t) || proofEn.test(t) || proofEnExact.test(t) || secExact.test(t)) { proofHit = t; return true; }
+      return false;
+    });
+    var secHeading = !!proofHit || qs(doc, '[class*="testimonial" i],[class*="review" i],[class*="portfolio" i],[class*="case-" i]').length > 0;
     var rStatus = ldReview ? 'pass' : (secHeading ? 'pass' : 'fail');
     items.push(item({ id: 'e_proof', cat: 'E', title: '有真實案例或客戶評價', max: 4, status: rStatus,
-      note: ldReview ? '結構化資料中有評價（Review／AggregateRating）。' : (secHeading ? '找到案例、作品或評價區塊。' : '找不到案例或評價。') + '（工具無法驗證內容真偽，請確保內容真實。）',
+      note: ldReview ? '結構化資料中有評價（Review／AggregateRating）。' : (secHeading ? ('找到案例、作品或評價區塊' + (proofHit ? '（「' + proofHit + '」）' : '') + '。') : '找不到案例或評價。') + '（工具無法驗證內容真偽，請確保內容真實。）',
       why: '真實案例與客人的評價，是 AI 與消費者判斷「這家店可不可靠」的重要依據。',
       fix: '在首頁或專頁放上真實的客戶案例、作品或評價（可附店家名稱、時間、成果）。只放真實內容，不要編造；有真實評分資料時可加上 Review／AggregateRating 結構化資料。' }));
     return items;
@@ -420,7 +431,16 @@
 
   // ═══════════════ F. 標題結構 ═══════════════
   var GENERIC_H1 = /^(首頁|home|homepage|welcome|歡迎|歡迎光臨|index|untitled|logo|main|網站|我的網站|標題)$/i;
-  function checkF(doc) {
+  // 偵測店名／品牌名：結構化資料 name → og:site_name；找不到回傳空字串（不從標題猜，避免把服務名稱當店名）
+  function detectSiteName(doc, nodes) {
+    var biz = nodes.filter(function (n) { return isLocal(n) || isOrg(n); });
+    var n1 = biz.map(function (n) { return textOf(n.name); }).filter(Boolean)[0];
+    if (n1) return norm(n1);
+    var og = metaContent(doc, 'meta[property="og:site_name"]');
+    if (og) return og;
+    return '';          // 標題的品牌段落順序不固定（店名｜服務 或 服務｜店名），不拿來猜
+  }
+  function checkF(doc, nodes) {
     var items = [];
     var hs = qs(doc, 'h1,h2,h3,h4,h5,h6').filter(function (h) { return !h.closest('template,noscript'); });
     var h1s = hs.filter(function (h) { return h.tagName === 'H1'; });
@@ -435,7 +455,11 @@
     items.push(item({ id: 'f_h1_desc', cat: 'F', title: '主標題有說明這頁在講什麼', max: 3, status: dStatus,
       note: !t ? '沒有 H1，無從判斷。' : '目前的 H1：「' + (t.length > 40 ? t.slice(0, 40) + '…' : t) + '」。' + (GENERIC_H1.test(t) ? '這是很籠統的標題。' : (L < 4 || L > 70 ? '長度偏' + (L < 4 ? '短' : '長') + '。' : '')),
       why: '「首頁」「歡迎」這類標題對 AI 沒有任何資訊；寫清楚「誰、做什麼、在哪裡」才讀得懂。',
-      fix: '把 H1 改成具體描述，例如「台中網頁設計｜品牌形象網站」，長度約 10–40 字。' }));
+      fix: (function () {
+        var nm = detectSiteName(doc, nodes || []);
+        if (nm && nm.length <= 20) return '把 H1 改成「地區＋店名＋主要服務」的具體描述，例如：「（地區）｜' + nm + ' （主要服務）」，長度約 10–40 字。';
+        return '把 H1 改成「地區＋店名＋主要服務」的具體描述，例如：高雄左營｜小方光影設計 商業攝影，長度約 10–40 字。';
+      })() }));
     var h2 = hs.filter(function (h) { return h.tagName === 'H2'; }).length;
     var skip = false, empty = 0, prev = 0;
     hs.forEach(function (h) {
@@ -471,7 +495,7 @@
     var text = visibleText(doc);
     var items = [].concat(
       checkA(doc, ctx, extra), checkB(doc, extra), checkC(doc, extra, text, nodes),
-      checkD(doc, extra, nodes, text), checkE(doc, ctx, extra, nodes, text), checkF(doc));
+      checkD(doc, extra, nodes, text), checkE(doc, ctx, extra, nodes, text), checkF(doc, nodes));
 
     var cats = CATS.map(function (c) {
       var its = items.filter(function (i) { return i.cat === c.id; });
