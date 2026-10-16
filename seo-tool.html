@@ -129,6 +129,13 @@ textarea{min-height:100px;resize:vertical;font-size:12px;font-family:monospace;}
 .mp-pass{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#34d399;}
 .mp-warn{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:#fbbf24;}
 .mp-fail{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#f87171;}
+.url-status-btn{margin-left:auto;flex-shrink:0;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#fca5a5;border-radius:6px;padding:5px 12px;font-size:12px;font-family:inherit;cursor:pointer}
+.url-status-btn:hover{background:rgba(239,68,68,0.2)}
+#results{scroll-margin-top:76px}
+.js-warn{display:none;align-items:flex-start;gap:8px;background:rgba(245,158,11,0.09);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-sm);padding:11px 14px;font-size:13px;color:#fbbf24;margin-bottom:14px;line-height:1.6}
+.js-warn.show{display:flex}
+#results.yc-gated.yc-gated.yc-gated > #jsWarn.show{display:flex !important}
+.js-suggest{margin-top:14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:var(--text2);line-height:1.6}
 .seo-cta{margin-top:14px;display:none;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px}
 .seo-cta.show{display:block}
 .seo-cta-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:10px}
@@ -1695,6 +1702,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
 
   <!-- ═══ RESULTS ═══ -->
   <div id="results">
+    <div class="js-warn" id="jsWarn">⚠ <span>這個網站的內容由 JavaScript 產生，Google 會執行 JavaScript，所以以下結果可能不準確。</span></div>
     <div class="cwv-note">
       <span>ℹ️</span>
       <span>此分析涵蓋 <strong>靜態 HTML 結構</strong>的 <span class="js-rule-count"></span> SEO 規則。<strong>Core Web Vitals（LCP、CLS、FID）、頁面速度</strong>等效能指標請另外使用 Google PageSpeed Insights 查看。</span>
@@ -1715,6 +1723,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
         <p id="scoreSummary"></p>
         <div class="metric-row" id="metricPills"></div>
         <div id="scoreBreakdown"></div>
+        <div class="js-suggest" id="jsSuggest" style="display:none">建議改用上傳 HTML，或用 Google Search Console 的網址審查功能確認。</div>
         <div class="seo-cta" id="seoCta">
           <div class="seo-cta-title">找 YC 幫你修</div>
           <div class="seo-cta-row"><a class="line" id="seoLineBtn" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">找 YC 幫你修</a><span class="hint">分數低於 80 分，有不少可以改善的地方，歡迎 LINE 詢問。</span></div>
@@ -2058,7 +2067,7 @@ function rawFetch(url, ms) {
 // 抓網頁優先走本站自己的抓取服務（Supabase Edge Function fetch-page，回傳格式與 allorigins 相同）；
 // 只有它連不上時才退回公開代理。目標網站的狀態碼（404、403…）放在 status.http_code，不算失敗。
 const AO_PREFIX = 'https://api.allorigins.win/get?url=';
-const OWN_ERR = { host_not_allowed:'這個網址不能檢測（內網或本機位址）', dns_failed:'找不到這個網域，請確認網址拼寫', bad_url:'網址格式不正確', bad_protocol:'只支援 http／https 網址', bad_host:'網址格式不正確', port_not_allowed:'不支援這個連接埠', credentials_not_allowed:'網址不可包含帳號密碼', too_many_redirects:'網站轉址次數過多', rate_limited:'查詢太頻繁，請稍等一分鐘再試', timeout:'網站回應逾時', fetch_failed:'連不上這個網站', origin_not_allowed:'目前的網頁來源不被允許' };
+const OWN_ERR = { host_not_allowed:'這個網址不能檢測（內網或本機位址）', dns_failed:'找不到這個網域，請確認網址拼寫', bad_url:'網址格式不正確', bad_protocol:'只支援 http／https 網址', bad_host:'網址格式不正確', port_not_allowed:'不支援這個連接埠', credentials_not_allowed:'網址不可包含帳號密碼', too_many_redirects:'網站轉址次數過多', rate_limited:'查詢太頻繁，請稍等一分鐘再試', timeout:'網站回應逾時', fetch_failed:'我們的伺服器無法連到這個網站，可能被網站的安全設定擋住。你的網站本身不一定有問題，請改用『上傳 HTML』檢測。', origin_not_allowed:'目前的網頁來源不被允許' };
 function ownProxyBase() {
   const c = window.YC_CONFIG;
   return c && c.supabaseUrl ? String(c.supabaseUrl).replace(/\/$/, '') + '/functions/v1/fetch-page?url=' : null;
@@ -2098,6 +2107,7 @@ async function fetchUrl(tab) {
   if(!url){setUrlStatus(tab,'error','⚠ 請輸入網址');return;}
   if(!/^https?:\/\//i.test(url)) url='https://'+url;
   document.getElementById(`${tab}Url`).value=url;
+  if(tab==='t1') resetResults();
   const btn=document.getElementById(`${tab}FetchBtn`);
   const icon=document.getElementById(`${tab}FetchIcon`);
   btn.disabled=true; icon.innerHTML='<span class="spin">⟳</span>';
@@ -2118,7 +2128,12 @@ async function fetchUrl(tab) {
     }catch(e){lastErr=e.message;html=null;if(e.definitive)break;}
   }
   btn.disabled=false; icon.textContent='⬇';
-  if(!html){setUrlStatus(tab,'error',`✗ 無法抓取（${lastErr}）。請確認網址或改用「上傳檔案」。`);return;}
+  if(!html){
+    const blocked = lastErr==='我們的伺服器無法連到這個網站，可能被網站的安全設定擋住。你的網站本身不一定有問題，請改用『上傳 HTML』檢測。';
+    setUrlStatus(tab,'error', blocked ? `✗ ${lastErr}` : `✗ 無法抓取（${lastErr}）。請確認網址，或改用「上傳 HTML」檢測。`, tab);
+    if(tab==='t1') resetResults();
+    return;
+  }
   tabState[tab].html=html; tabState[tab].label=url;
   setUrlStatus(tab,null);
   const tmpDoc=new DOMParser().parseFromString(html,'text/html');
@@ -2128,15 +2143,35 @@ async function fetchUrl(tab) {
   document.getElementById(`${tab}FetchedBadge`).innerHTML=
     `✓ 已抓取 · <strong style="color:#fff">${escHtml(title)}</strong>
      <span style="font-size:11px;color:rgba(52,211,153,0.6);margin-left:6px;word-break:break-all">${escHtml(url.length>60?url.slice(0,57)+'…':url)}</span>`;
-  if(tab==='t1') document.getElementById('t1SpaWarn').style.display=bodyLen<150?'flex':'none';
+  if(tab==='t1') document.getElementById('t1SpaWarn').style.display=detectJsSite(html).is?'flex':'none';
   if(tab==='t2') extractKeywordsFromHtml(html,url);
   if(tab==='t3') showCompPreview(html,url);
 }
-function setUrlStatus(tab,type,msg){
+function setUrlStatus(tab,type,msg,uploadTab){
   const el=document.getElementById(`${tab}UrlStatus`);
   if(!type){el.style.display='none';return;}
   el.style.display='flex'; el.className='url-status '+(type==='loading'?'url-status-loading':'url-status-error');
   el.textContent=msg;
+  if(uploadTab){
+    // 抓取失敗：在錯誤訊息旁放「改用上傳 HTML」按鈕，點了切換到上傳分頁
+    const b=document.createElement('button');
+    b.type='button'; b.className='url-status-btn'; b.textContent='改用上傳 HTML';
+    b.onclick=function(){ switchSource(uploadTab,'file'); el.style.display='none'; };
+    el.appendChild(b);
+  }
+}
+// 清空上一次的分數與結果，避免失敗或重新檢測時還顯示上一個網站的結果
+function resetResults(){
+  const res=document.getElementById('results'); if(res) res.style.display='none';
+  currentReport=null;
+  const set=(id,t)=>{const e=document.getElementById(id); if(e) e.textContent=t;};
+  set('scoreTitle','—'); set('scoreSummary','');
+  const num=document.getElementById('scoreNum'); if(num) num.innerHTML='0<div class="score-lbl">/100</div>';
+  const ring=document.getElementById('scoreRing'); if(ring) ring.style.strokeDashoffset=289;
+  ['metricPills','scoreBreakdown'].forEach(id=>{const e=document.getElementById(id); if(e) e.innerHTML='';});
+  const cta=document.getElementById('seoCta'); if(cta) cta.classList.remove('show');
+  const w=document.getElementById('jsWarn'); if(w) w.classList.remove('show');
+  const sg=document.getElementById('jsSuggest'); if(sg) sg.style.display='none';
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -2773,6 +2808,21 @@ function switchCaTab(name, btn) {
 // ═══════════════════════════════════════════════════════
 //  SEO ANALYSIS ENGINE
 // ═══════════════════════════════════════════════════════
+// 偵測 JavaScript 渲染網站：可見文字少於 200 字，或偵測到前端框架且可見文字仍偏少
+function detectJsSite(html){
+  let doc; try{ doc=new DOMParser().parseFromString(html||'','text/html'); }catch(e){ return {is:false,textLen:0,frameworks:[]}; }
+  const textLen=cleanBodyText(doc).replace(/\s+/g,' ').trim().length;
+  const src=String(html||'');
+  const fw=[];
+  if(/id=["']__next["']|__NEXT_DATA__/i.test(src)) fw.push('Next.js');
+  if(/id=["']__nuxt["']|window\.__NUXT__/i.test(src)) fw.push('Nuxt');
+  if(/data-reactroot|<div id=["']root["']>\s*<\/div>|react-dom|__REACT_DEVTOOLS/i.test(src)) fw.push('React');
+  if(/data-v-app|<div id=["']app["']>\s*<\/div>|vue(?:\.runtime)?(?:\.global)?(?:\.prod)?(?:\.min)?\.js/i.test(src)) fw.push('Vue');
+  if(/ng-version=|<app-root/i.test(src)) fw.push('Angular');
+  if(/___gatsby|id=["']svelte["']/i.test(src)) fw.push('Gatsby/Svelte');
+  const is = textLen<200 || (fw.length>0 && textLen<800);
+  return {is,textLen,frameworks:fw};
+}
 function cleanBodyText(doc){
   if(!doc||!doc.body) return '';
   const clone=doc.body.cloneNode(true);
@@ -2878,6 +2928,7 @@ function analyzeHTML(html, kwList, bizName, bizType, sourceLabel, sourceDomain) 
 
   // 11. Text length
   const wordCount=bodyText.replace(/\s+/g,' ').trim().length;info.textLength=wordCount;info.bodyText=bodyText;
+  info.jsSite=detectJsSite(html);
   if(wordCount<200){checks.push({status:'warn',title:`頁面文字量偏少（${wordCount} 字）`,detail:'建議至少 300 字，文字量低可能是 JS 渲染網站。'});actions.push({priority:'medium',title:'增加頁面文字',detail:'補充店家介紹、特色說明，目標 500 字以上。'});}
   else checks.push({status:'pass',title:`頁面文字量充足（${wordCount} 字）`,detail:'有足夠內容供搜尋引擎分析。'});
 
@@ -3121,8 +3172,14 @@ async function cancelAnalysis(){
 
 async function runAnalysis(){
   let content='',sourceLabel='',sourceDomain='';
+  resetResults();
   if(tabState.t1.mode==='url'){
-    if(!tabState.t1.html){const v=document.getElementById('t1Url').value.trim();if(v)await fetchUrl('t1');}
+    {
+      // 網址和上次抓取的不同時，要重新抓取，不能拿上一個網站的內容來分析
+      let v=document.getElementById('t1Url').value.trim();
+      if(v&&!/^https?:\/\//i.test(v)) v='https://'+v;
+      if(v&&(!tabState.t1.html||tabState.t1.label!==v)) await fetchUrl('t1');
+    }
     if(!tabState.t1.html){showErr('請先輸入網址並抓取，或切換到「上傳檔案」。');return;}
     content=tabState.t1.html;sourceLabel=tabState.t1.label;
     try{sourceDomain=new URL(tabState.t1.label).hostname;}catch{}
@@ -5708,7 +5765,12 @@ window.renderResults = function(r) {
     const totalChecks = (r.pass||0) + (r.warn||0) + (r.fail||0);
     document.querySelectorAll('.js-rule-count').forEach(el => { el.textContent = totalChecks ? `${totalChecks} 項` : ''; });
     const cta = document.getElementById('seoCta');
-    if (cta) cta.classList.toggle('show', Number(r.score) < 80);
+    const js = r.info && r.info.jsSite && r.info.jsSite.is;
+    const jw=document.getElementById('jsWarn'), jsg=document.getElementById('jsSuggest');
+    if (jw) jw.classList.toggle('show', !!js);
+    if (jsg) jsg.style.display = js ? 'block' : 'none';
+    // JavaScript 網站的分數可能不準，不顯示「找 YC 幫你修」，改建議上傳 HTML／Search Console
+    if (cta) cta.classList.toggle('show', Number(r.score) < 80 && !js);
   } catch(e) {}
   
   // Add score breakdown bars
