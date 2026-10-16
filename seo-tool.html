@@ -1392,7 +1392,7 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
     <button class="hist-toggle" onclick="toggleWLPanel()" title="品牌設定">
       <span style="opacity:0.6">⚙</span> 設定
     </button>
-    <div class="v-badge">v18</div>
+    <div class="v-badge">v19</div>
     <div class="offline-badge">本機分析</div>
   </div>
 </header>
@@ -3066,6 +3066,35 @@ function analyzeHTML(html, kwList, bizName, bizType, sourceLabel, sourceDomain) 
     if(invalid>0){checks.push({status:'warn',title:`結構化資料有 ${invalid} 筆驗證失敗`,detail:'必填欄位缺失，Google 豐富摘要可能無法正確顯示。'});actions.push({priority:'medium',title:'修復結構化資料',detail:'補充缺失的必填欄位，可用 Google Rich Results Test 驗證。'});}
     else checks.push({status:'pass',title:`結構化資料已設定（${schemas.length} 筆，驗證通過）`,detail:schemaResults.map(r=>r.type).join('、')});
   }
+
+  // ─── v19：補強檢查（Twitter Card、Favicon、圖片寬高、meta refresh、重複標籤）───
+  // Twitter Card（twCard 已在上方的社群預覽區讀取）
+  if(twCard) checks.push({status:'pass',title:`Twitter Card 已設定（${twCard}）`,detail:'在 X（Twitter）分享時會顯示完整的預覽卡片。'});
+  else{checks.push({status:'warn',title:'缺少 Twitter Card',detail:(ogTitle||ogImg)?'X（Twitter）會退回使用 Open Graph，但可能只顯示小卡片。':'在 X（Twitter）分享時不會有預覽卡片。'});actions.push({priority:'low',title:'加入 Twitter Card',detail:'在 <head> 加上 <meta name="twitter:card" content="summary_large_image">，分享時會顯示大張預覽圖。'});}
+
+  // Favicon
+  const favicon=qa('link[rel]').some(l=>/(^|\s)(icon|shortcut icon|apple-touch-icon)(\s|$)/i.test(l.getAttribute('rel')||''));
+  if(favicon) checks.push({status:'pass',title:'Favicon 網站圖示已設定',detail:'Google 手機版搜尋結果與瀏覽器分頁會顯示你的網站圖示。'});
+  else{checks.push({status:'warn',title:'缺少 Favicon 網站圖示',detail:'Google 手機版搜尋結果會在網址旁顯示網站圖示，沒有設定時會顯示預設圖示，降低辨識度。'});actions.push({priority:'medium',title:'加入 Favicon',detail:'準備 48×48 以上的正方形圖示，在 <head> 加上 <link rel="icon" href="/favicon.png">。'});}
+
+  // 圖片寬高（避免版面跳動 CLS）
+  const realImgs=imgs.filter(i=>{const w=parseInt(i.getAttribute('width'),10),h=parseInt(i.getAttribute('height'),10);return !((w&&w<=2)||(h&&h<=2));});
+  const noDims=realImgs.filter(i=>!(i.getAttribute('width')&&i.getAttribute('height'))&&!/aspect-ratio|(^|;)\s*height\s*:/i.test(i.getAttribute('style')||''));
+  if(!realImgs.length) checks.push({status:'pass',title:'沒有圖片造成版面跳動的風險',detail:'頁面沒有內容圖片。'});
+  else if(!noDims.length) checks.push({status:'pass',title:`所有 ${realImgs.length} 張圖片都有設定寬高`,detail:'圖片載入時不會造成版面跳動（CLS）。'});
+  else{checks.push({status:'warn',title:`${noDims.length} 張圖片沒有設定寬高`,detail:`共 ${realImgs.length} 張圖片，其中 ${noDims.length} 張缺少 width／height。圖片載入時版面會跳動，影響 Core Web Vitals 的 CLS 分數。`});actions.push({priority:'medium',title:'替圖片加上寬高',detail:'在 <img> 加上 width 與 height 屬性（填圖片原始尺寸即可，CSS 仍可縮放），瀏覽器就能預留空間、避免版面跳動。'});}
+
+  // meta refresh 跳轉
+  const metaRefresh=qa('meta[http-equiv]').find(m=>/^refresh$/i.test(m.getAttribute('http-equiv')||''));
+  if(!metaRefresh) checks.push({status:'pass',title:'沒有使用 meta refresh 跳轉',detail:'頁面不會用過時的方式自動跳轉。'});
+  else{const rc=(metaRefresh.getAttribute('content')||'');const toUrl=/url\s*=/i.test(rc);
+    checks.push({status:toUrl?'fail':'warn',title:toUrl?'使用 meta refresh 跳轉到其他網址':'頁面設定了 meta refresh 自動重新整理',detail:toUrl?`偵測到 <meta http-equiv="refresh" content="${rc.slice(0,60)}">。搜尋引擎可能把它當成低品質的跳轉，排名不一定會轉移到新網址。`:'自動重新整理會打斷閱讀，也可能被搜尋引擎視為不良體驗。'});
+    actions.push({priority:toUrl?'high':'low',title:toUrl?'改用 301 轉址取代 meta refresh':'移除 meta refresh',detail:toUrl?'在主機或 CDN 設定 301 永久轉址；若無法設定（例如 GitHub Pages），至少在新網址加上 canonical。':'移除 <meta http-equiv="refresh">，需要更新內容時改用 JavaScript 局部更新。'});}
+
+  // 重複的 Title／Meta Description 標籤
+  const titleCount=qa('head title').length, descCount=qa('meta[name="description"]').length;
+  if(titleCount<=1&&descCount<=1) checks.push({status:'pass',title:'Title 與 Description 標籤沒有重複',detail:'每個頁面各只有一組，搜尋引擎不會混淆。'});
+  else{checks.push({status:'warn',title:`有重複的${titleCount>1?` ${titleCount} 個 <title>`:''}${titleCount>1&&descCount>1?' 與':''}${descCount>1?` ${descCount} 個 Meta Description`:''}`,detail:'同一頁有多個 Title 或 Description 時，搜尋引擎只會採用其中一個，不一定是你想要的那個。常見原因是佈景主題和 SEO 外掛重複輸出。'});actions.push({priority:'medium',title:'移除重複的 Title／Description',detail:'檢查佈景主題與 SEO 外掛，只保留一組 <title> 與 <meta name="description">。'});}
 
   // ─── READABILITY ───
   const rawBodyText=bodyText.trim();
@@ -6606,7 +6635,7 @@ function shareReport() {
 
     <div class="footer-bottom">
       <div class="footer-bottom-left">
-        © 2026 SEO Analyzer Pro · 版本 v18 · Ctrl+Enter 快速分析
+        © 2026 SEO Analyzer Pro · 版本 v19 · Ctrl+Enter 快速分析
       </div>
       <div class="footer-pills">
         <span class="footer-pill"><span class="dot"></span>純前端架構</span>
