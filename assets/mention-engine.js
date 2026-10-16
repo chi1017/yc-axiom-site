@@ -126,7 +126,7 @@
     r.ownDomainCited = r.domainCited;
     if (prompt.kind === 'brand') {
       var unknown = RE_UNKNOWN.test(text);
-      r.recognized = !unknown && r.chars >= 40;
+      r.recognized = !unknown && r.chars >= 15;
       r.unknownPhrase = unknown;
     }
     return r;
