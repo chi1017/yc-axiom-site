@@ -193,12 +193,13 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
     </div>
 
     <div class="geo-full">
-      <div class="geo-section"><h3>各面向得分</h3><p class="sub">AI 可見度由六個面向組成，滿分 100 分。「無法判斷」與「不適用」的項目不計入分母。</p><div id="catRows"></div></div>
+      <div class="geo-section"><h3>各面向得分</h3><p class="sub">AI 可見度由七個面向組成，滿分 100 分。「無法判斷」與「不適用」的項目不計入分母。</p><div id="catRows"></div></div>
       <div class="geo-section" id="issuesBox"><h3>優先處理清單</h3><p class="sub">依「失分最多」排序，先改上面的，效果最大。</p><div id="issueList"></div></div>
       <div class="geo-section"><h3>逐項檢測結果</h3><p class="sub">通過＝拿滿分，警告＝拿一半，需修正＝0 分。</p><div id="itemList"></div></div>
       <div class="geo-section"><h3>加分項與參考資訊</h3><div id="bonusBox"></div><div id="botsBox" style="margin-top:14px"></div></div>
     </div>
 
+    <div class="geo-section" id="mentionNext" style="border-color:rgba(95,163,150,.35)"><h3>下一步：實際問問 AI 會不會推薦你</h3><p class="sub" style="margin-bottom:10px">這份分數是官網的條件。想知道客人問 AI「推薦哪一家」時你有沒有出現，可以用免費的 AI 提及檢測，把 ChatGPT、Perplexity 的回答貼回來分析。</p><a class="btn-sub" id="mentionLink" href="geo/ai-mentions/" target="_top" style="text-decoration:none;display:inline-block">開始 AI 提及檢測 →</a></div>
     <div class="actions-row" id="exportRow">
       <button class="btn-sub" onclick="exportPDF()">⬇ 列印／存成 PDF</button>
       <button class="btn-sub" onclick="exportJSON()">⬇ JSON</button>
@@ -210,7 +211,7 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
 </div>
 <div id="toast" role="status"></div>
 
-<script src="assets/geo-engine.js"></script>
+<script src="assets/geo-engine.js?v=2026-10-16b"></script>
 <script>
 var DISCLAIMER = GEO.DISCLAIMER;
 ['disclaimerTop', 'disclaimerBottom'].forEach(function (id) { document.getElementById(id).textContent = DISCLAIMER + '本工具檢查的是網站讓 AI 容易讀懂的條件，不是實際詢問 AI。'; });
@@ -408,6 +409,7 @@ function renderResults(r) {
   $('bonusBox').innerHTML = '<div class="item st-' + (l.status === 'found' ? 'pass' : (l.status === 'unknown' ? 'unknown' : 'na')) + '"><span class="chip">' + esc(lt[l.status] || '') + '</span><span class="t">llms.txt（選擇性加分，最多 +3 分）</span><span class="pts">+' + l.bonus + '</span><span class="n">' + esc(l.note) + '</span></div>';
   var stTxt = { allowed: '允許', blocked: '被擋', unknown: '未知' };
   $('botsBox').innerHTML = '<div style="font-size:12.5px;color:var(--text3);margin-bottom:6px">其他常見 AI 爬蟲（僅供參考，不計分）</div><div class="bots">' + (r.extraBots || []).map(function (b) { return '<span class="' + b.state + '">' + esc(b.ua) + '：' + stTxt[b.state] + '</span>'; }).join('') + '</div>';
+  var ml = $('mentionLink'); if (ml) ml.setAttribute('href', 'geo/ai-mentions/' + (r.mode === 'url' && /^https?:\/\//i.test(r.url || '') ? '?url=' + encodeURIComponent(r.url) : ''));
   var cl = $('crossLinks'); if (window.onGeoResult) { try { window.onGeoResult(r, cl); } catch (e) { console.error(e); } }
 }
 

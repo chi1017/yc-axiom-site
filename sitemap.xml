@@ -128,8 +128,14 @@
   </url>
   <url>
     <loc>https://chi1017.github.io/yc-axiom-site/geo/</loc>
-    <lastmod>2026-10-15</lastmod>
+    <lastmod>2026-10-16</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://chi1017.github.io/yc-axiom-site/geo/ai-mentions/</loc>
+    <lastmod>2026-10-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
 </urlset>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 提及檢測工具｜ChatGPT 會推薦你嗎 - YC AXIOM</title>
+<meta name="description" content="YC AXIOM 免費 AI 提及檢測：產生客人會問 AI 的問題，把 ChatGPT、Perplexity、Gemini 的回答貼回來，就能看到品牌有沒有被推薦、排第幾、AI 引用了哪些網站。">
+<link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/geo/ai-mentions/">
+<meta name="robots" content="noindex, follow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314120F'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%235FA396' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B0A09;--bg2:#14120F;--bg3:#1A1815;--border:rgba(245,240,230,.08);--border2:rgba(245,240,230,.14);--accent:#5FA396;--accent2:#8CD2C2;--green:#10b981;--red:#ef4444;--gold:#f59e0b;--text:#DDD8CE;--text2:#9C9686;--text3:#6b6558;--radius:14px;--radius-sm:8px;}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.7;min-height:100vh}
+a{color:var(--accent2)}
+header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);gap:12px;flex-wrap:wrap}
+.logo{font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
+.logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent)}
+.badge-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.offline-badge{font-size:11px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:4px 12px;border-radius:20px;font-weight:500}
+.v-badge{font-size:11px;background:rgba(95,163,150,.15);border:1px solid rgba(95,163,150,.3);color:var(--accent2);padding:4px 10px;border-radius:20px;font-weight:600}
+.main{max-width:960px;margin:0 auto;padding:40px 24px 70px}
+.hero{text-align:center;margin-bottom:32px}
+.hero h1{font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:clamp(1.6rem,4.5vw,2.4rem);font-weight:800;letter-spacing:-.02em;color:#fff;margin-bottom:10px}
+.hero p{color:var(--text2);max-width:580px;margin:0 auto}
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+.step{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.step b{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#0b0a09;font-size:13px;font-weight:800;flex-shrink:0}
+.step h2{font-size:17px;color:#fff;font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif}
+.card>.sub{font-size:12.5px;color:var(--text3);margin:0 0 16px 34px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.grid .full{grid-column:1/-1}
+label.f{display:block;font-size:12.5px;color:var(--text2);margin-bottom:5px}
+label.f em{font-style:normal;color:#f87171;margin-left:3px}
+label.f small{color:var(--text3);margin-left:6px}
+.in{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font:14px 'Noto Sans TC',sans-serif;outline:none}
+.in:focus{border-color:var(--accent)}
+textarea.in{min-height:110px;resize:vertical;font-size:13px;line-height:1.6}
+select.in{appearance:auto;padding:8px 10px;font-size:13px;width:auto;min-width:150px}
+.btn-run{width:100%;padding:13px;background:var(--accent);color:#0b0a09;border:0;border-radius:var(--radius-sm);font:700 15px 'Noto Sans TC',sans-serif;cursor:pointer;margin-top:16px}
+.btn-run:hover:not(:disabled){filter:brightness(1.08)}.btn-run:disabled{opacity:.5;cursor:not-allowed}
+.btn-sub{background:var(--bg3);border:1px solid var(--border2);color:var(--accent2);border-radius:var(--radius-sm);padding:7px 12px;font:13px 'Noto Sans TC',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.btn-sub:hover{border-color:var(--accent)}
+.btn-link{background:none;border:0;color:var(--text3);font:12.5px 'Noto Sans TC',sans-serif;cursor:pointer;text-decoration:underline;padding:4px 0}
+.note{display:flex;gap:8px;background:rgba(95,163,150,.06);border:1px solid rgba(95,163,150,.15);border-radius:var(--radius-sm);padding:10px 12px;font-size:12.5px;color:var(--text2);line-height:1.65;margin-top:14px}
+.note.warn{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.25);color:#e9c37a}
+.status{display:none;font-size:13px;padding:9px 12px;border-radius:var(--radius-sm);margin-top:12px}
+.status.error{display:block;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:#f87171}
+.disclaimer{font-size:12px;color:var(--text3);text-align:center;margin:10px 0 0;line-height:1.7}
+/* prompts */
+#stepAsk,#stepGo,#results{display:none}
+.q{border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-top:12px;background:rgba(0,0,0,.14)}
+.q-head{display:flex;gap:8px;align-items:flex-start}
+.q-kind{flex-shrink:0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:2px;background:rgba(95,163,150,.18);color:#7fd1c2}
+.q-kind.brand{background:rgba(245,158,11,.16);color:#fbbf24}
+.q-text{flex:1;color:var(--text);font-size:14px;font-weight:500}
+.q-done{flex-shrink:0;font-size:11.5px;color:#34d399;margin-top:3px}
+.q-btns{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.ans{margin-top:8px}
+.ans-top{display:flex;gap:8px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.ans-top span{font-size:12px;color:var(--text3)}
+.progress{font-size:13px;color:var(--text2);margin-top:4px}
+.progress b{color:var(--accent2)}
+/* results */
+.score-hero{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:24px;display:flex;align-items:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}
+.score-circle{position:relative;width:124px;height:124px;flex-shrink:0}
+.score-circle svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:800 32px 'Plus Jakarta Sans',sans-serif;color:#fff;line-height:1}
+.score-num small{font-size:16px}
+.score-lbl{font-size:11px;font-weight:500;color:var(--text3);margin-top:5px}
+.score-info{flex:1;min-width:230px}
+.score-info h2{font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:20px;color:#fff;margin-bottom:6px}
+.score-info p{color:var(--text2);font-size:13px}
+.grade{display:inline-block;font-size:12px;font-weight:700;padding:2px 12px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.grade.good{background:rgba(16,185,129,.16);color:#34d399}.grade.fair{background:rgba(245,158,11,.16);color:#fbbf24}.grade.low,.grade.poor{background:rgba(239,68,68,.16);color:#f87171}.grade.na{background:var(--bg3);color:var(--text2)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.kpi{background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px}
+.kpi b{display:block;font:800 19px 'Plus Jakarta Sans',sans-serif;color:#fff;font-variant-numeric:tabular-nums}
+.kpi span{font-size:11.5px;color:var(--text3)}
+.cta{margin-top:14px;display:none;gap:10px;flex-wrap:wrap;align-items:center}
+.cta.show{display:flex}
+.cta a.line{background:#06C755;color:#fff;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:6px;font-size:14px}
+.cta .hint{font-size:12px;color:var(--text3)}
+.sec{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px}
+.sec h3{font-size:16px;color:#fff;margin-bottom:4px;font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif}
+.sec>.sub{font-size:12.5px;color:var(--text3);margin-bottom:12px}
+.row{display:grid;grid-template-columns:150px 1fr 74px;gap:12px;align-items:center;padding:6px 0;font-size:13px}
+.row .bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.row .bar i{display:block;height:100%;border-radius:4px;background:var(--text3)}
+.row.own .bar i{background:var(--accent)}.row.own span:first-child{color:var(--accent2);font-weight:700}
+.row .pt{text-align:right;color:var(--text2);font-variant-numeric:tabular-nums}
+.adv{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--border)}
+.adv:first-of-type{border-top:0}
+.adv .lv{flex-shrink:0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;height:fit-content;margin-top:2px;background:rgba(239,68,68,.18);color:#f87171;white-space:nowrap}
+.adv .lv.medium{background:rgba(245,158,11,.18);color:#fbbf24}.adv .lv.low{background:rgba(95,163,150,.18);color:#7fd1c2}
+.adv b{display:block;color:var(--text);font-size:14px}
+.adv p{font-size:13px;color:var(--text2);margin-top:4px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.chips span{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 12px;color:var(--text2)}
+.chips span.own{border-color:rgba(95,163,150,.5);color:var(--accent2)}
+.chips span i{font-style:normal;color:var(--text3);margin-left:4px}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th,.tbl td{text-align:left;padding:8px 6px;border-top:1px solid var(--border);vertical-align:top}
+.tbl th{color:var(--text3);font-weight:500;border-top:0}
+.tbl th:not(:first-child),.tbl td:not(:first-child){white-space:nowrap}
+.tbl td:first-child{min-width:150px}
+.tbl td.y{color:#34d399}.tbl td.n{color:#f87171}.tbl td.m{color:var(--text3)}
+.tbl-wrap{overflow-x:auto}
+.empty{font-size:13px;color:var(--text3)}
+.actions-row{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+#toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:#222;color:#fff;border:1px solid var(--border2);padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:all .3s;z-index:9999}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+html.embedded,html.embedded body{overflow:hidden}
+html.embedded body{min-height:0}
+html.embedded .hero{display:none}
+html.embedded .main{padding-top:24px}
+html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(--vh,600px) - 90px)}
+@media (max-width:640px){header{padding:14px 16px}.main{padding:24px 14px 50px}.card{padding:16px}.card>.sub{margin-left:0}.grid{grid-template-columns:1fr}.score-hero{padding:18px;gap:16px}.row{grid-template-columns:96px 1fr 62px}.kpis{grid-template-columns:1fr 1fr 1fr;gap:8px}.kpi{padding:8px}.kpi b{font-size:16px}}
+@media print{
+  body{background:#fff;color:#111}header,#stepInfo,#stepAsk,#stepGo,.actions-row,.cta,.hero,#toast{display:none!important}
+  #results{display:block!important}.score-hero,.sec,.kpi{background:#fff;border-color:#bbb;color:#111}.score-info h2,.sec h3,.score-num,.kpi b{color:#111}
+  .adv b{color:#111}.adv p,.row .pt,.tbl td{color:#333}html.embedded,html.embedded body{overflow:visible}
+}
+</style>
+<script>
+(function () {
+  if (window.parent === window) return;
+  var de = document.documentElement;
+  de.classList.add('embedded');
+  function post() {
+    var b = document.body; if (!b) return;
+    var cs = getComputedStyle(b);
+    var h = b.getBoundingClientRect().height + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
+    parent.postMessage({ type: 'seo-tool-height', height: h }, '*');
+  }
+  function init() {
+    if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+    post(); setTimeout(post, 400); setTimeout(post, 1500);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  window.addEventListener('message', function (e) {
+    if (e.source !== parent || !e.data || e.data.type !== 'seo-viewport') return;
+    de.style.setProperty('--vt', e.data.top + 'px');
+    de.style.setProperty('--vh', e.data.height + 'px');
+  });
+})();
+</script>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-dot"></div><span>AI 提及檢測</span><span style="font-weight:400;font-size:11px;color:var(--text3)">GEO</span></div>
+  <div class="badge-wrap"><span class="offline-badge">瀏覽器本機分析</span><span class="v-badge">免費</span></div>
+</header>
+
+<div class="main">
+  <div class="hero">
+    <h1>ChatGPT 會推薦你嗎？</h1>
+    <p>工具幫你準備客人真的會問 AI 的問題。你把 AI 的回答貼回來，就能看到品牌有沒有被推薦、排第幾、AI 又引用了哪些網站。</p>
+  </div>
+
+  <!-- 步驟 1 -->
+  <div class="card" id="stepInfo">
+    <div class="step"><b>1</b><h2>填寫品牌資料</h2></div>
+    <p class="sub">用來產生問題，以及在 AI 的回答裡找到你。</p>
+    <div class="grid">
+      <div><label class="f" for="fBrand">品牌／店名<em>*</em></label><input class="in" id="fBrand" placeholder="例如 小方光影設計" autocomplete="off"></div>
+      <div><label class="f" for="fService">服務類型<em>*</em><small>客人會怎麼稱呼你這一行</small></label><input class="in" id="fService" placeholder="例如 商業攝影工作室" autocomplete="off"></div>
+      <div><label class="f" for="fArea">地區<small>選填</small></label><input class="in" id="fArea" placeholder="例如 高雄左營" autocomplete="off"></div>
+      <div><label class="f" for="fDomain">官網網址<small>選填，用來判斷 AI 有沒有引用你的網站</small></label><input class="in" id="fDomain" placeholder="例如 https://www.shooting.com.tw" autocomplete="off" inputmode="url"></div>
+      <div class="full"><label class="f" for="fAliases">其他寫法<small>選填，用逗號分隔，例如英文名、簡稱</small></label><input class="in" id="fAliases" placeholder="例如 小方光影, Xiaofang Studio" autocomplete="off"></div>
+      <div class="full"><label class="f" for="fComp">想比較的競爭對手<small>選填，用逗號分隔</small></label><input class="in" id="fComp" placeholder="例如 A 攝影, B 婚紗工作室" autocomplete="off"></div>
+    </div>
+    <button class="btn-run" id="genBtn" onclick="generate()">產生要問 AI 的問題</button>
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+  </div>
+
+  <!-- 步驟 2 -->
+  <div class="card" id="stepAsk">
+    <div class="step"><b>2</b><h2>拿去問 AI，把回答貼回來</h2></div>
+    <p class="sub">每題按按鈕開啟 AI，把完整回答複製貼到下面的框。不用每題都做，建議至少 5 個回答。</p>
+    <div class="note warn"><span>💡</span><span><b>請用「無痕視窗」或 ChatGPT 的「暫時聊天」提問。</b>如果你平常就用自己的帳號跟 AI 聊過自己的品牌，AI 可能會因為「記得你」而特別提到你，結果會不準。</span></div>
+    <div id="qList"></div>
+  </div>
+
+  <!-- 步驟 3 -->
+  <div class="card" id="stepGo">
+    <div class="step"><b>3</b><h2>分析結果</h2></div>
+    <p class="progress" id="progress"></p>
+    <button class="btn-run" id="runBtn" onclick="run()" disabled>開始分析</button>
+  </div>
+  <p class="disclaimer" id="disclaimerTop"></p>
+
+  <!-- 結果 -->
+  <div id="results" aria-live="polite">
+    <div class="score-hero">
+      <div class="score-circle">
+        <svg viewBox="0 0 110 110"><circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="9"/><circle id="ring" cx="55" cy="55" r="46" fill="none" stroke="#5FA396" stroke-width="9" stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round" style="transition:stroke-dashoffset 1s ease"/></svg>
+        <div class="score-num"><span id="rateNum">—</span><span class="score-lbl">推薦提及率</span></div>
+      </div>
+      <div class="score-info">
+        <h2><span id="rTitle">—</span><span class="grade na" id="rGrade"></span></h2>
+        <p id="rSummary"></p>
+        <div class="kpis">
+          <div class="kpi"><b id="kPos">—</b><span>平均排名</span></div>
+          <div class="kpi"><b id="kKnow">—</b><span>AI 認識你</span></div>
+          <div class="kpi"><b id="kSite">—</b><span>引用官網次數</span></div>
+        </div>
+        <p id="rLast" style="margin-top:10px;font-size:12px;color:var(--text3)"></p>
+        <div class="cta" id="cta"><a class="line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">找 YC 幫你提高 AI 曝光</a><span class="hint">想讓 AI 更常推薦你，歡迎 LINE 詢問。</span></div>
+      </div>
+    </div>
+
+    <div class="sec" id="advBox"><h3>建議先做的事</h3><p class="sub">依照這次的回答整理，最上面的影響最大。</p><div id="advList"></div></div>
+    <div class="sec"><h3>各家 AI 的表現</h3><p class="sub">只計算「推薦類」問題：在這些回答裡，有多少比例提到你。</p><div id="engRows"></div></div>
+    <div class="sec"><h3>和競爭對手比較</h3><p class="sub">在推薦類回答中被提到的次數。只比較你在步驟 1 填的對手。</p><div id="sovRows"></div>
+      <div id="othersBox" style="margin-top:14px"></div></div>
+    <div class="sec"><h3>AI 引用了哪些網站</h3><p class="sub">回答裡出現的網址。AI 常引用的網站，就是值得讓品牌出現的地方。</p><div id="domBox"></div></div>
+    <div class="sec"><h3>逐題結果</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>問題</th><th>AI</th><th>提到你</th><th>排名</th><th>引用官網</th></tr></thead><tbody id="ansRows"></tbody></table></div></div>
+
+    <div class="actions-row">
+      <button class="btn-sub" onclick="window.print()">⬇ 列印／存成 PDF</button>
+      <button class="btn-sub" onclick="exportJSON()">⬇ JSON</button>
+      <button class="btn-sub" onclick="exportCSV()">⬇ CSV</button>
+      <a class="btn-sub" id="geoLink" href="geo/" target="_top">檢查官網 AI 讀不讀得懂 →</a>
+    </div>
+    <p class="disclaimer" id="disclaimerBottom"></p>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script src="assets/mention-engine.js?v=2026-10-16"></script>
+<script>
+var STORE = 'yc-ai-mentions-v1';
+var prompts = [], answers = {}, currentReport = null;
+['disclaimerTop', 'disclaimerBottom'].forEach(function (id) { document.getElementById(id).textContent = MENTION.DISCLAIMER + '工具不會連線到任何 AI，你貼上的內容只在這個瀏覽器裡分析。'; });
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function $(id) { return document.getElementById(id); }
+function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function () { t.classList.remove('show'); }, 2200); }
+function inputVals() { return { brand: $('fBrand').value, service: $('fService').value, area: $('fArea').value, domain: $('fDomain').value, aliases: $('fAliases').value, competitors: $('fComp').value }; }
+
+// ── 本機暫存：只存在這個瀏覽器，方便下次回來繼續或比較上一次 ──
+function load() { try { return JSON.parse(localStorage.getItem(STORE) || '{}') || {}; } catch (e) { return {}; } }
+function save(extra) {
+  try { var d = load(); d.form = inputVals(); d.answers = answers; if (extra) for (var k in extra) d[k] = extra[k]; localStorage.setItem(STORE, JSON.stringify(d)); } catch (e) { /* 無痕或封鎖儲存時略過 */ }
+}
+
+function generate() {
+  var v = inputVals();
+  if (!v.brand.trim() || !v.service.trim()) { var s = $('status'); s.className = 'status error'; s.textContent = '請填寫「品牌／店名」與「服務類型」。'; return; }
+  $('status').className = 'status';
+  // 換了品牌或服務類型，問題就不同了，舊的回答不能沿用
+  var old = load().form;
+  if (old && (MENTION.key(old.brand) !== MENTION.key(v.brand) || MENTION.key(old.service) !== MENTION.key(v.service) || MENTION.key(old.area) !== MENTION.key(v.area))) answers = {};
+  prompts = MENTION.genPrompts(MENTION.profileFrom(v));
+  renderPrompts();
+  $('stepAsk').style.display = 'block'; $('stepGo').style.display = 'block';
+  updateProgress(); save();
+  if (window.parent === window) $('stepAsk').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function engineOptions(sel) {
+  return MENTION.ENGINES.map(function (e) { return '<option value="' + e.id + '"' + (e.id === sel ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('');
+}
+function renderPrompts() {
+  $('qList').innerHTML = prompts.map(function (q) {
+    var list = answers[q.id] && answers[q.id].length ? answers[q.id] : [{ engine: 'chatgpt', text: '' }];
+    answers[q.id] = list;
+    var btns = MENTION.ENGINES.filter(function (e) { return e.open; }).map(function (e) {
+      return '<a class="btn-sub" href="' + esc(e.open(q.text)) + '" target="_blank" rel="noopener" onclick="openAI(\'' + q.id + '\',\'' + e.id + '\')">' + esc(e.name) + ' ↗</a>';
+    }).join('');
+    return '<div class="q" id="q-' + q.id + '"><div class="q-head"><span class="q-kind ' + q.kind + '">' + (q.kind === 'brand' ? '品牌' : '推薦') + '</span><span class="q-text">' + esc(q.text) + '</span><span class="q-done" id="done-' + q.id + '"></span></div>' +
+      '<div class="q-btns"><button class="btn-sub" onclick="copyQ(\'' + q.id + '\')">複製問題</button>' + btns + '</div>' +
+      '<div id="ans-' + q.id + '">' + list.map(function (a, i) { return ansHtml(q.id, i, a); }).join('') + '</div>' +
+      '<button class="btn-link" onclick="addAns(\'' + q.id + '\')">＋ 再貼一個 AI 的回答（同一題問不同 AI）</button></div>';
+  }).join('');
+  prompts.forEach(function (q) { markDone(q.id); });
+}
+function ansHtml(qid, i, a) {
+  return '<div class="ans"><div class="ans-top"><span>回答來自</span><select class="in" onchange="setAns(\'' + qid + '\',' + i + ',\'engine\',this.value)" aria-label="回答來自哪個 AI">' + engineOptions(a.engine) + '</select></div>' +
+    '<textarea class="in" placeholder="把 AI 的完整回答貼在這裡…" oninput="setAns(\'' + qid + '\',' + i + ',\'text\',this.value)" aria-label="AI 的回答">' + esc(a.text) + '</textarea></div>';
+}
+function setAns(qid, i, k, v) { answers[qid][i][k] = v; markDone(qid); updateProgress(); save(); }
+function addAns(qid) {
+  var used = answers[qid].map(function (a) { return a.engine; });
+  var next = MENTION.ENGINES.filter(function (e) { return used.indexOf(e.id) < 0; })[0];
+  answers[qid].push({ engine: next ? next.id : 'other', text: '' });
+  var box = $('ans-' + qid), i = answers[qid].length - 1;
+  box.insertAdjacentHTML('beforeend', ansHtml(qid, i, answers[qid][i]));
+  box.lastElementChild.querySelector('textarea').focus();
+}
+// 按了哪個 AI 的按鈕，就把第一個還空著的回答框設成那個 AI
+function openAI(qid, eng) {
+  var list = answers[qid], i;
+  for (i = 0; i < list.length; i++) if (!list[i].text.trim()) break;
+  if (i === list.length) { addAns(qid); i = list.length - 1; }
+  list[i].engine = eng;
+  var sel = $('ans-' + qid).querySelectorAll('select')[i]; if (sel) sel.value = eng;
+  save();
+}
+function copyQ(qid) {
+  var q = prompts.filter(function (x) { return x.id === qid; })[0]; if (!q) return;
+  var done = function () { toast('已複製問題'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(q.text).then(done, function () { fallbackCopy(q.text); done(); });
+  else { fallbackCopy(q.text); done(); }
+}
+function fallbackCopy(t) { var ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} ta.remove(); }
+function filled() { var out = []; Object.keys(answers).forEach(function (k) { answers[k].forEach(function (a) { if (a.text && a.text.trim().length >= 10) out.push({ promptId: k, engine: a.engine, text: a.text }); }); }); return out.filter(function (a) { return prompts.some(function (q) { return q.id === a.promptId; }); }); }
+function markDone(qid) { var n = (answers[qid] || []).filter(function (a) { return a.text && a.text.trim().length >= 10; }).length; var el = $('done-' + qid); if (el) el.textContent = n ? '✓ ' + n + ' 個回答' : ''; }
+function updateProgress() {
+  var f = filled(), d = f.filter(function (a) { return /^d/.test(a.promptId); }).length;
+  $('progress').innerHTML = '已貼上 <b>' + f.length + '</b> 個回答（推薦類 ' + d + ' 個）。' + (f.length < 5 ? '建議至少 5 個，結果比較有參考價值。' : '可以開始分析了。');
+  $('runBtn').disabled = d === 0;
+}
+
+function run() {
+  var r = MENTION.analyze(inputVals(), filled());
+  var prev = load().last;
+  render(r, prev);
+  save({ last: { at: r.scannedAt, rate: r.summary.discovery.rate, brand: r.profile.brand, n: r.summary.discovery.total } });
+  if (window.parent === window) $('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function bars(rows) {
+  var max = Math.max.apply(null, rows.map(function (x) { return x.v; }).concat([1]));
+  return rows.map(function (x) {
+    return '<div class="row' + (x.own ? ' own' : '') + '"><span>' + esc(x.label) + '</span><div class="bar"><i style="width:' + Math.round(x.v / max * 100) + '%"></i></div><span class="pt">' + esc(x.pt) + '</span></div>';
+  }).join('');
+}
+function render(r, prev) {
+  currentReport = r;
+  var s = r.summary, d = s.discovery;
+  $('results').style.display = 'block';
+  $('rateNum').innerHTML = d.rate == null ? '—' : d.rate + '<small>%</small>';
+  var ring = $('ring'); ring.style.strokeDashoffset = 289 * (1 - (d.rate || 0) / 100);
+  ring.setAttribute('stroke', d.rate >= 60 ? '#10b981' : (d.rate >= 30 ? '#f59e0b' : '#ef4444'));
+  $('rTitle').textContent = r.profile.brand;
+  var g = $('rGrade'); g.className = 'grade ' + s.level.key; g.textContent = s.level.label;
+  $('rSummary').textContent = d.total + ' 個推薦類回答中，有 ' + d.mentioned + ' 個提到你' + (d.top3 ? '，其中 ' + d.top3 + ' 次排在前 3 名' : '') + '。共分析 ' + s.answers + ' 個回答。';
+  $('kPos').textContent = d.avgPosition == null ? '—' : '第 ' + d.avgPosition;
+  $('kKnow').textContent = s.brand.total ? s.brand.recognized + ' / ' + s.brand.total : '—';
+  $('kSite').textContent = r.profile.domain ? s.ownDomainCited : '—';
+  $('rLast').textContent = prev && prev.rate != null && prev.brand === r.profile.brand ? '上次（' + prev.at.slice(0, 10) + '）推薦提及率 ' + prev.rate + '%，共 ' + prev.n + ' 個推薦類回答。' : '';
+  $('cta').classList.toggle('show', d.rate != null && d.rate < 60);
+
+  var lvTxt = { high: '高', medium: '中', low: '低' };
+  $('advBox').style.display = s.advice.length ? '' : 'none';
+  $('advList').innerHTML = s.advice.map(function (a) { return '<div class="adv"><span class="lv ' + a.level + '">' + lvTxt[a.level] + '</span><div><b>' + esc(a.title) + '</b><p>' + esc(a.body) + '</p></div></div>'; }).join('');
+
+  $('engRows').innerHTML = s.byEngine.length ? bars(s.byEngine.map(function (e) { return { label: e.name, v: e.rate || 0, pt: e.mentioned + ' / ' + e.total, own: true }; })) : '<p class="empty">沒有推薦類的回答。</p>';
+
+  $('sovRows').innerHTML = s.shareOfVoice.length > 1 ? bars(s.shareOfVoice.map(function (x) { return { label: x.name, v: x.count, pt: x.count + ' 次', own: x.own }; })) : '<p class="empty">步驟 1 沒有填競爭對手，所以這裡只看得到自己。</p>' + bars([{ label: r.profile.brand, v: d.mentioned, pt: d.mentioned + ' 次', own: true }]);
+  $('othersBox').innerHTML = s.others.length ? '<div style="font-size:12.5px;color:var(--text3);margin-bottom:6px">回答裡其他常被列出的名稱（自動擷取，可能包含非店名，僅供參考）</div><div class="chips">' + s.others.map(function (o) { return '<span>' + esc(o.name) + '<i>×' + o.count + '</i></span>'; }).join('') + '</div>' : '';
+
+  $('domBox').innerHTML = s.domains.length ? '<div class="chips">' + s.domains.map(function (x) { return '<span class="' + (x.own ? 'own' : '') + '">' + esc(x.domain) + (x.own ? '（你的官網）' : '') + '<i>×' + x.count + '</i></span>'; }).join('') + '</div>' :
+    '<p class="empty">回答裡沒有找到網址。Perplexity 與 Google AI 摘要通常會列出來源，複製時記得連來源一起貼上。</p>';
+
+  $('ansRows').innerHTML = r.answers.map(function (a) {
+    var ment = a.kind === 'brand' ? (a.recognized ? '<td class="y">認識</td>' : '<td class="n">不認識</td>') : (a.mentioned ? '<td class="y">有</td>' : '<td class="n">沒有</td>');
+    return '<tr><td>' + esc(a.prompt) + '</td><td>' + esc(a.engineName) + '</td>' + ment +
+      '<td class="m">' + (a.position ? '第 ' + a.position + (a.listCount ? ' / ' + a.listCount : '') : '—') + '</td>' +
+      (r.profile.domain ? (a.ownDomainCited ? '<td class="y">有</td>' : '<td class="m">沒有</td>') : '<td class="m">—</td>') + '</tr>';
+  }).join('');
+}
+
+function download(name, mime, text) { var b = new Blob([text], { type: mime }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+function stamp() { return new Date().toISOString().slice(0, 10); }
+function exportJSON() { if (currentReport) download('ai-mentions-' + stamp() + '.json', 'application/json', JSON.stringify(currentReport, null, 2)); }
+function exportCSV() {
+  if (!currentReport) return;
+  var rows = [['問題', '類型', 'AI', '提到你', '排名', '列出數量', '引用官網', '一起被提到的對手', 'AI 引用的網站']];
+  currentReport.answers.forEach(function (a) {
+    rows.push([a.prompt, a.kind === 'brand' ? '品牌' : '推薦', a.engineName, a.kind === 'brand' ? (a.recognized ? '認識' : '不認識') : (a.mentioned ? '有' : '沒有'), a.position || '', a.listCount || '', a.ownDomainCited ? '有' : '沒有', a.competitors.join('、'), a.citedDomains.join('、')]);
+  });
+  download('ai-mentions-' + stamp() + '.csv', 'text/csv;charset=utf-8', '﻿' + rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n'));
+}
+
+// 進入頁面時還原上次填的資料與回答
+(function restore() {
+  var d = load();
+  if (d.form) { $('fBrand').value = d.form.brand || ''; $('fService').value = d.form.service || ''; $('fArea').value = d.form.area || ''; $('fDomain').value = d.form.domain || ''; $('fAliases').value = d.form.aliases || ''; $('fComp').value = d.form.competitors || ''; }
+  if (d.answers) answers = d.answers;
+  if (d.form && d.form.brand && d.form.service) generate();
+  // 從 GEO 檢測帶網址過來：?url=
+  try { var u = new URLSearchParams(location.search).get('url'); if (u && /^https?:\/\//i.test(u) && !$('fDomain').value) $('fDomain').value = u; } catch (e) {}
+})();
+</script>
+</body>
+</html>
