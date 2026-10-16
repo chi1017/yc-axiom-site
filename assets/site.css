@@ -347,10 +347,10 @@
         .tech-desc { font-size: 13px; color: var(--text-bright); font-weight: 500; }
 
         .about-features { background: var(--surface); border: 1px solid var(--border); padding: 44px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .about-features h4 { font-family: var(--f-ui); font-weight: 600; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); margin-bottom: 32px; }
+        .about-features h4, .about-features > h2 { font-family: var(--f-ui); font-weight: 600; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); margin-bottom: 32px; }
         .feature-item { padding: 20px 0; border-bottom: 1px solid var(--border); }
         .feature-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .feature-item h5 { font-family: var(--f-ui); font-weight: 600; font-size: 16px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-bright); margin-bottom: 8px; }
+        .feature-item h5, .feature-item h3 { font-family: var(--f-ui); font-weight: 600; font-size: 16px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-bright); margin-bottom: 8px; }
         .feature-item p { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
 
         /* Process Flow Section */
@@ -481,7 +481,7 @@
         /* ── INTERACTIVE FORM ── */
         .contact-grid { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 48px; }
         .form-box { background: var(--surface); border: 1px solid var(--border); padding: 48px; border-radius: 4px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .form-box h4 { font-family: var(--f-ui); font-weight: 600; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); margin-bottom: 32px; }
+        .form-box h4, .form-box h2 { font-family: var(--f-ui); font-weight: 600; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); margin-bottom: 32px; }
 
         .form-group { margin-bottom: 28px; }
         .form-label { display: block; font-family: var(--f-ui); font-weight: 600; font-weight: 700; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-bright); margin-bottom: 10px; }
@@ -986,7 +986,7 @@ body { background-image: none; font-family: var(--f-ui); font-weight: 400; }
 .price-tier .amt, .plan-subtitle { font-family: var(--f-ui); font-variant-numeric: tabular-nums; }
 
 /* Quiet labels: no wide tracking, no forced uppercase */
-.section-eyebrow, .hero-badge, .service-module-tag, .tech-title, .about-features h4, .form-box h4, .form-label,
+.section-eyebrow, .hero-badge, .service-module-tag, .tech-title, .about-features h4, .about-features > h2, .form-box h4, .form-box h2, .form-label,
 .work-eyebrow, .plan-eyebrow, .article-meta, .nav-links :is(button, a), .nav-cta, .btn-primary, .btn-secondary {
     text-transform: none; letter-spacing: 0.04em;
 }

@@ -59,7 +59,7 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="./assets/site.css?v=2026-10-15">
+<link rel="stylesheet" href="./assets/site.css?v=2026-10-15b">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -82,12 +82,31 @@
     "新北市",
     "台灣"
   ],
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "opens": "09:00",
+    "closes": "18:00"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer service",
+    "email": "ycaxiom@gmail.com",
+    "availableLanguage": "zh-TW"
+  },
   "knowsAbout": [
     "商業網頁設計",
     "品牌形象網站",
     "電商網站設計",
     "RWD 網頁設計",
     "SEO 優化",
+    "GEO／AI 搜尋優化",
     "UI/UX 設計",
     "網站健檢與搶救",
     "舊站改版",
@@ -110,6 +129,46 @@
       "position": 1,
       "name": "首頁",
       "item": "https://chi1017.github.io/yc-axiom-site/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "專案完成後，網站程式碼與所有權會完全歸我嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "是的！YC AXIOM 採用買斷交付機制。專案完工並驗收後，我們會將完整的網站原始碼、Figma 設計稿與伺服器控制權完全移交給您，無任何隱藏綁定合約。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "一般網站開發的製作時程大概需要多久？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "單頁形象網站 (Landing Page) 平均約需要 2–3 週；標準多頁品牌網站約 3–5 週；若是大型電商或客製化系統網站，則約需 6–8 週。急件需求亦可在評估後調整優先順序。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "專案付款方式與訂金比例為何？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "標準付款流程為分期交付：簽約開工時收取 50% 首期訂金，設計與程式碼開發完畢並進行跨裝置測試驗收無誤後，再支付剩餘 50% 尾款並正式部署上線。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "網站上線後如果需要微調或技術支援怎麼辦？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "所有買斷專案均免費附贈上線後 30 天的技術保固期（含 Bug 修正與基礎圖文微調）。保固期滿後可自由選擇是否加購「月費技術託管方案」。"
+      }
     }
   ]
 }
@@ -312,8 +371,48 @@
                 <li class="reveal"><a href="./services/custom-system/"><span class="rh-idx" aria-hidden="true">04</span><span class="rh-svc-name">全客製多頁與系統</span><span class="rh-svc-desc">複雜流程與後台需求的完整解決方案。</span><span class="rh-svc-arrow" aria-hidden="true">→</span></a></li>
                             <li class="reveal"><a href="./services/data-cleaning/"><span class="rh-idx" aria-hidden="true">05</span><span class="rh-svc-name">商業資料清洗與整理</span><span class="rh-svc-desc">多平台訂單、庫存、帳務資料自動清洗與對帳。</span><span class="rh-svc-arrow" aria-hidden="true">→</span></a></li>
                 <li class="reveal"><a href="./services/market-intelligence/"><span class="rh-idx" aria-hidden="true">06</span><span class="rh-svc-name">市場情報與競品分析</span><span class="rh-svc-desc">同業定價、評價與市場缺口，整理成可用的報告。</span><span class="rh-svc-arrow" aria-hidden="true">→</span></a></li>
+                <li class="reveal"><a href="./services/geo-optimization/"><span class="rh-idx" aria-hidden="true">07</span><span class="rh-svc-name">GEO／AI 搜尋優化</span><span class="rh-svc-desc">讓 ChatGPT、Google AI 等更容易讀懂並引用你的網站。</span><span class="rh-svc-arrow" aria-hidden="true">→</span></a></li>
             </ul>
             <p class="rh-lede reveal">服務地區以台中為主、全台可洽。<a href="./taichung-web-design/">了解台中在地服務 →</a></p>
+        </div>
+    </div>
+    <!-- FAQ -->
+    <div class="rh-band">
+        <div class="rh-section">
+            <div class="rh-head reveal">
+                <h2 class="rh-h2">常見問題</h2>
+                <a href="./pricing/" class="rh-more">查看定價與方案 →</a>
+            </div>
+            <div class="faq-list reveal">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)" onkeydown="faqKeydown(event,this)" tabindex="0" role="button" aria-expanded="false">
+                        <span>01. 專案完成後，網站程式碼與所有權會完全歸我嗎？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">是的！YC AXIOM 採用買斷交付機制。專案完工並驗收後，我們會將完整的網站原始碼、Figma 設計稿與伺服器控制權完全移交給您，無任何隱藏綁定合約。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)" onkeydown="faqKeydown(event,this)" tabindex="0" role="button" aria-expanded="false">
+                        <span>02. 一般網站開發的製作時程大概需要多久？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">單頁形象網站 (Landing Page) 平均約需要 2–3 週；標準多頁品牌網站約 3–5 週；若是大型電商或客製化系統網站，則約需 6–8 週。急件需求亦可在評估後調整優先順序。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)" onkeydown="faqKeydown(event,this)" tabindex="0" role="button" aria-expanded="false">
+                        <span>03. 專案付款方式與訂金比例為何？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">標準付款流程為分期交付：簽約開工時收取 50% 首期訂金，設計與程式碼開發完畢並進行跨裝置測試驗收無誤後，再支付剩餘 50% 尾款並正式部署上線。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)" onkeydown="faqKeydown(event,this)" tabindex="0" role="button" aria-expanded="false">
+                        <span>04. 網站上線後如果需要微調或技術支援怎麼辦？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">所有買斷專案均免費附贈上線後 30 天的技術保固期（含 Bug 修正與基礎圖文微調）。保固期滿後可自由選擇是否加購「月費技術託管方案」。</div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -343,11 +442,11 @@
             <a href="./pricing/">定價</a>
             <a href="./contact/">聯絡</a>
         </div>
-        <div class="footer-services" aria-label="服務與地區"><a href="./services/brand-website/">品牌形象網站</a><a href="./services/ecommerce-website/">品牌電商網站</a><a href="./services/seo-performance/">SEO 與效能調校</a><a href="./services/custom-system/">全客製多頁與系統</a><a href="./services/data-cleaning/">商業資料清洗與整理</a><a href="./services/market-intelligence/">市場情報與競品分析</a><a href="./taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-services" aria-label="服務與地區"><a href="./services/brand-website/">品牌形象網站</a><a href="./services/ecommerce-website/">品牌電商網站</a><a href="./services/seo-performance/">SEO 與效能調校</a><a href="./services/geo-optimization/">GEO／AI 搜尋優化</a><a href="./services/custom-system/">全客製多頁與系統</a><a href="./services/data-cleaning/">商業資料清洗與整理</a><a href="./services/market-intelligence/">市場情報與競品分析</a><a href="./taichung-web-design/">台中網頁設計</a></div>
         <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程<a class="footer-privacy" href="./privacy/">隱私權政策</a></div>
         <div class="footer-status">
             <span class="status-dot"></span>
-            現正接案中 · 台灣在地服務
+            現正接案中 · 台灣在地服務 · 服務時間：週一至週五 09:00–18:00
         </div>
     </div>
 </footer>
