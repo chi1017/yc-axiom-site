@@ -2326,26 +2326,23 @@ function isStopWord(w) {
   return false;
 }
 
-// ── 分詞（CJK bigram + 英文 token）──
+// ── 分詞：Intl.Segmenter('zh-TW', { granularity: 'word' })，只保留 isWordLike 的詞 ──
+let _zhSegmenter = null;
+try { _zhSegmenter = new Intl.Segmenter('zh-TW', { granularity: 'word' }); } catch (e) { _zhSegmenter = null; }
 function tokenize(text) {
   const tokens = [];
-  // Extract English words
-  const enWords = text.match(/[a-zA-Z]{2,}/g) || [];
-  enWords.forEach(w => { if (!isStopWord(w)) tokens.push(w.toLowerCase()); });
-  // CJK bigrams
-  const cjkText = text.replace(/[^\u4e00-\u9fff\u3400-\u4dbf]/g, ' ');
-  const segments = cjkText.split(' ').filter(s => s.length >= 2);
-  segments.forEach(seg => {
-    for (let i = 0; i < seg.length - 1; i++) {
-      const bi = seg.slice(i, i + 2);
-      if (!isStopWord(bi)) tokens.push(bi);
-    }
-    // Also add trigrams for CJK
-    for (let i = 0; i < seg.length - 2; i++) {
-      const tri = seg.slice(i, i + 3);
-      tokens.push(tri);
-    }
-  });
+  if (!_zhSegmenter) {
+    // 舊瀏覽器沒有 Intl.Segmenter：只取英文單字與連續中文片段（不再做二字／三字切片）
+    (String(text).match(/[a-zA-Z]{2,}|[\u3400-\u9fff]{2,}/g) || []).forEach(w => { const t = /^[a-zA-Z]/.test(w) ? w.toLowerCase() : w; if (!isStopWord(t)) tokens.push(t); });
+    return tokens;
+  }
+  for (const seg of _zhSegmenter.segment(String(text))) {
+    if (!seg.isWordLike) continue;
+    let w = seg.segment;
+    if (/^[a-zA-Z][a-zA-Z'’-]*$/.test(w)) { w = w.toLowerCase(); if (w.length < 2) continue; }
+    else if (!/[\u3400-\u9fff]/.test(w)) continue;      // 數字、符號、其他文字不算詞
+    if (!isStopWord(w)) tokens.push(w);
+  }
   return tokens;
 }
 
@@ -2808,10 +2805,12 @@ function switchCaTab(name, btn) {
 // ═══════════════════════════════════════════════════════
 //  SEO ANALYSIS ENGINE
 // ═══════════════════════════════════════════════════════
-// 偵測 JavaScript 渲染網站：可見文字少於 200 字，或偵測到前端框架且可見文字仍偏少
+// 偵測 JavaScript 渲染網站（SEO／GEO 兩個工具共用同一套標準，改動時兩邊要一起改）：
+// 可見文字（中文字＋英文單字，與 GEO 引擎算法相同）少於 200 字，或偵測到前端框架且少於 600 字（GEO 認定「足夠」的字數）
 function detectJsSite(html){
   let doc; try{ doc=new DOMParser().parseFromString(html||'','text/html'); }catch(e){ return {is:false,textLen:0,frameworks:[]}; }
-  const textLen=cleanBodyText(doc).replace(/\s+/g,' ').trim().length;
+  const vt=cleanBodyText(doc);
+  const textLen=(vt.match(/[\u3400-\u9fff\uf900-\ufaff]/g)||[]).length+(vt.match(/[A-Za-z]{2,}/g)||[]).length;
   const src=String(html||'');
   const fw=[];
   if(/id=["']__next["']|__NEXT_DATA__/i.test(src)) fw.push('Next.js');
@@ -2820,7 +2819,7 @@ function detectJsSite(html){
   if(/data-v-app|<div id=["']app["']>\s*<\/div>|vue(?:\.runtime)?(?:\.global)?(?:\.prod)?(?:\.min)?\.js/i.test(src)) fw.push('Vue');
   if(/ng-version=|<app-root/i.test(src)) fw.push('Angular');
   if(/___gatsby|id=["']svelte["']/i.test(src)) fw.push('Gatsby/Svelte');
-  const is = textLen<200 || (fw.length>0 && textLen<800);
+  const is = textLen<200 || (fw.length>0 && textLen<600);
   return {is,textLen,frameworks:fw};
 }
 function cleanBodyText(doc){
@@ -2876,7 +2875,13 @@ function analyzeHTML(html, kwList, bizName, bizType, sourceLabel, sourceDomain) 
 
   // 6. Lang
   const lang=doc.documentElement.getAttribute('lang');
-  if(!lang) checks.push({status:'warn',title:'缺少 lang 屬性',detail:'<html lang="zh-TW"> 有助搜尋引擎了解語言。'});
+  // 頁面主要文字是否為中文（中文字占比過半、且不是日文）
+  const _vt=cleanBodyText(doc);
+  const _han=(_vt.match(/[\u3400-\u9fff\uf900-\ufaff]/g)||[]).length, _kana=(_vt.match(/[\u3040-\u30ff]/g)||[]).length, _lat=(_vt.match(/[A-Za-z]{2,}/g)||[]).length;
+  const isZhContent=_han>=30 && _han>=_lat && _kana<_han*0.1;
+  info.langMismatch=!!(lang && isZhContent && !/^zh/i.test(lang.trim()));
+  if(!lang) checks.push({status:'warn',title:'缺少 lang 屬性',detail:isZhContent?'頁面主要為中文，建議設定 <html lang="zh-TW">。':'<html lang="zh-TW"> 有助搜尋引擎了解語言。'});
+  else if(info.langMismatch){checks.push({status:'warn',title:`語言設定與內容不符（lang="${lang}"）`,detail:`頁面主要文字是中文，但 lang 屬性是「${lang}」。搜尋引擎與翻譯工具可能誤判語言。`});actions.push({priority:'medium',title:'修正 lang 屬性',detail:'把 <html lang="'+lang+'"> 改成 <html lang="zh-TW">（繁體中文）。'});}
   else checks.push({status:'pass',title:`語言屬性已設定（lang="${lang}"）`,detail:'有助多語系索引。'});
 
   // 7. Robots
@@ -2927,9 +2932,16 @@ function analyzeHTML(html, kwList, bizName, bizType, sourceLabel, sourceDomain) 
   else checks.push({status:'pass',title:`內部連結完整（${intLinks.length} 個）`,detail:`外部連結 ${extLinks.length} 個。`});
 
   // 11. Text length
-  const wordCount=bodyText.replace(/\s+/g,' ').trim().length;info.textLength=wordCount;info.bodyText=bodyText;
-  info.jsSite=detectJsSite(html);
-  if(wordCount<200){checks.push({status:'warn',title:`頁面文字量偏少（${wordCount} 字）`,detail:'建議至少 300 字，文字量低可能是 JS 渲染網站。'});actions.push({priority:'medium',title:'增加頁面文字',detail:'補充店家介紹、特色說明，目標 500 字以上。'});}
+  // 抓取階段與報告共用 detectJsSite 的同一個結果（文字量也用同一個算法：中文字＋英文單字）
+  const jsInfo=detectJsSite(html);
+  const wordCount=jsInfo.textLen;info.textLength=wordCount;info.bodyText=bodyText;
+  info.jsSite=jsInfo;
+  if(jsInfo.is){
+    const fwTxt=jsInfo.frameworks.length?`，並偵測到 ${jsInfo.frameworks.join('、')}`:'';
+    checks.push({status:'warn',title:`頁面文字量偏少（${wordCount} 字），疑似 JavaScript 渲染網站`,detail:`靜態抓到的文字太少${fwTxt}，內容可能由 JavaScript 產生，本報告結果可能不準確。`});
+    actions.push({priority:'medium',title:'確認網站內容是否由 JavaScript 產生',detail:'改用「上傳 HTML」檢測，或用 Google Search Console 的網址審查確認 Google 實際看到的內容。'});
+  }
+  else if(wordCount<200){checks.push({status:'warn',title:`頁面文字量偏少（${wordCount} 字）`,detail:'建議至少 300 字。'});actions.push({priority:'medium',title:'增加頁面文字',detail:'補充店家介紹、特色說明，目標 500 字以上。'});}
   else checks.push({status:'pass',title:`頁面文字量充足（${wordCount} 字）`,detail:'有足夠內容供搜尋引擎分析。'});
 
   // ─── IMAGES (深度分析) ───
@@ -3626,7 +3638,7 @@ function renderResults(r){
       <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">H</div><div class="cc"><strong>H1 標題</strong><span>${escHtml(info.h1Text||'（未設定）')}</span></div></div>
       <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🔗</div><div class="cc"><strong>連結數量</strong><span>總計 ${info.linkCount} 個，內部 ${info.internalLinkCount} 個，外部 ${(info.externalLinks||[]).length} 個</span></div></div>
       <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🖼</div><div class="cc"><strong>圖片</strong><span>${info.imgData?.total||0} 張（${info.imgData?.noAlt||0} 張缺少 alt，${info.imgData?.noLazy||0} 張無 lazy，${info.imgData?.modern||0} 張現代格式）</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">📝</div><div class="cc"><strong>頁面文字量</strong><span>約 ${info.textLength} 字元，${info.readability?.sentences||0} 個句子</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">📝</div><div class="cc"><strong>頁面文字量</strong><span>約 ${info.textLength} 字，${info.readability?.sentences||0} 個句子</span></div></div>
       <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🗂</div><div class="cc"><strong>Schema.org</strong><span>${info.schemaCount} 筆（${(info.schemaResults||[]).filter(s=>s.valid).length} 筆通過驗證）</span></div></div>
       <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🌍</div><div class="cc"><strong>Hreflang</strong><span>${info.hreflang?.length||0} 個語言標籤</span></div></div>
     </div>`;
