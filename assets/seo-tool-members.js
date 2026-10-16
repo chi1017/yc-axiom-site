@@ -66,7 +66,7 @@
     var box = document.createElement('div'); box.id = 'yc-gate';
     box.innerHTML =
       '<h3>' + (issues.length ? '最需要先處理的 ' + issues.length + ' 個問題' : '這個頁面沒有明顯的重大問題') + '</h3>' +
-      '<p class="yc-sub">免費版只顯示總分與前 3 大問題。' + (loggedNoConsent ? '還差最後一步：同意保存紀錄，就能看完整報告。' : '登入後可看完整 40+ 項檢測結果。') + '</p>' +
+      '<p class="yc-sub">免費版只顯示總分與前 3 大問題。' + (loggedNoConsent ? '還差最後一步：同意保存紀錄，就能看完整報告。' : '登入後可看完整檢測結果。') + '</p>' +
       (issues.length ? '<ol>' + issues.map(function (i) {
         return '<li><span class="yc-lv ' + lvClass(i.level) + '">' + lvText(i.level) + '</span><div><b>' + esc(i.title) + '</b>' + (i.detail ? '<span class="d">' + esc(i.detail) + '</span>' : '') + '</div></li>';
       }).join('') + '</ol>' : '') +
