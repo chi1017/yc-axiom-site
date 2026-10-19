@@ -4,6 +4,7 @@ const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
 const SAVE_DELAY = 2000, RENDER_DELAY = 150;
+const TERMS_VERSION = '2026-10-v1';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
 const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
 
 function tplBase() {
@@ -228,7 +229,7 @@ function deriveStatus() {
 }
 async function refreshStatus() {
   const [s, e] = await Promise.all([
-    YC.client.from('rental_sites').select('status,public_url,paid_until,live_version_id,first_published_at,last_published_at,cf_project_name').eq('id', S.site.id).single(),
+    YC.client.from('rental_sites').select('status,public_url,paid_until,live_version_id,first_published_at,last_published_at,cf_project_name,terms_accepted_at').eq('id', S.site.id).single(),
     YC.client.from('site_events').select('type,detail,created_at').eq('site_id', S.site.id).order('created_at', { ascending: false }).limit(20)
   ]);
   if (s.data) Object.assign(S.site, s.data);
@@ -519,6 +520,11 @@ async function publish() {
     closeModal(); S.publishing = true; const btn = $('#btnPublish'); btn.disabled = true; btn.textContent = '處理中…';
     try {
       const ok = await save(); if (!ok) throw new Error('草稿尚未儲存成功，請稍後再按發佈');
+      if (first && !S.site.terms_accepted_at) {
+        const t = await YC.client.rpc('rental_accept_terms', { p_site_id: S.site.id, p_version: TERMS_VERSION });
+        if (t.error) throw new Error('無法記錄條款同意，請稍後再試');
+        S.site.terms_accepted_at = t.data || new Date().toISOString();
+      }
       const r = await YC.client.functions.invoke('publish-site', { body: { site_id: S.site.id } });
       if (r.error) {
         let body = null; try { body = await r.error.context.json(); } catch (e) { /* ignore */ }
@@ -532,8 +538,15 @@ async function publish() {
     finally { S.publishing = false; btn.disabled = false; btn.textContent = '發佈'; }
   };
   if (first) {
-    modal('送出上線申請？', [h('p', { text: '送出後，網址代稱「' + S.slug + '」就不能再修改。' }), h('p', { text: '我們會確認後為你開通網站，開通後會以 Email 通知你。在那之前你仍可以繼續編輯。' })],
-      [h('button', { class: 'btn', onclick: closeModal }, '再檢查一下'), h('button', { class: 'btn primary', onclick: go }, '送出申請')]);
+    const needTerms = !S.site.terms_accepted_at;
+    const chk = h('input', { type: 'checkbox', id: 'termsOk' });
+    const sendBtn = h('button', { class: 'btn primary', id: 'termsGo', onclick: go }, '送出申請');
+    if (needTerms) sendBtn.disabled = true;
+    chk.addEventListener('change', () => { sendBtn.disabled = !chk.checked; });
+    modal('送出上線申請？', [h('p', { text: '送出後，網址代稱「' + S.slug + '」就不能再修改。' }), h('p', { text: '我們會確認後為你開通網站，開通後會以 Email 通知你。在那之前你仍可以繼續編輯。' }),
+      needTerms && h('label', { class: 'terms-ok', style: 'display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:14px;line-height:1.6' }, chk,
+        h('span', {}, '我已閱讀並同意', h('a', { href: YC.url('terms/rental/'), target: '_blank', rel: 'noopener' }, '《網站租用條款》')))],
+      [h('button', { class: 'btn', onclick: closeModal }, '再檢查一下'), sendBtn]);
   } else if (st === 'pending') {
     modal('更新送審內容？', [h('p', { text: '你的網站還在等待開通。更新後，開通時會使用最新的內容。' })], [h('button', { class: 'btn', onclick: closeModal }, '取消'), h('button', { class: 'btn primary', onclick: go }, '更新')]);
   } else {
