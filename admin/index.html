@@ -300,13 +300,23 @@
 .adm-raw pre { max-height: 420px; overflow: auto; font-size: 11.5px; line-height: 1.6; background: rgba(0,0,0,.25); padding: 14px; border-radius: 4px; white-space: pre-wrap; word-break: break-all; }
 #adm-toast { position: fixed; left: 50%; bottom: 36px; transform: translateX(-50%) translateY(10px); background: var(--surface); border: 1px solid var(--accent); color: var(--text-bright); padding: 10px 20px; border-radius: 22px; font-size: 13px; opacity: 0; pointer-events: none; transition: all .25s; z-index: 9999; }
 #adm-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.adm-tabs { display: flex; gap: 8px; margin: 18px 0 4px; border-bottom: 1px solid var(--border); }
+.adm-tabs[hidden] { display: none; }
+.adm-tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--text-dim); font: 600 14px var(--f-ui); padding: 10px 16px; cursor: pointer; margin-bottom: -1px; }
+.adm-tabs button[aria-selected="true"] { color: var(--text-bright); border-bottom-color: var(--accent); }
+.adm-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 </style>
 <section id="page-admin" class="page showing active">
     <div class="container section-pad">
         <div class="mem wide">
         <p class="section-eyebrow mem-eyebrow">Admin / 管理後台</p>
         <h1 class="section-title">會員與名單</h1>
+        <div id="adm-tabs" class="adm-tabs" role="tablist" aria-label="管理後台分頁" hidden>
+            <button type="button" role="tab" data-tab="members" aria-selected="true">會員與名單</button>
+            <button type="button" role="tab" data-tab="rental" aria-selected="false">租用網站</button>
+        </div>
         <div id="adm-root" aria-live="polite"><div class="mem-card mem-empty"><p>載入中…</p></div></div>
+        <div id="adm-rental" aria-live="polite" hidden></div>
         </div>
     </div>
 </section>
@@ -350,5 +360,6 @@
 <script src="../assets/vendor/supabase-2.117.2.min.js"></script>
 <script src="../assets/yc-auth.js?v=2026-10-16"></script>
 <script src="../assets/admin.js?v=2026-10-16"></script>
+<script src="../assets/admin-rental.js?v=2026-10-19"></script>
 </body>
 </html>
