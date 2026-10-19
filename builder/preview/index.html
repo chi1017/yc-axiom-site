@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>網站預覽 - YC AXIOM</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="../../favicon-32.png">
+<style>
+:root{--bg:#14110f;--bg2:#1c1815;--line:#3a332d;--text:#f1ece2;--muted:#b3aa9c;--accent:#5fa396}
+@media(prefers-color-scheme:light){:root{--bg:#f5f3ee;--bg2:#fff;--line:#d9d3c7;--text:#25211c;--muted:#6a6358;--accent:#2f7f70}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;display:flex;flex-direction:column}
+.top{background:var(--bg2);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:12px 18px;flex-wrap:wrap;align-items:center;font-size:14px}
+.top b{font-weight:700}.top span{color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-left:auto}
+.seg button{font:inherit;border:0;background:var(--bg2);color:var(--muted);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--accent);color:#fff;font-weight:700}
+.stage{flex:1;min-height:0;display:flex;justify-content:center;padding:12px;background:#2a2622}
+iframe{border:0;width:100%;height:100%;background:#fff;border-radius:8px}
+.stage.mob iframe{width:390px;max-width:100%;border:8px solid #111;border-radius:26px}
+.msg{margin:auto;max-width:440px;padding:24px;text-align:center}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="top" id="top" hidden><b id="pName"></b><span id="pInfo"></span>
+  <div class="seg"><button id="dDesk" aria-pressed="true">桌面版</button><button id="dMob" aria-pressed="false">手機版</button></div></div>
+<div class="stage" id="stage" hidden><iframe id="frame" title="網站預覽" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div>
+<div class="msg" id="msg"><p>載入中…</p></div>
+<script>window.YC_BASE = '../../';</script>
+<script src="../../assets/supabase-config.js"></script>
+<script src="../../assets/vendor/supabase-2.117.2.min.js"></script>
+<script src="../../assets/yc-auth.js?v=2026-10-16"></script>
+<script type="module" src="preview.js?v=2026-10-19"></script>
+</body>
+</html>
