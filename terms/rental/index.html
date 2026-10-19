@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        page: function () {
+            var path = location.pathname;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.href, page_path: path, page_title: document.title });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: (a.classList.contains('line-float') || a.closest('.social-float')) ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>網站租用條款（草稿）｜YC AXIOM 網站租用服務</title>
+<meta name="description" content="YC AXIOM 網站租用服務的條款說明：服務範圍、內容責任、付款與到期、逾期與暫停、終止與資料保存、網域與免責。">
+<meta name="author" content="YC AXIOM">
+<link rel="icon" type="image/png" href="https://chi1017.github.io/yc-axiom-site/favicon-32.png">
+<link rel="apple-touch-icon" href="https://chi1017.github.io/yc-axiom-site/apple-touch-icon.png">
+<link rel="canonical" href="https://chi1017.github.io/yc-axiom-site/terms/rental/">
+<meta name="robots" content="noindex, follow">
+<meta property="og:title" content="網站租用條款（草稿）｜YC AXIOM 網站租用服務">
+<meta property="og:description" content="YC AXIOM 網站租用服務的條款說明：服務範圍、內容責任、付款與到期、逾期與暫停、終止與資料保存、網域與免責。">
+<meta property="og:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta property="og:url" content="https://chi1017.github.io/yc-axiom-site/terms/rental/">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="YC AXIOM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="網站租用條款（草稿）｜YC AXIOM 網站租用服務">
+<meta name="twitter:description" content="YC AXIOM 網站租用服務的條款說明：服務範圍、內容責任、付款與到期、逾期與暫停、終止與資料保存、網域與免責。">
+<meta name="twitter:image" content="https://chi1017.github.io/yc-axiom-site/og-image.png">
+<meta name="theme-color" content="#5FA396">
+<script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../../assets/site.css?v=2026-10-15b">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://chi1017.github.io/yc-axiom-site/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "網站租用條款",
+      "item": "https://chi1017.github.io/yc-axiom-site/terms/rental/"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="頁面載入中">
+    <div class="loader-mark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="ringGrad-load" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient>
+                <linearGradient id="yGrad-load" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="50"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient>
+                <filter id="glow-load" filterUnits="userSpaceOnUse" x="-8" y="-8" width="80" height="80"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path class="loader-draw loader-ring" pathLength="1" d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-load)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y1" pathLength="1" d="M18,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y2" pathLength="1" d="M46,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+        </svg>
+    </div>
+    <div class="loader-text">
+        <div class="loader-name">YC AXIOM</div>
+        <div class="loader-sub">[品牌與工程]</div>
+    </div>
+    <div class="loader-bar"></div>
+</div>
+<script>
+(function () {
+    var root = document.documentElement, loader = document.getElementById('page-loader');
+    if (!loader) return;
+    try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
+    root.classList.add('is-loading');
+    var start = Date.now(), MIN = 1700, MAX = 5000, closed = false;
+    function close() {
+        if (closed) return; closed = true;
+        loader.classList.add('is-done');
+        root.classList.remove('is-loading');
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 900);
+    }
+    function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+})();
+</script>
+
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor Elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-follower"></div>
+
+
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-inner">
+        <a href="../../" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
+            <div class="nav-logo-img">
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+            </div>
+            <div class="nav-logo-text">
+                <div class="nav-logo-name">YC AXIOM</div>
+                <div class="nav-logo-sub">[品牌與工程]</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="../../" class="nav-link">首頁</a></li>
+            <li><a href="../../about/" class="nav-link">關於</a></li>
+            <li><a href="../../services/" class="nav-link">服務項目</a></li>
+            <li><a href="../../works/" class="nav-link">作品集</a></li>
+            <li><a href="../../articles/" class="nav-link">文章</a></li>
+            <li class="nav-dd"><a href="../../seo/" class="nav-link" aria-haspopup="true">SEO 工具</a><ul class="nav-sub"><li><a href="../../seo/">SEO 檢測</a></li><li><a href="../../geo/">GEO 檢測<small>AI 可見度</small></a></li></ul></li>
+            <li><a href="../../pricing/" class="nav-link">定價</a></li>
+            <li><a href="../../contact/" class="nav-link">聯絡</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="../../contact/" class="nav-cta magnetic">免費諮詢</a>
+
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu">
+    <button class="mobile-close" onclick="toggleMobileMenu()" aria-label="關閉選單">✕</button>
+    <a class="mobile-nav-btn" href="../../">首頁</a>
+    <a class="mobile-nav-btn" href="../../about/">關於</a>
+    <a class="mobile-nav-btn" href="../../services/">服務項目</a>
+    <a class="mobile-nav-btn" href="../../works/">作品集</a>
+    <a class="mobile-nav-btn" href="../../articles/">文章</a>
+    <a class="mobile-nav-btn" href="../../seo/">SEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../geo/">GEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../pricing/">定價</a>
+    <a class="mobile-nav-btn" href="../../contact/">聯絡</a>
+</div>
+
+
+<main>
+<section id="page-rental-terms" class="page showing active">
+    <div class="container section-pad">
+        <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../../">首頁</a><span aria-hidden="true">›</span><span aria-current="page">網站租用條款</span></div>
+        <p class="section-eyebrow reveal">Terms / 網站租用條款</p>
+        <h1 class="section-title reveal">網站租用條款<br>租用前請先看過.</h1>
+        <div class="article-meta reveal" style="margin-top:20px;">
+            <span>適用：YC AXIOM 網站租用服務</span>
+            <span>狀態：草稿（部分內容待填）</span>
+            <span>版本：2026-10-v1</span>
+        </div>
+
+        <div class="article-body reveal">
+            <p><strong>【草稿說明】</strong>這份條款目前是草稿，標示「【待填】」的地方（價格、租期、退費等）尚未確定，確定後會更新並調整版本。條款內容僅為一般性說明，不構成法律意見；正式簽署或有疑慮時，建議諮詢律師。</p>
+            <p>YC AXIOM（以下稱「我們」）提供「網站租用」服務：你在會員專區的編輯器填寫內容，我們把網站發佈到網路上，並維護網站的運作。使用服務前，請閱讀以下條款；你在編輯器第一次送出上線申請時勾選同意，即表示接受這份條款。</p>
+
+            <h2>一、服務範圍</h2>
+            <ul>
+                <li>我們提供預先設計好的網站版型、線上編輯器、網站發佈與主機服務，以及網站在租用期間的基本維護。</li>
+                <li>網站會發佈在我們提供的網址（例如 xxx.pages.dev），或在雙方協助設定後使用你自己的網域。</li>
+                <li>目前版型的內容欄位與區塊以編輯器提供者為準；客製化設計、額外功能不在本服務內，如有需要請另行洽詢報價。</li>
+                <li>我們盡力維持網站穩定，但網站依賴第三方服務（雲端主機、網域與 DNS 等），無法保證完全不中斷。</li>
+            </ul>
+
+            <h2>二、價格與租用期間</h2>
+            <ul>
+                <li>租用費用：【待填：金額、計價方式（例如每月或每年）】。</li>
+                <li>租用期間：依你實際付款的月數計算，服務到期日會顯示在會員專區的「我的網站」。</li>
+                <li>是否有建置費、設定費或其他費用：【待填】。</li>
+            </ul>
+
+            <h2>三、付款方式</h2>
+            <ul>
+                <li>目前以銀行轉帳付款。匯款資訊會顯示在會員專區；匯款後請告知我們匯款帳號末五碼，我們確認款項後會更新服務到期日。</li>
+                <li>第一次付款確認後，我們才會開通網站上線。開通與到期日更新以我們確認收款為準，不是以你匯款的時間為準。</li>
+                <li>發票／收據：【待填】。</li>
+            </ul>
+
+            <h2>四、內容與著作權責任</h2>
+            <ul>
+                <li>你要確保放在網站上的文字、圖片、商標、菜單與資訊是你有權使用的，沒有侵害他人的著作權、商標權、肖像權或其他權利，內容也必須真實、不得違反法律或公序良俗。</li>
+                <li>內容所生的法律責任由你負責。若我們接到權利人通知或主管機關要求，可以先暫停或移除相關內容，並通知你。</li>
+                <li>你保有自己內容的著作權。你授權我們為了提供服務所需，儲存、處理、顯示與傳輸這些內容。</li>
+                <li>版型、程式與編輯器的智慧財產權屬於我們或原授權人，租用期間你可以使用，但不得複製、轉售或反向工程。</li>
+            </ul>
+
+            <h2>五、到期、逾期與暫停</h2>
+            <ul>
+                <li>服務到期後，網站會先進入「逾期」狀態，仍維持上線一段寬限期，我們會以 Email 提醒你續約。</li>
+                <li>到期後超過 7 天仍未續約，網站會被暫停：原本的網址會改顯示「網站維護中」頁面，網站內容不會公開。</li>
+                <li>暫停期間，你的內容與設定仍會保留。付款確認後，網站會自動恢復。</li>
+                <li>暫停滿 30 天仍未處理，我們會與你聯絡確認；我們不會因為逾期而自動刪除你的資料。</li>
+                <li>以上期限為目前的作法，若有調整會更新本條款並通知你。</li>
+            </ul>
+
+            <h2>六、終止與資料保存</h2>
+            <ul>
+                <li>你可以隨時通知我們終止租用。終止後網站會下線；已付款項是否退費：【待填】。</li>
+                <li>我們可以在你嚴重違反本條款（例如違法內容）時終止服務，並通知你。</li>
+                <li>終止後，你的網站內容與圖片會保存【待填：保存期限】，期間內你可以向我們索取內容備份；期限過後我們可以刪除。</li>
+                <li>你也可以依<a href="../../privacy/">隱私權政策</a>的說明，自行刪除帳號與資料。</li>
+            </ul>
+
+            <h2>七、網域</h2>
+            <ul>
+                <li>預設網址由我們提供，網址可能包含服務商的網域（例如 pages.dev）。</li>
+                <li>想使用自己的網域，請聯絡我們協助設定；網域的註冊與續約由你自己負責，網域費用與到期風險不在本服務內。</li>
+                <li>網域設定需要你在網域服務商新增 DNS 紀錄，生效時間視服務商而定。</li>
+            </ul>
+
+            <h2>八、個人資料</h2>
+            <p>我們如何蒐集與使用你的資料，請見<a href="../../privacy/">隱私權政策</a>。你放在網站上、會公開給訪客看到的資訊（例如店名、地址、電話），是你自己決定公開的內容。</p>
+
+            <h2>九、免責與責任限制</h2>
+            <ul>
+                <li>我們不保證網站一定帶來特定的流量、排名、AI 推薦或業績；SEO 與 AI 可見度的分數與建議僅供參考。</li>
+                <li>因第三方服務中斷、不可抗力、你自己的操作或內容所造成的損失，我們在法律允許的範圍內不負責任。</li>
+                <li>我們對單一事件的賠償責任，以你最近一期已付的租用費用為上限：【待填，請確認】。</li>
+            </ul>
+
+            <h2>十、條款更新</h2>
+            <p>條款有重大變更時，我們會更新版本與日期，並以 Email 通知你。你繼續使用服務，代表接受更新後的條款；若不同意，可以依第六條終止。</p>
+
+            <h2>十一、聯絡方式</h2>
+            <p>對條款有任何問題，請聯絡 YC AXIOM：<a href="mailto:ycaxiom@gmail.com">ycaxiom@gmail.com</a>，或 <a href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">LINE @788cblaq</a>。</p>
+        </div>
+    </div>
+</section>
+</main>
+
+
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
+<div class="social-float" role="group" aria-label="社群與聯絡">
+    <a class="sf sf-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）" data-tip="LINE 諮詢"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg></a>
+    <a class="sf sf-threads" href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Threads（@ycaxiom）" data-tip="Threads"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M16.8 11.2c-.3-3.4-2.3-5.1-5.2-5.1-2.9 0-5 2-5 5.9 0 3.9 2.1 6.1 5.2 6.1 2.7 0 4.3-1.5 4.3-3.4 0-1.9-1.6-3-3.7-3-1.8 0-2.7.9-2.7 1.9 0 1 .8 1.7 2 1.7 1.7 0 3-1 3-3.8"/></svg></a>
+    <a class="sf sf-ig" href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Instagram（@ycaxiom）" data-tip="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="3.9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.1" fill="currentColor"/></svg></a>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-nav">
+            <a href="../../">首頁</a>
+            <a href="../../about/">關於</a>
+            <a href="../../services/">服務項目</a>
+            <a href="../../works/">作品集</a>
+            <a href="../../articles/">文章</a>
+            <a href="../../seo/">SEO 工具</a>
+            <a href="../../pricing/">定價</a>
+            <a href="../../contact/">聯絡</a>
+        </div>
+        <div class="footer-services" aria-label="服務與地區"><a href="../../services/brand-website/">品牌形象網站</a><a href="../../services/ecommerce-website/">品牌電商網站</a><a href="../../services/seo-performance/">SEO 與效能調校</a><a href="../../services/geo-optimization/">GEO／AI 搜尋優化</a><a href="../../services/custom-system/">全客製多頁與系統</a><a href="../../services/data-cleaning/">商業資料清洗與整理</a><a href="../../services/market-intelligence/">市場情報與競品分析</a><a href="../../taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程<a class="footer-privacy" href="../../privacy/">隱私權政策</a></div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            現正接案中 · 台灣在地服務 · 服務時間：週一至週五 09:00–18:00
+        </div>
+    </div>
+</footer>
+<script src="../../assets/site.js?v=2026-10-15" defer></script>
+</body>
+</html>
