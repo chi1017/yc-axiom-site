@@ -18,22 +18,51 @@
     return { text: st === 'overdue' ? '上線中（已到期，請聯絡我們續約）' : '上線中', color: '#6cc08b' };
   }
 
+  function daysLeft(d) {
+    if (!d) return null;
+    var tw = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);   // 以台灣日期計算
+    return Math.round((Date.parse(d + 'T00:00:00Z') - Date.parse(tw + 'T00:00:00Z')) / 86400000);
+  }
+  function money(n) { return 'NT$ ' + Number(n).toLocaleString('en-US'); }
+  function bankHtml(b, open) {
+    if (!b || !(b.account || b.bank)) return open ? '<p style="margin:10px 0 0;font-size:14px">匯款資訊請用 LINE（@788cblaq）詢問。</p>' : '';
+    var row = function (k, v) { return v ? '<tr><td style="padding:3px 14px 3px 0;color:#9a8f80;white-space:nowrap">' + k + '</td><td style="padding:3px 0;word-break:break-all">' + esc(v) + '</td></tr>' : ''; };
+    return '<details class="ds-bank" style="margin:12px 0 0"' + (open ? ' open' : '') + '><summary style="cursor:pointer;font-size:14px">匯款資訊</summary>' +
+      '<table style="border-collapse:collapse;font-size:14px;margin-top:6px">' + row('銀行', b.bank + (b.code ? '（' + b.code + '）' : '')) + row('帳號', b.account) + row('戶名', b.holder) + '</table>' +
+      (b.note ? '<p style="margin:6px 0 0;font-size:13px;color:#9a8f80">' + esc(b.note) + '</p>' : '') +
+      '<p style="margin:6px 0 0;font-size:13px;color:#9a8f80">匯款後請用 LINE（@788cblaq）或 Email（ycaxiom@gmail.com）告訴我們匯款帳號末五碼，我們確認後會更新到期日。</p></details>';
+  }
+
   async function draw() {
     var my = ++token;
     box.innerHTML = '';
     if (!YC.enabled || !YC.loggedIn() || !YC.consented()) return;
     try {
-      var r = await YC.client.from('rental_sites').select('id,slug,status,public_url,paid_until,last_published_at').eq('member_id', YC.session.user.id).order('created_at').limit(1);
+      var r = await YC.client.from('rental_sites').select('id,slug,status,public_url,paid_until,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at').limit(1);
       if (my !== token || r.error || !r.data || !r.data.length) return;
       var s = r.data[0];
       var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
+      var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
+      var cfg = await YC.client.from('settings').select('key,value').in('key', ['bank_transfer', 'plan']);
       if (my !== token) return;
+      var bank = null, plan = null;
+      (cfg.data || []).forEach(function (x) { if (x.key === 'bank_transfer') bank = x.value; if (x.key === 'plan') plan = x.value; });
+      var dl = daysLeft(s.paid_until);
+      var needPay = s.status === 'pending' || s.status === 'overdue' || s.status === 'suspended' || (dl != null && dl <= 14);
       var st = status(s, e.data || []);
       var live = s.public_url && (s.status === 'live' || s.status === 'overdue');
       box.innerHTML = '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">我的網站</h2>' +
         '<p style="margin:0 0 6px"><span style="display:inline-block;padding:2px 12px;border:1px solid ' + st.color + ';color:' + st.color + ';border-radius:999px;font-size:13px">' + esc(st.text) + '</span></p>' +
         (live ? '<p style="margin:6px 0">網址：<a href="' + esc(s.public_url) + '" target="_blank" rel="noopener">' + esc(s.public_url) + '</a></p>' : '') +
-        (s.paid_until ? '<p style="margin:6px 0;font-size:14px">服務到期日：' + esc(s.paid_until) + '</p>' : '') +
+        (s.paid_until ? '<p style="margin:6px 0;font-size:14px">服務到期日：' + esc(s.paid_until) + (dl == null ? '' : dl >= 0 ? '（還有 ' + dl + ' 天）' : '（已過期 ' + (-dl) + ' 天）') + '</p>' : '') +
+        (s.status === 'suspended' && s.suspend_reason ? '<p style="margin:6px 0;font-size:14px;color:#f0776b">暫停原因：' + esc(s.suspend_reason) + '</p>' : '') +
+        (plan && plan.text ? '<p style="margin:6px 0;font-size:13px;color:#9a8f80;white-space:pre-line">' + esc(plan.text) + '</p>' : '') +
+        bankHtml(bank, needPay) +
+        ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
+          pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +
+        (s.custom_domain ? '<p style="margin:10px 0 0;font-size:13px;color:#9a8f80">自訂網域：' + esc(s.custom_domain) + (s.domain_status === 'active' ? '（已啟用）' : '（設定中，等待 DNS 生效）') + '</p>'
+          : '<p style="margin:10px 0 0;font-size:13px;color:#9a8f80">想綁定自己的網域？請用 LINE（@788cblaq）聯絡我們，由我們協助設定。</p>') +
+        '<p style="margin:6px 0 0;font-size:13px"><a href="' + esc(YC.url('terms/rental/')) + '" target="_blank" rel="noopener">網站租用條款</a>' + (s.terms_accepted_at ? '<span style="color:#9a8f80">（你已於 ' + esc(String(s.terms_accepted_at).slice(0, 10)) + ' 同意）</span>' : '') + '</p>' +
         '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/')) + '">編輯網站</a></p></div>';
     } catch (err) { console.warn('dash-site', err); }
   }
