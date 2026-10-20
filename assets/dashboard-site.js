@@ -1,4 +1,4 @@
-/* 會員專區：「我的網站」卡片。只有已建立網站的會員才會看到；不影響原本的檢測紀錄。 */
+/* 會員專區：「我的網站」卡片。已建立網站的會員看到網站狀態；還沒有網站的會員看到「建立我的網站」入口；不影響原本的檢測紀錄。 */
 (function () {
   'use strict';
   var YC = window.YC, box = document.getElementById('dash-site');
@@ -56,7 +56,13 @@
     if (!YC.enabled || !YC.loggedIn() || !YC.consented()) return;
     try {
       var r = await YC.client.from('rental_sites').select('id,slug,status,public_url,paid_until,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at').limit(1);
-      if (my !== token || r.error || !r.data || !r.data.length) return;
+      if (my !== token || r.error || !r.data) return;
+      if (!r.data.length) {   // 還沒有網站：顯示入口
+        box.innerHTML = '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">網站租用</h2>' +
+          '<p style="margin:6px 0 0;font-size:14px;line-height:1.7">自己填寫店家資訊，我們負責發佈上線與維護，並每月自動檢測 SEO 與 AI 可見度。</p>' +
+          '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/')) + '">建立我的網站</a>　<a href="' + esc(YC.url('rental/')) + '" style="font-size:14px">了解網站租用</a></p></div>';
+        return;
+      }
       var s = r.data[0];
       var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
