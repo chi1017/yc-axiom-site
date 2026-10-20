@@ -470,7 +470,7 @@
     if(document.readyState === 'complete') init(); else window.addEventListener('load', init);
 })();
 
-/* ── 導覽列「會員專區」入口：未登入顯示「會員登入」，已登入顯示「會員專區」與「登出」 ──
+/* ── 導覽列「會員專區」入口：未登入顯示「會員登入」；已登入顯示「會員專區」下拉選單（會員專區／我的網站／網站編輯器／管理後台／登出） ──
    不需要在每一頁載入 Supabase：用瀏覽器裡的登入紀錄判斷狀態，只有按「登出」時才會載入登入元件。 */
 (function () {
     'use strict';
@@ -483,13 +483,20 @@
     try { if (CFG.supabaseUrl) ref = new URL(CFG.supabaseUrl).hostname.split('.')[0]; } catch (e) {}
     var KEY = 'sb-' + ref + '-auth-token';
 
-    function loggedIn() {
+    // 回傳 null（未登入）或 { admin: 是否為管理員 }
+    function readState() {
         try {
             var raw = localStorage.getItem(KEY);
-            if (!raw) return false;
+            if (!raw) return null;
             var o = JSON.parse(raw);
-            return !!(o && (o.access_token || o.refresh_token));
-        } catch (e) { return false; }
+            if (!o || !(o.access_token || o.refresh_token)) return null;
+            var admin = false;
+            try {
+                var pl = JSON.parse(decodeURIComponent(escape(atob(String(o.access_token).split('.')[1].replace(/-/g, '+').replace(/_/g, '/')))));
+                admin = !!(pl && pl.app_metadata && pl.app_metadata.role === 'admin');
+            } catch (e) {}
+            return { admin: admin };
+        } catch (e) { return null; }
     }
     function loadScript(src) {
         return new Promise(function (ok, no) {
@@ -516,44 +523,73 @@
 
     var st = document.createElement('style');
     st.textContent =
-        '.nav-member{display:flex;align-items:center;gap:6px;margin-right:4px}' +
-        '.nav-member a,.nav-member button{font-family:var(--f-ui);font-size:13px;font-weight:600;letter-spacing:.05em;color:var(--text-dim);background:none;border:none;cursor:pointer;padding:8px 6px;transition:color .2s;text-decoration:none;white-space:nowrap}' +
-        '.nav-member a:hover,.nav-member button:hover{color:var(--text-bright)}' +
-        '.nav-member .nav-member-link{color:var(--accent)}' +
-        '.nav-member .nav-member-out[hidden]{display:none}' +
+        '.nav-member{position:relative;display:flex;align-items:center;margin-right:4px}' +
+        '.nav-member>a{font-family:var(--f-ui);font-size:13px;font-weight:600;letter-spacing:.05em;color:var(--accent);padding:8px 6px;text-decoration:none;white-space:nowrap;transition:color .2s}' +
+        '.nav-member>a:hover{color:var(--text-bright)}' +
+        '.nav-member.has-menu>a::after{content:"";display:inline-block;margin-left:6px;width:5px;height:5px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg)}' +
+        '.nav-member-menu{position:absolute;top:100%;right:0;min-width:176px;margin:0;padding:12px 0 0;list-style:none;opacity:0;visibility:hidden;transition:opacity .18s,visibility .18s;z-index:60}' +
+        '.nav-member-menu::before{content:"";position:absolute;inset:12px 0 0 0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.28);z-index:-1}' +
+        '.nav-member.has-menu:hover .nav-member-menu,.nav-member.has-menu:focus-within .nav-member-menu{opacity:1;visibility:visible}' +
+        '.nav-member-menu li{padding:0 6px}.nav-member-menu li:first-child{padding-top:6px}.nav-member-menu li:last-child{padding-bottom:6px}' +
+        '.nav-member-menu a,.nav-member-menu button{display:block;width:100%;text-align:left;box-sizing:border-box;padding:9px 12px;border:none;background:none;border-radius:7px;cursor:pointer;font-family:var(--f-ui);font-size:14px;font-weight:500;color:var(--text);text-decoration:none;white-space:nowrap;letter-spacing:0}' +
+        '.nav-member-menu a:hover,.nav-member-menu button:hover,.nav-member-menu a:focus-visible,.nav-member-menu button:focus-visible{background:var(--accent-dim);color:var(--accent)}' +
+        '.nav-member-menu .sep{height:1px;margin:4px 12px;background:var(--border);padding:0}' +
         '@media (max-width:768px){.nav-member{display:none}}';
     document.head.appendChild(st);
 
     var wrap = document.createElement('div');
     wrap.id = 'yc-nav-member'; wrap.className = 'nav-member';
     var link = document.createElement('a');
-    link.className = 'nav-member-link'; link.href = root + 'dashboard/';
-    var out = document.createElement('button');
-    out.type = 'button'; out.className = 'nav-member-out'; out.textContent = '登出';
-    out.onclick = signOut;
-    wrap.appendChild(link); wrap.appendChild(out);
+    link.href = root + 'dashboard/';
+    var menu = document.createElement('ul');
+    menu.className = 'nav-member-menu'; menu.setAttribute('aria-label', '會員選單');
+    wrap.appendChild(link); wrap.appendChild(menu);
     navRight.insertBefore(wrap, navRight.firstChild);
 
+    function item(label, href) {
+        var li = document.createElement('li'), a = document.createElement('a');
+        a.href = href; a.textContent = label; li.appendChild(a); return li;
+    }
     var mm = document.getElementById('mobile-menu');
-    var mLink = null, mOut = null;
-    if (mm) {
-        mLink = document.createElement('a');
-        mLink.className = 'mobile-nav-btn'; mLink.href = root + 'dashboard/';
-        mOut = document.createElement('a');
-        mOut.className = 'mobile-nav-btn'; mOut.href = '#'; mOut.textContent = '登出';
-        mOut.onclick = function (e) { e.preventDefault(); signOut(); };
-        mm.appendChild(mLink); mm.appendChild(mOut);
+    var mobileEls = [];
+    function clearMobile() { mobileEls.forEach(function (e) { if (e.parentNode) e.parentNode.removeChild(e); }); mobileEls = []; }
+    function addMobile(label, href, onclick) {
+        if (!mm) return;
+        var a = document.createElement('a');
+        a.className = 'mobile-nav-btn'; a.href = href; a.textContent = label;
+        if (onclick) a.onclick = function (e) { e.preventDefault(); onclick(); };
+        mm.appendChild(a); mobileEls.push(a);
     }
 
-    var last = null;
+    var last = '';
     function render() {
-        var on = loggedIn();
-        if (on === last) return;
-        last = on;
-        link.textContent = on ? '會員專區' : '會員登入';
-        link.setAttribute('aria-label', on ? '前往會員專區' : '會員登入或註冊');
-        out.hidden = !on;
-        if (mLink) { mLink.textContent = on ? '會員專區' : '會員登入'; mOut.style.display = on ? '' : 'none'; }
+        var s = readState();
+        var sig = s ? (s.admin ? 'admin' : 'member') : 'out';
+        if (sig === last) return;
+        last = sig;
+        menu.innerHTML = '';
+        clearMobile();
+        if (!s) {
+            link.textContent = '會員登入';
+            link.setAttribute('aria-label', '會員登入或註冊');
+            wrap.classList.remove('has-menu');
+            addMobile('會員登入', root + 'dashboard/');
+            return;
+        }
+        link.textContent = '會員專區';
+        link.setAttribute('aria-label', '會員專區選單');
+        wrap.classList.add('has-menu');
+        menu.appendChild(item('會員專區', root + 'dashboard/'));
+        menu.appendChild(item('我的網站', root + 'dashboard/#dash-site'));
+        menu.appendChild(item('網站編輯器', root + 'builder/'));
+        if (s.admin) menu.appendChild(item('管理後台', root + 'admin/'));
+        var sep = document.createElement('li'); sep.className = 'sep'; sep.setAttribute('role', 'separator'); menu.appendChild(sep);
+        var lo = document.createElement('li'), b = document.createElement('button');
+        b.type = 'button'; b.textContent = '登出'; b.onclick = signOut; lo.appendChild(b); menu.appendChild(lo);
+        addMobile('會員專區', root + 'dashboard/');
+        addMobile('網站編輯器', root + 'builder/');
+        if (s.admin) addMobile('管理後台', root + 'admin/');
+        addMobile('登出', '#', signOut);
     }
     render();
     window.addEventListener('storage', render);
