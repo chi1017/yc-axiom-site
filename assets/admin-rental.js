@@ -12,7 +12,7 @@
   var STATUS_COLOR = { draft: '#9a8f80', pending: '#e0b05a', live: '#6cc08b', overdue: '#f59e0b', suspended: '#f0776b', cancelled: '#9ca3af' };
   var EVENT_LABEL = {
     published_first: '客戶首次送出上線申請', version_saved: '客戶更新送審內容', deploy_queued: '排入部署', deploy_ok: '部署成功', deploy_failed: '部署失敗',
-    email_sent: '寄信成功', email_failed: '寄信失敗', terms_accepted: '客戶同意租用條款', payment_confirmed: '確認收款', suspended: '暫停網站', restored: '恢復網站',
+    email_sent: '寄信成功', email_failed: '寄信失敗', terms_accepted: '客戶同意租用條款', payment_confirmed: '確認收款', suspended: '暫停網站', restored: '恢復網站', terminated: '終止租用',
     republish_queued: '重新發佈', version_restore_queued: '還原版本', domain_set: '設定網域', domain_checked: '檢查網域', domain_active: '網域生效', domain_failed: '網域設定失敗', domain_cleared: '移除網域',
     reminder_sent: '系統：寄出到期提醒', auto_overdue: '系統：到期，自動改為逾期', auto_live: '系統：到期日已延後，改回上線中', long_suspend_notified: '系統：暫停滿 30 天，已通知管理員', cron_anomaly: '系統：資料異常',
     monthly_report: '月報檢測完成', report_failed: '月報檢測失敗', photos_cleaned: '清理沒被引用的舊照片'
@@ -292,13 +292,14 @@
     var d = e.detail || {}, bits = [];
     if (e.type === 'payment_confirmed') bits.push(money(d.amount) + '・' + d.months + ' 個月' + (d.period_to ? '・到期 ' + d.period_to : ''), d.warning || '');
     else if (e.type === 'suspended') bits.push(d.auto ? '系統自動暫停' : '', d.reason ? '原因：' + d.reason : '');
+    else if (e.type === 'terminated') bits.push(d.status_from ? '原狀態：' + (STATUS[d.status_from] || d.status_from) : '', d.reason ? '原因：' + d.reason : '');
     else if (e.type === 'reminder_sent') bits.push('到期日 ' + (d.paid_until || '') + '，剩 ' + (d.days_left == null ? '?' : d.days_left) + ' 天');
     else if (e.type === 'auto_overdue') bits.push('到期日 ' + (d.paid_until || ''));
     else if (e.type === 'long_suspend_notified') bits.push('自 ' + (d.since || '') + '，共 ' + (d.days || '') + ' 天');
     else if (e.type === 'monthly_report') bits.push((d.month || '').slice(0, 7) + '　SEO ' + d.seo + '／GEO ' + d.geo);
     else if (e.type === 'report_failed') bits.push((d.month || '').slice(0, 7), d.error || '');
     else if (e.type === 'photos_cleaned') bits.push('刪除 ' + (d.count || 0) + ' 個');
-    else if (e.type === 'deploy_ok') bits.push(d.mode === 'maintenance' ? '維護頁' : (d.url || ''), d.skipped || '');
+    else if (e.type === 'deploy_ok') bits.push(d.mode === 'maintenance' ? '維護頁' : d.mode === 'closed' ? '已停止服務頁' : (d.url || ''), d.skipped || '');
     else if (e.type === 'deploy_failed') bits.push(d.message || '');
     else if (e.type === 'email_sent' || e.type === 'email_failed') bits.push(MAIL_LABEL[d.template] || d.template || '', d.error || '');
     else if (e.type === 'version_restore_queued') bits.push(d.overwrite_draft ? '已覆蓋會員草稿' : '未覆蓋會員草稿');
@@ -317,6 +318,11 @@
     if (canDeploy || r.status === 'suspended') acts.push('<button class="m-btn sm" data-act="republish">' + (r.status === 'suspended' ? '重新部署維護頁' : '重新發佈') + '</button>');
     if (['pending', 'live', 'overdue'].indexOf(r.status) >= 0) acts.push('<button class="m-btn sm rn-danger" data-act="suspend">暫停網站</button>');
     if (r.status === 'suspended') acts.push('<button class="m-btn sm" data-act="restore">恢復網站</button>');
+    if (['pending', 'live', 'overdue', 'suspended'].indexOf(r.status) >= 0) acts.push('<button class="m-btn sm rn-danger" data-act="terminate">終止租用</button>');
+    if (r.status === 'cancelled') {
+      acts.push('<button class="m-btn sm" data-act="restore">恢復租用</button>');
+      acts.push('<button class="m-btn sm rn-danger" data-act="purge">永久刪除</button>');
+    }
     acts.push('<a class="m-btn sm" target="_blank" rel="noopener" href="' + esc(YC.url('builder/preview/') + '?site=' + encodeURIComponent(r.id)) + '">預覽最新版本</a>');
     var kv = [
       ['會員', esc(r.member_email)], ['網址', u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u) + '</a>' : '—'],
@@ -431,8 +437,26 @@
         '<label>原因（客戶在會員專區看得到）<textarea id="rn-reason" rows="2" maxlength="200" placeholder="例如：服務逾期未續約"></textarea></label></div>', '暫停網站', true,
         async function () { var res = await call('suspend', r.id, { reason: document.getElementById('rn-reason').value.trim() }); toast(res.message || '已暫停'); await refreshAfter(r.id, true); });
     }
+    if (act === 'terminate') {
+      return modal('終止「' + (r.shop_name || r.slug) + '」的租用？', '<div class="rn-form"><p class="rn-note">終止後，網站網址會改顯示「已停止服務」頁（不會被搜尋引擎收錄），客戶不能再發佈更新；<b>所有資料（草稿、版本、照片、收款紀錄）都會保留</b>，之後隨時可以按「恢復租用」。確定不再需要時，才在「已終止」的網站上按「永久刪除」。</p>' +
+        '<label>原因（只有後台看得到，選填）<textarea id="rn-reason" rows="2" maxlength="200" placeholder="例如：客戶表示不再續約"></textarea></label></div>', '終止租用', true,
+        async function () { var res = await call('terminate', r.id, { reason: document.getElementById('rn-reason').value.trim() }); toast(res.message || '已終止'); await refreshAfter(r.id, /分鐘/.test(res.message || '')); });
+    }
+    if (act === 'purge') {
+      return modal('永久刪除「' + (r.shop_name || r.slug) + '」？', '<div class="rn-form"><p class="rn-note"><b>這個動作無法復原。</b>會一併刪除：網站（' + esc(r.slug) + '.pages.dev）、所有照片、草稿與歷史版本、收款紀錄、事件與月報。客戶的會員帳號不會被刪除。</p>' +
+        '<label>請輸入網址代稱 <b>' + esc(r.slug) + '</b> 確認<input id="rn-confirm" type="text" autocomplete="off" placeholder="' + esc(r.slug) + '"></label></div>', '永久刪除', true,
+        async function () {
+          var v = document.getElementById('rn-confirm').value.trim();
+          if (v !== r.slug) throw new Error('輸入的代稱不一致，請再確認');
+          var res = await call('purge', r.id, { confirm_slug: v });
+          toast(res.message || '已永久刪除');
+          closeDrawer();
+          try { await load(); } catch (e) { /* 列表重整失敗不影響 */ }
+          if (state.tab === 'rental') drawList();
+        });
+    }
     if (act === 'restore') {
-      return confirmDialog('恢復「' + (r.shop_name || r.slug) + '」？', '<p class="rn-note">會依服務到期日恢復為「上線中」或「逾期」，並重新部署原本上線的版本。若到期日已過，請同時確認收款。</p>', '恢復', false,
+      return confirmDialog((r.status === 'cancelled' ? '恢復租用「' : '恢復「') + (r.shop_name || r.slug) + '」？', '<p class="rn-note">' + (r.status === 'cancelled' ? '網站會從「已終止」恢復。' : '') + '會依服務到期日恢復為「上線中」或「逾期」，並重新部署原本上線的版本。若到期日已過，請同時確認收款。</p>', '恢復', false,
         async function () { var res = await call('restore', r.id); toast(res.message || '已恢復'); await refreshAfter(r.id, true); });
     }
   }
