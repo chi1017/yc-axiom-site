@@ -49,6 +49,11 @@ input.bad,textarea.bad{border-color:var(--danger)}
 .pal[aria-pressed=true]{border-color:var(--accent)}
 .pal i{display:flex;height:22px;border-radius:5px;overflow:hidden;margin-bottom:6px;border:1px solid rgba(127,127,127,.3)}
 .pal i s{flex:1}
+.custom-pal{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.custom-pal .mute{font-size:13px}
+.custom-pal input[type=color]{width:44px;height:34px;padding:2px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer}
+.custom-pal select{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.custom-pal .msg{flex-basis:100%;margin:0}
 .toggles label{display:flex;align-items:center;gap:8px;padding:4px 0}
 .hours-row{display:grid;grid-template-columns:44px 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
 .hours-row label.closed{display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap}
