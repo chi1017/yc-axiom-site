@@ -33,6 +33,23 @@
       '<p style="margin:6px 0 0;font-size:13px;color:#9a8f80">匯款後請用 LINE（@788cblaq）或 Email（ycaxiom@gmail.com）告訴我們匯款帳號末五碼，我們確認後會更新到期日。</p></details>';
   }
 
+  // 最近一次月報分數（每月 1 日自動檢測；沒有資料就不顯示）
+  function reportHtml(list) {
+    var cur = (list || [])[0], prev = (list || [])[1];
+    if (!cur) return '';
+    var lab = function (n) { return n >= 80 ? '良好' : n >= 60 ? '普通' : '需加強'; };
+    var diff = function (a, b) { if (!prev) return ''; var d = a - b; return d > 0 ? '<span style="color:#34d399">▲ ' + d + '</span>' : d < 0 ? '<span style="color:#f87171">▼ ' + (-d) + '</span>' : '<span style="color:#9a8f80">持平</span>'; };
+    var m = String(cur.month || '').slice(0, 7).replace('-', ' 年 ') + ' 月';
+    var issues = Array.isArray(cur.top_issues) ? cur.top_issues.slice(0, 3) : [];
+    return '<div class="ds-report" style="margin:12px 0 0;padding:10px 14px;border:1px solid rgba(255,255,255,.12);border-radius:8px">' +
+      '<p style="margin:0 0 4px;font-size:14px"><b>網站體檢</b><span style="color:#9a8f80;font-size:12px">　' + esc(m) + '・每月自動更新</span></p>' +
+      '<p style="margin:0;font-size:14px">SEO <b>' + esc(cur.seo_score) + '</b>（' + lab(cur.seo_score) + '）' + (prev ? ' ' + diff(cur.seo_score, prev.seo_score) : '') +
+      '　　GEO <b>' + esc(cur.geo_score) + '</b>（' + lab(cur.geo_score) + '）' + (prev ? ' ' + diff(cur.geo_score, prev.geo_score) : '') + '</p>' +
+      (issues.length ? '<details style="margin:6px 0 0"><summary style="cursor:pointer;font-size:13px;color:#9a8f80">最值得優先改善的事</summary><ol style="margin:6px 0 0;padding-left:20px;font-size:13.5px;line-height:1.7">' +
+        issues.map(function (i) { return '<li>' + esc(i.title) + (i.detail ? '<br><span style="color:#9a8f80;font-size:12.5px">' + esc(i.detail) + '</span>' : '') + '</li>'; }).join('') + '</ol></details>' : '') +
+      '</div>';
+  }
+
   async function draw() {
     var my = ++token;
     box.innerHTML = '';
@@ -43,6 +60,7 @@
       var s = r.data[0];
       var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
+      var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);
       var cfg = await YC.client.from('settings').select('key,value').in('key', ['bank_transfer', 'plan']);
       if (my !== token) return;
       var bank = null, plan = null;
@@ -56,6 +74,7 @@
         (live ? '<p style="margin:6px 0">網址：<a href="' + esc(s.public_url) + '" target="_blank" rel="noopener">' + esc(s.public_url) + '</a></p>' : '') +
         (s.paid_until ? '<p style="margin:6px 0;font-size:14px">服務到期日：' + esc(s.paid_until) + (dl == null ? '' : dl >= 0 ? '（還有 ' + dl + ' 天）' : '（已過期 ' + (-dl) + ' 天）') + '</p>' : '') +
         (s.status === 'suspended' && s.suspend_reason ? '<p style="margin:6px 0;font-size:14px;color:#f0776b">暫停原因：' + esc(s.suspend_reason) + '</p>' : '') +
+        reportHtml(rep && !rep.error ? rep.data : []) +
         (plan && plan.text ? '<p style="margin:6px 0;font-size:13px;color:#9a8f80;white-space:pre-line">' + esc(plan.text) + '</p>' : '') +
         bankHtml(bank, needPay) +
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
