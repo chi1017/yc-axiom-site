@@ -71,6 +71,12 @@
       if (my !== token) return;
       var bank = null, plan = null;
       (cfg.data || []).forEach(function (x) { if (x.key === 'bank_transfer') bank = x.value; if (x.key === 'plan') plan = x.value; });
+      var planHtml = '';
+      try {
+        var PM = await import(YC.url('assets/rental-plan.js')), P = PM.PLAN;
+        planHtml = '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + '　<span style="' + PM.STRIKE_STYLE + '">' + esc(PM.money(P.listMonthly)) + '</span> <b>' + esc(PM.money(P.monthly)) + '／月</b>' +
+          '<br><span style="font-size:13px;color:#9a8f80">一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + esc(PM.money(PM.YEAR_AMOUNT)) + '</span></p>';
+      } catch (e2) { /* 略過 */ }
       var dl = daysLeft(s.paid_until);
       var needPay = s.status === 'pending' || s.status === 'overdue' || s.status === 'suspended' || (dl != null && dl <= 14);
       var st = status(s, e.data || []);
@@ -82,6 +88,7 @@
         (s.status === 'suspended' && s.suspend_reason ? '<p style="margin:6px 0;font-size:14px;color:#f0776b">暫停原因：' + esc(s.suspend_reason) + '</p>' : '') +
         reportHtml(rep && !rep.error ? rep.data : []) +
         (plan && plan.text ? '<p style="margin:6px 0;font-size:13px;color:#9a8f80;white-space:pre-line">' + esc(plan.text) + '</p>' : '') +
+        planHtml +
         bankHtml(bank, needPay) +
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
           pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +
