@@ -57,7 +57,8 @@ input.bad,textarea.bad{border-color:var(--danger)}
 .toggles label{display:flex;align-items:center;gap:8px;padding:4px 0}
 .hours-row{display:grid;grid-template-columns:44px 1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
 .hours-row label.closed{display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap}
-.hours-row input[type=time]{padding:6px 8px}
+.hours-row input[type=time]{padding:6px 8px;min-width:0;font-size:16px}
+.hours-row .hrs{grid-column:2/-1;margin:-2px 0 2px;font-size:13px;color:var(--muted)}
 .row2{display:grid;grid-template-columns:1fr 110px auto;gap:8px;margin-bottom:8px;align-items:center}
 .rowN{display:grid;grid-template-columns:150px 1fr auto;gap:8px;margin-bottom:8px;align-items:center}
 .faq-item{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px;background:var(--bg)}
@@ -91,6 +92,6 @@ input.bad,textarea.bad{border-color:var(--danger)}
  .split{flex:1;overflow:hidden}.panel,.view{height:100%}
  .app[data-tab=edit] .view{display:none}.app[data-tab=view] .panel{display:none}
  .view-hint{display:none}
- .hours-row{grid-template-columns:40px 1fr 1fr}.hours-row label.closed{grid-column:1/-1}
+ .hours-row{grid-template-columns:40px 1fr 1fr}.hours-row label.closed{grid-column:1/-1;order:5}.hours-row .hrs{order:4}
  .rowN{grid-template-columns:1fr auto}.rowN input[type=date]{grid-column:1/-1}
 }
