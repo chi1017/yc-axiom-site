@@ -562,12 +562,22 @@ async function publish() {
     finally { S.publishing = false; btn.disabled = false; btn.textContent = '發佈'; }
   };
   if (first) {
+    let priceBox = null;
+    try {
+      const PM = await import(YC.url('assets/rental-plan.js'));
+      const P = PM.PLAN;
+      priceBox = h('div', { style: 'margin:12px 0 0;padding:12px 14px;border:1px solid var(--line,#3a342c);border-radius:10px;font-size:14px;line-height:1.7' },
+        h('div', { style: 'font-weight:700' }, '租用方案：' + P.name),
+        h('div', {}, h('span', { style: PM.STRIKE_STYLE, text: PM.money(P.listMonthly) }), ' ', h('b', { text: PM.money(P.monthly) + '／月' }), '（特價）'),
+        h('div', { style: 'color:var(--muted,#9a8f80)', text: '一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + PM.money(PM.YEAR_AMOUNT) + '。菜單、店內環境、常見問題、最新消息都包含，不另外加價。' }),
+        h('div', { style: 'color:var(--muted,#9a8f80)', text: '送出後以銀行轉帳付款，我們確認收款後才會開通網站。' }));
+    } catch (e) { /* 價格模組載入失敗時略過價格區塊，不影響送審 */ }
     const needTerms = !S.site.terms_accepted_at;
     const chk = h('input', { type: 'checkbox', id: 'termsOk' });
     const sendBtn = h('button', { class: 'btn primary', id: 'termsGo', onclick: go }, '送出申請');
     if (needTerms) sendBtn.disabled = true;
     chk.addEventListener('change', () => { sendBtn.disabled = !chk.checked; });
-    modal('送出上線申請？', [h('p', { text: '送出後，網址代稱「' + S.slug + '」就不能再修改。' }), h('p', { text: '我們會確認後為你開通網站，開通後會以 Email 通知你。在那之前你仍可以繼續編輯。' }),
+    modal('送出上線申請？', [h('p', { text: '送出後，網址代稱「' + S.slug + '」就不能再修改。' }), h('p', { text: '我們會確認後為你開通網站，開通後會以 Email 通知你。在那之前你仍可以繼續編輯。' }), priceBox,
       needTerms && h('label', { class: 'terms-ok', style: 'display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:14px;line-height:1.6' }, chk,
         h('span', {}, '我已閱讀並同意', h('a', { href: YC.url('terms/rental/'), target: '_blank', rel: 'noopener' }, '《網站租用條款》')))],
       [h('button', { class: 'btn', onclick: closeModal }, '再檢查一下'), sendBtn]);
