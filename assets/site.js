@@ -469,3 +469,93 @@
     }
     if(document.readyState === 'complete') init(); else window.addEventListener('load', init);
 })();
+
+/* ── 導覽列「會員專區」入口：未登入顯示「會員登入」，已登入顯示「會員專區」與「登出」 ──
+   不需要在每一頁載入 Supabase：用瀏覽器裡的登入紀錄判斷狀態，只有按「登出」時才會載入登入元件。 */
+(function () {
+    'use strict';
+    var navRight = document.querySelector('nav .nav-right');
+    if (!navRight || document.getElementById('yc-nav-member')) return;
+    var me = document.querySelector('script[src*="assets/site.js"]');
+    var root = me ? new URL('../', me.src).href : location.origin + '/';
+    var CFG = window.YC_CONFIG || {};
+    var ref = 'gatgcuntwqibpxhjviqw';
+    try { if (CFG.supabaseUrl) ref = new URL(CFG.supabaseUrl).hostname.split('.')[0]; } catch (e) {}
+    var KEY = 'sb-' + ref + '-auth-token';
+
+    function loggedIn() {
+        try {
+            var raw = localStorage.getItem(KEY);
+            if (!raw) return false;
+            var o = JSON.parse(raw);
+            return !!(o && (o.access_token || o.refresh_token));
+        } catch (e) { return false; }
+    }
+    function loadScript(src) {
+        return new Promise(function (ok, no) {
+            var s = document.createElement('script');
+            s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s);
+        });
+    }
+    async function signOut() {
+        try {
+            if (window.YC && typeof window.YC.signOut === 'function') {
+                await window.YC.signOut();
+            } else {
+                if (!window.YC_CONFIG) await loadScript(root + 'assets/supabase-config.js');
+                if (!window.supabase) await loadScript(root + 'assets/vendor/supabase-2.117.2.min.js');
+                var c = window.YC_CONFIG;
+                if (window.supabase && c && c.supabaseUrl) {
+                    await window.supabase.createClient(c.supabaseUrl, c.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: false, detectSessionInUrl: false } }).auth.signOut();
+                }
+            }
+        } catch (e) { /* 連線失敗時仍清掉這台裝置上的登入紀錄 */ }
+        try { localStorage.removeItem(KEY); } catch (e) {}
+        render();
+    }
+
+    var st = document.createElement('style');
+    st.textContent =
+        '.nav-member{display:flex;align-items:center;gap:6px;margin-right:4px}' +
+        '.nav-member a,.nav-member button{font-family:var(--f-ui);font-size:13px;font-weight:600;letter-spacing:.05em;color:var(--text-dim);background:none;border:none;cursor:pointer;padding:8px 6px;transition:color .2s;text-decoration:none;white-space:nowrap}' +
+        '.nav-member a:hover,.nav-member button:hover{color:var(--text-bright)}' +
+        '.nav-member .nav-member-link{color:var(--accent)}' +
+        '.nav-member .nav-member-out[hidden]{display:none}' +
+        '@media (max-width:768px){.nav-member{display:none}}';
+    document.head.appendChild(st);
+
+    var wrap = document.createElement('div');
+    wrap.id = 'yc-nav-member'; wrap.className = 'nav-member';
+    var link = document.createElement('a');
+    link.className = 'nav-member-link'; link.href = root + 'dashboard/';
+    var out = document.createElement('button');
+    out.type = 'button'; out.className = 'nav-member-out'; out.textContent = '登出';
+    out.onclick = signOut;
+    wrap.appendChild(link); wrap.appendChild(out);
+    navRight.insertBefore(wrap, navRight.firstChild);
+
+    var mm = document.getElementById('mobile-menu');
+    var mLink = null, mOut = null;
+    if (mm) {
+        mLink = document.createElement('a');
+        mLink.className = 'mobile-nav-btn'; mLink.href = root + 'dashboard/';
+        mOut = document.createElement('a');
+        mOut.className = 'mobile-nav-btn'; mOut.href = '#'; mOut.textContent = '登出';
+        mOut.onclick = function (e) { e.preventDefault(); signOut(); };
+        mm.appendChild(mLink); mm.appendChild(mOut);
+    }
+
+    var last = null;
+    function render() {
+        var on = loggedIn();
+        if (on === last) return;
+        last = on;
+        link.textContent = on ? '會員專區' : '會員登入';
+        link.setAttribute('aria-label', on ? '前往會員專區' : '會員登入或註冊');
+        out.hidden = !on;
+        if (mLink) { mLink.textContent = on ? '會員專區' : '會員登入'; mOut.style.display = on ? '' : 'none'; }
+    }
+    render();
+    window.addEventListener('storage', render);
+    setInterval(render, 1500);
+})();
