@@ -347,17 +347,21 @@ function buildPanel() {
   const rows = DAYS.map((d) => {
     const o = h('input', { type: 'time', 'aria-label': DAYL[d] + ' 開始' }), c = h('input', { type: 'time', 'aria-label': DAYL[d] + ' 結束' });
     const cl = h('input', { type: 'checkbox' });
-    const sync = () => { o.disabled = c.disabled = cl.checked; };
+    const rd = h('div', { class: 'hrs', 'aria-live': 'polite' });
+    // 手機的時間欄位可能只顯示 24 小時制：另外用文字標出「上午／下午」
+    const ap = (v) => { if (!/^\d{1,2}:\d{2}$/.test(v || '')) return '未填'; const [H, M] = v.split(':').map(Number); return (H < 12 ? '上午 ' : '下午 ') + (H % 12 || 12) + ':' + String(M).padStart(2, '0'); };
+    const refresh = () => { rd.textContent = cl.checked ? '公休' : ap(o.value) + ' – ' + ap(c.value); };
+    const sync = () => { o.disabled = c.disabled = cl.checked; refresh(); };
     o.value = S.content.hours[d].open; c.value = S.content.hours[d].close; cl.checked = S.content.hours[d].closed; sync();
-    o.addEventListener('input', () => { S.content.hours[d].open = o.value; touch(); });
-    c.addEventListener('input', () => { S.content.hours[d].close = c.value; touch(); });
+    o.addEventListener('input', () => { S.content.hours[d].open = o.value; refresh(); touch(); });
+    c.addEventListener('input', () => { S.content.hours[d].close = c.value; refresh(); touch(); });
     cl.addEventListener('change', () => { S.content.hours[d].closed = cl.checked; if (cl.checked) { S.content.hours[d].open = ''; S.content.hours[d].close = ''; o.value = c.value = ''; } sync(); touch(); });
-    return { d, o, c, cl, el: h('div', { class: 'hours-row' }, h('strong', { text: DAYL[d] }), o, c, h('label', { class: 'closed' }, cl, '公休')) };
+    return { d, o, c, cl, refresh, el: h('div', { class: 'hours-row' }, h('strong', { text: DAYL[d] }), o, c, h('label', { class: 'closed' }, cl, '公休'), rd) };
   });
   const copyBtn = h('button', { type: 'button', class: 'btn small' }, '把週一的時間套用到全部');
   copyBtn.addEventListener('click', () => {
     const src = S.content.hours.mon;
-    rows.forEach((r) => { if (r.d === 'mon') return; Object.assign(S.content.hours[r.d], { open: src.open, close: src.close, closed: src.closed }); r.o.value = src.open; r.c.value = src.close; r.cl.checked = src.closed; r.o.disabled = r.c.disabled = src.closed; });
+    rows.forEach((r) => { if (r.d === 'mon') return; Object.assign(S.content.hours[r.d], { open: src.open, close: src.close, closed: src.closed }); r.o.value = src.open; r.c.value = src.close; r.cl.checked = src.closed; r.o.disabled = r.c.disabled = src.closed; r.refresh(); });
     touch();
   });
   P.append(card('c-hours', 'visit', '營業時間', '每天填開始與結束時間；沒營業的那天勾「公休」。',
