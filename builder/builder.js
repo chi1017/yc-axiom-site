@@ -56,7 +56,7 @@ async function loadLib() {
     import(base + 'templates/shared/site.js'), import(base + 'templates/shared/content.js'), import(base + 'templates/shared/validate.js'),
     import(base + 'templates/shared/slug.js'), import(base + 'templates/shared/palettes.js'), import(base + 'templates/shared/hours.js')
   ]);
-  S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, hours };
+  S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, hours };
 }
 
 const photoUrl = (path) => YC_CONFIG.supabaseUrl.replace(/\/$/, '') + '/storage/v1/object/public/site-photos/' + path.split('/').map(encodeURIComponent).join('/');
@@ -290,13 +290,37 @@ function buildPanel() {
       paintSlug(); touch();
     }, 400);
   });
+  // 內建配色 + 自訂主色（自訂：選一個主色與淺色／深色底，其餘顏色自動搭配並保證文字清楚）
+  const cur = L.parseCustomPalette(S.palette);
+  const customIn = h('input', { type: 'color', id: 'f-custom', value: cur ? cur.accent.toLowerCase() : '#2f6f5c', 'aria-label': '自訂主色' });
+  const modeSel = h('select', { id: 'f-custom-mode', 'aria-label': '自訂配色底色' },
+    h('option', { value: 'l', text: '淺色底' }), h('option', { value: 'd', text: '深色底' }));
+  modeSel.value = cur && cur.dark ? 'd' : 'l';
+  const customSw = h('i', {});
+  const customBtn = h('button', { type: 'button', class: 'pal pal-custom', 'data-id': 'custom', 'aria-pressed': String(!!cur) }, customSw, '自訂配色');
   const palBtns = L.PALETTE_IDS.map((id) => {
     const p = L.PALETTES[id];
     const b = h('button', { type: 'button', class: 'pal', 'data-id': id, 'aria-pressed': String(S.palette === id) },
       h('i', {}, [p.bg, p.surface, p.accent, p.text].map((c) => h('s', { style: 'background:' + c }))), p.label);
-    b.addEventListener('click', () => { S.palette = id; palBtns.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.id === id))); touch(); });
+    b.addEventListener('click', () => { setPalette(id); });
     return b;
   });
+  const allPalBtns = [...palBtns, customBtn];
+  function paintCustomSwatch() {
+    const p = L.getPalette(L.customPaletteId(customIn.value, modeSel.value === 'd'));
+    customSw.replaceChildren(...[p.bg, p.surface, p.accent, p.text].map((c) => h('s', { style: 'background:' + c })));
+  }
+  function setPalette(id) {
+    S.palette = id;
+    allPalBtns.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.id === id || (x.dataset.id === 'custom' && L.isCustomPalette(id)))));
+    touch();
+  }
+  function applyCustom() { paintCustomSwatch(); setPalette(L.customPaletteId(customIn.value, modeSel.value === 'd')); }
+  customIn.addEventListener('input', applyCustom); modeSel.addEventListener('change', applyCustom);
+  customBtn.addEventListener('click', applyCustom);
+  paintCustomSwatch();
+  const customRow = h('div', { class: 'custom-pal' }, h('span', { class: 'mute', text: '或自己挑主色：' }), customIn, modeSel,
+    h('div', { class: 'msg mute', text: '只要選一個主色（例如店招的顏色），其餘顏色會自動搭配，文字一定看得清楚。' }));
   const toggles = L.SECTION_KEYS.map((k) => {
     const cb = h('input', { type: 'checkbox' }); cb.checked = !!S.sections[k];
     cb.addEventListener('change', () => { S.sections[k] = cb.checked; touch(); if (cb.checked) scrollPreviewTo(k); });
@@ -305,7 +329,7 @@ function buildPanel() {
   P.append(card('c-basic', 'top', '網址與外觀', '選配色、決定要顯示哪些區塊。版型與字體由 YC AXIOM 統一設計。',
     h('label', { class: 'field', for: 'f-slug' }, h('span', {}, h('em', { style: 'font-style:normal', text: '網址代稱' }), h('b', { id: 'slugLock', text: '' })), slugIn),
     h('div', { id: 'slugMsg', class: 'msg mute' }), h('div', { id: 'slugUrl', class: 'msg mute', style: 'margin-bottom:12px' }),
-    h('div', { class: 'field' }, h('span', { text: '配色' }), h('div', { class: 'palettes' }, palBtns)),
+    h('div', { class: 'field' }, h('span', { text: '配色' }), h('div', { class: 'palettes' }, allPalBtns), customRow),
     h('div', { class: 'field toggles' }, h('span', { text: '要顯示的區塊' }), toggles)));
 
   P.append(card('c-info', 'about', '店家資訊', null,
