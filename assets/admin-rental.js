@@ -453,6 +453,9 @@
       var res = await call('confirm_payment', r.id, { amount: amt, months: mon, reference: document.getElementById('rn-ref').value.trim(), paid_on: document.getElementById('rn-paid').value });
       toast(res.message || '已記錄收款'); await refreshAfter(r.id, !!res.deploying);
     });
+    var PMOD = null, amtTouched = false;
+    var amtEl = document.getElementById('rn-amt');
+    amtEl.addEventListener('input', function () { amtTouched = true; });
     var upd = function () {
       var sel = document.getElementById('rn-mon').value, cm = document.getElementById('rn-cm');
       document.getElementById('rn-cm-w').hidden = sel !== 'custom';
@@ -460,9 +463,17 @@
       if (!Number.isInteger(n) || n < 1 || n > 60) { pv.textContent = '請選擇月數'; return; }
       var from = r.paid_until && r.paid_until > today ? r.paid_until : today;
       pv.textContent = '服務期間 ' + from + ' → ' + addMonths(from, n) + (pend ? '（首次上線）' : '');
+      if (PMOD) {
+        var q = PMOD.quote(n);
+        if (q) {
+          pv.textContent += '　｜　依方案「' + PMOD.PLAN.name + '」應收 ' + PMOD.money(q.amount) + (q.freeMonths ? '（' + q.months + ' 個月只收 ' + q.paidMonths + ' 個月）' : '');
+          if (!amtTouched) amtEl.value = String(q.amount);   // 預填金額，仍可自行修改
+        }
+      }
     };
     ['rn-mon', 'rn-cm'].forEach(function (id) { var e = document.getElementById(id); e.oninput = upd; e.onchange = upd; });
     upd();
+    import(YC.url('assets/rental-plan.js')).then(function (m) { PMOD = m; upd(); }).catch(function () { /* 沒有方案模組就不預填 */ });
   }
   function askRestoreVersion(r, vid, vt) {
     modal('還原到這個版本？', '<div class="rn-form"><p class="rn-note">會把 <b>' + esc(vt) + '</b> 的版本部署到正式網站（約 1–2 分鐘）。建議先按「預覽」確認內容。</p>' +
