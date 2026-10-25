@@ -4,7 +4,7 @@ const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
 const SAVE_DELAY = 2000, RENDER_DELAY = 150;
-const TERMS_VERSION = '2026-10-v2';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
+const TERMS_VERSION = '2026-10-v3';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
 const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
 
 function tplBase() {
@@ -68,6 +68,12 @@ async function loadLib() {
 const IND = () => S.lib.getIndustry(S.site && S.site.template) || S.lib.getIndustry('cafe');
 const multiOpen = () => !!(S.plan && S.plan.PLANS && S.plan.PLANS.multi && S.plan.PLANS.multi.selectable);
 const isMulti = () => S.layout === 'multi';
+// 方案月費文字（例如「每月 NT$899」）；價格未定或模組沒載入時回傳空字串
+function priceText(layout) {
+  const PM = S.plan; if (!PM || !PM.planFor) return '';
+  const P = PM.planFor(layout);
+  return PM.hasPrice(P) ? '每月 ' + PM.money(P.monthly) : '';
+}
 // 區塊／頁面的名稱跟著行業走（菜單→服務項目、店內環境→作品集…）
 function sectionLabel(k) {
   const i = IND();
@@ -124,8 +130,8 @@ function showCreate() {
     return h('label', { class: 'choice' }, r, h('span', {}, h('strong', { text: title }), h('small', { text: desc })));
   };
   const layoutBox = multiOpen() ? h('div', { class: 'field', style: 'margin-top:14px' }, h('span', { text: '網站版型' }),
-    lay('single', '一頁版', '所有內容放在同一頁，適合資訊不多的店家。之後可以升級成多頁版。'),
-    lay('multi', '多頁版', '首頁加上關於、價目、照片、消息、常見問題、聯絡等分頁，可自己勾選要哪些頁。多頁版費用確認中，開通前會先與你確認。')) : null;
+    lay('single', '一頁版' + (priceText('single') ? '（' + priceText('single') + '）' : ''), '所有內容放在同一頁，適合資訊不多的店家。之後可以升級成多頁版。'),
+    lay('multi', '多頁版' + (priceText('multi') ? '（' + priceText('multi') + '）' : ''), '首頁加上關於、價目、照片、消息、常見問題、聯絡等分頁，可自己勾選要哪些頁。' + (priceText('multi') ? '' : '多頁版費用確認中，開通前會先與你確認。'))) : null;
   const msg = h('div', { class: 'msg mute', text: '3–30 個字，只能用小寫英文、數字與連字號（-）。' });
   const url = h('div', { class: 'msg mute' });
   const btn = h('button', { class: 'btn primary', disabled: true }, '建立我的網站');
@@ -520,7 +526,7 @@ function askUpgrade() {
   modal('升級成多頁版？', [
     h('p', { text: '升級後，網站會分成首頁和幾個獨立頁面，預設開啟：' + names + '。之後可以自己勾選要哪些頁面。' }),
     h('p', {}, h('strong', { text: '升級後不能改回一頁版。' }), '你填的內容都會保留，不必重填。'),
-    h('p', { class: 'msg mute', text: '多頁版的費用確認中，若與一頁版不同，會在下一期續約前與你確認。' + (live ? '升級後要按「發佈」，正式網站才會變成多頁。' : '') })],
+    h('p', { class: 'msg mute', text: (priceText('multi') ? '多頁版' + priceText('multi') + '。升級不另收費，目前這一期已付的費用不變，下一期起改依多頁版計費。' : '多頁版的費用確認中，若與一頁版不同，會在下一期續約前與你確認。') + (live ? '升級後要按「發佈」，正式網站才會變成多頁。' : '') })],
   [h('button', { class: 'btn', onclick: closeModal }, '先不要'), goBtn]);
 }
 
