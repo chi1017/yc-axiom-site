@@ -19,7 +19,7 @@
   };
   var MAIL_LABEL = { adminFirstPublish: '管理員通知', customerGoLive: '網站上線通知（客戶）', customerReceipt: '收款通知（客戶）',
     customerReminder: '即將到期提醒（客戶）', customerOverdue: '已到期通知（客戶）', customerSuspended: '已暫停通知（客戶）', customerMonthlyReport: '月報（客戶）', adminAutoSuspended: '自動暫停通知（管理員）', adminLongSuspended: '暫停滿 30 天通知（管理員）' };
-  var state = { domMsg: '', rows: [], loaded: false, q: '', status: 'all', due: 'all', failedOnly: false, sort: 'due_asc', sel: null, bank: null, plan: null, tab: 'members', det: null, loading: false, simOpen: false, sim: { date: '', site: '', out: null, err: '', busy: false, runs: null, runsErr: '' } };
+  var state = { domMsg: '', rows: [], loaded: false, q: '', status: 'all', due: 'all', failedOnly: false, layout: 'all', sort: 'due_asc', sel: null, bank: null, plan: null, tab: 'members', det: null, loading: false, simOpen: false, sim: { date: '', site: '', out: null, err: '', busy: false, runs: null, runsErr: '' } };
   var token = 0, watchTimer = null;
 
   // ── 小工具 ──
@@ -92,6 +92,11 @@
     var r = await YC.client.from('admin_rental_overview').select('*').order('created_at', { ascending: false }).limit(2000);
     if (r.error) throw r.error;
     state.rows = r.data || [];
+    // 版型（一頁／多頁）不在總覽 view 裡，另外讀 rental_sites 合併（管理員可讀全部）
+    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at').limit(2000);
+    var byId = {}; (lay.data || []).forEach(function (x) { byId[x.id] = x; });
+    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; });
+    loadIndustries();
     var s = await YC.client.from('settings').select('key,value').in('key', ['bank_transfer', 'plan']);
     state.bank = null; state.plan = null;
     (s.data || []).forEach(function (x) { if (x.key === 'bank_transfer') state.bank = x.value; if (x.key === 'plan') state.plan = x.value; });
@@ -203,6 +208,19 @@
     };
   }
 
+  // ── 行業名稱：從版型專案讀行業清單（讀不到時顯示行業代碼）──
+  var IND = null;
+  function loadIndustries() {
+    if (IND) return;
+    IND = {};
+    import('https://chi1017.github.io/yc-axiom-sites/templates/shared/industries.js').then(function (m) {
+      m.INDUSTRIES.forEach(function (i) { IND[i.key] = i.label; });
+      if (state.tab === 'rental') drawList();
+    }).catch(function () { /* 讀不到就顯示代碼 */ });
+  }
+  function indLabel(k) { return (IND && IND[k]) || k || '—'; }
+  var LAYOUT = { single: '一頁版', multi: '多頁版' };
+
   // ── 篩選 / 排序 ──
   function view() {
     var q = state.q.trim().toLowerCase();
@@ -212,7 +230,8 @@
       if (state.due === '30' && !(r.days_left != null && r.days_left >= 0 && r.days_left <= 30)) return false;
       if (state.due === 'over' && !(r.days_left != null && r.days_left < 0)) return false;
       if (state.failedOnly && r.last_deploy_type !== 'deploy_failed') return false;
-      if (q && [r.slug, r.shop_name, r.member_email, r.custom_domain].join('\n').toLowerCase().indexOf(q) < 0) return false;
+      if (state.layout !== 'all' && r.layout !== state.layout) return false;
+      if (q && [r.slug, r.shop_name, r.member_email, r.custom_domain, indLabel(r.template)].join('\n').toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
     var t = function (x) { return x ? +new Date(x) : 0; };
@@ -239,6 +258,7 @@
       '<div class="adm-tools rn-tools">' +
       '<input type="search" id="rn-q" placeholder="搜尋 網址代稱／店名／Email" value="' + esc(state.q) + '" aria-label="搜尋">' +
       '<select id="rn-status" aria-label="狀態">' + opts([['all', '全部狀態']].concat(Object.keys(STATUS).map(function (k) { return [k, STATUS[k]]; })), state.status) + '</select>' +
+      '<select id="rn-layout" aria-label="版型">' + opts([['all', '全部版型'], ['single', '一頁版'], ['multi', '多頁版']], state.layout) + '</select>' +
       '<select id="rn-due" aria-label="到期">' + opts([['all', '全部到期日'], ['7', '7 天內到期'], ['30', '30 天內到期'], ['over', '已過期']], state.due) + '</select>' +
       '<label class="rn-chk"><input type="checkbox" id="rn-fail"' + (state.failedOnly ? ' checked' : '') + '>只看部署失敗</label>' +
       '<select id="rn-sort" aria-label="排序">' + opts([['due_asc', '到期日：近 → 遠'], ['due_desc', '到期日：遠 → 近'], ['pub_desc', '最近發佈'], ['created_desc', '建立時間（新 → 舊）']], state.sort) + '</select>' +
@@ -247,7 +267,7 @@
       '<div class="adm-wrap"><table class="adm-table rn-table"><thead><tr><th>狀態</th><th>店名／代稱</th><th>會員</th><th>網址</th><th>到期日</th><th>最近部署</th><th>最近發佈</th></tr></thead><tbody>' +
       (v.length ? v.map(function (r) {
         var u = safeUrl(r.public_url);
-        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '</div></td>' +
+        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + '</div></td>' +
           '<td style="word-break:break-all">' + esc(r.member_email) + '</td><td class="adm-url">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https:\/\//, '').replace(/\/$/, '')) + '</a>' : '<span class="rn-dim">—</span>') + (r.custom_domain ? '<div class="rn-sub">' + esc(r.custom_domain) + (r.domain_status === 'active' ? '（已生效）' : '（設定中）') + '</div>' : '') + '</td>' +
           '<td>' + dueText(r) + '</td><td>' + deployText(r) + '</td><td class="adm-time">' + (r.last_published_at ? esc(fmtDT(r.last_published_at)) : '<span class="rn-dim">—</span>') + '</td></tr>';
       }).join('') : '<tr><td colspan="7" class="adm-none">' + (rows.length ? '沒有符合條件的網站' : '還沒有客戶建立網站') + '</td></tr>') + '</tbody></table></div>';
@@ -259,6 +279,7 @@
     $('rn-q').oninput = function () { state.q = this.value; redraw(); };
     $('rn-status').onchange = function () { state.status = this.value; drawList(); };
     $('rn-due').onchange = function () { state.due = this.value; drawList(); };
+    $('rn-layout').onchange = function () { state.layout = this.value; drawList(); };
     $('rn-fail').onchange = function () { state.failedOnly = this.checked; drawList(); };
     $('rn-sort').onchange = function () { state.sort = this.value; drawList(); };
     $('rn-simbtn').onclick = function () { state.simOpen = !state.simOpen; drawList(); if (state.simOpen) loadRuns(); };
@@ -325,7 +346,9 @@
     }
     acts.push('<a class="m-btn sm" target="_blank" rel="noopener" href="' + esc(YC.url('builder/preview/') + '?site=' + encodeURIComponent(r.id)) + '">預覽最新版本</a>');
     var kv = [
-      ['會員', esc(r.member_email)], ['網址', u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u) + '</a>' : '—'],
+      ['會員', esc(r.member_email)],
+      ['行業／版型', esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.upgraded_at ? '<span class="rn-dim">（' + esc(fmtDT(r.upgraded_at)) + ' 由一頁版升級）</span>' : '')],
+      ['網址', u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u) + '</a>' : '—'],
       ['服務到期', r.paid_until ? esc(r.paid_until) + (r.days_left == null ? '' : r.days_left < 0 ? '（已過 ' + (-r.days_left) + ' 天）' : '（剩 ' + r.days_left + ' 天）') : '—'],
       ['累計收款', r.payment_count ? money(r.paid_total) + '（' + r.payment_count + ' 筆）' : '—'],
       ['租用條款', r.terms_accepted_at ? esc(fmtDT(r.terms_accepted_at)) + '・' + esc(r.terms_version || '') : '<span class="rn-bad">尚未同意</span>'],
@@ -488,10 +511,15 @@
       var from = r.paid_until && r.paid_until > today ? r.paid_until : today;
       pv.textContent = '服務期間 ' + from + ' → ' + addMonths(from, n) + (pend ? '（首次上線）' : '');
       if (PMOD) {
-        var q = PMOD.quote(n);
+        // 依網站的版型算應收金額；多頁版價格未定案時不預填，請自行輸入與客戶談定的金額
+        var P = PMOD.planFor ? PMOD.planFor(r.layout) : PMOD.PLAN;
+        var q = PMOD.quote(n, r.layout);
         if (q) {
-          pv.textContent += '　｜　依方案「' + PMOD.PLAN.name + '」應收 ' + PMOD.money(q.amount) + (q.freeMonths ? '（' + q.months + ' 個月只收 ' + q.paidMonths + ' 個月）' : '');
+          pv.textContent += '　｜　依方案「' + P.name + '」應收 ' + PMOD.money(q.amount) + (q.freeMonths ? '（' + q.months + ' 個月只收 ' + q.paidMonths + ' 個月）' : '');
           if (!amtTouched) amtEl.value = String(q.amount);   // 預填金額，仍可自行修改
+        } else {
+          pv.textContent += '　｜　「' + P.name + '」的價格尚未定案，請輸入與客戶確認的金額';
+          if (!amtTouched) amtEl.value = '';
         }
       }
     };
