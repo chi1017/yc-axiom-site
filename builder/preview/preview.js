@@ -25,25 +25,46 @@ async function run() {
   try {
     const base = tplBase();
     const lib = await import(base + 'templates/shared/site.js');
-    const s = await YC.client.from('rental_sites').select('id,slug,template,status,palette,sections,content,public_url').eq('id', id).maybeSingle();
+    const s = await YC.client.from('rental_sites').select('id,slug,template,status,palette,sections,content,public_url,layout,pages').eq('id', id).maybeSingle();
     if (s.error) throw s.error;
     if (!s.data) { done = false; return say('找不到這個網站，或你沒有檢視權限'); }
     // ?version=<id>：預覽指定版本（管理員還原前確認用）；沒帶就預覽最新送出的版本
     const vid = new URLSearchParams(location.search).get('version') || '';
     if (vid && !/^[0-9a-f-]{36}$/i.test(vid)) { done = false; return say('網址不正確：版本編號格式錯誤'); }
-    let vq = YC.client.from('site_versions').select('content,palette,sections,created_at').eq('site_id', id);
+    let vq = YC.client.from('site_versions').select('content,palette,sections,layout,pages,created_at').eq('site_id', id);
     vq = vid ? vq.eq('id', vid).limit(1) : vq.order('created_at', { ascending: false }).limit(1);
     const v = await vq;
     if (vid && !(v.data && v.data[0])) { done = false; return say('找不到這個版本，或你沒有檢視權限'); }
     const ver = v.data && v.data[0];
-    const src = ver || { content: s.data.content, palette: s.data.palette, sections: s.data.sections, created_at: null };
+    const src = ver || { content: s.data.content, palette: s.data.palette, sections: s.data.sections, layout: s.data.layout, pages: s.data.pages, created_at: null };
     const url = (s.data.public_url || 'https://' + s.data.slug + '.pages.dev/');
-    const r = lib.buildSite({ template: s.data.template, content: src.content, palette: src.palette, sections: src.sections, siteUrl: url, preview: false,
-      imageSrc: (role, p) => YC_CONFIG.supabaseUrl.replace(/\/$/, '') + '/storage/v1/object/public/site-photos/' + p.path.split('/').map(encodeURIComponent).join('/') });
+    // 多頁版：用上方的選單切換頁面；預覽裡點站內連結也會切換
+    const show = (page) => {
+      const r = lib.buildSite({ template: s.data.template, content: src.content, palette: src.palette, sections: src.sections, layout: src.layout, pages: src.pages, page, siteUrl: url, preview: false,
+        imageSrc: (role, p) => YC_CONFIG.supabaseUrl.replace(/\/$/, '') + '/storage/v1/object/public/site-photos/' + p.path.split('/').map(encodeURIComponent).join('/') });
+      const sel = $('#pPage');
+      sel.hidden = r.pages.length < 2;
+      sel.replaceChildren(...r.pages.map((p) => Object.assign(document.createElement('option'), { value: p.key, textContent: p.label, selected: p.key === (page || 'home') })));
+      sel.onchange = () => show(sel.value);
+      const f = $('#frame');
+      f.onload = () => {
+        try {
+          f.contentDocument.addEventListener('click', (ev) => {
+            const a = ev.target.closest && ev.target.closest('a'); if (!a) return;
+            const href = a.getAttribute('href') || '';
+            if (href.startsWith('#') || /^(https?:|mailto:|tel:)/i.test(href)) return;
+            ev.preventDefault();
+            const path = href.replace(/^(\.\.\/|\.\/)+/, '').split('#')[0];
+            const pg = r.pages.find((p) => p.path === path); if (pg) show(pg.key);
+          });
+        } catch (e) { /* ignore */ }
+      };
+      f.srcdoc = r.html;
+    };
+    show('home');
     $('#msg').hidden = true; $('#top').hidden = false; $('#stage').hidden = false;
     $('#pName').textContent = (src.content && src.content.name) || s.data.slug;
     $('#pInfo').textContent = '代稱 ' + s.data.slug + ' · 狀態：' + (STATUS[s.data.status] || s.data.status) + ' · ' + (ver ? (vid ? '指定版本 ' : '版本時間 ') + new Date(ver.created_at).toLocaleString('zh-TW') : '尚無送出的版本，顯示的是草稿');
-    $('#frame').srcdoc = r.html;
     document.title = '預覽：' + ((src.content && src.content.name) || s.data.slug);
   } catch (e) { done = false; console.error(e); say('載入失敗：' + String((e && e.message) || e)); }
 }

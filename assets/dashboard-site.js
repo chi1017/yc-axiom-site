@@ -55,7 +55,7 @@
     box.innerHTML = '';
     if (!YC.enabled || !YC.loggedIn() || !YC.consented()) return;
     try {
-      var r = await YC.client.from('rental_sites').select('id,slug,status,public_url,paid_until,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at').limit(1);
+      var r = await YC.client.from('rental_sites').select('id,slug,status,layout,public_url,paid_until,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at').limit(1);
       if (my !== token || r.error || !r.data) return;
       if (!r.data.length) {   // 還沒有網站：顯示入口
         box.innerHTML = '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">網站租用</h2>' +
@@ -73,9 +73,12 @@
       (cfg.data || []).forEach(function (x) { if (x.key === 'bank_transfer') bank = x.value; if (x.key === 'plan') plan = x.value; });
       var planHtml = '';
       try {
-        var PM = await import(YC.url('assets/rental-plan.js')), P = PM.PLAN;
-        planHtml = '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + '　<span style="' + PM.STRIKE_STYLE + '">' + esc(PM.money(P.listMonthly)) + '</span> <b>' + esc(PM.money(P.monthly)) + '／月</b>' +
-          '<br><span style="font-size:13px;color:#9a8f80">一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + esc(PM.money(PM.YEAR_AMOUNT)) + '</span></p>';
+        var PM = await import(YC.url('assets/rental-plan.js')), P = PM.planFor ? PM.planFor(s.layout) : PM.PLAN;
+        var yq = PM.hasPrice && PM.hasPrice(P) ? PM.quote(12, s.layout) : null;
+        planHtml = yq
+          ? '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + '　' + (P.listMonthly ? '<span style="' + PM.STRIKE_STYLE + '">' + esc(PM.money(P.listMonthly)) + '</span> ' : '') + '<b>' + esc(PM.money(P.monthly)) + '／月</b>' +
+            '<br><span style="font-size:13px;color:#9a8f80">一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + esc(PM.money(yq.amount)) + '</span></p>'
+          : '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + '<br><span style="font-size:13px;color:#9a8f80">費用確認中，我們會與你聯絡確認。</span></p>';
       } catch (e2) { /* 略過 */ }
       var dl = daysLeft(s.paid_until);
       var needPay = s.status === 'pending' || s.status === 'overdue' || s.status === 'suspended' || (dl != null && dl <= 14);
