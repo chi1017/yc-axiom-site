@@ -20,10 +20,10 @@ export const PLANS = {
     id: 'self-multi',
     layout: 'multi',
     name: '自架版（多頁）',
-    listMonthly: null,  // 待定
-    monthly: null,      // 待定：定案前不可出現在任何頁面
+    listMonthly: 1090,  // 原價
+    monthly: 899,       // 目前特價，每月（2026-10 定案）
     yearPaidMonths: 10,
-    selectable: true    // 編輯器開放選擇；價格未定時編輯器只顯示「費用確認中」
+    selectable: true    // 編輯器開放選擇
   }
 };
 
