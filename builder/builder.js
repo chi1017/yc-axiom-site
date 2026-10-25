@@ -103,10 +103,15 @@ async function boot() {
     gate([h('p', { text: '載入編輯器…' })]);
     await loadLib();
     const uid = YC.session.user.id;
-    const r = await YC.client.from('rental_sites').select('*').eq('member_id', uid).order('created_at').limit(1);
+    // 一個會員可以有多個網站：網址 ?site=<id> 指定要編輯哪一個，沒指定就開上次編輯的（或第一個）
+    const r = await YC.client.from('rental_sites').select('*').eq('member_id', uid).order('created_at');
     if (r.error) throw r.error;
-    if (!r.data.length) return showCreate();
-    mount(r.data[0]);
+    S.mySites = r.data;
+    const q = new URLSearchParams(location.search);
+    if (!r.data.length || q.get('new') === '1') return showCreate();
+    let last = ''; try { last = localStorage.getItem('yc-builder-site') || ''; } catch (e) { /* ignore */ }
+    const pick = r.data.find((x) => x.id === q.get('site')) || r.data.find((x) => x.id === last) || r.data[0];
+    mount(pick);
   } catch (e) {
     booted = false;
     console.error(e);
@@ -122,7 +127,7 @@ function showCreate() {
   // 行業：依群組列出；決定網站的用詞、頁面名稱與給搜尋引擎看的店家類型
   const ind = h('select', { id: 'cInd', class: 'sel' }, h('option', { value: '', text: '請選擇' }),
     L.INDUSTRY_GROUPS.map((g) => h('optgroup', { label: g }, L.INDUSTRIES.filter((i) => i.group === g).map((i) => h('option', { value: i.key, text: i.label })))));
-  const indMsg = h('div', { class: 'msg mute', text: '網站的用詞（例如菜單、服務項目、課程）會依行業自動調整。建立後不能更改。' });
+  const indMsg = h('div', { class: 'msg mute', text: '網站的用詞（例如菜單、服務項目、課程）會依行業自動調整。之後也可以在編輯器裡更改。' });
   let layout = 'single';
   const lay = (v, title, desc) => {
     const r = h('input', { type: 'radio', name: 'cLayout', value: v }); r.checked = v === layout;
@@ -160,10 +165,18 @@ function showCreate() {
     const row = { member_id: YC.session.user.id, slug: slug.value, template: ind.value, palette: 'forest', sections: L.defaultSections(), content: c };
     if (layout === 'multi') { row.layout = 'multi'; row.pages = L.defaultPages(); }
     const r = await YC.client.from('rental_sites').insert(row).select('*').single();
-    if (r.error) { msg.className = 'msg bad'; msg.textContent = '建立失敗：' + (/duplicate|unique/i.test(r.error.message) ? '這個名稱剛被使用了，請換一個' : r.error.message); btn.textContent = '建立我的網站'; btn.disabled = false; return; }
+    if (r.error) {
+      const m = r.error.message || '';
+      msg.className = 'msg bad';
+      msg.textContent = '建立失敗：' + (/duplicate|unique/i.test(m) ? '這個名稱剛被使用了，請換一個' : /row-level security|policy/i.test(m) ? '你的網站數量已達上限（每位會員最多 5 個），需要更多請聯絡我們' : m);
+      btn.textContent = '建立我的網站'; btn.disabled = false; return;
+    }
+    S.mySites = (S.mySites || []).concat(r.data);
+    try { history.replaceState(null, '', location.pathname + '?site=' + r.data.id); } catch (e) { /* ignore */ }
     mount(r.data);
   });
-  gate([h('h1', { text: '建立你的網站' }), h('p', { text: '先決定行業、網址代稱與店名，之後都可以在編輯器裡修改內容（網址代稱在第一次發佈後就不能再改）。' }),
+  const back = (S.mySites || []).length ? h('p', { style: 'margin:0 0 8px' }, h('a', { href: location.pathname, text: '← 回到我的網站' })) : null;
+  gate([back, h('h1', { text: (S.mySites || []).length ? '建立另一個網站' : '建立你的網站' }), h('p', { text: '先決定行業、網址代稱與店名，之後都可以在編輯器裡修改內容（網址代稱在第一次發佈後就不能再改）。' }),
     h('label', { class: 'field', for: 'cInd' }, h('span', { text: '行業' }), ind), indMsg,
     layoutBox,
     h('label', { class: 'field', for: 'cSlug', style: 'margin-top:14px' }, h('span', { text: '網址代稱' }), slug), msg, url,
@@ -171,9 +184,28 @@ function showCreate() {
 }
 
 // ── 編輯器 ──
+// 上方的網站切換（有多個網站時）與「建立新網站」
+function paintSiteSwitch() {
+  const box = $('#siteSwitch'); if (!box) return;
+  const list = S.mySites || [];
+  const sel = h('select', { class: 'sel', 'aria-label': '切換網站' },
+    list.map((x) => h('option', { value: x.id, text: ((x.content && x.content.name) || x.slug) + '（' + x.slug + '）' })),
+    h('option', { value: '__new', text: '＋ 建立新網站' }));
+  sel.value = S.site.id;
+  sel.addEventListener('change', async () => {
+    const v = sel.value; sel.disabled = true;
+    if (S.dirty || S.saving) await save();
+    S.dirty = false;
+    location.href = location.pathname + (v === '__new' ? '?new=1' : '?site=' + encodeURIComponent(v));
+  });
+  box.replaceChildren(sel);
+}
+
 function mount(site) {
   const L = S.lib;
   S.site = site; S.slug = site.slug;
+  try { localStorage.setItem('yc-builder-site', site.id); } catch (e) { /* ignore */ }
+  paintSiteSwitch();
   S.content = L.normalizeContent(site.content);
   S.palette = L.normalizePalette(site.palette);
   S.sections = L.normalizeSections(site.sections);
@@ -310,7 +342,7 @@ function deriveStatus() {
 }
 async function refreshStatus() {
   const [s, e] = await Promise.all([
-    YC.client.from('rental_sites').select('status,public_url,paid_until,live_version_id,first_published_at,last_published_at,cf_project_name,terms_accepted_at').eq('id', S.site.id).single(),
+    YC.client.from('rental_sites').select('status,public_url,paid_until,live_version_id,first_published_at,last_published_at,cf_project_name,terms_accepted_at,terms_version').eq('id', S.site.id).single(),
     YC.client.from('site_events').select('type,detail,created_at').eq('site_id', S.site.id).order('created_at', { ascending: false }).limit(20)
   ]);
   if (s.data) Object.assign(S.site, s.data);
@@ -413,7 +445,7 @@ function buildPanel() {
     sel('heroStyle', [['card', '標準：照片在文字旁'], ['full', '滿版大圖：照片鋪滿首頁上方']], '首頁主視覺'),
     sel('homeStyle', [['standard', '標準：區塊依序排列'], ['magazine', '雜誌風：大圖與圖文交錯']], '首頁排版'));
   P.append(card('c-basic', 'top', '網址與外觀', '選配色、版型與要顯示的內容。字體與排版細節由 YC AXIOM 統一設計。',
-    h('div', { class: 'msg mute', style: 'margin:0 0 12px' }, '行業：', h('strong', { text: IND().label }), '（建立後不能更改，需要更改請聯絡我們）'),
+    industryField(),
     h('label', { class: 'field', for: 'f-slug' }, h('span', {}, h('em', { style: 'font-style:normal', text: '網址代稱' }), h('b', { id: 'slugLock', text: '' })), slugIn),
     h('div', { id: 'slugMsg', class: 'msg mute' }), h('div', { id: 'slugUrl', class: 'msg mute', style: 'margin-bottom:12px' }),
     h('div', { class: 'field' }, h('span', { text: '配色' }), h('div', { class: 'palettes' }, allPalBtns), customRow),
@@ -475,6 +507,40 @@ function buildPanel() {
   $('#newsAdd').onclick = () => { if (S.content.news.length < L.LIMITS.news) { S.content.news.push({ date: new Date().toISOString().slice(0, 10), title: '' }); paintNews(); touch(); } };
   $('#faqAdd').onclick = () => { if (S.content.faq.length < L.LIMITS.faq) { S.content.faq.push({ q: '', a: '' }); paintFaq(); touch(); } };
   paintMenu(); paintNews(); paintFaq(); paintSlug(); paintLinks(); refreshTodo();
+}
+
+// 行業：可以更改；會改變網站用詞、頁面名稱與網址（多頁版）、給搜尋引擎看的店家類型
+function industryField() {
+  const L = S.lib;
+  const sel = h('select', { id: 'f-industry', class: 'sel' },
+    L.INDUSTRY_GROUPS.map((g) => h('optgroup', { label: g }, L.INDUSTRIES.filter((i) => i.group === g).map((i) => h('option', { value: i.key, text: i.label })))));
+  sel.value = IND().key;
+  sel.addEventListener('change', () => {
+    const to = L.getIndustry(sel.value), from = IND();
+    if (!to || to.key === from.key) return;
+    const live = ['live', 'overdue', 'pending'].includes(S.site.status);
+    const moved = isMulti() ? L.pagesFor(to.key).filter((p) => { const o = L.pagesFor(from.key).find((x) => x.key === p.key); return o && o.path !== p.path && S.pages[p.key]; }) : [];
+    const goBtn = h('button', { class: 'btn primary' }, '確定更改');
+    goBtn.addEventListener('click', async () => {
+      goBtn.disabled = true; goBtn.textContent = '更改中…';
+      if (!(await save())) { goBtn.disabled = false; goBtn.textContent = '確定更改'; toast('目前的內容還沒儲存成功，請稍後再試', 5000); return; }
+      const r = await YC.client.from('rental_sites').update({ template: to.key }).eq('id', S.site.id).select('template').single();
+      if (r.error) {
+        closeModal(); sel.value = from.key;
+        toast(/permission|privilege|denied/i.test(r.error.message) ? '目前還不能自己更改行業，請聯絡我們協助' : '更改失敗：' + r.error.message, 6000);
+        return;
+      }
+      S.site.template = r.data.template;
+      closeModal(); buildPanel(); renderPreview(true);
+      toast('已改為「' + to.label + '」' + (live ? '，按「發佈」後正式網站才會更新' : ''), 5000);
+    });
+    modal('更改行業為「' + to.label + '」？', [
+      h('p', { text: '網站的用詞與頁面名稱會改成這個行業的說法（例如「' + from.offer.label + '」會變成「' + to.offer.label + '」），你填的內容都會保留。' }),
+      moved.length ? h('p', { class: 'msg mute', text: '多頁版有些頁面的網址會改變：' + moved.map((p) => '/' + L.pagesFor(from.key).find((x) => x.key === p.key).path + ' → /' + p.path).join('、') + '。已經分享出去的舊網址會找不到頁面。' }) : null,
+      live ? h('p', { class: 'msg mute', text: '改完要按「發佈」，正式網站才會更新。' }) : null],
+    [h('button', { class: 'btn', onclick: () => { closeModal(); sel.value = from.key; } }, '取消'), goBtn]);
+  });
+  return h('label', { class: 'field', for: 'f-industry' }, h('span', { text: '行業' }), sel);
 }
 
 // 版型：一頁版用區塊開關；多頁版用頁面勾選（首頁一定有）
@@ -690,10 +756,10 @@ async function publish() {
     closeModal(); S.publishing = true; const btn = $('#btnPublish'); btn.disabled = true; btn.textContent = '處理中…';
     try {
       const ok = await save(); if (!ok) throw new Error('草稿尚未儲存成功，請稍後再按發佈');
-      if (first && !S.site.terms_accepted_at) {
+      if (needTerms()) {
         const t = await YC.client.rpc('rental_accept_terms', { p_site_id: S.site.id, p_version: TERMS_VERSION });
         if (t.error) throw new Error('無法記錄條款同意，請稍後再試');
-        S.site.terms_accepted_at = t.data || new Date().toISOString();
+        S.site.terms_accepted_at = t.data || new Date().toISOString(); S.site.terms_version = TERMS_VERSION;
       }
       const r = await YC.client.functions.invoke('publish-site', { body: { site_id: S.site.id } });
       if (r.error) {
@@ -727,21 +793,30 @@ async function publish() {
           h('div', { text: '費用確認中。送出申請後，我們會先與你確認費用，你同意後再付款開通。' }), pay);
       }
     }
-    const needTerms = !S.site.terms_accepted_at;
-    const chk = h('input', { type: 'checkbox', id: 'termsOk' });
-    const sendBtn = h('button', { class: 'btn primary', id: 'termsGo', onclick: go }, '送出申請');
-    if (needTerms) sendBtn.disabled = true;
-    chk.addEventListener('change', () => { sendBtn.disabled = !chk.checked; });
-    modal('送出上線申請？', [h('p', { text: '送出後，網址代稱「' + S.slug + '」就不能再修改。' }), h('p', { text: '我們會確認後為你開通網站，開通後會以 Email 通知你。在那之前你仍可以繼續編輯。' }), priceBox,
-      needTerms && h('label', { class: 'terms-ok', style: 'display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:14px;line-height:1.6' }, chk,
-        h('span', {}, '我已閱讀並同意', h('a', { href: YC.url('terms/rental/'), target: '_blank', rel: 'noopener' }, '《網站租用條款》')))],
-      [h('button', { class: 'btn', onclick: closeModal }, '再檢查一下'), sendBtn]);
+    const t = termsBox('送出申請');
+    modal('送出上線申請？', [h('p', { text: '送出後，網址代稱「' + S.slug + '」就不能再修改。' }), h('p', { text: '我們會確認後為你開通網站，開通後會以 Email 通知你。在那之前你仍可以繼續編輯。' }), priceBox, t.label],
+      [h('button', { class: 'btn', onclick: closeModal }, '再檢查一下'), t.btn]);
   } else if (st === 'pending') {
-    modal('更新送審內容？', [h('p', { text: '你的網站還在等待開通。更新後，開通時會使用最新的內容。' })], [h('button', { class: 'btn', onclick: closeModal }, '取消'), h('button', { class: 'btn primary', onclick: go }, '更新')]);
+    const t = termsBox('更新');
+    modal('更新送審內容？', [h('p', { text: '你的網站還在等待開通。更新後，開通時會使用最新的內容。' }), t.label], [h('button', { class: 'btn', onclick: closeModal }, '取消'), t.btn]);
   } else {
-    modal('發佈更新？', [h('p', { text: '目前編輯的內容會更新到正式網站，約 1–2 分鐘後生效。' })], [h('button', { class: 'btn', onclick: closeModal }, '取消'), h('button', { class: 'btn primary', onclick: go }, '發佈')]);
+    const t = termsBox('發佈');
+    modal('發佈更新？', [h('p', { text: '目前編輯的內容會更新到正式網站，約 1–2 分鐘後生效。' }), t.label], [h('button', { class: 'btn', onclick: closeModal }, '取消'), t.btn]);
+  }
+  // 還沒同意、或同意的是舊版條款：要勾選同意才能按
+  function termsBox(label) {
+    const need = needTerms(), updated = need && !!S.site.terms_accepted_at;
+    const chk = h('input', { type: 'checkbox', id: 'termsOk' });
+    const btn = h('button', { class: 'btn primary', id: 'termsGo', onclick: go }, label);
+    if (need) btn.disabled = true;
+    chk.addEventListener('change', () => { btn.disabled = !chk.checked; });
+    const box = need ? h('label', { class: 'terms-ok', style: 'display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:14px;line-height:1.6' }, chk,
+      h('span', {}, updated ? '條款已更新，請先閱讀並同意新版' : '我已閱讀並同意', h('a', { href: YC.url('terms/rental/'), target: '_blank', rel: 'noopener' }, '《網站租用條款》'))) : null;
+    return { label: box, btn };
   }
 }
+// 是否需要（重新）同意條款：從沒同意過，或同意的不是目前版本
+function needTerms() { return !S.site.terms_accepted_at || (S.site.terms_version || '') !== TERMS_VERSION; }
 
 function bindChrome() {
   if (bindChrome.done) return; bindChrome.done = true;
