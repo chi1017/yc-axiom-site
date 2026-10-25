@@ -6,6 +6,7 @@
 //   single：一頁版（目前上線中的方案）
 //   multi ：多頁版。月費尚未定案，monthly 為 null 時代表「還沒開放、不顯示價格」，quote() 會回傳 null。
 //           定案後只要填 listMonthly 與 monthly；一頁升級多頁不另收費，月費自下一期改用多頁價。
+//           selectable：編輯器是否讓客戶選多頁版（建立網站時與「升級成多頁版」按鈕）。設 false 就全部隱藏。
 export const PLANS = {
   single: {
     id: 'self',
@@ -21,7 +22,8 @@ export const PLANS = {
     name: '自架版（多頁）',
     listMonthly: null,  // 待定
     monthly: null,      // 待定：定案前不可出現在任何頁面
-    yearPaidMonths: 10
+    yearPaidMonths: 10,
+    selectable: true    // 編輯器開放選擇；價格未定時編輯器只顯示「費用確認中」
   }
 };
 

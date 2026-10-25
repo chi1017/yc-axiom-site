@@ -45,19 +45,37 @@ function closeModal() { const m = $('#modal'); if (m) m.remove(); }
 function gate(nodes) { const g = $('#gate'); g.hidden = false; g.replaceChildren(h('div', { class: 'gate-card' }, nodes)); $('#app').hidden = true; }
 
 const S = {
-  lib: null, site: null, content: null, palette: 'forest', sections: null, slug: '', slugState: { ok: true, msg: '' },
+  lib: null, plan: null, site: null, content: null, palette: 'forest', sections: null, slug: '', slugState: { ok: true, msg: '' },
+  layout: 'single', pages: null, page: 'home', pageList: [],
   events: [], dirty: false, saving: false, saveErr: false, lastSaved: null, fresh: new Set(), timers: {}, publishing: false
 };
 
 // ── 載入共用版型模組 ──
 async function loadLib() {
   const base = tplBase();
-  const [site, content, valid, slug, pal, hours] = await Promise.all([
+  const [site, content, valid, slug, pal, hours, pages, ind] = await Promise.all([
     import(base + 'templates/shared/site.js'), import(base + 'templates/shared/content.js'), import(base + 'templates/shared/validate.js'),
-    import(base + 'templates/shared/slug.js'), import(base + 'templates/shared/palettes.js'), import(base + 'templates/shared/hours.js')
+    import(base + 'templates/shared/slug.js'), import(base + 'templates/shared/palettes.js'), import(base + 'templates/shared/hours.js'),
+    import(base + 'templates/shared/pages.js'), import(base + 'templates/shared/industries.js')
   ]);
-  S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, hours };
+  S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, hours,
+    pagesFor: pages.pagesFor, normalizeLayout: pages.normalizeLayout, normalizePages: pages.normalizePages, defaultPages: pages.defaultPages, pagesFromSections: pages.pagesFromSections, LAYOUT_LABELS: pages.LAYOUT_LABELS,
+    INDUSTRIES: ind.INDUSTRIES, INDUSTRY_GROUPS: ind.INDUSTRY_GROUPS, getIndustry: ind.getIndustry };
+  // 方案（價格）模組：載入失敗時不影響編輯，只是不開放選多頁版、不顯示價格
+  try { S.plan = await import(YC.url('assets/rental-plan.js')); } catch (e) { S.plan = null; }
 }
+// 目前網站的行業設定（舊網站沒有對應行業時當作咖啡店）
+const IND = () => S.lib.getIndustry(S.site && S.site.template) || S.lib.getIndustry('cafe');
+const multiOpen = () => !!(S.plan && S.plan.PLANS && S.plan.PLANS.multi && S.plan.PLANS.multi.selectable);
+const isMulti = () => S.layout === 'multi';
+// 區塊／頁面的名稱跟著行業走（菜單→服務項目、店內環境→作品集…）
+function sectionLabel(k) {
+  const i = IND();
+  if (k === 'menu') return i.offer.nav;
+  if (k === 'interior') return i.space.label;
+  return S.lib.SECTION_LABELS[k];
+}
+const bookWord = () => (IND().offer === S.lib.getIndustry('cafe').offer ? '訂位' : '預約');
 
 const photoUrl = (path) => YC_CONFIG.supabaseUrl.replace(/\/$/, '') + '/storage/v1/object/public/site-photos/' + path.split('/').map(encodeURIComponent).join('/');
 
@@ -93,14 +111,29 @@ async function boot() {
 // ── 第一次：建立網站 ──
 function showCreate() {
   const L = S.lib;
-  const slug = h('input', { type: 'text', id: 'cSlug', maxlength: '30', autocomplete: 'off', spellcheck: 'false', placeholder: 'my-cafe' });
-  const name = h('input', { type: 'text', id: 'cName', maxlength: '40', placeholder: '例如：午後日光咖啡' });
+  const slug = h('input', { type: 'text', id: 'cSlug', maxlength: '30', autocomplete: 'off', spellcheck: 'false', placeholder: 'my-shop' });
+  const name = h('input', { type: 'text', id: 'cName', maxlength: '40', placeholder: '你的店名或品牌名稱' });
+  // 行業：依群組列出；決定網站的用詞、頁面名稱與給搜尋引擎看的店家類型
+  const ind = h('select', { id: 'cInd', class: 'sel' }, h('option', { value: '', text: '請選擇' }),
+    L.INDUSTRY_GROUPS.map((g) => h('optgroup', { label: g }, L.INDUSTRIES.filter((i) => i.group === g).map((i) => h('option', { value: i.key, text: i.label })))));
+  const indMsg = h('div', { class: 'msg mute', text: '網站的用詞（例如菜單、服務項目、課程）會依行業自動調整。建立後不能更改。' });
+  let layout = 'single';
+  const lay = (v, title, desc) => {
+    const r = h('input', { type: 'radio', name: 'cLayout', value: v }); r.checked = v === layout;
+    r.addEventListener('change', () => { if (r.checked) layout = v; });
+    return h('label', { class: 'choice' }, r, h('span', {}, h('strong', { text: title }), h('small', { text: desc })));
+  };
+  const layoutBox = multiOpen() ? h('div', { class: 'field', style: 'margin-top:14px' }, h('span', { text: '網站版型' }),
+    lay('single', '一頁版', '所有內容放在同一頁，適合資訊不多的店家。之後可以升級成多頁版。'),
+    lay('multi', '多頁版', '首頁加上關於、價目、照片、消息、常見問題、聯絡等分頁，可自己勾選要哪些頁。多頁版費用確認中，開通前會先與你確認。')) : null;
   const msg = h('div', { class: 'msg mute', text: '3–30 個字，只能用小寫英文、數字與連字號（-）。' });
   const url = h('div', { class: 'msg mute' });
   const btn = h('button', { class: 'btn primary', disabled: true }, '建立我的網站');
   let ok = false, t;
+  const sync = () => { btn.disabled = !(ok && ind.value); };
+  ind.addEventListener('change', sync);
   const check = () => {
-    clearTimeout(t); ok = false; btn.disabled = true;
+    clearTimeout(t); ok = false; sync();
     const v = slug.value.trim().toLowerCase(); slug.value = v;
     url.textContent = v ? '網站網址會是：' + v + '.pages.dev' : '';
     const err = L.slugError(v);
@@ -111,19 +144,23 @@ function showCreate() {
       if (slug.value !== v) return;
       if (r.error) { msg.className = 'msg bad'; msg.textContent = '檢查失敗，請稍後再試'; return; }
       ok = !!r.data; msg.className = 'msg ' + (ok ? 'ok' : 'bad'); msg.textContent = ok ? '✓ 這個名稱可以使用' : '這個名稱已被使用，請換一個';
-      btn.disabled = !ok;
+      sync();
     }, 400);
   };
   slug.addEventListener('input', check);
   btn.addEventListener('click', async () => {
-    if (!ok) return; btn.disabled = true; btn.textContent = '建立中…';
+    if (!ok || !ind.value) return; btn.disabled = true; btn.textContent = '建立中…';
     const c = L.emptyContent(); c.name = name.value.trim();
-    const r = await YC.client.from('rental_sites').insert({ member_id: YC.session.user.id, slug: slug.value, template: 'cafe', palette: 'forest', sections: L.defaultSections(), content: c }).select('*').single();
+    const row = { member_id: YC.session.user.id, slug: slug.value, template: ind.value, palette: 'forest', sections: L.defaultSections(), content: c };
+    if (layout === 'multi') { row.layout = 'multi'; row.pages = L.defaultPages(); }
+    const r = await YC.client.from('rental_sites').insert(row).select('*').single();
     if (r.error) { msg.className = 'msg bad'; msg.textContent = '建立失敗：' + (/duplicate|unique/i.test(r.error.message) ? '這個名稱剛被使用了，請換一個' : r.error.message); btn.textContent = '建立我的網站'; btn.disabled = false; return; }
     mount(r.data);
   });
-  gate([h('h1', { text: '建立你的網站' }), h('p', { text: '先決定網站的網址代稱與店名，之後都可以在編輯器裡修改內容（網址代稱在第一次發佈後就不能再改）。' }),
-    h('label', { class: 'field', for: 'cSlug' }, h('span', { text: '網址代稱' }), slug), msg, url,
+  gate([h('h1', { text: '建立你的網站' }), h('p', { text: '先決定行業、網址代稱與店名，之後都可以在編輯器裡修改內容（網址代稱在第一次發佈後就不能再改）。' }),
+    h('label', { class: 'field', for: 'cInd' }, h('span', { text: '行業' }), ind), indMsg,
+    layoutBox,
+    h('label', { class: 'field', for: 'cSlug', style: 'margin-top:14px' }, h('span', { text: '網址代稱' }), slug), msg, url,
     h('label', { class: 'field', for: 'cName', style: 'margin-top:14px' }, h('span', { text: '店名（之後可修改）' }), name), btn]);
 }
 
@@ -134,6 +171,9 @@ function mount(site) {
   S.content = L.normalizeContent(site.content);
   S.palette = L.normalizePalette(site.palette);
   S.sections = L.normalizeSections(site.sections);
+  S.layout = L.normalizeLayout(site.layout);
+  S.pages = L.normalizePages(site.pages);
+  S.page = 'home';
   $('#gate').hidden = true; $('#app').hidden = false;
   buildPanel();
   $('#barName').textContent = S.content.name || '我的網站';
@@ -143,33 +183,66 @@ function mount(site) {
   bindChrome();
 }
 
-let frameScroll = 0;
-function renderPreview() {
+let frameScroll = 0, pendingAnchor = null;
+function renderPreview(now) {
   clearTimeout(S.timers.render);
   S.timers.render = setTimeout(() => {
     const L = S.lib;
-    let html;
+    let r;
     try {
-      html = L.buildSite({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections,
-        siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path) }).html;
+      r = L.buildSite({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
+        siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path) });
     } catch (e) { console.error(e); return; }
+    S.pageList = r.pages || [];
+    if (!S.pageList.some((p) => p.key === S.page)) S.page = 'home';
+    paintPageTabs();
     const f = $('#frame');
-    try { frameScroll = f.contentWindow.scrollY || 0; } catch (e) { /* ignore */ }
+    if (pendingAnchor === null) { try { frameScroll = f.contentWindow.scrollY || 0; } catch (e) { /* ignore */ } }
     f.onload = () => {
       try {
         const d = f.contentDocument;
-        f.contentWindow.scrollTo(0, frameScroll);
+        const a = pendingAnchor; pendingAnchor = null;
+        const t = a && d.getElementById(a);
+        if (t) t.scrollIntoView({ block: 'start' }); else f.contentWindow.scrollTo(0, a === null ? frameScroll : 0);
         d.addEventListener('click', (ev) => {
-          const a = ev.target.closest && ev.target.closest('a'); if (!a) return;
-          const href = a.getAttribute('href') || '';
-          if (href.startsWith('#')) { ev.preventDefault(); const t = href.length > 1 ? d.querySelector(href) : null; if (t) t.scrollIntoView({ behavior: 'smooth' }); else f.contentWindow.scrollTo({ top: 0, behavior: 'smooth' }); }
+          const el = ev.target.closest && ev.target.closest('a'); if (!el) return;
+          const href = el.getAttribute('href') || '';
+          if (href.startsWith('#')) { ev.preventDefault(); const x = href.length > 1 ? d.querySelector(href) : null; if (x) x.scrollIntoView({ behavior: 'smooth' }); else f.contentWindow.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+          if (/^(https?:|mailto:|tel:)/i.test(href)) return;   // 外部連結照常開新視窗
+          // 站內連結（多頁版的導覽）：預覽裡切換到那一頁
+          ev.preventDefault();
+          const [path, hash] = href.replace(/^(\.\.\/|\.\/)+/, '').split('#');
+          const pg = S.pageList.find((p) => p.path === path);
+          if (pg) goPage(pg.key, hash || '');
         });
       } catch (e) { /* ignore */ }
     };
-    f.srcdoc = html;
-  }, RENDER_DELAY);
+    f.srcdoc = r.html;
+  }, now ? 0 : RENDER_DELAY);
 }
+function goPage(key, anchor) {
+  if (!S.pageList.some((p) => p.key === key)) return;
+  S.page = key; pendingAnchor = anchor || '';
+  renderPreview(true);
+}
+// 多頁版：預覽上方的分頁切換
+function paintPageTabs() {
+  const box = $('#pageTabs'); if (!box) return;
+  box.hidden = !isMulti();
+  if (!isMulti()) return;
+  box.replaceChildren(...S.pageList.map((p) => {
+    const b = h('button', { type: 'button', 'aria-pressed': String(p.key === S.page) }, p.label);
+    b.addEventListener('click', () => goPage(p.key));
+    return b;
+  }));
+}
+// 左側卡片對應的頁面（多頁版編輯時，右邊自動切到那一頁）
+const ANCHOR_PAGE = { about: 'about', menu: 'menu', interior: 'interior', news: 'news', faq: 'faq', visit: 'visit' };
 function scrollPreviewTo(anchor) {
+  if (isMulti()) {
+    const want = ANCHOR_PAGE[anchor] && S.pageList.some((p) => p.key === ANCHOR_PAGE[anchor]) ? ANCHOR_PAGE[anchor] : null;
+    if (want && want !== S.page) { goPage(want, anchor); return; }
+  }
   try { const d = $('#frame').contentDocument; const t = d && d.getElementById(anchor); if (t) t.scrollIntoView({ block: 'start' }); } catch (e) { /* ignore */ }
 }
 
@@ -192,8 +265,9 @@ async function save() {
   if (S.saving) { S.timers.save = setTimeout(save, 500); return true; }
   if (!S.dirty) return true;
   S.saving = true; setSaveText();
-  const snapshot = clone({ content: S.content, palette: S.palette, sections: S.sections });
+  const snapshot = clone({ content: S.content, palette: S.palette, sections: S.sections, pages: S.pages });
   const payload = { content: snapshot.content, palette: snapshot.palette, sections: snapshot.sections };
+  if (isMulti()) payload.pages = snapshot.pages;   // 一頁版不存 pages（升級時才寫入）
   const wantSlug = S.slug;
   if (S.site.status === 'draft' && wantSlug !== S.site.slug && S.slugState.ok && !S.lib.slugError(wantSlug)) payload.slug = wantSlug;
   const r = await YC.client.from('rental_sites').update(payload).eq('id', S.site.id).select('slug').single();
@@ -205,7 +279,8 @@ async function save() {
     return false;
   }
   S.site.slug = r.data.slug; S.site.content = snapshot.content; S.site.palette = snapshot.palette; S.site.sections = snapshot.sections;
-  S.dirty = JSON.stringify({ content: S.content, palette: S.palette, sections: S.sections }) !== JSON.stringify(snapshot);
+  if (isMulti()) S.site.pages = snapshot.pages;
+  S.dirty = JSON.stringify({ content: S.content, palette: S.palette, sections: S.sections, pages: S.pages }) !== JSON.stringify(snapshot);
   S.lastSaved = new Date(); setSaveText();
   if (S.dirty) S.timers.save = setTimeout(save, 300);
   return true;
@@ -242,7 +317,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news' };
+const FIELD_CARD = { template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -321,21 +396,29 @@ function buildPanel() {
   paintCustomSwatch();
   const customRow = h('div', { class: 'custom-pal' }, h('span', { class: 'mute', text: '或自己挑主色：' }), customIn, modeSel,
     h('div', { class: 'msg mute', text: '只要選一個主色（例如店招的顏色），其餘顏色會自動搭配，文字一定看得清楚。' }));
-  const toggles = L.SECTION_KEYS.map((k) => {
-    const cb = h('input', { type: 'checkbox' }); cb.checked = !!S.sections[k];
-    cb.addEventListener('change', () => { S.sections[k] = cb.checked; touch(); if (cb.checked) scrollPreviewTo(k); });
-    return h('label', {}, cb, L.SECTION_LABELS[k]);
-  });
-  P.append(card('c-basic', 'top', '網址與外觀', '選配色、決定要顯示哪些區塊。版型與字體由 YC AXIOM 統一設計。',
+  // 首頁樣式
+  const sel = (path, opts, label) => {
+    const id = 'f-' + path;
+    const el = h('select', { id, class: 'sel' }, opts.map(([v, t]) => h('option', { value: v, text: t })));
+    bindInput(el, path);
+    return h('label', { class: 'field', for: id }, h('span', { text: label }), el);
+  };
+  const styleBox = h('div', { class: 'style-row' },
+    sel('heroStyle', [['card', '標準：照片在文字旁'], ['full', '滿版大圖：照片鋪滿首頁上方']], '首頁主視覺'),
+    sel('homeStyle', [['standard', '標準：區塊依序排列'], ['magazine', '雜誌風：大圖與圖文交錯']], '首頁排版'));
+  P.append(card('c-basic', 'top', '網址與外觀', '選配色、版型與要顯示的內容。字體與排版細節由 YC AXIOM 統一設計。',
+    h('div', { class: 'msg mute', style: 'margin:0 0 12px' }, '行業：', h('strong', { text: IND().label }), '（建立後不能更改，需要更改請聯絡我們）'),
     h('label', { class: 'field', for: 'f-slug' }, h('span', {}, h('em', { style: 'font-style:normal', text: '網址代稱' }), h('b', { id: 'slugLock', text: '' })), slugIn),
     h('div', { id: 'slugMsg', class: 'msg mute' }), h('div', { id: 'slugUrl', class: 'msg mute', style: 'margin-bottom:12px' }),
     h('div', { class: 'field' }, h('span', { text: '配色' }), h('div', { class: 'palettes' }, allPalBtns), customRow),
-    h('div', { class: 'field toggles' }, h('span', { text: '要顯示的區塊' }), toggles)));
+    styleBox,
+    h('div', { id: 'layoutBox', class: 'field toggles' })));
+  paintLayout();
 
   P.append(card('c-info', 'about', '店家資訊', null,
-    field('店名', 'name', { max: 40, ph: '例如：午後日光咖啡' }),
-    field('一句話介紹', 'tagline', { max: 60, ph: '例如：手沖單品與自烤甜點' }),
-    field('店家介紹', 'intro', { area: true, max: 600, rows: 6, ph: '店的故事、特色、座位與使用方式…（可分段）' }),
+    field('店名', 'name', { max: 40, ph: '你的店名或品牌名稱' }),
+    field('一句話介紹', 'tagline', { max: 60, ph: '一句話說明你的特色' }),
+    field('店家介紹', 'intro', { area: true, max: 600, rows: 6, ph: '店的故事、特色、提供什麼、適合誰…（可分段）' }),
     field('地址', 'address', { max: 120, ph: '例如：高雄市苓雅區四維三路100號', help: '請寫完整地址（含縣市與區），搜尋與地圖才找得到你。' }),
     field('電話', 'phone', { max: 24, type: 'tel', ph: '例如：07-123-4567', inputmode: 'tel' }),
     h('div', { class: 'field' }, h('span', { text: '社群連結（選填，需 https:// 開頭）' })),
@@ -367,25 +450,78 @@ function buildPanel() {
   P.append(card('c-hours', 'visit', '營業時間', '每天填開始與結束時間；沒營業的那天勾「公休」。',
     rows.map((r) => r.el), h('div', { style: 'margin:4px 0 12px' }, copyBtn), field('備註（選填）', 'hoursNote', { max: 80, ph: '例如：國定假日營業時間以粉絲專頁公告為準' })));
 
-  P.append(card('c-booking', 'top', '訂位按鈕', '填了才會出現在網站首頁。連結必須是 https:// 開頭（例如你的訂位系統或 LINE 預約頁）。',
-    field('按鈕文字', 'booking.label', { max: 12, ph: '例如：線上訂位' }), field('連結', 'booking.url', { max: 500, type: 'url', ph: 'https://' }), h('div', { id: 'bookMsg', class: 'msg bad' })));
+  P.append(card('c-booking', 'top', bookWord() + '按鈕', '填了才會出現在網站首頁。連結必須是 https:// 開頭（例如你的' + bookWord() + '系統或 LINE 預約頁）。',
+    field('按鈕文字', 'booking.label', { max: 12, ph: '例如：線上' + bookWord() }), field('連結', 'booking.url', { max: 500, type: 'url', ph: 'https://' }), h('div', { id: 'bookMsg', class: 'msg bad' })));
 
   // 照片
   const slots = [{ key: 'hero', label: '主視覺照片（必填）', get: () => S.content.photos.hero, set: (v) => { S.content.photos.hero = v; } }];
-  for (let i = 0; i < 3; i++) slots.push({ key: 'room' + i, label: '店內照片 ' + (i + 1) + '（選填）', get: () => S.content.photos.room[i] || null,
+  for (let i = 0; i < L.LIMITS.room; i++) slots.push({ key: 'room' + i, label: IND().space.label + '照片 ' + (i + 1) + '（選填）', get: () => S.content.photos.room[i] || null,
     set: (v) => { const r = S.content.photos.room; if (v) { r[i] = v; } else { r.splice(i, 1); } } });
   const photoBox = h('div', { id: 'photoBox' });
   P.append(card('c-photos', 'top', '照片', 'JPG、PNG、WebP、HEIC 皆可，單張原檔不超過 5MB。系統會自動縮小並轉成適合網頁的格式。', photoBox));
   S.slots = slots; paintPhotos();
 
   // 清單
-  P.append(card('c-menu', 'menu', '菜單', '最多 12 項。價格只填數字。', h('div', { id: 'menuBox' }), h('button', { type: 'button', class: 'btn small', id: 'menuAdd' }, '＋ 新增品項'), h('span', { id: 'menuCnt', class: 'msg mute', style: 'margin-left:10px' })));
+  P.append(card('c-menu', 'menu', IND().offer.label, '最多 ' + L.LIMITS.menu + ' 項。價格只填數字。', h('div', { id: 'menuBox' }), h('button', { type: 'button', class: 'btn small', id: 'menuAdd' }, '＋ 新增' + IND().offer.item), h('span', { id: 'menuCnt', class: 'msg mute', style: 'margin-left:10px' })));
   P.append(card('c-news', 'news', '最新消息', '最多 6 則。', h('div', { id: 'newsBox' }), h('button', { type: 'button', class: 'btn small', id: 'newsAdd' }, '＋ 新增消息'), h('span', { id: 'newsCnt', class: 'msg mute', style: 'margin-left:10px' })));
   P.append(card('c-faq', 'faq', '常見問題', '最多 8 題。每題的回答建議 30–300 字，搜尋引擎與 AI 最愛引用這種問與答。', h('div', { id: 'faqBox' }), h('button', { type: 'button', class: 'btn small', id: 'faqAdd' }, '＋ 新增問題'), h('span', { id: 'faqCnt', class: 'msg mute', style: 'margin-left:10px' })));
   $('#menuAdd').onclick = () => { if (S.content.menu.length < L.LIMITS.menu) { S.content.menu.push({ name: '', price: null }); paintMenu(); touch(); const i = $('#menuBox input'); } };
   $('#newsAdd').onclick = () => { if (S.content.news.length < L.LIMITS.news) { S.content.news.push({ date: new Date().toISOString().slice(0, 10), title: '' }); paintNews(); touch(); } };
   $('#faqAdd').onclick = () => { if (S.content.faq.length < L.LIMITS.faq) { S.content.faq.push({ q: '', a: '' }); paintFaq(); touch(); } };
   paintMenu(); paintNews(); paintFaq(); paintSlug(); paintLinks(); refreshTodo();
+}
+
+// 版型：一頁版用區塊開關；多頁版用頁面勾選（首頁一定有）
+function paintLayout() {
+  const L = S.lib, box = $('#layoutBox'); if (!box) return;
+  if (!isMulti()) {
+    const toggles = L.SECTION_KEYS.map((k) => {
+      const cb = h('input', { type: 'checkbox' }); cb.checked = !!S.sections[k];
+      cb.addEventListener('change', () => { S.sections[k] = cb.checked; touch(); if (cb.checked) scrollPreviewTo(k); });
+      return h('label', {}, cb, sectionLabel(k));
+    });
+    const up = multiOpen() ? h('div', { class: 'upgrade' },
+      h('div', { class: 'msg mute', text: '想把內容分成多個頁面（關於、' + IND().offer.nav + '、' + IND().space.label + '、常見問題…）？可以升級成多頁版。' }),
+      h('button', { type: 'button', class: 'btn small', onclick: askUpgrade }, '升級成多頁版')) : null;
+    box.replaceChildren(h('span', { text: '版型：一頁版（所有內容在同一頁）' }), h('div', { class: 'msg mute', style: 'margin:0 0 4px', text: '要顯示的區塊：' }), ...toggles, up || '');
+    return;
+  }
+  const list = L.pagesFor(S.site.template).map((p) => {
+    const cb = h('input', { type: 'checkbox' }); cb.checked = !!S.pages[p.key];
+    cb.addEventListener('change', () => {
+      S.pages[p.key] = cb.checked;
+      if (L.SECTION_KEYS.includes(p.key)) S.sections[p.key] = cb.checked;   // 與發佈檢查一致
+      if (!cb.checked && S.page === p.key) S.page = 'home';
+      touch();
+      if (cb.checked) setTimeout(() => goPage(p.key), RENDER_DELAY + 20);
+    });
+    return h('label', {}, cb, p.label, h('small', { class: 'mute', text: '　/' + p.path }));
+  });
+  const home = h('input', { type: 'checkbox', checked: true, disabled: true });
+  box.replaceChildren(h('span', { text: '版型：多頁版' }), h('div', { class: 'msg mute', style: 'margin:0 0 4px', text: '要有哪些頁面（沒有內容的頁面不會出現在正式網站）：' }),
+    h('label', {}, home, '首頁', h('small', { class: 'mute', text: '　一定會有' })), ...list);
+}
+function askUpgrade() {
+  const L = S.lib;
+  const pages = L.pagesFromSections(S.sections);
+  const names = L.pagesFor(S.site.template).filter((p) => pages[p.key]).map((p) => p.label).join('、');
+  const live = ['live', 'overdue', 'pending'].includes(S.site.status);
+  const goBtn = h('button', { class: 'btn primary' }, '確定升級');
+  goBtn.addEventListener('click', async () => {
+    goBtn.disabled = true; goBtn.textContent = '升級中…';
+    if (!(await save())) { goBtn.disabled = false; goBtn.textContent = '確定升級'; toast('目前的內容還沒儲存成功，請稍後再試', 5000); return; }
+    const r = await YC.client.from('rental_sites').update({ layout: 'multi', pages }).eq('id', S.site.id).select('layout,pages,upgraded_at').single();
+    if (r.error) { goBtn.disabled = false; goBtn.textContent = '確定升級'; toast('升級失敗：' + r.error.message, 6000); return; }
+    Object.assign(S.site, r.data);
+    S.layout = 'multi'; S.pages = L.normalizePages(r.data.pages); S.page = 'home';
+    closeModal(); paintLayout(); renderPreview(true); refreshTodo();
+    toast('已升級成多頁版' + (live ? '，按「發佈」後正式網站才會更新' : ''), 5000);
+  });
+  modal('升級成多頁版？', [
+    h('p', { text: '升級後，網站會分成首頁和幾個獨立頁面，預設開啟：' + names + '。之後可以自己勾選要哪些頁面。' }),
+    h('p', {}, h('strong', { text: '升級後不能改回一頁版。' }), '你填的內容都會保留，不必重填。'),
+    h('p', { class: 'msg mute', text: '多頁版的費用確認中，若與一頁版不同，會在下一期續約前與你確認。' + (live ? '升級後要按「發佈」，正式網站才會變成多頁。' : '') })],
+  [h('button', { class: 'btn', onclick: closeModal }, '先不要'), goBtn]);
 }
 
 function paintSlug() {
@@ -410,7 +546,7 @@ function iconBtn(text, onclick, cls) { return h('button', { type: 'button', clas
 function paintMenu() {
   const L = S.lib, box = $('#menuBox'); box.replaceChildren();
   S.content.menu.forEach((m, i) => {
-    const n = h('input', { type: 'text', maxlength: '40', placeholder: '品名', 'aria-label': '品名 ' + (i + 1) }), p = h('input', { type: 'number', min: '0', max: '99999', step: '1', inputmode: 'numeric', placeholder: '價格', 'aria-label': '價格 ' + (i + 1) });
+    const n = h('input', { type: 'text', maxlength: '40', placeholder: IND().offer.item + '名稱', 'aria-label': IND().offer.item + '名稱 ' + (i + 1) }), p = h('input', { type: 'number', min: '0', max: '99999', step: '1', inputmode: 'numeric', placeholder: '價格', 'aria-label': '價格 ' + (i + 1) });
     n.value = m.name; p.value = m.price == null ? '' : m.price;
     n.addEventListener('input', () => { m.name = n.value; touch(); });
     p.addEventListener('input', () => { m.price = p.value === '' ? null : Number(p.value); touch(); });
@@ -431,7 +567,7 @@ function paintNews() {
 function paintFaq() {
   const L = S.lib, box = $('#faqBox'); box.replaceChildren();
   S.content.faq.forEach((f, i) => {
-    const q = h('input', { type: 'text', maxlength: '60', placeholder: '問題，例如：需要訂位嗎？', 'aria-label': '問題 ' + (i + 1) }), a = h('textarea', { maxlength: '300', rows: '3', placeholder: '回答（建議 30–300 字）', 'aria-label': '回答 ' + (i + 1) });
+    const q = h('input', { type: 'text', maxlength: '60', placeholder: '問題，例如：需要' + bookWord() + '嗎？', 'aria-label': '問題 ' + (i + 1) }), a = h('textarea', { maxlength: '300', rows: '3', placeholder: '回答（建議 30–300 字）', 'aria-label': '回答 ' + (i + 1) });
     const cnt = h('div', { class: 'msg mute', style: 'text-align:right' });
     q.value = f.q; a.value = f.a;
     const upd = () => { const n = [...a.value].length; cnt.textContent = n + '/300' + (n && n < 30 ? '（建議至少 30 字）' : ''); };
@@ -510,7 +646,7 @@ async function uploadPhoto(sl, file, nm, btn) {
 // ── 必填檢查 ──
 function validate() {
   const L = S.lib;
-  const r = L.validateForPublish(L.normalizeContent(S.content), L.normalizeSections(S.sections), S.slug, S.content);
+  const r = L.validateForPublish(L.normalizeContent(S.content), L.normalizeSections(S.sections), S.slug, S.content, { template: S.site.template });
   if (!S.slugState.ok && !r.errors.some((e) => e.field === 'slug') && S.site.status === 'draft') r.errors.push({ field: 'slug', msg: S.slugState.msg || '網址代稱尚未確認可用' });
   r.ok = r.errors.length === 0; return r;
 }
@@ -525,7 +661,7 @@ function refreshTodo() {
   const v = validate();
   const bm = $('#bookMsg'); if (bm) { const e = v.errors.find((x) => x.field.startsWith('booking')); bm.textContent = e ? e.msg : ''; }
   const tips = $('#tips');
-  const sg = S.lib.suggestions(S.lib.normalizeContent(S.content), S.lib.normalizeSections(S.sections));
+  const sg = S.lib.suggestions(S.lib.normalizeContent(S.content), S.lib.normalizeSections(S.sections), S.site.template);
   tips.hidden = !sg.length;
   if (sg.length) tips.replaceChildren(h('summary', { style: 'cursor:pointer;font-weight:700', text: '讓網站更容易被搜尋與 AI 找到（建議，共 ' + sg.length + ' 項）' }),
     h('ul', { style: 'margin:8px 0 0;padding-left:20px;font-size:14px;color:var(--muted)' }, sg.map((e) => h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); goField(e.field); }, text: e.msg })))));
@@ -567,15 +703,24 @@ async function publish() {
   };
   if (first) {
     let priceBox = null;
-    try {
-      const PM = await import(YC.url('assets/rental-plan.js'));
-      const P = PM.PLAN;
-      priceBox = h('div', { style: 'margin:12px 0 0;padding:12px 14px;border:1px solid var(--line,#3a342c);border-radius:10px;font-size:14px;line-height:1.7' },
-        h('div', { style: 'font-weight:700' }, '租用方案：' + P.name),
-        h('div', {}, h('span', { style: PM.STRIKE_STYLE, text: PM.money(P.listMonthly) }), ' ', h('b', { text: PM.money(P.monthly) + '／月' }), '（特價）'),
-        h('div', { style: 'color:var(--muted,#9a8f80)', text: '一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + PM.money(PM.YEAR_AMOUNT) + '。菜單、店內環境、常見問題、最新消息都包含，不另外加價。' }),
-        h('div', { style: 'color:var(--muted,#9a8f80)', text: '送出後以銀行轉帳付款，我們確認收款後才會開通網站。' }));
-    } catch (e) { /* 價格模組載入失敗時略過價格區塊，不影響送審 */ }
+    const PM = S.plan;
+    if (PM && PM.planFor) {
+      const P = PM.planFor(S.layout);
+      const pages = isMulti() ? S.pageList.filter((p) => p.key !== 'home').map((p) => p.label).join('、') : '';
+      const box = (...kids) => h('div', { style: 'margin:12px 0 0;padding:12px 14px;border:1px solid var(--line,#3a342c);border-radius:10px;font-size:14px;line-height:1.7' }, ...kids);
+      const pay = h('div', { style: 'color:var(--muted,#9a8f80)', text: '送出後以銀行轉帳付款，我們確認收款後才會開通網站。' });
+      if (PM.hasPrice(P)) {
+        const q = PM.quote(12, S.layout);
+        priceBox = box(h('div', { style: 'font-weight:700' }, '租用方案：' + P.name),
+          h('div', {}, P.listMonthly ? h('span', { style: PM.STRIKE_STYLE, text: PM.money(P.listMonthly) }) : null, ' ', h('b', { text: PM.money(P.monthly) + '／月' }), P.listMonthly ? '（特價）' : ''),
+          h('div', { style: 'color:var(--muted,#9a8f80)', text: '一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + PM.money(q.amount) + '。' + (isMulti() ? '包含' + pages + '等頁面。' : sectionLabel('menu') + '、' + sectionLabel('interior') + '、常見問題、最新消息都包含，不另外加價。') }),
+          pay);
+      } else {
+        // 價格尚未定案的方案（目前是多頁版）：不顯示任何金額
+        priceBox = box(h('div', { style: 'font-weight:700' }, '租用方案：' + P.name),
+          h('div', { text: '費用確認中。送出申請後，我們會先與你確認費用，你同意後再付款開通。' }), pay);
+      }
+    }
     const needTerms = !S.site.terms_accepted_at;
     const chk = h('input', { type: 'checkbox', id: 'termsOk' });
     const sendBtn = h('button', { class: 'btn primary', id: 'termsGo', onclick: go }, '送出申請');
