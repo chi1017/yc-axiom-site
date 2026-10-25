@@ -55,7 +55,7 @@
     box.innerHTML = '';
     if (!YC.enabled || !YC.loggedIn() || !YC.consented()) return;
     try {
-      var r = await YC.client.from('rental_sites').select('id,slug,status,layout,public_url,paid_until,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at').limit(1);
+      var r = await YC.client.from('rental_sites').select('id,slug,status,layout,content,public_url,paid_until,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at');
       if (my !== token || r.error || !r.data) return;
       if (!r.data.length) {   // 還沒有網站：顯示入口
         box.innerHTML = '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">網站租用</h2>' +
@@ -63,17 +63,27 @@
           '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/')) + '">建立我的網站</a>　<a href="' + esc(YC.url('rental/')) + '" style="font-size:14px">了解網站租用</a></p></div>';
         return;
       }
-      var s = r.data[0];
-      var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
-      var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
-      var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);
+      // 一個會員可以有多個網站：每個網站一張卡片
       var cfg = await YC.client.from('settings').select('key,value').in('key', ['bank_transfer', 'plan']);
+      var PM = null; try { PM = await import(YC.url('assets/rental-plan.js')); } catch (e1) { /* 略過價格 */ }
       if (my !== token) return;
       var bank = null, plan = null;
       (cfg.data || []).forEach(function (x) { if (x.key === 'bank_transfer') bank = x.value; if (x.key === 'plan') plan = x.value; });
+      var cards = [];
+      for (var k = 0; k < r.data.length; k++) cards.push(await siteCard(r.data[k], bank, plan, PM, r.data.length > 1));
+      if (my !== token) return;
+      box.innerHTML = cards.join('') +
+        '<p style="margin:-8px 0 22px;font-size:14px"><a href="' + esc(YC.url('builder/') + '?new=1') + '">＋ 建立另一個網站</a></p>';
+    } catch (err) { console.warn('dash-site', err); }
+  }
+
+  async function siteCard(s, bank, plan, PM, many) {
+      var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
+      var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
+      var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);
       var planHtml = '';
       try {
-        var PM = await import(YC.url('assets/rental-plan.js')), P = PM.planFor ? PM.planFor(s.layout) : PM.PLAN;
+        var P = PM.planFor ? PM.planFor(s.layout) : PM.PLAN;
         var yq = PM.hasPrice && PM.hasPrice(P) ? PM.quote(12, s.layout) : null;
         planHtml = yq
           ? '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + '　' + (P.listMonthly ? '<span style="' + PM.STRIKE_STYLE + '">' + esc(PM.money(P.listMonthly)) + '</span> ' : '') + '<b>' + esc(PM.money(P.monthly)) + '／月</b>' +
@@ -84,7 +94,8 @@
       var needPay = s.status === 'pending' || s.status === 'overdue' || s.status === 'suspended' || (dl != null && dl <= 14);
       var st = status(s, e.data || []);
       var live = s.public_url && (s.status === 'live' || s.status === 'overdue');
-      box.innerHTML = '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">我的網站</h2>' +
+      var name = (s.content && s.content.name) || s.slug;
+      return '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">' + (many ? esc(name) : '我的網站') + '</h2>' +
         '<p style="margin:0 0 6px"><span style="display:inline-block;padding:2px 12px;border:1px solid ' + st.color + ';color:' + st.color + ';border-radius:999px;font-size:13px">' + esc(st.text) + '</span></p>' +
         (live ? '<p style="margin:6px 0">網址：<a href="' + esc(s.public_url) + '" target="_blank" rel="noopener">' + esc(s.public_url) + '</a></p>' : '') +
         (s.paid_until ? '<p style="margin:6px 0;font-size:14px">服務到期日：' + esc(s.paid_until) + (dl == null ? '' : dl >= 0 ? '（還有 ' + dl + ' 天）' : '（已過期 ' + (-dl) + ' 天）') + '</p>' : '') +
@@ -98,8 +109,7 @@
         (s.custom_domain ? '<p style="margin:10px 0 0;font-size:13px;color:#9a8f80">自訂網域：' + esc(s.custom_domain) + (s.domain_status === 'active' ? '（已啟用）' : '（設定中，等待 DNS 生效）') + '</p>'
           : '<p style="margin:10px 0 0;font-size:13px;color:#9a8f80">想綁定自己的網域？請用 LINE（@788cblaq）聯絡我們，由我們協助設定。</p>') +
         '<p style="margin:6px 0 0;font-size:13px"><a href="' + esc(YC.url('terms/rental/')) + '" target="_blank" rel="noopener">網站租用條款</a>' + (s.terms_accepted_at ? '<span style="color:#9a8f80">（你已於 ' + esc(String(s.terms_accepted_at).slice(0, 10)) + ' 同意）</span>' : '') + '</p>' +
-        '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/')) + '">編輯網站</a></p></div>';
-    } catch (err) { console.warn('dash-site', err); }
+        '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(s.id)) + '">編輯網站</a></p></div>';
   }
   YC.onChange(function () { draw(); });
 })();
