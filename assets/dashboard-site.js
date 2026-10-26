@@ -77,10 +77,65 @@
     } catch (err) { console.warn('dash-site', err); }
   }
 
+  // 最近 30 天瀏覽次數（網站內建統計，不用 Cookie）
+  function statsHtml(rows) {
+    if (!rows) return '';
+    var total = 0, today = 0, byPath = {}, tw = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+    rows.forEach(function (r) { total += r.views; if (r.day === tw) today += r.views; byPath[r.path] = (byPath[r.path] || 0) + r.views; });
+    var top = Object.keys(byPath).sort(function (a, b) { return byPath[b] - byPath[a]; }).slice(0, 5);
+    return '<div style="margin:12px 0 0;padding:10px 14px;border:1px solid rgba(255,255,255,.12);border-radius:8px">' +
+      '<p style="margin:0;font-size:14px"><b>網站瀏覽</b>　最近 30 天 <b>' + total.toLocaleString('en-US') + '</b> 次　今天 <b>' + today + '</b> 次</p>' +
+      (top.length ? '<p style="margin:4px 0 0;font-size:13px;color:#9a8f80">最常被看的頁面：' + top.map(function (k) { return esc(k === '/' ? '首頁' : k) + ' ' + byPath[k]; }).join('、') + '</p>'
+        : '<p style="margin:4px 0 0;font-size:13px;color:#9a8f80">網站上線並重新發佈後開始統計，不使用 Cookie、不記錄訪客個人資料。</p>') + '</div>';
+  }
+  // 聯絡表單留言
+  function msgsHtml(rows, count) {
+    if (!rows || !rows.length) return '';
+    var d = function (t) { var x = new Date(t); return (x.getMonth() + 1) + '/' + x.getDate() + ' ' + String(x.getHours()).padStart(2, '0') + ':' + String(x.getMinutes()).padStart(2, '0'); };
+    return '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">網站留言（共 ' + (count || rows.length) + ' 則，顯示最新 ' + rows.length + ' 則）</summary>' +
+      '<ul style="margin:6px 0 0;padding-left:0;list-style:none;font-size:14px;line-height:1.7">' + rows.map(function (m) {
+        return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)"><b>' + esc(m.name) + '</b>　<span style="color:#9a8f80">' + esc(m.contact) + '・' + esc(d(m.created_at)) + '</span>' +
+          '<div style="white-space:pre-wrap">' + esc(m.message) + '</div></li>';
+      }).join('') + '</ul></details>';
+  }
+  // 自訂網域：上線中的網站可以自己設定
+  function domainHtml(s) {
+    var canSet = s.status === 'live' || s.status === 'overdue';
+    var id = esc(s.id);
+    var cur = s.custom_domain ? '<p style="margin:0 0 6px;font-size:14px">目前：<b>' + esc(s.custom_domain) + '</b>　' + (s.domain_status === 'active' ? '<span style="color:#6cc08b">已生效</span>' : '<span style="color:#e0b05a">等待 DNS 設定生效</span>') + '</p>' : '';
+    return '<details style="margin:12px 0 0"' + (s.custom_domain && s.domain_status !== 'active' ? ' open' : '') + '><summary style="cursor:pointer;font-size:14px">自訂網域' + (s.custom_domain ? '：' + esc(s.custom_domain) : '') + '</summary><div style="margin:8px 0 0">' + cur +
+      (canSet ? '<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="dom-' + id + '" placeholder="例如 www.yourshop.com" value="' + esc(s.custom_domain || '') + '" aria-label="網域" style="flex:1;min-width:180px;font:inherit;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit">' +
+        '<button type="button" class="m-btn sm" data-dom="set_domain" data-site="' + id + '">' + (s.custom_domain ? '更換' : '設定') + '</button>' +
+        (s.custom_domain ? '<button type="button" class="m-btn sm" data-dom="check_domain" data-site="' + id + '">檢查</button><button type="button" class="m-btn sm" data-dom="clear_domain" data-site="' + id + '">移除</button>' : '') + '</div>' +
+        '<p style="margin:6px 0 0;font-size:13px;color:#9a8f80">網域要自己先買好（例如在 GoDaddy、Gandi、中華電信 HiNet 等）。設定後畫面會告訴你要在網域的 DNS 新增哪一筆 CNAME。</p>'
+        : '<p style="margin:0;font-size:13px;color:#9a8f80">網站上線後就可以在這裡綁定自己的網域。</p>') +
+      '<div id="domout-' + id + '" aria-live="polite" style="margin:6px 0 0;font-size:14px"></div></div></details>';
+  }
+  // 網域按鈕（事件委派，畫面重畫後仍有效）
+  box.addEventListener('click', async function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-dom]'); if (!b) return;
+    var act = b.getAttribute('data-dom'), sid = b.getAttribute('data-site'), out = document.getElementById('domout-' + sid);
+    var inp = document.getElementById('dom-' + sid), body = { action: act, site_id: sid };
+    if (act === 'set_domain') { body.domain = (inp && inp.value || '').trim(); if (!body.domain) { out.textContent = '請輸入網域'; return; } }
+    if (act === 'clear_domain' && !confirm('移除自訂網域後，網站會改回 pages.dev 網址。確定移除？')) return;
+    b.disabled = true; out.textContent = '處理中…';
+    try {
+      var r = await YC.client.functions.invoke('member-site', { body: body });
+      var j = r.data;
+      if (r.error) { try { j = await r.error.context.json(); } catch (e3) { j = null; } throw new Error((j && j.message) || '操作失敗，請稍後再試'); }
+      out.innerHTML = esc(j.message || '完成') + (j.cname_target ? '<div style="margin:6px 0 0;padding:8px 10px;border:1px solid rgba(255,255,255,.15);border-radius:8px">類型：<b>CNAME</b>　名稱：<b>' + esc(j.domain) + '</b>　指向：<b>' + esc(j.cname_target) + '</b></div>' : '') + (j.warning ? '<div style="color:#e0b05a">' + esc(j.warning) + '</div>' : '');
+      if (act !== 'set_domain') setTimeout(draw, 2500);
+    } catch (e4) { out.textContent = String(e4.message || e4); }
+    b.disabled = false;
+  });
+
   async function siteCard(s, bank, plan, PM, many) {
       var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
       var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);
+      var since = new Date(Date.now() + 8 * 3600 * 1000 - 29 * 86400000).toISOString().slice(0, 10);
+      var hits = await YC.client.from('site_daily_hits').select('day,path,views').eq('site_id', s.id).gte('day', since).limit(2000);
+      var msgs = await YC.client.from('site_messages').select('name,contact,message,created_at', { count: 'exact' }).eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var planHtml = '';
       try {
         var P = PM.planFor ? PM.planFor(s.layout) : PM.PLAN;
@@ -106,8 +161,9 @@
         bankHtml(bank, needPay) +
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
           pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +
-        (s.custom_domain ? '<p style="margin:10px 0 0;font-size:13px;color:#9a8f80">自訂網域：' + esc(s.custom_domain) + (s.domain_status === 'active' ? '（已啟用）' : '（設定中，等待 DNS 生效）') + '</p>'
-          : '<p style="margin:10px 0 0;font-size:13px;color:#9a8f80">想綁定自己的網域？請用 LINE（@788cblaq）聯絡我們，由我們協助設定。</p>') +
+        statsHtml(hits && !hits.error ? hits.data : null) +
+        msgsHtml(msgs && !msgs.error ? msgs.data : null, msgs && msgs.count) +
+        domainHtml(s) +
         '<p style="margin:6px 0 0;font-size:13px"><a href="' + esc(YC.url('terms/rental/')) + '" target="_blank" rel="noopener">網站租用條款</a>' + (s.terms_accepted_at ? '<span style="color:#9a8f80">（你已於 ' + esc(String(s.terms_accepted_at).slice(0, 10)) + ' 同意）</span>' : '') + '</p>' +
         '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(s.id)) + '">編輯網站</a></p></div>';
   }

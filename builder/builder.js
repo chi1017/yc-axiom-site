@@ -275,7 +275,7 @@ function paintPageTabs() {
   }));
 }
 // 左側卡片對應的頁面（多頁版編輯時，右邊自動切到那一頁）
-const ANCHOR_PAGE = { about: 'about', menu: 'menu', interior: 'interior', news: 'news', faq: 'faq', visit: 'visit' };
+const ANCHOR_PAGE = { about: 'about', menu: 'menu', interior: 'interior', news: 'news', faq: 'faq', visit: 'visit', contact: 'visit' };
 function scrollPreviewTo(anchor) {
   if (isMulti()) {
     const want = ANCHOR_PAGE[anchor] && S.pageList.some((p) => p.key === ANCHOR_PAGE[anchor]) ? ANCHOR_PAGE[anchor] : null;
@@ -355,7 +355,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news' };
+const FIELD_CARD = { template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -506,7 +506,22 @@ function buildPanel() {
   $('#menuAdd').onclick = () => { if (S.content.menu.length < L.LIMITS.menu) { S.content.menu.push({ name: '', price: null }); paintMenu(); touch(); const i = $('#menuBox input'); } };
   $('#newsAdd').onclick = () => { if (S.content.news.length < L.LIMITS.news) { S.content.news.push({ date: new Date().toISOString().slice(0, 10), title: '' }); paintNews(); touch(); } };
   $('#faqAdd').onclick = () => { if (S.content.faq.length < L.LIMITS.faq) { S.content.faq.push({ q: '', a: '' }); paintFaq(); touch(); } };
-  paintMenu(); paintNews(); paintFaq(); paintSlug(); paintLinks(); refreshTodo();
+  // 更多內容：聯絡表單、地圖、影片、客人評價、Google Analytics
+  const toggle = (path, label, help) => {
+    const cb = h('input', { type: 'checkbox', id: 'f-' + path }); cb.checked = !!S.content[path];
+    cb.addEventListener('change', () => { S.content[path] = cb.checked; touch(); if (cb.checked) scrollPreviewTo(path === 'contactForm' ? 'contact' : 'visit'); });
+    return h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-' + path }, cb, h('strong', { text: label })), h('div', { class: 'msg mute', text: help }));
+  };
+  P.append(card('c-more', 'reviews', '更多內容', '都是選用的，需要再開。',
+    toggle('contactForm', '顯示聯絡表單', '客人可以在網站上留言，留言會寄到你的登入 Email，也可以在會員專區查看。'),
+    toggle('showMap', '顯示 Google 地圖', '在' + IND().visit.label + '顯示地圖（需要先填地址）。地圖要點了才會載入，不會拖慢網站。'),
+    field('YouTube 影片網址（選填）', 'video', { max: 200, type: 'url', ph: 'https://www.youtube.com/watch?v=…', help: '放一支介紹影片。訪客點了才會載入播放器，不會拖慢網站。' }),
+    h('div', { class: 'field' }, h('span', { text: '客人評價（選填，最多 6 則）' }), h('div', { class: 'msg mute', style: 'margin:0 0 8px', text: '請放真實的評價，可以摘自 Google 評論或客人留言；名字可以只寫稱呼（例如：林小姐）。' })),
+    h('div', { id: 'reviewBox' }), h('button', { type: 'button', class: 'btn small', id: 'reviewAdd' }, '＋ 新增評價'), h('span', { id: 'reviewCnt', class: 'msg mute', style: 'margin-left:10px' }),
+    h('div', { style: 'height:14px' }),
+    field('Google Analytics 評估 ID（選填）', 'ga4', { max: 20, ph: 'G-XXXXXXXXXX', help: '網站已經內建瀏覽次數統計（在會員專區查看）。需要更詳細的分析才填；GA 會在訪客第一次操作或 6 秒後才載入。' })));
+  $('#reviewAdd').onclick = () => { if (S.content.reviews.length < L.LIMITS.reviews) { S.content.reviews.push({ name: '', text: '' }); paintReviews(); touch(); } };
+  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintSlug(); paintLinks(); refreshTodo();
 }
 
 // 行業：可以更改；會改變網站用詞、頁面名稱與網址（多頁版）、給搜尋引擎看的店家類型
@@ -635,6 +650,17 @@ function paintNews() {
     box.append(h('div', { class: 'rowN' }, d, t, iconBtn('刪除', () => { S.content.news.splice(i, 1); paintNews(); touch(); }, 'danger')));
   });
   $('#newsAdd').disabled = S.content.news.length >= L.LIMITS.news; $('#newsCnt').textContent = S.content.news.length + '/' + L.LIMITS.news;
+}
+function paintReviews() {
+  const L = S.lib, box = $('#reviewBox'); if (!box) return; box.replaceChildren();
+  S.content.reviews.forEach((r, i) => {
+    const n = h('input', { type: 'text', maxlength: String(L.LIMITS.reviewName), placeholder: '稱呼，例如：林小姐', 'aria-label': '評價者 ' + (i + 1) });
+    const t = h('textarea', { maxlength: String(L.LIMITS.reviewText), rows: '3', placeholder: '評價內容', 'aria-label': '評價內容 ' + (i + 1) });
+    n.value = r.name; t.value = r.text;
+    n.addEventListener('input', () => { r.name = n.value; touch(); }); t.addEventListener('input', () => { r.text = t.value; touch(); });
+    box.append(h('div', { class: 'faq-item' }, n, h('div', { style: 'height:8px' }), t, h('div', { style: 'text-align:right' }, iconBtn('刪除這則', () => { S.content.reviews.splice(i, 1); paintReviews(); touch(); }, 'danger'))));
+  });
+  $('#reviewAdd').disabled = S.content.reviews.length >= L.LIMITS.reviews; $('#reviewCnt').textContent = S.content.reviews.length + '/' + L.LIMITS.reviews;
 }
 function paintFaq() {
   const L = S.lib, box = $('#faqBox'); box.replaceChildren();
