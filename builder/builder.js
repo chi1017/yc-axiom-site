@@ -6,6 +6,8 @@ const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
 const SAVE_DELAY = 2000, RENDER_DELAY = 150;
 const TERMS_VERSION = '2026-10-v3';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
 const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
+// 標題字型檔（預覽用完整的常用字版本；正式網站只放用到的字）
+const FONT_FILE = { serif: 'NotoSerifTC-Bold-common.woff2', sans: 'NotoSansTC-Bold-common.woff2', round: 'Huninn-common.woff2', kai: 'LXGWWenKaiTC-Bold-common.woff2' };
 
 function tplBase() {
   // 只有本機測試（127.0.0.1／localhost）允許用 ?tplbase= 指定版型來源
@@ -47,7 +49,7 @@ function gate(nodes) { const g = $('#gate'); g.hidden = false; g.replaceChildren
 const S = {
   lib: null, plan: null, site: null, content: null, palette: 'forest', sections: null, slug: '', slugState: { ok: true, msg: '' },
   layout: 'single', pages: null, page: 'home', pageList: [],
-  events: [], dirty: false, saving: false, saveErr: false, lastSaved: null, fresh: new Set(), timers: {}, publishing: false
+  events: [], dirty: false, saving: false, saveErr: false, lastSaved: null, fresh: new Set(), timers: {}, publishing: false, hist: [], hpos: 0, applying: false
 };
 
 // ── 載入共用版型模組 ──
@@ -214,6 +216,7 @@ function mount(site) {
   S.page = 'home';
   $('#gate').hidden = true; $('#app').hidden = false;
   buildPanel();
+  S.hist = [snap()]; S.hpos = 0; paintUndo();
   $('#barName').textContent = S.content.name || '我的網站';
   setSaveText();
   renderPreview();
@@ -229,8 +232,10 @@ function renderPreview(now) {
     let r;
     try {
       r = L.buildSite({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
-        siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path) });
+        siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path),
+        previewFontUrl: tplBase() + 'templates/base/fonts/' + (FONT_FILE[S.content.style.font] || FONT_FILE.serif) });
     } catch (e) { console.error(e); return; }
+    if (S.page === 'home') paintSeoHints(r);
     S.pageList = r.pages || [];
     if (!S.pageList.some((p) => p.key === S.page)) S.page = 'home';
     paintPageTabs();
@@ -285,7 +290,30 @@ function scrollPreviewTo(anchor) {
 }
 
 // ── 自動儲存 ──
+// ── 復原／重做：每次停手 0.7 秒記一筆（配色、區塊開關、內容）；最多 60 筆 ──
+const snap = () => JSON.stringify({ content: S.content, palette: S.palette, sections: S.sections });
+function recordHist() {
+  clearTimeout(S.timers.hist);
+  const cur = snap();
+  if (S.hist[S.hpos] === cur) return;
+  S.hist = S.hist.slice(0, S.hpos + 1); S.hist.push(cur);
+  if (S.hist.length > 60) S.hist.shift();
+  S.hpos = S.hist.length - 1; paintUndo();
+}
+function applySnap(json, msg) {
+  const o = JSON.parse(json);
+  S.content = S.lib.normalizeContent(o.content); S.palette = o.palette; S.sections = o.sections;
+  const sc = $('#panel').scrollTop;
+  buildPanel(); $('#panel').scrollTop = sc;
+  S.applying = true; touch(); S.applying = false; paintUndo();
+  if (msg) toast(msg, 1500);
+}
+function undo() { recordHist(); if (S.hpos > 0) { S.hpos--; applySnap(S.hist[S.hpos], '已復原'); } }
+function redo() { recordHist(); if (S.hpos < S.hist.length - 1) { S.hpos++; applySnap(S.hist[S.hpos], '已重做'); } }
+function paintUndo() { const u = $('#btnUndo'), r = $('#btnRedo'); if (u) u.disabled = S.hpos <= 0; if (r) r.disabled = S.hpos >= S.hist.length - 1; }
+
 function touch() {
+  if (!S.applying) { clearTimeout(S.timers.hist); S.timers.hist = setTimeout(recordHist, 700); }
   S.dirty = true; S.saveErr = false; setSaveText();
   $('#barName').textContent = S.content.name || '我的網站';
   renderPreview(); refreshTodo();
@@ -355,7 +383,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more' };
+const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -438,13 +466,13 @@ function buildPanel() {
   const sel = (path, opts, label) => {
     const id = 'f-' + path;
     const el = h('select', { id, class: 'sel' }, opts.map(([v, t]) => h('option', { value: v, text: t })));
-    bindInput(el, path);
+    bindInput(el, path, path === 'homeStyle' ? () => paintOrder() : null);
     return h('label', { class: 'field', for: id }, h('span', { text: label }), el);
   };
   const styleBox = h('div', { class: 'style-row' },
     sel('heroStyle', [['card', '標準：照片在文字旁'], ['full', '滿版大圖：照片鋪滿首頁上方']], '首頁主視覺'),
     sel('homeStyle', [['standard', '標準：區塊依序排列'], ['magazine', '雜誌風：大圖與圖文交錯']], '首頁排版'));
-  P.append(card('c-basic', 'top', '網址與外觀', '選配色、版型與要顯示的內容。字體與排版細節由 YC AXIOM 統一設計。',
+  P.append(card('c-basic', 'top', '網址與外觀', '選配色、版型與要顯示的內容。字型與按鈕在下一張卡片。',
     industryField(),
     h('label', { class: 'field', for: 'f-slug' }, h('span', {}, h('em', { style: 'font-style:normal', text: '網址代稱' }), h('b', { id: 'slugLock', text: '' })), slugIn),
     h('div', { id: 'slugMsg', class: 'msg mute' }), h('div', { id: 'slugUrl', class: 'msg mute', style: 'margin-bottom:12px' }),
@@ -452,6 +480,23 @@ function buildPanel() {
     styleBox,
     h('div', { id: 'layoutBox', class: 'field toggles' })));
   paintLayout();
+
+  // 字型與按鈕
+  const fontSel = h('select', { id: 'f-style-font', class: 'sel' }, L.FONTS.map((k) => h('option', { value: k, text: L.FONT_LABELS[k] })));
+  fontSel.value = S.content.style.font;
+  fontSel.addEventListener('change', () => { S.content.style.font = fontSel.value; touch(); });
+  const btnBox = h('div', { class: 'seg-btns', role: 'group', 'aria-label': '按鈕形狀' }, L.BUTTONS.map((k) => {
+    const b = h('button', { type: 'button', class: 'btn small', 'aria-pressed': String(S.content.style.button === k), style: 'border-radius:' + ({ pill: '999px', round: '10px', square: '2px' })[k] }, L.BUTTON_LABELS[k]);
+    b.addEventListener('click', () => { S.content.style.button = k; btnBox.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); touch(); });
+    return b;
+  }));
+  const flOn = h('input', { type: 'checkbox', id: 'f-style-floatLine' }); flOn.checked = !!S.content.style.floatLine;
+  flOn.addEventListener('change', () => { S.content.style.floatLine = flOn.checked; touch(); });
+  P.append(card('c-style', 'top', '字型與按鈕', '標題字型會套用在店名與各區塊標題；內文維持清楚好讀的黑體。',
+    h('label', { class: 'field', for: 'f-style-font' }, h('span', { text: '標題字型' }), fontSel),
+    h('div', { class: 'field' }, h('span', { text: '按鈕形狀' }), btnBox),
+    h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-style-floatLine' }, flOn, h('strong', { text: '在畫面右下角顯示「LINE 聯絡」按鈕' })),
+      h('div', { class: 'msg mute', text: '需要先在「店家資訊」填 LINE 連結。手機上客人隨時一按就能加你的 LINE。' }))));
 
   P.append(card('c-info', 'about', '店家資訊', null,
     field('店名', 'name', { max: 40, ph: '你的店名或品牌名稱' }),
@@ -545,6 +590,35 @@ function buildPanel() {
     S.content.posts.unshift({ id: d + '-' + Math.random().toString(36).slice(2, 6), title: '', date: d, body: '' });
     paintPosts(); touch();
   };
+  // 自訂區塊：標題、文字、照片、按鈕
+  P.append(card('c-blocks', 'top', '自訂區塊（選填）', '最多 ' + L.LIMITS.blocks + ' 個。想放的內容沒有現成欄位時用這裡，例如：包場服務、品牌故事、合作夥伴、徵才。',
+    h('div', { id: 'blockBox' }), h('button', { type: 'button', class: 'btn small', id: 'blockAdd' }, '＋ 新增區塊'), h('span', { id: 'blockCnt', class: 'msg mute', style: 'margin-left:10px' })));
+  $('#blockAdd').onclick = () => {
+    if (S.content.blocks.length >= L.LIMITS.blocks) return;
+    const id = 'k' + Math.random().toString(36).slice(2, 9).replace(/[^a-z0-9]/g, 'x');
+    S.content.blocks.push({ id, title: '', body: '', photo: null, btnLabel: '', btnUrl: '', side: 'right', hidden: false });
+    S.content.order = L.normalizeOrder(S.content.order, S.content.blocks);
+    paintBlocks(); paintOrder(); touch(); setTimeout(() => scrollPreviewTo('b-' + id), 300);
+  };
+  // 首頁區塊順序
+  P.append(card('c-order', 'top', '首頁區塊順序', '用「上移／下移」調整首頁區塊的先後。沒有內容或沒開啟的區塊不會出現在網站上。',
+    h('div', { id: 'orderNote', class: 'msg mute', style: 'margin:0 0 8px' }), h('ol', { id: 'orderBox', class: 'order-list' }),
+    h('button', { type: 'button', class: 'btn small', id: 'orderReset' }, '恢復預設順序')));
+  $('#orderReset').onclick = () => { S.content.order = L.normalizeOrder([], S.content.blocks); paintOrder(); touch(); };
+  // 搜尋與分享
+  const shareSlot = { key: 'share', label: '分享圖片', get: () => S.content.seo.share, set: (v) => { S.content.seo.share = v; } };
+  const shareBox = h('div', { id: 'shareBox' });
+  P.append(card('c-seo', 'top', '搜尋與分享（選填）', '系統會自動產生網頁標題與描述，通常不用改。想自己寫，填在這裡就會取代自動的版本。',
+    field('網頁標題', 'seo.title', { max: L.LIMITS.seoTitle, ph: '留空＝自動產生', help: '顯示在 Google 搜尋結果與瀏覽器分頁上。建議包含店名、地區與店家類型，30 字以內最完整。' }),
+    field('網頁描述', 'seo.description', { area: true, max: L.LIMITS.seoDesc, rows: 3, ph: '留空＝自動產生', help: '顯示在搜尋結果標題下方。建議 80–160 字，寫清楚你是誰、在哪裡、提供什麼。' }),
+    h('div', { class: 'field' }, h('span', { text: '分享到 LINE／Facebook 時的圖片（選填，沒有就用主視覺）' }), shareBox,
+      h('div', { class: 'msg mute', text: '建議橫式、寬 1200 像素左右的照片。' }))));
+  S.shareSlot = shareSlot; paintShare();
+  // 版本紀錄
+  P.append(card('c-history', 'top', '版本紀錄', '每次按「發佈」都會留一個版本（保留最近 20 個）。改壞了可以還原成之前的版本，還原後再按一次發佈才會更新網站。',
+    h('button', { type: 'button', class: 'btn small', id: 'histOpen' }, '查看過去的版本')));
+  $('#histOpen').onclick = openHistory;
+
   // 英文版
   const enOn = h('input', { type: 'checkbox', id: 'f-en-enabled' }); enOn.checked = !!S.content.en.enabled;
   enOn.addEventListener('change', () => { S.content.en.enabled = enOn.checked; touch(); });
@@ -555,7 +629,7 @@ function buildPanel() {
     field('英文介紹', 'en.intro', { area: true, max: 1000, rows: 5, ph: 'Who you are, what you offer, what makes you special…' }),
     field('英文地址（選填）', 'en.address', { max: 160, ph: 'e.g. No. 100, Siwei 3rd Rd., Lingya Dist., Kaohsiung', help: '沒填會用中文地址。價目會沿用中文品名與價格。' })));
   $('#reviewAdd').onclick = () => { if (S.content.reviews.length < L.LIMITS.reviews) { S.content.reviews.push({ name: '', text: '' }); paintReviews(); touch(); } };
-  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintItems(); paintSlug(); paintLinks(); refreshTodo();
+  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintItems(); paintBlocks(); paintOrder(); paintSlug(); paintLinks(); refreshTodo();
 }
 
 // 行業：可以更改；會改變網站用詞、頁面名稱與網址（多頁版）、給搜尋引擎看的店家類型
@@ -702,6 +776,93 @@ function paintPosts() {
   });
   $('#postAdd').disabled = S.content.posts.length >= L.LIMITS.posts; $('#postCnt').textContent = S.content.posts.length + '/' + L.LIMITS.posts;
 }
+function orderLabel(k) {
+  const I = IND();
+  if (k.startsWith('b:')) { const b = S.content.blocks.find((x) => x.id === k.slice(2)); return '自訂：' + ((b && b.title) || '（未命名區塊）') + (b && b.hidden ? '（隱藏中）' : ''); }
+  return ({ menu: I.offer.label, interior: I.space.label, visit: I.visit.label })[k] || S.lib.ORDER_LABELS[k] || k;
+}
+function paintOrder() {
+  const box = $('#orderBox'); if (!box) return;
+  const o = S.content.order;
+  $('#orderNote').textContent = S.content.homeStyle === 'magazine' ? '目前首頁排版是「雜誌風」，版面固定，這裡的順序要改回「標準」排版才會套用。' : '';
+  box.replaceChildren(...o.map((k, i) => h('li', {}, h('span', { text: (i + 1) + '. ' + orderLabel(k) }),
+    h('span', { class: 'ord-btns' },
+      iconBtn('上移', () => { [o[i - 1], o[i]] = [o[i], o[i - 1]]; paintOrder(); touch(); scrollPreviewTo(k.startsWith('b:') ? 'b-' + k.slice(2) : k); }),
+      iconBtn('下移', () => { [o[i + 1], o[i]] = [o[i], o[i + 1]]; paintOrder(); touch(); scrollPreviewTo(k.startsWith('b:') ? 'b-' + k.slice(2) : k); })))));
+  box.querySelectorAll('li').forEach((li, i) => { const [u, d] = li.querySelectorAll('button'); u.disabled = i === 0; d.disabled = i === o.length - 1; });
+}
+function paintBlocks() {
+  const L = S.lib, box = $('#blockBox'); if (!box) return; box.replaceChildren();
+  S.content.blocks.forEach((b, i) => {
+    const t = h('input', { type: 'text', maxlength: String(L.LIMITS.blockTitle), placeholder: '區塊標題，例如：包場服務', 'aria-label': '區塊標題 ' + (i + 1) });
+    const body = h('textarea', { maxlength: String(L.LIMITS.blockBody), rows: '5', placeholder: '內容（空一行就是新段落）', 'aria-label': '區塊內容 ' + (i + 1) });
+    const bl = h('input', { type: 'text', maxlength: String(L.LIMITS.btnLabel), placeholder: '按鈕文字（選填）', 'aria-label': '按鈕文字 ' + (i + 1) });
+    const bu = h('input', { type: 'url', maxlength: '500', placeholder: '按鈕連結 https://（選填）', 'aria-label': '按鈕連結 ' + (i + 1) });
+    const side = h('select', { class: 'sel', 'aria-label': '照片位置 ' + (i + 1) }, h('option', { value: 'right', text: '照片在右' }), h('option', { value: 'left', text: '照片在左' }));
+    const hid = h('input', { type: 'checkbox' });
+    t.value = b.title; body.value = b.body; bl.value = b.btnLabel; bu.value = b.btnUrl; side.value = b.side; hid.checked = b.hidden;
+    const go = () => scrollPreviewTo('b-' + b.id);
+    t.addEventListener('input', () => { b.title = t.value; paintOrder(); touch(); });
+    body.addEventListener('input', () => { b.body = body.value; touch(); });
+    bl.addEventListener('input', () => { b.btnLabel = bl.value; touch(); });
+    bu.addEventListener('input', () => { b.btnUrl = bu.value; touch(); });
+    side.addEventListener('change', () => { b.side = side.value; touch(); go(); });
+    hid.addEventListener('change', () => { b.hidden = hid.checked; paintOrder(); touch(); });
+    [t, body].forEach((el) => el.addEventListener('focus', go));
+    const sl = { key: 'block', label: '區塊照片', get: () => b.photo, set: (v) => { b.photo = v; } };
+    const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', hidden: true });
+    const nm = h('div', { class: 'nm' });
+    const up = h('button', { type: 'button', class: 'btn small' }, b.photo ? '更換照片' : '上傳照片（選填）');
+    up.addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) { await uploadPhoto(sl, f, nm, up); paintBlocks(); go(); } });
+    const del = b.photo ? iconBtn('移除照片', async () => { const old = b.photo.path; b.photo = null; touch(); await trashPhoto(old); paintBlocks(); }, 'danger') : null;
+    box.append(h('div', { class: 'faq-item' }, t, h('div', { style: 'height:8px' }), body,
+      h('div', { class: 'photo', style: 'margin-top:8px' }, h('div', { class: 'th' }, b.photo ? h('img', { src: photoUrl(b.photo.path), alt: b.title || '區塊照片' }) : '無照片'),
+        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del), file, side)),
+      h('div', { class: 'row2', style: 'margin-top:8px' }, bl, bu),
+      h('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-top:8px' },
+        h('label', { class: 'check' }, hid, '暫時隱藏'),
+        iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger'))));
+  });
+  $('#blockAdd').disabled = S.content.blocks.length >= L.LIMITS.blocks; $('#blockCnt').textContent = S.content.blocks.length + '/' + L.LIMITS.blocks;
+}
+function paintShare() {
+  const box = $('#shareBox'), sl = S.shareSlot; if (!box) return;
+  const cur = sl.get();
+  const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', hidden: true });
+  const nm = h('div', { class: 'nm' });
+  const up = h('button', { type: 'button', class: 'btn small' }, cur ? '更換圖片' : '上傳圖片');
+  up.addEventListener('click', () => file.click());
+  file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) { await uploadPhoto(sl, f, nm, up); paintShare(); } });
+  const del = cur ? iconBtn('移除', async () => { const old = cur.path; sl.set(null); touch(); await trashPhoto(old); paintShare(); }, 'danger') : null;
+  box.replaceChildren(h('div', { class: 'photo' }, h('div', { class: 'th' }, cur ? h('img', { src: photoUrl(cur.path), alt: '分享圖片' }) : '未上傳'),
+    h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px' }, up, del), file)));
+}
+// 自訂標題／描述空白時，提示自動產生的內容
+function paintSeoHints(r) {
+  const t = $('#f-seo-title'), d = $('#f-seo-description');
+  if (t && !S.content.seo.title) t.placeholder = '留空＝自動：' + r.title;
+  if (d && !S.content.seo.description) d.placeholder = '留空＝自動：' + r.description;
+}
+// 版本紀錄：列出最近發佈的版本，可以還原成草稿
+async function openHistory() {
+  const r = await YC.client.from('site_versions').select('id,created_at,content,palette,sections,pages').eq('site_id', S.site.id).order('created_at', { ascending: false }).limit(20);
+  if (r.error) { toast('讀取版本失敗，請稍後再試'); return; }
+  const live = S.site.live_version_id;
+  const fmt = (t) => { const x = new Date(t); return x.getFullYear() + '/' + (x.getMonth() + 1) + '/' + x.getDate() + ' ' + pad(x.getHours()) + ':' + pad(x.getMinutes()); };
+  const rows = (r.data || []).map((v) => h('li', { style: 'display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)' },
+    h('span', {}, fmt(v.created_at), v.id === live ? h('b', { style: 'margin-left:8px;color:var(--ok,#6cc08b)', text: '目前網站上的版本' }) : null,
+      h('span', { class: 'msg mute', style: 'display:block', text: ((v.content && v.content.name) || '') + (v.content && v.content.tagline ? '・' + v.content.tagline : '') })),
+    iconBtn('還原', () => {
+      if (!confirm('把編輯中的內容換成 ' + fmt(v.created_at) + ' 的版本？（之後還可以按「復原」回來）')) return;
+      recordHist();
+      S.content = S.lib.normalizeContent(v.content); S.palette = v.palette || S.palette; S.sections = v.sections || S.sections;
+      if (isMulti() && v.pages) S.pages = S.lib.normalizePages(v.pages);
+      closeModal(); buildPanel(); touch(); recordHist(); toast('已還原，確認沒問題後按「發佈」更新網站');
+    })));
+  modal('版本紀錄', [rows.length ? h('ul', { style: 'list-style:none;margin:0;padding:0;max-height:60vh;overflow:auto' }, rows) : h('p', { text: '還沒有發佈過的版本。' })],
+    [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '關閉')]);
+}
 function paintItems() {
   const L = S.lib, box = $('#itemBox'); if (!box) return; box.replaceChildren();
   S.content.shop.items.forEach((it, i) => {
@@ -809,7 +970,7 @@ async function uploadPhoto(sl, file, nm, btn) {
   btn.disabled = true; nm.className = 'nm'; nm.textContent = '處理中…';
   try {
     const { blob, ext, w, h: hh } = await compress(file);
-    const path = S.site.id + '/' + (sl.key === 'hero' ? 'hero' : sl.key === 'item' ? 'item' : 'room') + '-' + Date.now().toString(36) + '.' + ext;
+    const path = S.site.id + '/' + (['hero', 'item', 'block', 'share'].includes(sl.key) ? sl.key : 'room') + '-' + Date.now().toString(36) + '.' + ext;
     const r = await YC.client.storage.from('site-photos').upload(path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
     if (r.error) throw new Error('上傳失敗：' + r.error.message);
     S.fresh.add(path);
@@ -933,7 +1094,15 @@ function bindChrome() {
   const te = $('#tabEdit'), tv = $('#tabView');
   te.addEventListener('click', () => { app.dataset.tab = 'edit'; te.setAttribute('aria-selected', 'true'); tv.setAttribute('aria-selected', 'false'); });
   tv.addEventListener('click', () => { app.dataset.tab = 'view'; tv.setAttribute('aria-selected', 'true'); te.setAttribute('aria-selected', 'false'); renderPreview(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+    // 輸入框裡交給瀏覽器自己的復原；其他地方 Ctrl/⌘+Z 復原、Ctrl/⌘+Shift+Z 或 Ctrl+Y 重做
+    const t = e.target, typing = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
+    if (typing || !(e.ctrlKey || e.metaKey)) return;
+    const k = e.key.toLowerCase();
+    if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); } else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); redo(); }
+  });
+  $('#btnUndo').addEventListener('click', undo); $('#btnRedo').addEventListener('click', redo);
 }
 
 YC.onChange((ev) => { if (ev === 'SIGNED_OUT') location.reload(); if (!booted) boot(); });
