@@ -74,7 +74,6 @@
       if (my !== token) return;
       box.innerHTML = cards.join('') +
         '<p style="margin:-8px 0 22px;font-size:14px"><a href="' + esc(YC.url('builder/') + '?new=1') + '">＋ 建立另一個網站</a></p>';
-      Array.prototype.forEach.call(box.querySelectorAll('.ds-pay'), function (el) { fillPay(el, my); });
     } catch (err) { console.warn('dash-site', err); }
   }
 
@@ -95,7 +94,7 @@
     var d = function (t) { var x = new Date(t); return (x.getMonth() + 1) + '/' + x.getDate() + ' ' + String(x.getHours()).padStart(2, '0') + ':' + String(x.getMinutes()).padStart(2, '0'); };
     return '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">網站留言與預約（共 ' + (count || rows.length) + ' 則，顯示最新 ' + rows.length + ' 則）</summary>' +
       '<ul style="margin:6px 0 0;padding-left:0;list-style:none;font-size:14px;line-height:1.7">' + rows.map(function (m) {
-        return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)">' + (m.kind === 'booking' ? '<span style="display:inline-block;padding:0 8px;margin-right:6px;border:1px solid #e0b05a;color:#e0b05a;border-radius:999px;font-size:12px">預約</span>' : '') + '<b>' + esc(m.name) + '</b>　<span style="color:#9a8f80">' + esc(m.contact) + '・' + esc(d(m.created_at)) + '</span>' +
+        return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)">' + (m.kind === 'booking' ? '<span style="display:inline-block;padding:0 8px;margin-right:6px;border:1px solid #e0b05a;color:#e0b05a;border-radius:999px;font-size:12px">預約</span>' : '') + (m.meta && m.meta.deposit ? (m.meta.deposit_paid ? '<span style="color:#6cc08b;font-size:12px;margin-right:6px">訂金已付</span>' : '<span style="color:#9a8f80;font-size:12px;margin-right:6px">訂金未付</span>') : '') + '<b>' + esc(m.name) + '</b>　<span style="color:#9a8f80">' + esc(m.contact) + '・' + esc(d(m.created_at)) + '</span>' +
           '<div style="white-space:pre-wrap">' + esc(m.message) + '</div></li>';
       }).join('') + '</ul></details>';
   }
@@ -112,46 +111,66 @@
         : '<p style="margin:0;font-size:13px;color:#9a8f80">網站上線後就可以在這裡綁定自己的網域。</p>') +
       '<div id="domout-' + id + '" aria-live="polite" style="margin:6px 0 0;font-size:14px"></div></div></details>';
   }
-  // ── 線上付款（綠界）：付款選項、ATM 待繳資訊、每月自動扣款狀態 ──
+  // ── 網站收款（店家自己的綠界帳號）與訂單 ──
   async function invoke(body) {
     var r = await YC.client.functions.invoke('member-site', { body: body });
     if (r.error) { var j = null; try { j = await r.error.context.json(); } catch (e) { /* ignore */ } throw new Error((j && j.message) || '操作失敗，請稍後再試'); }
     return r.data;
   }
-  async function fillPay(el, my) {
-    var sid = el.getAttribute('data-site');
-    try {
-      var j = await invoke({ action: 'pay_options', site_id: sid });
-      if (my !== token || !j || !j.enabled) return;
-      var atm = await YC.client.from('pay_orders').select('amount,months,atm,created_at').eq('site_id', sid).eq('status', 'atm_issued').order('created_at', { ascending: false }).limit(3);
-      var atmRows = (atm.data || []).filter(function (o) { return o.atm && o.atm.account; });
-      el.innerHTML = '<div style="margin:12px 0 0;padding:12px 14px;border:1px solid rgba(255,255,255,.15);border-radius:8px">' +
-        '<p style="margin:0 0 8px;font-size:14px"><b>線上付款</b>' + (j.test ? '　<span style="color:#e0b05a;font-size:12px">測試模式：只有管理員看得到，請用綠界測試卡號</span>' : '') + '</p>' +
-        (j.recurring ? '<p style="margin:0 0 8px;font-size:14px">已設定信用卡每月自動扣款（每月 ' + esc(money(j.recurring.amount)) + '，已扣款 ' + esc(j.recurring.success_times) + ' 次）　<button type="button" class="m-btn sm" data-cancel="' + esc(sid) + '">取消自動扣款</button></p>' : '') +
-        atmRows.map(function (o) { return '<p style="margin:0 0 8px;font-size:14px;color:#e0b05a">待繳 ATM：銀行代碼 <b>' + esc(o.atm.bank) + '</b>　帳號 <b>' + esc(o.atm.account) + '</b>　金額 ' + esc(money(o.amount)) + '　期限 ' + esc(o.atm.expire) + '</p>'; }).join('') +
-        '<div style="display:flex;flex-wrap:wrap;gap:8px">' + j.options.map(function (o) { return '<button type="button" class="m-btn sm' + (o.key === 'card_monthly' ? ' primary' : '') + '" data-pay="' + esc(o.key) + '" data-site="' + esc(sid) + '">' + esc(o.label) + '　' + esc(money(o.amount)) + '</button>'; }).join('') + '</div>' +
-        '<p style="margin:8px 0 0;font-size:13px;color:#9a8f80">付款完成後系統會自動入帳、延長到期日' + '，第一次付款會自動上線，不用另外通知我們。</p>' +
-        '<div class="ds-payout" aria-live="polite" style="margin:6px 0 0;font-size:14px"></div></div>';
-    } catch (e) { /* 線上付款暫時無法使用：只顯示匯款資訊 */ }
+  var ORDER_ST = { paid: ['已付款', '#6cc08b'], awaiting: ['等待繳費', '#e0b05a'], created: ['未完成付款', '#9a8f80'], failed: ['付款失敗', '#f0776b'] };
+  function ordersHtml(rows) {
+    if (!rows || !rows.length) return '<p style="margin:8px 0 0;font-size:13px;color:#9a8f80">還沒有訂單。</p>';
+    var d = function (t) { var x = new Date(t); return (x.getMonth() + 1) + '/' + x.getDate() + ' ' + String(x.getHours()).padStart(2, '0') + ':' + String(x.getMinutes()).padStart(2, '0'); };
+    return '<ul style="margin:8px 0 0;padding-left:0;list-style:none;font-size:14px;line-height:1.7">' + rows.map(function (o) {
+      var st = ORDER_ST[o.status] || [o.status, '#9a8f80'], b = o.buyer || {};
+      var what = o.kind === 'deposit' ? '預約訂金' : (o.items || []).map(function (i) { return esc(i.name) + ' x' + esc(i.qty); }).join('、');
+      var info = o.status === 'awaiting' && o.pay_info ? '<div style="color:#e0b05a;font-size:13px">' + (o.pay_info.account ? '銀行 ' + esc(o.pay_info.bank) + ' 帳號 ' + esc(o.pay_info.account) : '繳費代碼 ' + esc(o.pay_info.code)) + '　期限 ' + esc(o.pay_info.expire) + '</div>' : '';
+      return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="display:inline-block;padding:0 8px;margin-right:6px;border:1px solid ' + st[1] + ';color:' + st[1] + ';border-radius:999px;font-size:12px">' + st[0] + '</span>' +
+        (o.test ? '<span style="color:#e0b05a;font-size:12px;margin-right:6px">測試</span>' : '') + '<b>' + esc(money(o.amount)) + '</b>　<span style="color:#9a8f80">' + esc(d(o.created_at)) + '・' + esc(o.trade_no) + '</span>' +
+        '<div>' + what + '</div><div style="color:#9a8f80;font-size:13px">' + esc(b.name || '') + '　' + esc(b.phone || '') + '　' + esc(b.email || '') + (b.address ? '　' + esc(b.address) : '') + (b.note ? '<br>備註：' + esc(b.note) : '') + '</div>' + info +
+        (o.status === 'paid' ? '<div style="margin-top:4px">' + (o.fulfilled_at ? '<span style="color:#6cc08b;font-size:13px">已處理</span> <button type="button" class="m-btn sm" data-done="' + esc(o.trade_no) + '" data-site="' + esc(o.site_id) + '" data-undo="1">改回未處理</button>' : '<button type="button" class="m-btn sm" data-done="' + esc(o.trade_no) + '" data-site="' + esc(o.site_id) + '">標記已處理</button>') + '</div>' : '') + '</li>';
+    }).join('') + '</ul>';
   }
+  function shopHtml(s, pay, orders) {
+    var id = esc(s.id), mode = (pay && pay.mode) || 'off';
+    var paid = (orders || []).filter(function (o) { return o.status === 'paid' && !o.fulfilled_at; }).length;
+    var radio = function (v, label) { return '<label style="margin-right:14px;white-space:nowrap"><input type="radio" name="pm-' + id + '" value="' + v + '"' + (mode === v ? ' checked' : '') + '> ' + label + '</label>'; };
+    var inp = function (k, ph, type, val) { return '<input type="' + (type || 'text') + '" id="pay-' + k + '-' + id + '" placeholder="' + esc(ph) + '" value="' + esc(val || '') + '" autocomplete="off" spellcheck="false" style="width:100%;font:inherit;padding:6px 10px;margin:4px 0;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit">'; };
+    var state = mode === 'live' ? '<span style="color:#6cc08b">正式收款中（特店 ' + esc(pay.merchant_id) + '）</span>' : mode === 'test' ? '<span style="color:#e0b05a">測試模式</span>' : '<span style="color:#9a8f80">未開啟</span>';
+    return '<details style="margin:12px 0 0"' + (paid ? ' open' : '') + '><summary style="cursor:pointer;font-size:14px">網站收款與訂單：' + state + (paid ? '　<b style="color:#6cc08b">' + paid + ' 筆待處理</b>' : '') + '</summary>' +
+      '<div style="margin:8px 0 0;padding:12px 14px;border:1px solid rgba(255,255,255,.15);border-radius:8px;font-size:14px">' +
+      '<p style="margin:0 0 8px">用你自己的綠界帳號，讓客人在網站上購買商品或付預約訂金，款項直接進你的綠界帳戶。商品與訂金金額在編輯器的「線上購買」與「更多內容」設定。</p>' +
+      '<div>' + radio('off', '關閉') + radio('test', '測試模式') + radio('live', '正式收款') + '</div>' +
+      '<div class="pay-live" data-site="' + id + '" style="margin:8px 0 0' + (mode === 'live' ? '' : ';display:none') + '">' +
+      inp('mid', '特店編號 MerchantID（7 到 10 位數字）', 'text', pay && pay.merchant_id) +
+      inp('key', mode === 'live' ? 'HashKey（已設定，不更換請留空）' : 'HashKey', 'password') + inp('iv', mode === 'live' ? 'HashIV（已設定，不更換請留空）' : 'HashIV', 'password') +
+      '<p style="margin:4px 0 0;font-size:13px;color:#9a8f80">在綠界廠商管理後台：系統開發管理 → 系統介接設定，可以看到這三項。金鑰會加密保存，連我們也看不到明文。</p></div>' +
+      '<p style="margin:6px 0 0;font-size:13px;color:#9a8f80">測試模式用綠界的測試環境，可以用測試卡號 4311-9522-2222-2222（有效期限填未來日期、安全碼任意、簡訊驗證碼 1234）走完整流程，不會真的收款。</p>' +
+      '<p style="margin:8px 0 0"><button type="button" class="m-btn sm primary" data-paysave="' + id + '">儲存收款設定</button></p>' +
+      '<div id="payout-' + id + '" aria-live="polite" style="margin:6px 0 0"></div>' +
+      '<p style="margin:12px 0 0"><b>最近訂單</b></p>' + ordersHtml(orders) + '</div></details>';
+  }
+  box.addEventListener('change', function (ev) {
+    var r = ev.target; if (!r.name || r.name.indexOf('pm-') !== 0) return;
+    var el = box.querySelector('.pay-live[data-site="' + r.name.slice(3) + '"]'); if (el) el.style.display = r.value === 'live' ? '' : 'none';
+  });
   box.addEventListener('click', async function (ev) {
-    var b = ev.target.closest && ev.target.closest('[data-pay],[data-cancel]'); if (!b) return;
-    var wrap = b.closest('.ds-pay'), out = wrap && wrap.querySelector('.ds-payout');
-    if (b.hasAttribute('data-cancel')) {
-      if (!confirm('取消每月自動扣款？已付的期間不受影響，到期前要記得再付款。')) return;
+    var b = ev.target.closest && ev.target.closest('[data-paysave],[data-done]'); if (!b) return;
+    if (b.hasAttribute('data-done')) {
       b.disabled = true;
-      try { var c = await invoke({ action: 'cancel_recurring', site_id: b.getAttribute('data-cancel') }); if (out) out.textContent = c.message || '已取消'; setTimeout(draw, 1500); }
-      catch (e) { if (out) out.textContent = String(e.message || e); b.disabled = false; }
+      try { await invoke({ action: 'order_done', site_id: b.getAttribute('data-site'), trade_no: b.getAttribute('data-done'), done: !b.hasAttribute('data-undo') }); draw(); }
+      catch (e) { b.disabled = false; alert(String(e.message || e)); }
       return;
     }
-    b.disabled = true; if (out) out.textContent = '前往付款頁…';
-    try {
-      var r = await invoke({ action: 'checkout', site_id: b.getAttribute('data-site'), option: b.getAttribute('data-pay') });
-      // 把綠界需要的欄位用表單 POST 過去（綠界規定要用瀏覽器送出）
-      var f = document.createElement('form'); f.method = 'post'; f.action = r.action; f.style.display = 'none';
-      Object.keys(r.fields).forEach(function (k) { var i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = r.fields[k]; f.appendChild(i); });
-      document.body.appendChild(f); f.submit();
-    } catch (e) { if (out) out.textContent = String(e.message || e); b.disabled = false; }
+    var sid = b.getAttribute('data-paysave'), out = document.getElementById('payout-' + sid);
+    var sel = box.querySelector('input[name="pm-' + sid + '"]:checked'), val = function (k) { var i = document.getElementById('pay-' + k + '-' + sid); return i ? i.value.trim() : ''; };
+    var body = { action: 'set_pay', site_id: sid, mode: sel ? sel.value : 'off' };
+    if (body.mode === 'live') { body.merchant_id = val('mid'); body.hash_key = val('key'); body.hash_iv = val('iv'); }
+    if (body.mode === 'live' && !confirm('開啟正式收款後，客人在網站上付的錢會進到特店 ' + body.merchant_id + ' 的綠界帳戶。確定？')) return;
+    b.disabled = true; out.textContent = '儲存中…';
+    try { var j = await invoke(body); out.textContent = j.message || '已儲存'; setTimeout(draw, 2500); }
+    catch (e) { out.textContent = String(e.message || e); }
+    b.disabled = false;
   });
 
   // 網域按鈕（事件委派，畫面重畫後仍有效）
@@ -178,7 +197,9 @@
       var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);
       var since = new Date(Date.now() + 8 * 3600 * 1000 - 29 * 86400000).toISOString().slice(0, 10);
       var hits = await YC.client.from('site_daily_hits').select('day,path,views').eq('site_id', s.id).gte('day', since).limit(2000);
-      var msgs = await YC.client.from('site_messages').select('name,contact,message,created_at,kind', { count: 'exact' }).eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
+      var pay = await YC.client.from('site_pay_settings').select('mode,merchant_id,updated_at').eq('site_id', s.id).maybeSingle();
+      var orders = await YC.client.from('shop_orders').select('trade_no,site_id,kind,items,amount,buyer,status,test,pay_info,created_at,paid_at,fulfilled_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(20);
+      var msgs = await YC.client.from('site_messages').select('name,contact,message,created_at,kind,meta', { count: 'exact' }).eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var planHtml = '';
       try {
         var P = PM.planFor ? PM.planFor(s.layout) : PM.PLAN;
@@ -201,12 +222,12 @@
         reportHtml(rep && !rep.error ? rep.data : []) +
         (plan && plan.text ? '<p style="margin:6px 0;font-size:13px;color:#9a8f80;white-space:pre-line">' + esc(plan.text) + '</p>' : '') +
         planHtml +
-        '<div class="ds-pay" data-site="' + esc(s.id) + '"></div>' +
         bankHtml(bank, needPay) +
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
           pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +
         statsHtml(hits && !hits.error ? hits.data : null) +
         msgsHtml(msgs && !msgs.error ? msgs.data : null, msgs && msgs.count) +
+        shopHtml(s, pay && !pay.error ? pay.data : null, orders && !orders.error ? orders.data : null) +
         domainHtml(s) +
         '<p style="margin:6px 0 0;font-size:13px"><a href="' + esc(YC.url('terms/rental/')) + '" target="_blank" rel="noopener">網站租用條款</a>' + (s.terms_accepted_at ? '<span style="color:#9a8f80">（你已於 ' + esc(String(s.terms_accepted_at).slice(0, 10)) + ' 同意）</span>' : '') + '</p>' +
         '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(s.id)) + '">編輯網站</a></p></div>';
