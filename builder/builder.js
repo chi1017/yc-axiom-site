@@ -355,7 +355,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more' };
+const FIELD_CARD = { template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -514,14 +514,33 @@ function buildPanel() {
   };
   P.append(card('c-more', 'reviews', '更多內容', '都是選用的，需要再開。',
     toggle('contactForm', '顯示聯絡表單', '客人可以在網站上留言，留言會寄到你的登入 Email，也可以在會員專區查看。'),
+    toggle('bookingForm', '顯示線上預約', '客人可以選日期、時間送出預約申請（會檢查是否在營業時間內），申請會寄到你的 Email。網站不會自動保留時段，請你收到後主動與客人確認。'),
     toggle('showMap', '顯示 Google 地圖', '在' + IND().visit.label + '顯示地圖（需要先填地址）。地圖要點了才會載入，不會拖慢網站。'),
     field('YouTube 影片網址（選填）', 'video', { max: 200, type: 'url', ph: 'https://www.youtube.com/watch?v=…', help: '放一支介紹影片。訪客點了才會載入播放器，不會拖慢網站。' }),
     h('div', { class: 'field' }, h('span', { text: '客人評價（選填，最多 6 則）' }), h('div', { class: 'msg mute', style: 'margin:0 0 8px', text: '請放真實的評價，可以摘自 Google 評論或客人留言；名字可以只寫稱呼（例如：林小姐）。' })),
     h('div', { id: 'reviewBox' }), h('button', { type: 'button', class: 'btn small', id: 'reviewAdd' }, '＋ 新增評價'), h('span', { id: 'reviewCnt', class: 'msg mute', style: 'margin-left:10px' }),
     h('div', { style: 'height:14px' }),
     field('Google Analytics 評估 ID（選填）', 'ga4', { max: 20, ph: 'G-XXXXXXXXXX', help: '網站已經內建瀏覽次數統計（在會員專區查看）。需要更詳細的分析才填；GA 會在訪客第一次操作或 6 秒後才載入。' })));
+  // 文章：每篇一個網頁（posts/<代碼>/），代碼建立時產生、之後不變
+  P.append(card('c-posts', 'posts', '文章', '最多 ' + L.LIMITS.posts + ' 篇。寫店裡的故事、新品、活動或常見問題的完整說明，每篇都會有自己的網頁，容易被搜尋與 AI 找到。',
+    h('div', { id: 'postBox' }), h('button', { type: 'button', class: 'btn small', id: 'postAdd' }, '＋ 新增文章'), h('span', { id: 'postCnt', class: 'msg mute', style: 'margin-left:10px' })));
+  $('#postAdd').onclick = () => {
+    if (S.content.posts.length >= L.LIMITS.posts) return;
+    const d = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+    S.content.posts.unshift({ id: d + '-' + Math.random().toString(36).slice(2, 6), title: '', date: d, body: '' });
+    paintPosts(); touch();
+  };
+  // 英文版
+  const enOn = h('input', { type: 'checkbox', id: 'f-en-enabled' }); enOn.checked = !!S.content.en.enabled;
+  enOn.addEventListener('change', () => { S.content.en.enabled = enOn.checked; touch(); });
+  P.append(card('c-en', 'top', '英文版（選填）', '開啟後網站會多一個英文頁（網址 /en/），給外國客人看，Google 也會知道這是同一家店的英文版。',
+    h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-en-enabled' }, enOn, h('strong', { text: '開啟英文頁' }))),
+    field('英文店名', 'en.name', { max: 60, ph: 'e.g. Afternoon Sun Coffee' }),
+    field('英文一句話介紹', 'en.tagline', { max: 100, ph: 'e.g. Pour-over coffee and home-baked desserts' }),
+    field('英文介紹', 'en.intro', { area: true, max: 1000, rows: 5, ph: 'Who you are, what you offer, what makes you special…' }),
+    field('英文地址（選填）', 'en.address', { max: 160, ph: 'e.g. No. 100, Siwei 3rd Rd., Lingya Dist., Kaohsiung', help: '沒填會用中文地址。價目會沿用中文品名與價格。' })));
   $('#reviewAdd').onclick = () => { if (S.content.reviews.length < L.LIMITS.reviews) { S.content.reviews.push({ name: '', text: '' }); paintReviews(); touch(); } };
-  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintSlug(); paintLinks(); refreshTodo();
+  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintSlug(); paintLinks(); refreshTodo();
 }
 
 // 行業：可以更改；會改變網站用詞、頁面名稱與網址（多頁版）、給搜尋引擎看的店家類型
@@ -650,6 +669,23 @@ function paintNews() {
     box.append(h('div', { class: 'rowN' }, d, t, iconBtn('刪除', () => { S.content.news.splice(i, 1); paintNews(); touch(); }, 'danger')));
   });
   $('#newsAdd').disabled = S.content.news.length >= L.LIMITS.news; $('#newsCnt').textContent = S.content.news.length + '/' + L.LIMITS.news;
+}
+function paintPosts() {
+  const L = S.lib, box = $('#postBox'); if (!box) return; box.replaceChildren();
+  S.content.posts.forEach((p, i) => {
+    const t = h('input', { type: 'text', maxlength: String(L.LIMITS.postTitle), placeholder: '文章標題', 'aria-label': '文章標題 ' + (i + 1) });
+    const d = h('input', { type: 'date', 'aria-label': '文章日期 ' + (i + 1) });
+    const b = h('textarea', { maxlength: String(L.LIMITS.postBody), rows: '6', placeholder: '文章內容（空一行就是新段落）', 'aria-label': '文章內容 ' + (i + 1) });
+    const cnt = h('div', { class: 'msg mute', style: 'text-align:right' });
+    t.value = p.title; d.value = p.date; b.value = p.body;
+    const upd = () => { cnt.textContent = [...b.value].length + '/' + L.LIMITS.postBody; };
+    t.addEventListener('input', () => { p.title = t.value; touch(); }); d.addEventListener('input', () => { p.date = d.value; touch(); });
+    b.addEventListener('input', () => { p.body = b.value; upd(); touch(); }); upd();
+    box.append(h('div', { class: 'faq-item' }, h('div', { class: 'rowN' }, d, t), b, cnt,
+      h('div', { class: 'msg mute', text: '網址：/posts/' + p.id + '/' }),
+      h('div', { style: 'text-align:right' }, iconBtn('刪除這篇', () => { if (confirm('確定刪除這篇文章？')) { S.content.posts.splice(i, 1); paintPosts(); touch(); } }, 'danger'))));
+  });
+  $('#postAdd').disabled = S.content.posts.length >= L.LIMITS.posts; $('#postCnt').textContent = S.content.posts.length + '/' + L.LIMITS.posts;
 }
 function paintReviews() {
   const L = S.lib, box = $('#reviewBox'); if (!box) return; box.replaceChildren();

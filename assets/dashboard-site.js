@@ -92,9 +92,9 @@
   function msgsHtml(rows, count) {
     if (!rows || !rows.length) return '';
     var d = function (t) { var x = new Date(t); return (x.getMonth() + 1) + '/' + x.getDate() + ' ' + String(x.getHours()).padStart(2, '0') + ':' + String(x.getMinutes()).padStart(2, '0'); };
-    return '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">網站留言（共 ' + (count || rows.length) + ' 則，顯示最新 ' + rows.length + ' 則）</summary>' +
+    return '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">網站留言與預約（共 ' + (count || rows.length) + ' 則，顯示最新 ' + rows.length + ' 則）</summary>' +
       '<ul style="margin:6px 0 0;padding-left:0;list-style:none;font-size:14px;line-height:1.7">' + rows.map(function (m) {
-        return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)"><b>' + esc(m.name) + '</b>　<span style="color:#9a8f80">' + esc(m.contact) + '・' + esc(d(m.created_at)) + '</span>' +
+        return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)">' + (m.kind === 'booking' ? '<span style="display:inline-block;padding:0 8px;margin-right:6px;border:1px solid #e0b05a;color:#e0b05a;border-radius:999px;font-size:12px">預約</span>' : '') + '<b>' + esc(m.name) + '</b>　<span style="color:#9a8f80">' + esc(m.contact) + '・' + esc(d(m.created_at)) + '</span>' +
           '<div style="white-space:pre-wrap">' + esc(m.message) + '</div></li>';
       }).join('') + '</ul></details>';
   }
@@ -135,7 +135,7 @@
       var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);
       var since = new Date(Date.now() + 8 * 3600 * 1000 - 29 * 86400000).toISOString().slice(0, 10);
       var hits = await YC.client.from('site_daily_hits').select('day,path,views').eq('site_id', s.id).gte('day', since).limit(2000);
-      var msgs = await YC.client.from('site_messages').select('name,contact,message,created_at', { count: 'exact' }).eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
+      var msgs = await YC.client.from('site_messages').select('name,contact,message,created_at,kind', { count: 'exact' }).eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var planHtml = '';
       try {
         var P = PM.planFor ? PM.planFor(s.layout) : PM.PLAN;
