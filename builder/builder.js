@@ -108,7 +108,9 @@ async function boot() {
     // 一個會員可以有多個網站：網址 ?site=<id> 指定要編輯哪一個，沒指定就開上次編輯的（或第一個）
     const r = await YC.client.from('rental_sites').select('*').eq('member_id', uid).order('created_at');
     if (r.error) throw r.error;
-    S.mySites = r.data;
+    // 會員自己刪除的草稿（狀態改成已終止、從沒上線過）不再顯示
+    S.mySites = r.data.filter((x) => !(x.status === 'cancelled' && !x.first_published_at));
+    r.data = S.mySites;
     const q = new URLSearchParams(location.search);
     if (!r.data.length || q.get('new') === '1') return showCreate();
     let last = ''; try { last = localStorage.getItem('yc-builder-site') || ''; } catch (e) { /* ignore */ }
@@ -200,7 +202,33 @@ function paintSiteSwitch() {
     S.dirty = false;
     location.href = location.pathname + (v === '__new' ? '?new=1' : '?site=' + encodeURIComponent(v));
   });
-  box.replaceChildren(sel);
+  const canDelete = ['draft', 'pending'].includes(S.site.status) && !S.site.first_published_at;
+  box.replaceChildren(sel, canDelete ? h('button', { type: 'button', class: 'btn small danger', title: '刪除這個網站', onclick: askDeleteSite }, '刪除') : '');
+}
+// 刪除還沒上線過的網站：要輸入「刪除」兩個字確認。資料不會真的消失（改成已終止並隱藏），需要時可請管理員復原。
+function askDeleteSite() {
+  const name = (S.content && S.content.name) || S.site.slug;
+  const inp = h('input', { type: 'text', placeholder: '請輸入：刪除', 'aria-label': '確認刪除' });
+  const msg = h('div', { class: 'msg bad' });
+  const go = h('button', { type: 'button', class: 'btn primary', disabled: true }, '確定刪除');
+  inp.addEventListener('input', () => { go.disabled = inp.value.trim() !== '刪除'; });
+  go.addEventListener('click', async () => {
+    go.disabled = true; msg.textContent = '刪除中…';
+    clearTimeout(S.timers.save); S.dirty = false;
+    const r = await YC.client.functions.invoke('member-site', { body: { action: 'delete_site', site_id: S.site.id } });
+    let j = r.data;
+    if (r.error) { try { j = await r.error.context.json(); } catch (e) { j = null; } msg.textContent = (j && j.message) || '刪除失敗，請稍後再試'; go.disabled = false; return; }
+    try { localStorage.removeItem('yc-builder-site'); } catch (e) { /* ignore */ }
+    const rest = (S.mySites || []).filter((x) => x.id !== S.site.id);
+    toast(j.message || '已刪除');
+    setTimeout(() => { location.href = location.pathname + (rest.length ? '?site=' + encodeURIComponent(rest[0].id) : '?new=1'); }, 900);
+  });
+  modal('刪除網站「' + name + '」？', [
+    h('p', { text: '這個網站還沒有上線，刪除後會從你的網站列表中移除，不能再編輯。' }),
+    h('p', { class: 'msg mute', text: '如果是誤刪，可以用 LINE（@788cblaq）聯絡我們協助復原。' }),
+    h('label', { class: 'field' }, h('span', { text: '請輸入「刪除」兩個字確認' }), inp), msg
+  ], [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '取消'), go]);
+  setTimeout(() => inp.focus(), 50);
 }
 
 function mount(site) {

@@ -55,8 +55,9 @@
     box.innerHTML = '';
     if (!YC.enabled || !YC.loggedIn() || !YC.consented()) return;
     try {
-      var r = await YC.client.from('rental_sites').select('id,slug,status,layout,content,public_url,paid_until,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at');
+      var r = await YC.client.from('rental_sites').select('id,slug,status,layout,content,public_url,paid_until,first_published_at,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at');
       if (my !== token || r.error || !r.data) return;
+      if (r.data) r.data = r.data.filter(function (x) { return !(x.status === "cancelled" && !x.first_published_at); });   // 自己刪除的草稿不顯示
       if (!r.data.length) {   // 還沒有網站：顯示入口
         box.innerHTML = '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">網站租用</h2>' +
           '<p style="margin:6px 0 0;font-size:14px;line-height:1.7">自己填寫店家資訊，我們負責發佈上線與維護，並每月自動檢測 SEO 與 AI 可見度。</p>' +
