@@ -111,3 +111,14 @@ input.bad,textarea.bad{border-color:var(--danger)}
  .style-row{grid-template-columns:1fr}
  .rowN{grid-template-columns:1fr auto}.rowN input[type=date]{grid-column:1/-1}
 }
+
+/* 復原／重做、區塊順序、按鈕形狀 */
+.bar-undo{display:flex;gap:6px}
+.bar-undo .btn[disabled]{opacity:.45;cursor:default}
+.order-list{list-style:none;margin:0 0 12px;padding:0}
+.order-list li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.order-list .ord-btns{display:flex;gap:6px;flex-shrink:0}
+.order-list .btn[disabled]{opacity:.35;cursor:default}
+.seg-btns{display:flex;gap:8px;flex-wrap:wrap}
+.seg-btns .btn[aria-pressed="true"]{outline:2px solid var(--accent,#c9a66b);outline-offset:1px}
+@media(max-width:760px){.bar-undo{order:2}.bar-undo .btn{padding:4px 10px}}

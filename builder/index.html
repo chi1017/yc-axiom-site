@@ -7,13 +7,14 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#14110f">
 <link rel="icon" type="image/png" href="../favicon-32.png">
-<link rel="stylesheet" href="builder.css?v=2026-10-26c">
+<link rel="stylesheet" href="builder.css?v=2026-10-26g">
 </head>
 <body>
 <div id="app" class="app" hidden>
   <header class="bar">
     <a class="bar-back" href="../dashboard/" title="回到會員專區">← 會員專區</a>
     <div class="bar-title"><strong id="barName">我的網站</strong><span id="barStatus" class="badge"></span><span id="siteSwitch" class="site-switch"></span></div>
+    <div class="bar-undo"><button type="button" class="btn small" id="btnUndo" title="復原（Ctrl＋Z）" disabled>↶ 復原</button><button type="button" class="btn small" id="btnRedo" title="重做（Ctrl＋Shift＋Z）" disabled>↷ 重做</button></div>
     <div class="bar-save" id="saveState" role="status" aria-live="polite"></div>
     <div class="bar-tabs" role="tablist" aria-label="手機版切換">
       <button type="button" role="tab" id="tabEdit" aria-selected="true">編輯</button>
@@ -43,6 +44,6 @@
 <script src="../assets/supabase-config.js"></script>
 <script src="../assets/vendor/supabase-2.117.2.min.js"></script>
 <script src="../assets/yc-auth.js?v=2026-10-16"></script>
-<script type="module" src="builder.js?v=2026-10-26f"></script>
+<script type="module" src="builder.js?v=2026-10-26g"></script>
 </body>
 </html>
