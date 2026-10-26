@@ -74,6 +74,7 @@
       if (my !== token) return;
       box.innerHTML = cards.join('') +
         '<p style="margin:-8px 0 22px;font-size:14px"><a href="' + esc(YC.url('builder/') + '?new=1') + '">＋ 建立另一個網站</a></p>';
+      Array.prototype.forEach.call(box.querySelectorAll('.ds-pay'), function (el) { fillPay(el, my); });
     } catch (err) { console.warn('dash-site', err); }
   }
 
@@ -111,6 +112,48 @@
         : '<p style="margin:0;font-size:13px;color:#9a8f80">網站上線後就可以在這裡綁定自己的網域。</p>') +
       '<div id="domout-' + id + '" aria-live="polite" style="margin:6px 0 0;font-size:14px"></div></div></details>';
   }
+  // ── 線上付款（綠界）：付款選項、ATM 待繳資訊、每月自動扣款狀態 ──
+  async function invoke(body) {
+    var r = await YC.client.functions.invoke('member-site', { body: body });
+    if (r.error) { var j = null; try { j = await r.error.context.json(); } catch (e) { /* ignore */ } throw new Error((j && j.message) || '操作失敗，請稍後再試'); }
+    return r.data;
+  }
+  async function fillPay(el, my) {
+    var sid = el.getAttribute('data-site');
+    try {
+      var j = await invoke({ action: 'pay_options', site_id: sid });
+      if (my !== token || !j || !j.enabled) return;
+      var atm = await YC.client.from('pay_orders').select('amount,months,atm,created_at').eq('site_id', sid).eq('status', 'atm_issued').order('created_at', { ascending: false }).limit(3);
+      var atmRows = (atm.data || []).filter(function (o) { return o.atm && o.atm.account; });
+      el.innerHTML = '<div style="margin:12px 0 0;padding:12px 14px;border:1px solid rgba(255,255,255,.15);border-radius:8px">' +
+        '<p style="margin:0 0 8px;font-size:14px"><b>線上付款</b>' + (j.test ? '　<span style="color:#e0b05a;font-size:12px">測試模式：只有管理員看得到，請用綠界測試卡號</span>' : '') + '</p>' +
+        (j.recurring ? '<p style="margin:0 0 8px;font-size:14px">已設定信用卡每月自動扣款（每月 ' + esc(money(j.recurring.amount)) + '，已扣款 ' + esc(j.recurring.success_times) + ' 次）　<button type="button" class="m-btn sm" data-cancel="' + esc(sid) + '">取消自動扣款</button></p>' : '') +
+        atmRows.map(function (o) { return '<p style="margin:0 0 8px;font-size:14px;color:#e0b05a">待繳 ATM：銀行代碼 <b>' + esc(o.atm.bank) + '</b>　帳號 <b>' + esc(o.atm.account) + '</b>　金額 ' + esc(money(o.amount)) + '　期限 ' + esc(o.atm.expire) + '</p>'; }).join('') +
+        '<div style="display:flex;flex-wrap:wrap;gap:8px">' + j.options.map(function (o) { return '<button type="button" class="m-btn sm' + (o.key === 'card_monthly' ? ' primary' : '') + '" data-pay="' + esc(o.key) + '" data-site="' + esc(sid) + '">' + esc(o.label) + '　' + esc(money(o.amount)) + '</button>'; }).join('') + '</div>' +
+        '<p style="margin:8px 0 0;font-size:13px;color:#9a8f80">付款完成後系統會自動入帳、延長到期日' + '，第一次付款會自動上線，不用另外通知我們。</p>' +
+        '<div class="ds-payout" aria-live="polite" style="margin:6px 0 0;font-size:14px"></div></div>';
+    } catch (e) { /* 線上付款暫時無法使用：只顯示匯款資訊 */ }
+  }
+  box.addEventListener('click', async function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-pay],[data-cancel]'); if (!b) return;
+    var wrap = b.closest('.ds-pay'), out = wrap && wrap.querySelector('.ds-payout');
+    if (b.hasAttribute('data-cancel')) {
+      if (!confirm('取消每月自動扣款？已付的期間不受影響，到期前要記得再付款。')) return;
+      b.disabled = true;
+      try { var c = await invoke({ action: 'cancel_recurring', site_id: b.getAttribute('data-cancel') }); if (out) out.textContent = c.message || '已取消'; setTimeout(draw, 1500); }
+      catch (e) { if (out) out.textContent = String(e.message || e); b.disabled = false; }
+      return;
+    }
+    b.disabled = true; if (out) out.textContent = '前往付款頁…';
+    try {
+      var r = await invoke({ action: 'checkout', site_id: b.getAttribute('data-site'), option: b.getAttribute('data-pay') });
+      // 把綠界需要的欄位用表單 POST 過去（綠界規定要用瀏覽器送出）
+      var f = document.createElement('form'); f.method = 'post'; f.action = r.action; f.style.display = 'none';
+      Object.keys(r.fields).forEach(function (k) { var i = document.createElement('input'); i.type = 'hidden'; i.name = k; i.value = r.fields[k]; f.appendChild(i); });
+      document.body.appendChild(f); f.submit();
+    } catch (e) { if (out) out.textContent = String(e.message || e); b.disabled = false; }
+  });
+
   // 網域按鈕（事件委派，畫面重畫後仍有效）
   box.addEventListener('click', async function (ev) {
     var b = ev.target.closest && ev.target.closest('[data-dom]'); if (!b) return;
@@ -158,6 +201,7 @@
         reportHtml(rep && !rep.error ? rep.data : []) +
         (plan && plan.text ? '<p style="margin:6px 0;font-size:13px;color:#9a8f80;white-space:pre-line">' + esc(plan.text) + '</p>' : '') +
         planHtml +
+        '<div class="ds-pay" data-site="' + esc(s.id) + '"></div>' +
         bankHtml(bank, needPay) +
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
           pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +

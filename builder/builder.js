@@ -842,7 +842,7 @@ async function publish() {
       const P = PM.planFor(S.layout);
       const pages = isMulti() ? S.pageList.filter((p) => p.key !== 'home').map((p) => p.label).join('、') : '';
       const box = (...kids) => h('div', { style: 'margin:12px 0 0;padding:12px 14px;border:1px solid var(--line,#3a342c);border-radius:10px;font-size:14px;line-height:1.7' }, ...kids);
-      const pay = h('div', { style: 'color:var(--muted,#9a8f80)', text: '送出後以銀行轉帳付款，我們確認收款後才會開通網站。' });
+      const pay = h('div', { style: 'color:var(--muted,#9a8f80)', text: '送出後請到會員專區付款，付款確認後網站就會開通。' });
       if (PM.hasPrice(P)) {
         const q = PM.quote(12, S.layout);
         priceBox = box(h('div', { style: 'font-weight:700' }, '租用方案：' + P.name),

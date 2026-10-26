@@ -12,7 +12,7 @@
   var STATUS_COLOR = { draft: '#9a8f80', pending: '#e0b05a', live: '#6cc08b', overdue: '#f59e0b', suspended: '#f0776b', cancelled: '#9ca3af' };
   var EVENT_LABEL = {
     published_first: '客戶首次送出上線申請', version_saved: '客戶更新送審內容', deploy_queued: '排入部署', deploy_ok: '部署成功', deploy_failed: '部署失敗',
-    email_sent: '寄信成功', email_failed: '寄信失敗', terms_accepted: '客戶同意租用條款', payment_confirmed: '確認收款', suspended: '暫停網站', restored: '恢復網站', terminated: '終止租用',
+    email_sent: '寄信成功', email_failed: '寄信失敗', terms_accepted: '客戶同意租用條款', payment_confirmed: '確認收款', payment_failed: '線上付款失敗', payment_mismatch: '付款金額不符', recurring_failed: '自動扣款失敗', recurring_cancelled: '客戶取消自動扣款', suspended: '暫停網站', restored: '恢復網站', terminated: '終止租用',
     republish_queued: '重新發佈', version_restore_queued: '還原版本', domain_set: '設定網域', domain_checked: '檢查網域', domain_active: '網域生效', domain_failed: '網域設定失敗', domain_cleared: '移除網域',
     reminder_sent: '系統：寄出到期提醒', auto_overdue: '系統：到期，自動改為逾期', auto_live: '系統：到期日已延後，改回上線中', long_suspend_notified: '系統：暫停滿 30 天，已通知管理員', cron_anomaly: '系統：資料異常',
     monthly_report: '月報檢測完成', report_failed: '月報檢測失敗', photos_cleaned: '清理沒被引用的舊照片'
@@ -107,7 +107,7 @@
     var rs = await Promise.all([
       c.from('site_events').select('id,type,detail,created_at').eq('site_id', id).order('created_at', { ascending: false }).order('id', { ascending: false }).limit(100),
       c.from('site_versions').select('id,created_at').eq('site_id', id).order('created_at', { ascending: false }).limit(20),
-      c.from('payments').select('id,amount,months,paid_on,period_from,period_to,reference,confirmed_by,created_at').eq('site_id', id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(50),
+      c.from('payments').select('id,amount,months,method,paid_on,period_from,period_to,reference,confirmed_by,created_at').eq('site_id', id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(50),
       c.from('site_reports').select('month,status,seo_score,geo_score,error,emailed_at').eq('site_id', id).order('month', { ascending: false }).limit(3)
     ]);
     rs.slice(0, 3).forEach(function (x) { if (x.error) throw x.error; });
@@ -373,7 +373,7 @@
           (canDeploy && !isLive ? '<button class="m-btn sm" data-ver="' + esc(v.id) + '" data-vt="' + esc(fmtDT(v.created_at)) + '">還原此版</button>' : '') + '</span></li>';
       }).join('') + '</ul>' : '<p class="rn-note">還沒有送出過的版本。</p>') +
       '<h3 class="rn-h">收款紀錄</h3>' + (det.payments.length ? '<ul class="rn-pays">' + det.payments.map(function (p) {
-        return '<li><span>' + esc(p.paid_on) + '・<b>' + esc(money(p.amount)) + '</b>・' + esc(p.months) + ' 個月</span><span class="rn-dim">' + esc(p.period_from) + ' → ' + esc(p.period_to) + (p.reference ? '・' + esc(p.reference) : '') + '</span></li>';
+        return '<li><span>' + esc(p.paid_on) + '・<b>' + esc(money(p.amount)) + '</b>・' + esc(p.months) + ' 個月・' + esc({ bank_transfer: '轉帳', credit: '信用卡', credit_recurring: '信用卡自動扣款', atm: 'ATM' }[p.method] || '轉帳') + '</span><span class="rn-dim">' + esc(p.period_from) + ' → ' + esc(p.period_to) + (p.reference ? '・' + esc(p.reference) : '') + '</span></li>';
       }).join('') + '</ul>' : '<p class="rn-note">還沒有收款紀錄。</p>') +
       '<h3 class="rn-h">事件時間軸</h3>' + (tl ? '<ul class="rn-tl">' + tl + '</ul>' : '<p class="rn-note">沒有事件。</p>');
     document.getElementById('rn-x').onclick = closeDrawer;
