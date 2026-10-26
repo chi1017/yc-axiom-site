@@ -355,7 +355,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en' };
+const FIELD_CARD = { template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -515,12 +515,27 @@ function buildPanel() {
   P.append(card('c-more', 'reviews', '更多內容', '都是選用的，需要再開。',
     toggle('contactForm', '顯示聯絡表單', '客人可以在網站上留言，留言會寄到你的登入 Email，也可以在會員專區查看。'),
     toggle('bookingForm', '顯示線上預約', '客人可以選日期、時間送出預約申請（會檢查是否在營業時間內），申請會寄到你的 Email。網站不會自動保留時段，請你收到後主動與客人確認。'),
+    field('預約訂金（選填，元）', 'bookingDeposit', { max: 6, type: 'number', inputmode: 'numeric', ph: '0＝不收訂金', help: '有填金額時，客人送出預約後要先付訂金才算送出。需要先在會員專區開啟「網站收款」（用你自己的綠界帳號）。' }),
     toggle('showMap', '顯示 Google 地圖', '在' + IND().visit.label + '顯示地圖（需要先填地址）。地圖要點了才會載入，不會拖慢網站。'),
     field('YouTube 影片網址（選填）', 'video', { max: 200, type: 'url', ph: 'https://www.youtube.com/watch?v=…', help: '放一支介紹影片。訪客點了才會載入播放器，不會拖慢網站。' }),
     h('div', { class: 'field' }, h('span', { text: '客人評價（選填，最多 6 則）' }), h('div', { class: 'msg mute', style: 'margin:0 0 8px', text: '請放真實的評價，可以摘自 Google 評論或客人留言；名字可以只寫稱呼（例如：林小姐）。' })),
     h('div', { id: 'reviewBox' }), h('button', { type: 'button', class: 'btn small', id: 'reviewAdd' }, '＋ 新增評價'), h('span', { id: 'reviewCnt', class: 'msg mute', style: 'margin-left:10px' }),
     h('div', { style: 'height:14px' }),
     field('Google Analytics 評估 ID（選填）', 'ga4', { max: 20, ph: 'G-XXXXXXXXXX', help: '網站已經內建瀏覽次數統計（在會員專區查看）。需要更詳細的分析才填；GA 會在訪客第一次操作或 6 秒後才載入。' })));
+  // 線上購買：商品（名稱、價格、說明、照片），付款走店家自己的綠界帳號（會員專區設定）
+  const shopOn = h('input', { type: 'checkbox', id: 'f-shop-enabled' }); shopOn.checked = !!S.content.shop.enabled;
+  shopOn.addEventListener('change', () => { S.content.shop.enabled = shopOn.checked; touch(); if (shopOn.checked) scrollPreviewTo('shop'); });
+  P.append(card('c-shop', 'shop', '線上購買（選填）', '最多 ' + L.LIMITS.shopItems + ' 項。客人在網站上選數量、填資料後線上付款，款項直接進你的綠界帳戶。收款要先到會員專區的「網站收款與訂單」開啟，沒開啟時網站只顯示商品，請客人用電話或 LINE 訂購。',
+    h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-shop-enabled' }, shopOn, h('strong', { text: '在網站顯示線上購買' }))),
+    h('div', { id: 'itemBox' }), h('button', { type: 'button', class: 'btn small', id: 'itemAdd' }, '＋ 新增商品'), h('span', { id: 'itemCnt', class: 'msg mute', style: 'margin-left:10px' }),
+    h('div', { style: 'height:14px' }),
+    field('購買須知（選填）', 'shop.note', { area: true, max: 300, rows: 3, ph: '例如：付款後 3 個工作天內出貨；運費已含在售價；可到店自取', help: '目前不另外計算運費，請把運費算進售價或在這裡說明。' })));
+  $('#itemAdd').onclick = () => {
+    if (S.content.shop.items.length >= L.LIMITS.shopItems) return;
+    S.content.shop.items.push({ id: Math.random().toString(36).slice(2, 10).replace(/[^a-z0-9]/g, 'x').padEnd(8, 'x'), name: '', price: null, desc: '', photo: null });
+    if (!S.content.shop.enabled) { S.content.shop.enabled = true; shopOn.checked = true; }
+    paintItems(); touch(); scrollPreviewTo('shop');
+  };
   // 文章：每篇一個網頁（posts/<代碼>/），代碼建立時產生、之後不變
   P.append(card('c-posts', 'posts', '文章', '最多 ' + L.LIMITS.posts + ' 篇。寫店裡的故事、新品、活動或常見問題的完整說明，每篇都會有自己的網頁，容易被搜尋與 AI 找到。',
     h('div', { id: 'postBox' }), h('button', { type: 'button', class: 'btn small', id: 'postAdd' }, '＋ 新增文章'), h('span', { id: 'postCnt', class: 'msg mute', style: 'margin-left:10px' })));
@@ -540,7 +555,7 @@ function buildPanel() {
     field('英文介紹', 'en.intro', { area: true, max: 1000, rows: 5, ph: 'Who you are, what you offer, what makes you special…' }),
     field('英文地址（選填）', 'en.address', { max: 160, ph: 'e.g. No. 100, Siwei 3rd Rd., Lingya Dist., Kaohsiung', help: '沒填會用中文地址。價目會沿用中文品名與價格。' })));
   $('#reviewAdd').onclick = () => { if (S.content.reviews.length < L.LIMITS.reviews) { S.content.reviews.push({ name: '', text: '' }); paintReviews(); touch(); } };
-  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintSlug(); paintLinks(); refreshTodo();
+  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintItems(); paintSlug(); paintLinks(); refreshTodo();
 }
 
 // 行業：可以更改；會改變網站用詞、頁面名稱與網址（多頁版）、給搜尋引擎看的店家類型
@@ -687,6 +702,34 @@ function paintPosts() {
   });
   $('#postAdd').disabled = S.content.posts.length >= L.LIMITS.posts; $('#postCnt').textContent = S.content.posts.length + '/' + L.LIMITS.posts;
 }
+function paintItems() {
+  const L = S.lib, box = $('#itemBox'); if (!box) return; box.replaceChildren();
+  S.content.shop.items.forEach((it, i) => {
+    const n = h('input', { type: 'text', maxlength: String(L.LIMITS.shopName), placeholder: '商品名稱', 'aria-label': '商品名稱 ' + (i + 1) });
+    const p = h('input', { type: 'number', min: '1', max: String(L.LIMITS.shopPrice), step: '1', inputmode: 'numeric', placeholder: '價格', 'aria-label': '商品價格 ' + (i + 1) });
+    const d = h('textarea', { maxlength: String(L.LIMITS.shopDesc), rows: '2', placeholder: '簡短說明（選填），例如：六入禮盒、常溫可放 7 天', 'aria-label': '商品說明 ' + (i + 1) });
+    n.value = it.name; p.value = it.price == null ? '' : it.price; d.value = it.desc || '';
+    n.addEventListener('input', () => { it.name = n.value; touch(); });
+    p.addEventListener('input', () => { it.price = p.value === '' ? null : Number(p.value); touch(); });
+    d.addEventListener('input', () => { it.desc = d.value; touch(); });
+    const sl = { key: 'item', label: '商品照片', get: () => it.photo, set: (v) => { it.photo = v; } };
+    const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', hidden: true });
+    const nm = h('div', { class: 'nm' });
+    const up = h('button', { type: 'button', class: 'btn small' }, it.photo ? '更換照片' : '上傳照片');
+    up.addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) { await uploadPhoto(sl, f, nm, up); paintItems(); } });
+    const del = it.photo ? iconBtn('移除照片', async () => { const old = it.photo.path; it.photo = null; touch(); await trashPhoto(old); paintItems(); }, 'danger') : null;
+    box.append(h('div', { class: 'faq-item' },
+      h('div', { class: 'row2' }, n, p),
+      h('div', { style: 'height:8px' }), d,
+      h('div', { class: 'photo', style: 'margin-top:8px' }, h('div', { class: 'th' }, it.photo ? h('img', { src: photoUrl(it.photo.path), alt: it.name || '商品照片' }) : '無照片'),
+        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del), file)),
+      h('div', { style: 'text-align:right' },
+        i > 0 ? iconBtn('上移', () => { const a = S.content.shop.items; [a[i - 1], a[i]] = [a[i], a[i - 1]]; paintItems(); touch(); }) : null, ' ',
+        iconBtn('刪除這項', () => { if (confirm('確定刪除這個商品？')) { S.content.shop.items.splice(i, 1); paintItems(); touch(); } }, 'danger'))));
+  });
+  $('#itemAdd').disabled = S.content.shop.items.length >= L.LIMITS.shopItems; $('#itemCnt').textContent = S.content.shop.items.length + '/' + L.LIMITS.shopItems;
+}
 function paintReviews() {
   const L = S.lib, box = $('#reviewBox'); if (!box) return; box.replaceChildren();
   S.content.reviews.forEach((r, i) => {
@@ -766,7 +809,7 @@ async function uploadPhoto(sl, file, nm, btn) {
   btn.disabled = true; nm.className = 'nm'; nm.textContent = '處理中…';
   try {
     const { blob, ext, w, h: hh } = await compress(file);
-    const path = S.site.id + '/' + (sl.key === 'hero' ? 'hero' : 'room') + '-' + Date.now().toString(36) + '.' + ext;
+    const path = S.site.id + '/' + (sl.key === 'hero' ? 'hero' : sl.key === 'item' ? 'item' : 'room') + '-' + Date.now().toString(36) + '.' + ext;
     const r = await YC.client.storage.from('site-photos').upload(path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
     if (r.error) throw new Error('上傳失敗：' + r.error.message);
     S.fresh.add(path);
