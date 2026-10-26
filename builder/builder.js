@@ -492,9 +492,25 @@ function buildPanel() {
   }));
   const flOn = h('input', { type: 'checkbox', id: 'f-style-floatLine' }); flOn.checked = !!S.content.style.floatLine;
   flOn.addEventListener('change', () => { S.content.style.floatLine = flOn.checked; touch(); });
-  P.append(card('c-style', 'top', '字型與按鈕', '標題字型會套用在店名與各區塊標題；內文維持清楚好讀的黑體。',
+  const styleSel = (key, list, labels, label, anchor) => {
+    const id = 'f-style-' + key;
+    const el = h('select', { id, class: 'sel' }, list.map((k) => h('option', { value: k, text: labels[k] })));
+    el.value = S.content.style[key];
+    el.addEventListener('change', () => { S.content.style[key] = el.value; touch(); if (anchor) scrollPreviewTo(anchor); });
+    return h('label', { class: 'field', for: id }, h('span', { text: label }), el);
+  };
+  P.append(card('c-style', 'top', '外觀細節', '字型、按鈕、背景與各區塊的排列方式。全部都不會讓網站變慢。',
     h('label', { class: 'field', for: 'f-style-font' }, h('span', { text: '標題字型' }), fontSel),
     h('div', { class: 'field' }, h('span', { text: '按鈕形狀' }), btnBox),
+    h('div', { class: 'style-row' },
+      styleSel('head', L.HEAD_STYLES, L.HEAD_LABELS, '區塊標題樣式', 'about'),
+      styleSel('texture', L.TEXTURES, L.TEXTURE_LABELS, '背景紋理', 'menu'),
+      styleSel('motion', L.MOTIONS, L.MOTION_LABELS, '捲動動畫')),
+    h('div', { class: 'msg mute', style: 'margin:-4px 0 12px', text: '背景紋理會套用在有底色的區塊上。' }),
+    h('div', { class: 'style-row' },
+      styleSel('menuStyle', L.MENU_STYLES, { list: '列表', cards: '卡片' }, '價目樣式', 'menu'),
+      styleSel('gallery', L.GALLERY_STYLES, { masonry: '錯落排列', grid: '整齊方格', slide: '橫向滑動' }, '照片排列', 'interior'),
+      styleSel('reviewStyle', L.REVIEW_STYLES, { cards: '卡片', quote: '大字引言' }, '評價樣式', 'reviews')),
     h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-style-floatLine' }, flOn, h('strong', { text: '在畫面右下角顯示「LINE 聯絡」按鈕' })),
       h('div', { class: 'msg mute', text: '需要先在「店家資訊」填 LINE 連結。手機上客人隨時一按就能加你的 LINE。' }))));
 
@@ -601,7 +617,7 @@ function buildPanel() {
     paintBlocks(); paintOrder(); touch(); setTimeout(() => scrollPreviewTo('b-' + id), 300);
   };
   // 首頁區塊順序
-  P.append(card('c-order', 'top', '首頁區塊順序', '用「上移／下移」調整首頁區塊的先後。沒有內容或沒開啟的區塊不會出現在網站上。',
+  P.append(card('c-order', 'top', '首頁區塊順序與副標題', '用「上移／下移」調整首頁區塊的先後，也可以替每個區塊寫一句副標題。沒有內容或沒開啟的區塊不會出現在網站上。',
     h('div', { id: 'orderNote', class: 'msg mute', style: 'margin:0 0 8px' }), h('ol', { id: 'orderBox', class: 'order-list' }),
     h('button', { type: 'button', class: 'btn small', id: 'orderReset' }, '恢復預設順序')));
   $('#orderReset').onclick = () => { S.content.order = L.normalizeOrder([], S.content.blocks); paintOrder(); touch(); };
@@ -630,6 +646,49 @@ function buildPanel() {
     field('英文地址（選填）', 'en.address', { max: 160, ph: 'e.g. No. 100, Siwei 3rd Rd., Lingya Dist., Kaohsiung', help: '沒填會用中文地址。價目會沿用中文品名與價格。' })));
   $('#reviewAdd').onclick = () => { if (S.content.reviews.length < L.LIMITS.reviews) { S.content.reviews.push({ name: '', text: '' }); paintReviews(); touch(); } };
   paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintItems(); paintBlocks(); paintOrder(); paintSlug(); paintLinks(); refreshTodo();
+  buildGroupNav();
+}
+
+// ── 編輯面板分組：上方的分組按鈕只顯示該組的卡片，不用一直往下捲 ──
+const GROUPS = [
+  { key: 'look', label: '外觀', cards: ['c-basic', 'c-style'] },
+  { key: 'info', label: '店家資料', cards: ['c-info', 'c-hours', 'c-booking', 'c-photos'] },
+  { key: 'content', label: '內容', cards: ['c-menu', 'c-news', 'c-faq', 'c-more', 'c-posts', 'c-blocks'] },
+  { key: 'feature', label: '收款與功能', cards: ['c-shop', 'c-en', 'c-seo'] },
+  { key: 'layout', label: '版面與紀錄', cards: ['c-order', 'c-history'] },
+  { key: 'all', label: '全部', cards: null }
+];
+const groupOf = (cardId) => (GROUPS.find((g) => g.cards && g.cards.includes(cardId)) || {}).key;
+function buildGroupNav() {
+  const P = $('#panel');
+  let cur = 'look';
+  try { cur = localStorage.getItem('yc-builder-group') || 'look'; } catch (e) { /* ignore */ }
+  if (!GROUPS.some((g) => g.key === cur)) cur = 'look';
+  const nav = h('nav', { class: 'group-nav', 'aria-label': '編輯分類' }, GROUPS.map((g) => h('button', { type: 'button', 'data-g': g.key, 'aria-pressed': 'false', onclick: () => showGroup(g.key, true) }, g.label)),
+    h('button', { type: 'button', class: 'guide-btn', onclick: () => openGuide(), title: '使用教學' }, '？ 教學'));
+  P.prepend(nav);
+  P.querySelectorAll('section.card').forEach((c) => { c.dataset.group = groupOf(c.id) || 'feature'; });
+  showGroup(cur, false);
+  let seen = false; try { seen = localStorage.getItem('yc-builder-guide') === '1'; } catch (e) { /* ignore */ }
+  if (!seen) setTimeout(openGuide, 600);
+}
+function showGroup(key, scroll) {
+  const P = $('#panel');
+  P.querySelectorAll('.group-nav button[data-g]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.g === key)));
+  P.querySelectorAll('section.card').forEach((c) => { c.hidden = key !== 'all' && c.dataset.group !== key; });
+  try { localStorage.setItem('yc-builder-group', key); } catch (e) { /* ignore */ }
+  if (scroll) P.scrollTo({ top: 0, behavior: 'smooth' });
+}
+// 第一次進編輯器的簡短引導（之後可按「？ 教學」再看）
+function openGuide() {
+  const steps = [
+    ['1　填內容', '左邊依分類填寫：先選外觀，再填店家資料與照片。不用一次填完，系統每 2 秒自動儲存。'],
+    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換桌面版與手機版。灰色的 [提示文字] 不會出現在正式網站。'],
+    ['3　按發佈', '必填項目完成後，按右上角「發佈」。之後每次修改再按一次發佈，網站約 1–2 分鐘更新。'],
+    ['小技巧', '改錯了可以按「復原」；想回到以前發佈的版本，到「版面與紀錄」的版本紀錄還原。']
+  ];
+  modal('三步驟做好你的網站', [h('ol', { class: 'guide' }, steps.map(([t, d]) => h('li', {}, h('strong', { text: t }), h('p', { text: d }))))],
+    [h('button', { type: 'button', class: 'btn primary', onclick: () => { try { localStorage.setItem('yc-builder-guide', '1'); } catch (e) { /* ignore */ } closeModal(); } }, '開始編輯')]);
 }
 
 // 行業：可以更改；會改變網站用詞、頁面名稱與網址（多頁版）、給搜尋引擎看的店家類型
@@ -785,7 +844,15 @@ function paintOrder() {
   const box = $('#orderBox'); if (!box) return;
   const o = S.content.order;
   $('#orderNote').textContent = S.content.homeStyle === 'magazine' ? '目前首頁排版是「雜誌風」，版面固定，這裡的順序要改回「標準」排版才會套用。' : '';
-  box.replaceChildren(...o.map((k, i) => h('li', {}, h('span', { text: (i + 1) + '. ' + orderLabel(k) }),
+  const subIn = (k) => {
+    if (!S.lib.SUB_KEYS.includes(k)) return null;
+    const el = h('input', { type: 'text', class: 'ord-sub', maxlength: String(S.lib.LIMITS.sub), placeholder: '副標題（選填）', 'aria-label': orderLabel(k) + ' 副標題' });
+    el.value = S.content.subs[k] || '';
+    el.addEventListener('input', () => { if (el.value.trim()) S.content.subs[k] = el.value; else delete S.content.subs[k]; touch(); });
+    el.addEventListener('focus', () => scrollPreviewTo(k));
+    return el;
+  };
+  box.replaceChildren(...o.map((k, i) => h('li', {}, h('div', { class: 'ord-main' }, h('span', { text: (i + 1) + '. ' + orderLabel(k) }), subIn(k)),
     h('span', { class: 'ord-btns' },
       iconBtn('上移', () => { [o[i - 1], o[i]] = [o[i], o[i - 1]]; paintOrder(); touch(); scrollPreviewTo(k.startsWith('b:') ? 'b-' + k.slice(2) : k); }),
       iconBtn('下移', () => { [o[i + 1], o[i]] = [o[i], o[i + 1]]; paintOrder(); touch(); scrollPreviewTo(k.startsWith('b:') ? 'b-' + k.slice(2) : k); })))));
@@ -991,6 +1058,7 @@ function validate() {
 function goField(field) {
   const id = FIELD_CARD[field.split('.')[0]]; const c = id && $('#' + id); if (!c) return;
   closeModal(); $('.app').dataset.tab = 'edit';
+  if (c.hidden) showGroup(c.dataset.group || 'all', false);
   c.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const i = c.querySelector('input:not([disabled]),textarea'); if (i && field !== 'photos.hero') setTimeout(() => i.focus({ preventScroll: true }), 300);
 }
