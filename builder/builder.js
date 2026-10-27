@@ -1,5 +1,6 @@
 /* YC AXIOM 網站編輯器：左邊填內容、右邊即時預覽。
    預覽用的版型函式與「正式建置」是同一份程式（yc-axiom-sites 的 templates/shared/*），所以所見即所得。 */
+import { startReveal, wireNav } from './preview-fx.js?v=2026-10-27a';
 const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
@@ -304,35 +305,17 @@ function renderPreview(now) {
     f.srcdoc = r.html;
   }, now ? 0 : RENDER_DELAY);
 }
-// 捲動動畫：預覽框為了安全不執行網站自己的程式，所以由編輯器代為觸發（效果與正式網站相同）
-function startReveal(f, replay) {
-  const d = f.contentDocument, w = f.contentWindow;
-  if (!d || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const els = [...d.querySelectorAll('.rv')];
-  if (!els.length) return;
-  const vh = () => w.innerHeight;
-  // 一般重繪時，畫面內的區塊直接顯示，不要每改一個字就閃一次
-  if (!replay) els.forEach((el) => { if (el.getBoundingClientRect().top < vh()) el.classList.add('in'); });
-  // 先「瞬間」藏起還沒出現的區塊（不要看到淡出），再開始動畫
-  const freeze = d.createElement('style'); freeze.textContent = '.rv{transition:none!important}';
-  d.head.appendChild(freeze);
-  d.documentElement.classList.add('js-rv');
-  void d.body.offsetHeight;
-  freeze.remove(); void d.body.offsetHeight;
-  const show = () => els.forEach((el) => { if (!el.classList.contains('in') && el.getBoundingClientRect().top < vh() * 0.92) el.classList.add('in'); });
-  setTimeout(show, replay ? 350 : 0);
-  w.addEventListener('scroll', show, { passive: true });
-  w.addEventListener('resize', show);
-}
-// 手機版的選單按鈕（≡）：同樣由編輯器代為處理，預覽裡點得開、關得起來
-function wireNav(f) {
-  const d = f.contentDocument; if (!d) return;
-  const b = d.querySelector('.nav-btn'), n = d.getElementById('site-nav');
-  if (!b || !n) return;
-  d.documentElement.classList.add('js-nav'); b.hidden = false;
-  const set = (o) => { b.setAttribute('aria-expanded', o ? 'true' : 'false'); n.classList.toggle('open', o); };
-  b.addEventListener('click', () => set(b.getAttribute('aria-expanded') !== 'true'));
-  n.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
+// 全螢幕預覽：先存檔，再在新分頁看「客人會看到的樣子」（不顯示灰色提示，還沒發佈也可以看）
+async function openFullPreview() {
+  if (!S.site) return;
+  const w = window.open('', '_blank');   // 先開視窗，避免存檔後被瀏覽器當成彈出視窗擋掉
+  const ok = await save();
+  if (!ok) { if (w) w.close(); toast('儲存失敗，請稍後再試'); return; }
+  const q = new URLSearchParams({ site: S.site.id, draft: '1' });
+  const tb = new URLSearchParams(location.search).get('tplbase'); if (tb) q.set('tplbase', tb);
+  if (S.page && S.page !== 'home') q.set('page', S.page);
+  const url = new URL('preview/?' + q, location.href).href;
+  if (w) w.location.href = url; else location.href = url;
 }
 function goPage(key, anchor) {
   if (!S.pageList.some((p) => p.key === key)) return;
@@ -1258,6 +1241,7 @@ function needTerms() { return !S.site.terms_accepted_at || (S.site.terms_version
 function bindChrome() {
   if (bindChrome.done) return; bindChrome.done = true;
   $('#btnPublish').addEventListener('click', publish);
+  $('#btnFull').addEventListener('click', openFullPreview);
   const stage = $('#stage'), d = $('#devDesk'), m = $('#devMob');
   d.addEventListener('click', () => { stage.classList.remove('mob'); d.setAttribute('aria-pressed', 'true'); m.setAttribute('aria-pressed', 'false'); });
   m.addEventListener('click', () => { stage.classList.add('mob'); m.setAttribute('aria-pressed', 'true'); d.setAttribute('aria-pressed', 'false'); });

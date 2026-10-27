@@ -1,5 +1,6 @@
 /* 預覽「最新送出的版本」：網站擁有者或管理員才看得到（由資料庫的 RLS 決定）。
    用的是與正式部署相同的版型函式，只是圖片網址改指向 Supabase，所以看到的就是上線後的樣子。 */
+import { startReveal, wireNav } from '../preview-fx.js?v=2026-10-27a';
 const YC = window.YC;
 const $ = (s) => document.querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
@@ -29,11 +30,13 @@ async function run() {
     if (s.error) throw s.error;
     if (!s.data) { done = false; return say('找不到這個網站，或你沒有檢視權限'); }
     // ?version=<id>：預覽指定版本（管理員還原前確認用）；沒帶就預覽最新送出的版本
-    const vid = new URLSearchParams(location.search).get('version') || '';
+    const qs = new URLSearchParams(location.search);
+    const draft = qs.get('draft') === '1';   // 從編輯器開的：看目前編輯中的內容（還沒發佈）
+    const vid = draft ? '' : (qs.get('version') || '');
     if (vid && !/^[0-9a-f-]{36}$/i.test(vid)) { done = false; return say('網址不正確：版本編號格式錯誤'); }
-    let vq = YC.client.from('site_versions').select('content,palette,sections,layout,pages,created_at').eq('site_id', id);
-    vq = vid ? vq.eq('id', vid).limit(1) : vq.order('created_at', { ascending: false }).limit(1);
-    const v = await vq;
+    let vq = draft ? null : YC.client.from('site_versions').select('content,palette,sections,layout,pages,created_at').eq('site_id', id);
+    if (vq) vq = vid ? vq.eq('id', vid).limit(1) : vq.order('created_at', { ascending: false }).limit(1);
+    const v = vq ? await vq : { data: null };
     if (vid && !(v.data && v.data[0])) { done = false; return say('找不到這個版本，或你沒有檢視權限'); }
     const ver = v.data && v.data[0];
     const src = ver || { content: s.data.content, palette: s.data.palette, sections: s.data.sections, layout: s.data.layout, pages: s.data.pages, created_at: null };
@@ -57,14 +60,17 @@ async function run() {
             const path = href.replace(/^(\.\.\/|\.\/)+/, '').split('#')[0];
             const pg = r.pages.find((p) => p.path === path); if (pg) show(pg.key);
           });
+          startReveal(f, false); wireNav(f);
         } catch (e) { /* ignore */ }
       };
       f.srcdoc = r.html;
     };
-    show('home');
+    const want = qs.get('page') || 'home';
+    show(/^[a-z]{2,12}$/.test(want) ? want : 'home');
     $('#msg').hidden = true; $('#top').hidden = false; $('#stage').hidden = false;
     $('#pName').textContent = (src.content && src.content.name) || s.data.slug;
-    $('#pInfo').textContent = '代稱 ' + s.data.slug + ' · 狀態：' + (STATUS[s.data.status] || s.data.status) + ' · ' + (ver ? (vid ? '指定版本 ' : '版本時間 ') + new Date(ver.created_at).toLocaleString('zh-TW') : '尚無送出的版本，顯示的是草稿');
+    $('#pInfo').textContent = draft ? '編輯中的內容（還沒發佈前只有你看得到）· 表單在預覽中不會送出' : '代稱 ' + s.data.slug + ' · 狀態：' + (STATUS[s.data.status] || s.data.status) + ' · ' + (ver ? (vid ? '指定版本 ' : '版本時間 ') + new Date(ver.created_at).toLocaleString('zh-TW') : '尚無送出的版本，顯示的是草稿');
+    if (draft) { const back = $('#pBack'); back.hidden = false; back.onclick = () => { window.close(); setTimeout(() => { location.href = '../?site=' + id; }, 200); }; }
     document.title = '預覽：' + ((src.content && src.content.name) || s.data.slug);
   } catch (e) { done = false; console.error(e); say('載入失敗：' + String((e && e.message) || e)); }
 }
