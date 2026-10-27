@@ -286,6 +286,8 @@ function renderPreview(now) {
         const a = pendingAnchor; pendingAnchor = null;
         const t = a && d.getElementById(a);
         if (t) t.scrollIntoView({ block: 'start' }); else f.contentWindow.scrollTo(0, a === null ? frameScroll : 0);
+        const replay = S.replayMotion; S.replayMotion = false;
+        startReveal(f, replay);
         d.addEventListener('click', (ev) => {
           const el = ev.target.closest && ev.target.closest('a'); if (!el) return;
           const href = el.getAttribute('href') || '';
@@ -301,6 +303,26 @@ function renderPreview(now) {
     };
     f.srcdoc = r.html;
   }, now ? 0 : RENDER_DELAY);
+}
+// 捲動動畫：預覽框為了安全不執行網站自己的程式，所以由編輯器代為觸發（效果與正式網站相同）
+function startReveal(f, replay) {
+  const d = f.contentDocument, w = f.contentWindow;
+  if (!d || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const els = [...d.querySelectorAll('.rv')];
+  if (!els.length) return;
+  const vh = () => w.innerHeight;
+  // 一般重繪時，畫面內的區塊直接顯示，不要每改一個字就閃一次
+  if (!replay) els.forEach((el) => { if (el.getBoundingClientRect().top < vh()) el.classList.add('in'); });
+  // 先「瞬間」藏起還沒出現的區塊（不要看到淡出），再開始動畫
+  const freeze = d.createElement('style'); freeze.textContent = '.rv{transition:none!important}';
+  d.head.appendChild(freeze);
+  d.documentElement.classList.add('js-rv');
+  void d.body.offsetHeight;
+  freeze.remove(); void d.body.offsetHeight;
+  const show = () => els.forEach((el) => { if (!el.classList.contains('in') && el.getBoundingClientRect().top < vh() * 0.92) el.classList.add('in'); });
+  setTimeout(show, replay ? 350 : 0);
+  w.addEventListener('scroll', show, { passive: true });
+  w.addEventListener('resize', show);
 }
 function goPage(key, anchor) {
   if (!S.pageList.some((p) => p.key === key)) return;
@@ -562,7 +584,12 @@ function buildPanel() {
     const id = 'f-style-' + key;
     const el = h('select', { id, class: 'sel' }, list.map((k) => h('option', { value: k, text: labels[k] })));
     el.value = S.content.style[key];
-    el.addEventListener('change', () => { S.content.style[key] = el.value; touch(); if (anchor) scrollPreviewTo(anchor); });
+    el.addEventListener('change', () => {
+      S.content.style[key] = el.value;
+      // 換了捲動動畫：預覽跳到第一個區塊，重新播放一次讓店家看到效果
+      if (key === 'motion') { S.replayMotion = true; try { if ($('#frame').contentDocument.getElementById('about')) pendingAnchor = 'about'; } catch (e) { /* ignore */ } }
+      touch(); if (anchor) scrollPreviewTo(anchor);
+    });
     return h('label', { class: 'field', for: id }, h('span', { text: label }), el);
   };
   P.append(card('c-style', 'top', '外觀細節', '字型、按鈕、背景與各區塊的排列方式。全部都不會讓網站變慢。',
@@ -572,7 +599,7 @@ function buildPanel() {
       styleSel('head', L.HEAD_STYLES, L.HEAD_LABELS, '區塊標題樣式', 'about'),
       styleSel('texture', L.TEXTURES, L.TEXTURE_LABELS, '背景紋理', 'menu'),
       styleSel('motion', L.MOTIONS, L.MOTION_LABELS, '捲動動畫')),
-    h('div', { class: 'msg mute', style: 'margin:-4px 0 12px', text: '背景紋理會套用在有底色的區塊上。' }),
+    h('div', { class: 'msg mute', style: 'margin:-4px 0 12px', text: '背景紋理會套用在有底色的區塊上。換了捲動動畫，預覽會自動播放一次，往下捲也看得到。' }),
     h('div', { class: 'style-row' },
       styleSel('menuStyle', L.MENU_STYLES, { list: '列表', cards: '卡片' }, '價目樣式', 'menu'),
       styleSel('gallery', L.GALLERY_STYLES, { masonry: '錯落排列', grid: '整齊方格', slide: '橫向滑動' }, '照片排列', 'interior'),
