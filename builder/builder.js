@@ -5,7 +5,7 @@ const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
 const SAVE_DELAY = 2000, RENDER_DELAY = 150;
-const TERMS_VERSION = '2026-10-v4';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
+const TERMS_VERSION = '2026-10-v5';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
 const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
 // 標題字型檔（預覽用完整的常用字版本；正式網站只放用到的字）
 const FONT_FILE = { serif: 'NotoSerifTC-Bold-common.woff2', sans: 'NotoSansTC-Bold-common.woff2', round: 'Huninn-common.woff2', kai: 'LXGWWenKaiTC-Bold-common.woff2' };
@@ -393,7 +393,10 @@ function paintFontBox() {
 // 進階方案功能的說明（一般方案可以先設定、在預覽看效果，升級後才會出現在正式網站）
 function proNote() {
   if (S.isPro) return h('div', { class: 'msg ok', text: '你的網站是進階方案，這個功能已開放。' });
-  return h('div', { class: 'msg pro-lock', text: '這是進階方案功能。可以先設定、在預覽看效果；升級後才會出現在正式網站。升級請用 LINE（@788cblaq）聯絡我們。' });
+  const add = S.plan && S.plan.PRO_ADDON ? S.plan.PRO_ADDON.monthly : 400;
+  const msg = S.site.pro_pending ? '進階功能已申請，確認收到差額後就會開通。現在可以先設定、在預覽看效果。'
+    : '這是進階功能（每月加 NT$' + add + '）。可以先設定、在預覽看效果；到會員專區「我的網站」按「加購進階功能」開通後，才會出現在正式網站。';
+  return h('div', { class: 'msg pro-lock' }, msg, ' ', h('a', { href: YC.url('dashboard/'), target: '_blank', rel: 'noopener', text: '前往會員專區' }));
 }
 function goPage(key, anchor) {
   if (!S.pageList.some((p) => p.key === key)) return;
@@ -1451,9 +1454,9 @@ async function publish() {
       const box = (...kids) => h('div', { style: 'margin:12px 0 0;padding:12px 14px;border:1px solid var(--line,#3a342c);border-radius:10px;font-size:14px;line-height:1.7' }, ...kids);
       const pay = h('div', { style: 'color:var(--muted,#9a8f80)', text: '送出後請到會員專區付款，付款確認後網站就會開通。' });
       if (PM.hasPrice(P)) {
-        const q = PM.quote(12, S.layout);
+        const q = PM.quote(12, S.layout, S.site.tier);
         priceBox = box(h('div', { style: 'font-weight:700' }, '租用方案：' + P.name),
-          h('div', {}, P.listMonthly ? h('span', { style: PM.STRIKE_STYLE, text: PM.money(P.listMonthly) }) : null, ' ', h('b', { text: PM.money(P.monthly) + '／月' }), P.listMonthly ? '（特價）' : ''),
+          h('div', {}, P.listMonthly && S.site.tier !== 'pro' ? h('span', { style: PM.STRIKE_STYLE, text: PM.money(P.listMonthly) }) : null, ' ', h('b', { text: PM.money(q.monthly || P.monthly) + '／月' }), S.site.tier === 'pro' ? '（含進階功能）' : P.listMonthly ? '（特價）' : ''),
           h('div', { style: 'color:var(--muted,#9a8f80)', text: '一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + PM.money(q.amount) + '。' + (isMulti() ? '包含' + pages + '等頁面。' : sectionLabel('menu') + '、' + sectionLabel('interior') + '、常見問題、最新消息都包含，不另外加價。') }),
           pay);
       } else {
