@@ -55,7 +55,15 @@
     box.innerHTML = '';
     if (!YC.enabled || !YC.loggedIn() || !YC.consented()) return;
     try {
-      var r = await YC.client.from('rental_sites').select('id,slug,status,layout,content,public_url,paid_until,first_published_at,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status').eq('member_id', YC.session.user.id).order('created_at');
+      // 先接受寄到自己 Email 的協作邀請；自己的網站和協作中的網站一起列出
+      try { await YC.client.functions.invoke('member-site', { body: { action: 'accept_invites' } }); } catch (e0) { /* ignore */ }
+      var uid = YC.session.user.id;
+      var cm = await YC.client.from('site_members').select('site_id').eq('member_id', uid).eq('status', 'active');
+      var collabIds = cm.error ? [] : (cm.data || []).map(function (x) { return x.site_id; });
+      var cols = 'id,member_id,tier,slug,status,layout,content,public_url,paid_until,first_published_at,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status';
+      var r = collabIds.length
+        ? await YC.client.from('rental_sites').select(cols).or('member_id.eq.' + uid + ',id.in.(' + collabIds.join(',') + ')').order('created_at')
+        : await YC.client.from('rental_sites').select(cols).eq('member_id', uid).order('created_at');
       if (my !== token || r.error || !r.data) return;
       if (r.data) r.data = r.data.filter(function (x) { return !(x.status === "cancelled" && !x.first_published_at); });   // 自己刪除的草稿不顯示
       if (!r.data.length) {   // 還沒有網站：顯示入口
@@ -192,7 +200,69 @@
     b.disabled = false;
   });
 
+  // ── 預約行事曆：接下來的預約，確認或取消 ──
+  function bookingsHtml(s, rows) {
+    if (!rows || !rows.length) return '';
+    var stl = { pending: ['待確認', '#e0b05a'], confirmed: ['已確認', '#34d399'], cancelled: ['已取消', '#9a8f80'] };
+    return '<details open style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px"><b>預約行事曆</b>（接下來 ' + rows.filter(function (m) { return m.slot_status !== 'cancelled'; }).length + ' 筆）</summary>' +
+      '<ul style="margin:8px 0 0;padding-left:0;list-style:none;font-size:14px;line-height:1.7">' + rows.map(function (m) {
+        var st = stl[m.slot_status] || stl.pending, mt = m.meta || {};
+        var btns = m.slot_status === 'cancelled' ? '' : (m.slot_status === 'pending' ? '<button class="m-btn sm" data-bk="confirmed" data-id="' + esc(m.id) + '" data-site="' + esc(s.id) + '">確認</button> ' : '') +
+          '<button class="m-btn sm" data-bk="cancelled" data-id="' + esc(m.id) + '" data-site="' + esc(s.id) + '">取消</button>';
+        return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)"><b>' + esc(String(m.slot_date).slice(5).replace('-', '/')) + ' ' + esc(m.slot_time) + '</b>　' + esc(m.name) + '　' + esc(m.contact) +
+          (mt.people ? '・' + esc(mt.people) + ' 人' : '') + (mt.item ? '・' + esc(mt.item) : '') + (mt.email ? '・' + esc(mt.email) : '') +
+          ' <span style="color:' + st[1] + ';font-size:13px">' + st[0] + '</span>' + (btns ? '<div style="margin-top:4px">' + btns + '</div>' : '') + '</li>';
+      }).join('') + '</ul><p id="bkout-' + esc(s.id) + '" style="margin:6px 0 0;font-size:13px;color:#9a8f80"></p></details>';
+  }
+  // ── 多人協作（進階方案，只有擁有者看得到）──
+  function collabHtml(s, rows) {
+    var id = esc(s.id);
+    if (s.tier !== 'pro') return '';
+    var list = (rows || []).filter(function (m) { return m.status !== 'removed'; });
+    return '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px"><b>一起編輯的人</b>（' + list.length + '／5）</summary>' +
+      '<p style="margin:8px 0 0;font-size:13px;color:#9a8f80">輸入對方的 Email 邀請；對方用這個 Email 登入會員專區後就能編輯內容、發佈與處理預約。收款、網域、刪除網站只有你能操作。</p>' +
+      (list.length ? '<ul style="margin:6px 0 0;padding-left:0;list-style:none;font-size:14px">' + list.map(function (m) {
+        return '<li style="padding:4px 0">' + esc(m.email) + ' <span style="font-size:13px;color:' + (m.status === 'active' ? '#34d399' : '#e0b05a') + '">' + (m.status === 'active' ? '已加入' : '等待對方登入') + '</span> <button class="m-btn sm" data-collab="remove" data-site="' + id + '" data-email="' + esc(m.email) + '">移除</button></li>';
+      }).join('') + '</ul>' : '') +
+      '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input type="email" id="collab-' + id + '" placeholder="對方的 Email" style="flex:1;min-width:200px;font:inherit;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit">' +
+      '<button class="m-btn sm" data-collab="invite" data-site="' + id + '">邀請</button></div><p id="collabout-' + id + '" style="margin:6px 0 0;font-size:13px;color:#9a8f80"></p></details>';
+  }
+  box.addEventListener('click', async function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-bk],[data-collab]'); if (!b) return;
+    var sid = b.getAttribute('data-site');
+    if (b.hasAttribute('data-bk')) {
+      var stv = b.getAttribute('data-bk'), out = document.getElementById('bkout-' + sid);
+      var note = '';
+      if (stv === 'cancelled') { note = prompt('取消這筆預約？可以寫一句說明給客人（選填）：', ''); if (note === null) return; }
+      b.disabled = true;
+      try { var j = await invoke({ action: 'set_booking', site_id: sid, message_id: b.getAttribute('data-id'), status: stv, note: note }); if (out) out.textContent = j.message || '已更新'; setTimeout(draw, 1500); }
+      catch (e) { b.disabled = false; if (out) out.textContent = String(e.message || e); }
+      return;
+    }
+    var act = b.getAttribute('data-collab'), o2 = document.getElementById('collabout-' + sid);
+    var email = act === 'invite' ? (document.getElementById('collab-' + sid).value || '').trim() : b.getAttribute('data-email');
+    if (!email) { o2.textContent = '請輸入 Email'; return; }
+    if (act === 'remove' && !confirm('移除 ' + email + '？對方將不能再編輯這個網站。')) return;
+    b.disabled = true; o2.textContent = '處理中…';
+    try { var j2 = await invoke({ action: act === 'invite' ? 'invite_collab' : 'remove_collab', site_id: sid, email: email }); o2.textContent = j2.message || '完成'; setTimeout(draw, 2000); }
+    catch (e2) { o2.textContent = String(e2.message || e2); }
+    b.disabled = false;
+  });
+
   async function siteCard(s, bank, plan, PM, many) {
+      var today = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+      var bks = await YC.client.from('site_messages').select('id,name,contact,slot_date,slot_time,slot_status,meta').eq('site_id', s.id).gte('slot_date', today).order('slot_date').order('slot_time').limit(50);
+      var bkHtml = bookingsHtml(s, bks && !bks.error ? bks.data : null);
+      var name0 = (s.content && s.content.name) || s.slug;
+      // 協作中的網站：只顯示網址、預約與編輯（收款、方案、網域由擁有者管理）
+      if (s.member_id !== YC.session.user.id) {
+        var live0 = s.public_url && (s.status === 'live' || s.status === 'overdue');
+        return '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">' + esc(name0) + ' <span style="font-size:13px;font-weight:400;color:#9a8f80">協作中</span></h2>' +
+          (live0 ? '<p style="margin:6px 0">網址：<a href="' + esc(s.public_url) + '" target="_blank" rel="noopener">' + esc(s.public_url) + '</a></p>' : '') +
+          '<p style="margin:6px 0;font-size:13px;color:#9a8f80">你被邀請一起編輯這個網站。收款、網域與續約由網站擁有者管理。</p>' + bkHtml +
+          '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(s.id)) + '">編輯網站</a></p></div>';
+      }
+      var mem = s.tier === 'pro' ? await YC.client.from('site_members').select('email,status').eq('site_id', s.id) : null;
       var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
       var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);
@@ -222,14 +292,14 @@
         (s.status === 'suspended' && s.suspend_reason ? '<p style="margin:6px 0;font-size:14px;color:#f0776b">暫停原因：' + esc(s.suspend_reason) + '</p>' : '') +
         reportHtml(rep && !rep.error ? rep.data : []) +
         (plan && plan.text ? '<p style="margin:6px 0;font-size:13px;color:#9a8f80;white-space:pre-line">' + esc(plan.text) + '</p>' : '') +
-        planHtml +
+        planHtml + '<p style="margin:6px 0;font-size:13px;color:#9a8f80">方案等級：' + (s.tier === 'pro' ? '<b style="color:#e0b05a">進階方案</b>（預約行事曆、自訂程式碼、多人協作）' : '一般方案（需要預約行事曆、自訂程式碼或多人協作，請用 LINE 聯絡我們升級進階方案）') + '</p>' +
         bankHtml(bank, needPay) +
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
           pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +
         statsHtml(hits && !hits.error ? hits.data : null) +
-        msgsHtml(msgs && !msgs.error ? msgs.data : null, msgs && msgs.count) +
+        bkHtml + msgsHtml(msgs && !msgs.error ? msgs.data : null, msgs && msgs.count) +
         shopHtml(s, pay && !pay.error ? pay.data : null, orders && !orders.error ? orders.data : null) +
-        domainHtml(s) +
+        domainHtml(s) + collabHtml(s, mem && !mem.error ? mem.data : null) +
         '<p style="margin:6px 0 0;font-size:13px"><a href="' + esc(YC.url('terms/rental/')) + '" target="_blank" rel="noopener">網站租用條款</a>' + (s.terms_accepted_at ? '<span style="color:#9a8f80">（你已於 ' + esc(String(s.terms_accepted_at).slice(0, 10)) + ' 同意）</span>' : '') + '</p>' +
         '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(s.id)) + '">編輯網站</a></p></div>';
   }

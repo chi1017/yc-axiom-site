@@ -72,9 +72,13 @@ async function loadLib() {
     import(base + 'templates/shared/slug.js'), import(base + 'templates/shared/palettes.js'), import(base + 'templates/shared/hours.js'),
     import(base + 'templates/shared/pages.js'), import(base + 'templates/shared/industries.js')
   ]);
+  // 進階方案的共用程式（程式碼審核用的雜湊）；舊快取沒有這個檔時不影響其他功能
+  let code = {};
+  try { code = await import(base + 'templates/shared/code.js'); } catch (e) { code = {}; }
   S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, derivePalette: pal.derivePalette, paletteFrom4: pal.paletteFrom4, colorWarnings: pal.colorWarnings || colorWarningsLocal(pal), luminance: pal.luminance, hours,
     pagesFor: pages.pagesFor, normalizeLayout: pages.normalizeLayout, normalizePages: pages.normalizePages, defaultPages: pages.defaultPages, pagesFromSections: pages.pagesFromSections, LAYOUT_LABELS: pages.LAYOUT_LABELS,
-    INDUSTRIES: ind.INDUSTRIES, INDUSTRY_GROUPS: ind.INDUSTRY_GROUPS, getIndustry: ind.getIndustry };
+    INDUSTRIES: ind.INDUSTRIES, INDUSTRY_GROUPS: ind.INDUSTRY_GROUPS, getIndustry: ind.getIndustry,
+    codeHash: code.codeHash, hasCustomCode: code.hasCustomCode };
   // 方案（價格）模組：載入失敗時不影響編輯，只是不開放選多頁版、不顯示價格
   try { S.plan = await import(YC.url('assets/rental-plan.js')); } catch (e) { S.plan = null; }
 }
@@ -118,7 +122,13 @@ async function boot() {
     await loadLib();
     const uid = YC.session.user.id;
     // 一個會員可以有多個網站：網址 ?site=<id> 指定要編輯哪一個，沒指定就開上次編輯的（或第一個）
-    const r = await YC.client.from('rental_sites').select('*').eq('member_id', uid).order('created_at');
+    // 先接受寄到自己 Email 的協作邀請，再把「自己的網站」和「協作中的網站」一起列出
+    try { await YC.client.functions.invoke('member-site', { body: { action: 'accept_invites' } }); } catch (e) { /* ignore */ }
+    const cm = await YC.client.from('site_members').select('site_id').eq('member_id', uid).eq('status', 'active');
+    const collabIds = cm.error ? [] : (cm.data || []).map((x) => x.site_id);
+    const r = collabIds.length
+      ? await YC.client.from('rental_sites').select('*').or('member_id.eq.' + uid + ',id.in.(' + collabIds.join(',') + ')').order('created_at')
+      : await YC.client.from('rental_sites').select('*').eq('member_id', uid).order('created_at');
     if (r.error) throw r.error;
     // 會員自己刪除的草稿（狀態改成已終止、從沒上線過）不再顯示
     S.mySites = r.data.filter((x) => !(x.status === 'cancelled' && !x.first_published_at));
@@ -205,7 +215,7 @@ function paintSiteSwitch() {
   const box = $('#siteSwitch'); if (!box) return;
   const list = S.mySites || [];
   const sel = h('select', { class: 'sel', 'aria-label': '切換網站' },
-    list.map((x) => h('option', { value: x.id, text: ((x.content && x.content.name) || x.slug) + '（' + x.slug + '）' })),
+    list.map((x) => h('option', { value: x.id, text: ((x.content && x.content.name) || x.slug) + '（' + x.slug + '）' + (x.member_id !== YC.session.user.id ? '・協作' : '') })),
     h('option', { value: '__new', text: '＋ 建立新網站' }));
   sel.value = S.site.id;
   sel.addEventListener('change', async () => {
@@ -214,7 +224,7 @@ function paintSiteSwitch() {
     S.dirty = false;
     location.href = location.pathname + (v === '__new' ? '?new=1' : '?site=' + encodeURIComponent(v));
   });
-  const canDelete = ['draft', 'pending'].includes(S.site.status) && !S.site.first_published_at;
+  const canDelete = S.isOwner && ['draft', 'pending'].includes(S.site.status) && !S.site.first_published_at;
   box.replaceChildren(sel, canDelete ? h('button', { type: 'button', class: 'btn small danger', title: '刪除這個網站', onclick: askDeleteSite }, '刪除') : '');
 }
 // 刪除還沒上線過的網站：要輸入「刪除」兩個字確認。資料不會真的消失（改成已終止並隱藏），需要時可請管理員復原。
@@ -246,6 +256,8 @@ function askDeleteSite() {
 function mount(site) {
   const L = S.lib;
   S.site = site; S.slug = site.slug;
+  S.isOwner = site.member_id === YC.session.user.id;   // 協作者不能改網址代稱、行業、版型，也不能刪除網站
+  S.isPro = site.tier === 'pro';
   try { localStorage.setItem('yc-builder-site', site.id); } catch (e) { /* ignore */ }
   paintSiteSwitch();
   S.content = L.normalizeContent(site.content);
@@ -273,7 +285,7 @@ function renderPreview(now) {
     try {
       r = L.buildSite({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
         siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path),
-        previewFontUrl: tplBase() + 'templates/base/fonts/' + (FONT_FILE[S.content.style.font] || FONT_FILE.serif) });
+        ...previewFont() });
     } catch (e) { console.error(e); return; }
     if (S.page === 'home') paintSeoHints(r);
     S.pageList = r.pages || [];
@@ -316,6 +328,61 @@ async function openFullPreview() {
   if (S.page && S.page !== 'home') q.set('page', S.page);
   const url = new URL('preview/?' + q, location.href).href;
   if (w) w.location.href = url; else location.href = url;
+}
+// 預覽用的標題字型：內建字型直接讀字型檔；上傳的字型從私有空間下載後用暫存網址（不會公開）
+function previewFont() {
+  const st = S.content.style;
+  if (st.font !== 'custom') return { previewFontUrl: tplBase() + 'templates/base/fonts/' + (FONT_FILE[st.font] || FONT_FILE.serif) };
+  const cf = st.customFont;
+  if (cf && S.fontBlob && S.fontBlob.path === cf.path) return { previewFontUrl: S.fontBlob.url, previewFontFormat: '' };
+  if (cf) loadFontBlob();
+  return { previewFontUrl: '', previewFontFormat: '' };
+}
+async function loadFontBlob() {
+  const cf = S.content.style.customFont;
+  if (!cf || S.fontLoading === cf.path || (S.fontBlob && S.fontBlob.path === cf.path)) return;
+  S.fontLoading = cf.path;
+  const r = await YC.client.storage.from('site-fonts').download(cf.path);
+  S.fontLoading = '';
+  if (r.error || !r.data) return;
+  if (S.fontBlob) URL.revokeObjectURL(S.fontBlob.url);
+  S.fontBlob = { path: cf.path, url: URL.createObjectURL(r.data) };
+  renderPreview(true);
+}
+const FONT_EXT = ['woff2', 'woff', 'ttf', 'otf'];
+async function uploadFont(file, msg, btn) {
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (!FONT_EXT.includes(ext)) { msg.className = 'msg bad'; msg.textContent = '只能上傳 TTF、OTF、WOFF 或 WOFF2 字型檔'; return; }
+  if (file.size > 20 * 1024 * 1024) { msg.className = 'msg bad'; msg.textContent = '字型檔超過 20MB，請改用較小的檔案（例如只含常用字的版本）'; return; }
+  btn.disabled = true; msg.className = 'msg mute'; msg.textContent = '上傳中…';
+  const path = S.site.id + '/font-' + Math.random().toString(36).slice(2, 12).replace(/[^a-z0-9]/g, 'x').padEnd(10, 'x') + '.' + ext;
+  const r = await YC.client.storage.from('site-fonts').upload(path, file, { contentType: 'application/octet-stream', upsert: false });
+  btn.disabled = false;
+  if (r.error) { msg.className = 'msg bad'; msg.textContent = '上傳失敗：' + r.error.message; return; }
+  const old = S.content.style.customFont && S.content.style.customFont.path;
+  S.content.style.customFont = { path, name: file.name.replace(/\.[^.]+$/, '').slice(0, 40) || '自訂字型' };
+  S.content.style.font = 'custom';
+  touch();
+  if (old && old !== path) YC.client.storage.from('site-fonts').remove([old]).catch(() => {});
+  msg.className = 'msg ok'; msg.textContent = '已上傳。網站只會放標題用到的字，不會拖慢網站。';
+  paintFontBox(); loadFontBlob();
+}
+function paintFontBox() {
+  const box = $('#fontBox'); if (!box) return;
+  const st = S.content.style, cf = st.customFont;
+  const file = h('input', { type: 'file', accept: '.ttf,.otf,.woff,.woff2', hidden: true });
+  const msg = h('div', { class: 'msg mute' });
+  const up = h('button', { type: 'button', class: 'btn small' }, cf ? '換一個字型檔' : '上傳字型檔');
+  up.addEventListener('click', () => file.click());
+  file.addEventListener('change', () => { const f = file.files[0]; file.value = ''; if (f) uploadFont(f, msg, up); });
+  box.hidden = st.font !== 'custom';
+  box.replaceChildren(h('div', { class: 'font-up' }, h('span', { text: cf ? '目前：' + cf.name : '還沒上傳字型' }), up, file), msg,
+    h('div', { class: 'msg mute', text: 'TTF、OTF、WOFF、WOFF2 都可以，最大 20MB。請確認你有這個字型的網頁使用授權。字型檔不會公開，網站只會放標題用到的字。' }));
+}
+// 進階方案功能的說明（一般方案可以先設定、在預覽看效果，升級後才會出現在正式網站）
+function proNote() {
+  if (S.isPro) return h('div', { class: 'msg ok', text: '你的網站是進階方案，這個功能已開放。' });
+  return h('div', { class: 'msg pro-lock', text: '這是進階方案功能。可以先設定、在預覽看效果；升級後才會出現在正式網站。升級請用 LINE（@788cblaq）聯絡我們。' });
 }
 function goPage(key, anchor) {
   if (!S.pageList.some((p) => p.key === key)) return;
@@ -437,7 +504,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more' };
+const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more', bookingCal: 'c-cal', code: 'c-code' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -552,7 +619,7 @@ function buildPanel() {
   };
   const styleBox = h('div', { class: 'style-row' },
     sel('heroStyle', [['card', '標準：照片在文字旁'], ['full', '滿版大圖：照片鋪滿首頁上方']], '首頁主視覺'),
-    sel('homeStyle', [['standard', '標準：區塊依序排列'], ['magazine', '雜誌風：大圖與圖文交錯']], '首頁排版'));
+    sel('homeStyle', (L.HOME_STYLES || ['standard', 'magazine']).map((k) => [k, ({ standard: '標準：區塊依序排列', magazine: '雜誌風：大圖與圖文交錯', center: '置中大字：標題置中、照片橫幅', bento: '方格拼貼：首頁照片拼貼、標題在左欄', sidebar: '左側選單：電腦版選單固定在左邊' })[k] || k]), '版型風格'));
   P.append(card('c-basic', 'top', '網址與外觀', '選配色、版型與要顯示的內容。字型與按鈕在下一張卡片。',
     industryField(),
     h('label', { class: 'field', for: 'f-slug' }, h('span', {}, h('em', { style: 'font-style:normal', text: '網址代稱' }), h('b', { id: 'slugLock', text: '' })), slugIn),
@@ -565,7 +632,7 @@ function buildPanel() {
   // 字型與按鈕
   const fontSel = h('select', { id: 'f-style-font', class: 'sel' }, L.FONTS.map((k) => h('option', { value: k, text: L.FONT_LABELS[k] })));
   fontSel.value = S.content.style.font;
-  fontSel.addEventListener('change', () => { S.content.style.font = fontSel.value; touch(); });
+  fontSel.addEventListener('change', () => { S.content.style.font = fontSel.value; paintFontBox(); touch(); });
   const btnBox = h('div', { class: 'seg-btns', role: 'group', 'aria-label': '按鈕形狀' }, L.BUTTONS.map((k) => {
     const b = h('button', { type: 'button', class: 'btn small', 'aria-pressed': String(S.content.style.button === k), style: 'border-radius:' + ({ pill: '999px', round: '10px', square: '2px' })[k] }, L.BUTTON_LABELS[k]);
     b.addEventListener('click', () => { S.content.style.button = k; btnBox.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); touch(); });
@@ -586,7 +653,7 @@ function buildPanel() {
     return h('label', { class: 'field', for: id }, h('span', { text: label }), el);
   };
   P.append(card('c-style', 'top', '外觀細節', '字型、按鈕、背景與各區塊的排列方式。全部都不會讓網站變慢。',
-    h('label', { class: 'field', for: 'f-style-font' }, h('span', { text: '標題字型' }), fontSel),
+    h('label', { class: 'field', for: 'f-style-font' }, h('span', { text: '標題字型' }), fontSel), h('div', { id: 'fontBox', class: 'field', hidden: true }),
     h('div', { class: 'field' }, h('span', { text: '按鈕形狀' }), btnBox),
     h('div', { class: 'style-row' },
       styleSel('head', L.HEAD_STYLES, L.HEAD_LABELS, '區塊標題樣式', 'about'),
@@ -694,14 +761,19 @@ function buildPanel() {
   };
   // 自訂區塊：標題、文字、照片、按鈕
   P.append(card('c-blocks', 'top', '自訂區塊（選填）', '最多 ' + L.LIMITS.blocks + ' 個。想放的內容沒有現成欄位時用這裡，例如：包場服務、品牌故事、合作夥伴、徵才。',
-    h('div', { id: 'blockBox' }), h('button', { type: 'button', class: 'btn small', id: 'blockAdd' }, '＋ 新增區塊'), h('span', { id: 'blockCnt', class: 'msg mute', style: 'margin-left:10px' })));
-  $('#blockAdd').onclick = () => {
+    h('div', { id: 'blockBox' }), h('button', { type: 'button', class: 'btn small', id: 'blockAdd' }, '＋ 新增圖文區塊'), ' ',
+    h('button', { type: 'button', class: 'btn small', id: 'blockAddHtml' }, '＋ 嵌入程式碼（進階）'), h('span', { id: 'blockCnt', class: 'msg mute', style: 'margin-left:10px' }),
+    h('div', { class: 'msg mute', style: 'margin-top:8px', text: '「嵌入程式碼」可以貼 Google 表單、Instagram、Google 日曆、訂位系統等提供的嵌入碼（進階方案，發佈後由我們審核才會出現在網站）。' })));
+  const addBlock = (kind) => {
     if (S.content.blocks.length >= L.LIMITS.blocks) return;
     const id = 'k' + Math.random().toString(36).slice(2, 9).replace(/[^a-z0-9]/g, 'x');
-    S.content.blocks.push({ id, title: '', body: '', photo: null, btnLabel: '', btnUrl: '', side: 'right', hidden: false });
+    S.content.blocks.push(kind === 'html' ? { id, kind: 'html', title: '', body: '', photo: null, btnLabel: '', btnUrl: '', side: 'right', hidden: false, html: '' }
+      : { id, kind: 'text', title: '', body: '', photo: null, btnLabel: '', btnUrl: '', side: 'right', hidden: false });
     S.content.order = L.normalizeOrder(S.content.order, S.content.blocks);
     paintBlocks(); paintOrder(); touch(); setTimeout(() => scrollPreviewTo('b-' + id), 300);
   };
+  $('#blockAdd').onclick = () => addBlock('text');
+  $('#blockAddHtml').onclick = () => addBlock('html');
   // 首頁區塊順序
   P.append(card('c-order', 'top', '首頁區塊順序與副標題', '用「上移／下移」調整首頁區塊的先後，也可以替每個區塊寫一句副標題。沒有內容或沒開啟的區塊不會出現在網站上。',
     h('div', { id: 'orderNote', class: 'msg mute', style: 'margin:0 0 8px' }), h('ol', { id: 'orderBox', class: 'order-list' }),
@@ -716,6 +788,29 @@ function buildPanel() {
     h('div', { class: 'field' }, h('span', { text: '分享到 LINE／Facebook 時的圖片（選填，沒有就用主視覺）' }), shareBox,
       h('div', { class: 'msg mute', text: '建議橫式、寬 1200 像素左右的照片。' }))));
   S.shareSlot = shareSlot; paintShare();
+  // 預約行事曆（進階方案）
+  const calOn = h('input', { type: 'checkbox', id: 'f-cal-enabled' }); calOn.checked = !!S.content.bookingCal.enabled;
+  calOn.addEventListener('change', () => {
+    S.content.bookingCal.enabled = calOn.checked;
+    if (calOn.checked && !S.content.bookingForm) { S.content.bookingForm = true; const b = $('#f-bookingForm'); if (b) b.checked = true; }
+    touch(); scrollPreviewTo('booking');
+  });
+  P.append(card('c-cal', 'booking', '預約行事曆（進階方案）', '客人在網站上直接選日期與時段，每個時段有名額上限，額滿就不能再選。你在會員專區確認或取消，客人有留 Email 會收到通知。',
+    proNote(),
+    h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-cal-enabled' }, calOn, h('strong', { text: '使用預約行事曆（取代原本的預約申請表）' }))),
+    h('div', { id: 'calBox' })));
+  // 自訂程式碼（進階方案）
+  const codeArea = (path, label, ph) => {
+    const el = h('textarea', { id: 'f-' + path.replace('.', '-'), class: 'code', rows: '6', maxlength: String(L.LIMITS.code || 20000), spellcheck: 'false', placeholder: ph });
+    bindInput(el, path, () => { clearTimeout(S.timers.code); S.timers.code = setTimeout(paintCodeStatus, 800); });
+    return h('label', { class: 'field', for: el.id }, h('span', { text: label }), el);
+  };
+  P.append(card('c-code', 'top', '自訂程式碼（進階方案）', '放 Meta Pixel、LINE Tag、聊天外掛、網站驗證碼等第三方提供的程式碼。預覽不會執行；發佈後由我們審核，核准才會放進正式網站（同一段程式碼只審一次）。',
+    proNote(),
+    codeArea('code.head', '放在 <head> 裡（追蹤碼、驗證碼）', '<script>…</script> 或 <meta …>'),
+    codeArea('code.body', '放在頁面最後（聊天外掛等）', '<script src="https://…"></script>'),
+    h('div', { id: 'codeStatus', class: 'msg mute' }),
+    h('div', { class: 'msg mute', text: '程式碼可能讓網站變慢或出錯，請只貼你信任的服務提供的程式碼。' })));
   // 版本紀錄
   P.append(card('c-history', 'top', '版本紀錄', '每次按「發佈」都會留一個版本（保留最近 20 個）。改壞了可以還原成之前的版本，還原後再按一次發佈才會更新網站。',
     h('button', { type: 'button', class: 'btn small', id: 'histOpen' }, '查看過去的版本')));
@@ -732,6 +827,8 @@ function buildPanel() {
     field('英文地址（選填）', 'en.address', { max: 160, ph: 'e.g. No. 100, Siwei 3rd Rd., Lingya Dist., Kaohsiung', help: '沒填會用中文地址。價目會沿用中文品名與價格。' })));
   $('#reviewAdd').onclick = () => { if (S.content.reviews.length < L.LIMITS.reviews) { S.content.reviews.push({ name: '', text: '' }); paintReviews(); touch(); } };
   paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintItems(); paintBlocks(); paintOrder(); paintSlug(); paintLinks(); refreshTodo();
+  paintFontBox(); paintCal(); paintCodeStatus();
+  if (!S.isOwner) { const ind = $('#f-industry'); if (ind) { ind.disabled = true; ind.title = '只有網站擁有者能更改行業'; } }
   buildGroupNav();
 }
 
@@ -740,7 +837,7 @@ const GROUPS = [
   { key: 'look', label: '外觀', cards: ['c-basic', 'c-style'] },
   { key: 'info', label: '店家資料', cards: ['c-info', 'c-hours', 'c-booking', 'c-photos'] },
   { key: 'content', label: '內容', cards: ['c-menu', 'c-news', 'c-faq', 'c-more', 'c-posts', 'c-blocks'] },
-  { key: 'feature', label: '收款與功能', cards: ['c-shop', 'c-en', 'c-seo'] },
+  { key: 'feature', label: '收款與功能', cards: ['c-shop', 'c-cal', 'c-en', 'c-seo', 'c-code'] },
   { key: 'layout', label: '版面與紀錄', cards: ['c-order', 'c-history'] },
   { key: 'all', label: '全部', cards: null }
 ];
@@ -820,7 +917,7 @@ function paintLayout() {
       cb.addEventListener('change', () => { S.sections[k] = cb.checked; touch(); if (cb.checked) scrollPreviewTo(k); });
       return h('label', {}, cb, sectionLabel(k));
     });
-    const up = multiOpen() ? h('div', { class: 'upgrade' },
+    const up = multiOpen() && S.isOwner ? h('div', { class: 'upgrade' },
       h('div', { class: 'msg mute', text: '想把內容分成多個頁面（關於、' + IND().offer.nav + '、' + IND().space.label + '、常見問題…）？可以升級成多頁版。' }),
       h('button', { type: 'button', class: 'btn small', onclick: askUpgrade }, '升級成多頁版')) : null;
     box.replaceChildren(h('span', { text: '版型：一頁版（所有內容在同一頁）' }), h('div', { class: 'msg mute', style: 'margin:0 0 4px', text: '要顯示的區塊：' }), ...toggles, up || '');
@@ -866,9 +963,9 @@ function askUpgrade() {
 
 function paintSlug() {
   const m = $('#slugMsg'); if (!m) return;
-  const locked = S.site.status !== 'draft';
+  const locked = S.site.status !== 'draft' || !S.isOwner;
   const inp = $('#f-slug'); inp.disabled = locked;
-  $('#slugLock').textContent = locked ? '已鎖定（第一次發佈後不能修改）' : '';
+  $('#slugLock').textContent = locked ? (S.isOwner ? '已鎖定（第一次發佈後不能修改）' : '只有網站擁有者能修改') : '';
   if (locked) { m.textContent = ''; }
   else { m.className = 'msg ' + (S.slugState.pending ? 'mute' : (S.slugState.msg ? (S.slugState.ok ? 'ok' : 'bad') : 'mute')); m.textContent = S.slugState.msg || ''; }
   inp.classList.toggle('bad', !locked && !S.slugState.ok && !S.slugState.pending);
@@ -947,6 +1044,21 @@ function paintOrder() {
 function paintBlocks() {
   const L = S.lib, box = $('#blockBox'); if (!box) return; box.replaceChildren();
   S.content.blocks.forEach((b, i) => {
+    const delBlock = () => iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger');
+    if (b.kind === 'html') {
+      const t2 = h('input', { type: 'text', maxlength: String(L.LIMITS.blockTitle), placeholder: '區塊標題（選填），例如：追蹤我們的 Instagram', 'aria-label': '嵌入區塊標題 ' + (i + 1) });
+      const code = h('textarea', { class: 'code', maxlength: String(L.LIMITS.html || 20000), rows: '6', spellcheck: 'false', placeholder: '貼上嵌入碼，例如 <iframe src="https://…"></iframe>', 'aria-label': '嵌入程式碼 ' + (i + 1) });
+      const hid2 = h('input', { type: 'checkbox' });
+      t2.value = b.title; code.value = b.html || ''; hid2.checked = b.hidden;
+      t2.addEventListener('input', () => { b.title = t2.value; paintOrder(); touch(); });
+      code.addEventListener('input', () => { b.html = code.value; touch(); clearTimeout(S.timers.code); S.timers.code = setTimeout(paintCodeStatus, 800); });
+      hid2.addEventListener('change', () => { b.hidden = hid2.checked; paintOrder(); touch(); });
+      [t2, code].forEach((el) => el.addEventListener('focus', () => scrollPreviewTo('b-' + b.id)));
+      box.append(h('div', { class: 'faq-item' }, h('div', { class: 'blk-kind' }, '嵌入程式碼', h('span', { class: 'pro-badge', text: '進階' })), t2, h('div', { style: 'height:8px' }), code,
+        h('div', { class: 'msg mute', text: '預覽只顯示一個框，不會執行程式碼。發佈後由我們審核，核准才會出現在正式網站。' }),
+        h('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-top:8px' }, h('label', { class: 'check' }, hid2, '暫時隱藏'), delBlock())));
+      return;
+    }
     const t = h('input', { type: 'text', maxlength: String(L.LIMITS.blockTitle), placeholder: '區塊標題，例如：包場服務', 'aria-label': '區塊標題 ' + (i + 1) });
     const body = h('textarea', { maxlength: String(L.LIMITS.blockBody), rows: '5', placeholder: '內容（空一行就是新段落）', 'aria-label': '區塊內容 ' + (i + 1) });
     const bl = h('input', { type: 'text', maxlength: String(L.LIMITS.btnLabel), placeholder: '按鈕文字（選填）', 'aria-label': '按鈕文字 ' + (i + 1) });
@@ -977,6 +1089,7 @@ function paintBlocks() {
         h('label', { class: 'check' }, hid, '暫時隱藏'),
         iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger'))));
   });
+  $('#blockAddHtml').disabled = S.content.blocks.length >= L.LIMITS.blocks;
   $('#blockAdd').disabled = S.content.blocks.length >= L.LIMITS.blocks; $('#blockCnt').textContent = S.content.blocks.length + '/' + L.LIMITS.blocks;
 }
 function paintShare() {
@@ -990,6 +1103,64 @@ function paintShare() {
   const del = cur ? iconBtn('移除', async () => { const old = cur.path; sl.set(null); touch(); await trashPhoto(old); paintShare(); }, 'danger') : null;
   box.replaceChildren(h('div', { class: 'photo' }, h('div', { class: 'th' }, cur ? h('img', { src: photoUrl(cur.path), alt: '分享圖片' }) : '未上傳'),
     h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px' }, up, del), file)));
+}
+// ── 預約行事曆的設定：每段長度、名額、提前時間、可預約天數、每週時段、不開放的日期 ──
+function paintCal() {
+  const L = S.lib, box = $('#calBox'); if (!box) return;
+  const cal = S.content.bookingCal;
+  const num = (key, label, opts) => {
+    const el = h('select', { class: 'sel', id: 'f-cal-' + key }, opts.map(([v, t]) => h('option', { value: String(v), text: t })));
+    el.value = String(cal[key]);
+    el.addEventListener('change', () => { cal[key] = Number(el.value); touch(); scrollPreviewTo('booking'); });
+    return h('label', { class: 'field', for: el.id }, h('span', { text: label }), el);
+  };
+  const cap = h('input', { type: 'number', id: 'f-cal-capacity', min: '1', max: '50', step: '1', inputmode: 'numeric' }); cap.value = cal.capacity;
+  cap.addEventListener('input', () => { const n = Math.round(Number(cap.value)); if (n >= 1 && n <= 50) { cal.capacity = n; touch(); } });
+  const days = DAYS.map((d) => {
+    const ranges = cal.weekly[d];
+    const rows = ranges.map((r, j) => {
+      const a = h('input', { type: 'time', step: '900', 'aria-label': DAYL[d] + ' 時段 ' + (j + 1) + ' 開始' }), b = h('input', { type: 'time', step: '900', 'aria-label': DAYL[d] + ' 時段 ' + (j + 1) + ' 結束' });
+      a.value = r.start; b.value = r.end;
+      a.addEventListener('change', () => { r.start = a.value; touch(); }); b.addEventListener('change', () => { r.end = b.value; touch(); });
+      return h('span', { class: 'cal-range' }, a, '–', b, iconBtn('移除', () => { ranges.splice(j, 1); paintCal(); touch(); }, 'danger'));
+    });
+    const add = ranges.length < (L.LIMITS.calRanges || 4) ? h('button', { type: 'button', class: 'btn small' }, '＋ 時段') : null;
+    if (add) add.addEventListener('click', () => {
+      const h0 = S.content.hours[d], last = ranges[ranges.length - 1];
+      ranges.push(last ? { start: last.end, end: last.end < '20:00' ? String(Number(last.end.slice(0, 2)) + 2).padStart(2, '0') + last.end.slice(2) : '22:00' } : { start: h0.open || '10:00', end: h0.close || '18:00' });
+      paintCal(); touch();
+    });
+    return h('div', { class: 'cal-row' }, h('strong', { text: DAYL[d] }), h('div', { class: 'cal-ranges' }, rows.length ? rows : h('span', { class: 'mute', text: '不開放' }), add));
+  });
+  const copy = h('button', { type: 'button', class: 'btn small' }, '把週一的時段套用到全部');
+  copy.addEventListener('click', () => { DAYS.forEach((d) => { if (d !== 'mon') cal.weekly[d] = cal.weekly.mon.map((r) => ({ ...r })); }); paintCal(); touch(); });
+  const fromHours = h('button', { type: 'button', class: 'btn small' }, '依營業時間自動填');
+  fromHours.addEventListener('click', () => { DAYS.forEach((d) => { const x = S.content.hours[d]; cal.weekly[d] = !x.closed && x.open && x.close && x.open < x.close ? [{ start: x.open, end: x.close }] : []; }); paintCal(); touch(); });
+  const dIn = h('input', { type: 'date', 'aria-label': '不開放預約的日期' });
+  const dAdd = h('button', { type: 'button', class: 'btn small' }, '加入');
+  dAdd.addEventListener('click', () => { const v = dIn.value; if (!v || cal.closed.includes(v) || cal.closed.length >= (L.LIMITS.calClosed || 60)) return; cal.closed.push(v); cal.closed.sort(); paintCal(); touch(); });
+  const chips = cal.closed.map((d, j) => h('span', { class: 'chip' }, d.replace(/-/g, '/'), h('button', { type: 'button', 'aria-label': '移除 ' + d, onclick: () => { cal.closed.splice(j, 1); paintCal(); touch(); } }, '×')));
+  box.replaceChildren(
+    h('div', { class: 'style-row' },
+      num('slotMinutes', '每個時段多長', (L.SLOT_MINUTES || [30, 60]).map((m) => [m, m < 60 ? m + ' 分鐘' : (m / 60) + ' 小時'])),
+      h('label', { class: 'field', for: 'f-cal-capacity' }, h('span', { text: '每個時段可接幾組' }), cap),
+      num('leadHours', '最晚提前多久', [[0, '不限制'], [1, '1 小時前'], [2, '2 小時前'], [3, '3 小時前'], [6, '6 小時前'], [12, '12 小時前'], [24, '前一天'], [48, '兩天前']]),
+      num('maxDays', '開放幾天內的預約', [[7, '7 天'], [14, '14 天'], [30, '30 天'], [60, '60 天'], [90, '90 天']])),
+    h('div', { class: 'field' }, h('span', { text: '每週可預約的時段' }), ...days, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;margin-top:6px' }, fromHours, copy)),
+    h('div', { class: 'field' }, h('span', { text: '不開放預約的日期（店休、包場等）' }), h('div', { class: 'cal-closed' }, dIn, dAdd), h('div', { class: 'chips' }, chips)));
+}
+// 自訂程式碼的審核狀態：用和發佈時相同的雜湊比對
+async function paintCodeStatus() {
+  const el = $('#codeStatus'); if (!el) return;
+  const L = S.lib;
+  if (!L.codeHash || !L.hasCustomCode) { el.textContent = ''; return; }
+  const c = L.normalizeContent(S.content);
+  if (!L.hasCustomCode(c)) { el.className = 'msg mute'; el.textContent = '目前沒有自訂程式碼。'; return; }
+  const hash = await L.codeHash(c);
+  const r = await YC.client.from('site_code_reviews').select('status,note').eq('site_id', S.site.id).eq('hash', hash).maybeSingle();
+  const rv = r.data;
+  const t = !rv ? ['mute', '這段程式碼還沒送審：按「發佈」後會送給我們審核。'] : rv.status === 'approved' ? ['ok', '這段程式碼已核准，會放進正式網站。'] : rv.status === 'pending' ? ['mute', '審核中：核准後網站會自動更新。'] : ['bad', '這段程式碼沒有通過審核' + (rv.note ? '：' + rv.note : '') + '。修改後重新發佈會再審一次。'];
+  el.className = 'msg ' + t[0]; el.textContent = (S.isPro ? '' : '（升級進階方案後才會放進網站）') + t[1];
 }
 // 自訂標題／描述空白時，提示自動產生的內容
 function paintSeoHints(r) {

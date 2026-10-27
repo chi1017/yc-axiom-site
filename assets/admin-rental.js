@@ -15,7 +15,8 @@
     email_sent: '寄信成功', email_failed: '寄信失敗', terms_accepted: '客戶同意租用條款', payment_confirmed: '確認收款', payment_failed: '線上付款失敗', payment_mismatch: '付款金額不符', recurring_failed: '自動扣款失敗', recurring_cancelled: '客戶取消自動扣款', suspended: '暫停網站', restored: '恢復網站', terminated: '終止租用',
     republish_queued: '重新發佈', version_restore_queued: '還原版本', domain_set: '設定網域', domain_checked: '檢查網域', domain_active: '網域生效', domain_failed: '網域設定失敗', domain_cleared: '移除網域',
     reminder_sent: '系統：寄出到期提醒', auto_overdue: '系統：到期，自動改為逾期', auto_live: '系統：到期日已延後，改回上線中', long_suspend_notified: '系統：暫停滿 30 天，已通知管理員', cron_anomaly: '系統：資料異常',
-    monthly_report: '月報檢測完成', report_failed: '月報檢測失敗', photos_cleaned: '清理沒被引用的舊照片'
+    monthly_report: '月報檢測完成', report_failed: '月報檢測失敗', photos_cleaned: '清理沒被引用的舊照片',
+    tier_changed: '變更方案等級', code_review_requested: '自訂程式碼送審', code_approved: '核准自訂程式碼', code_rejected: '退回自訂程式碼', collab_invited: '邀請協作者', collab_joined: '協作者加入', collab_removed: '移除協作者'
   };
   var MAIL_LABEL = { adminFirstPublish: '管理員通知', customerGoLive: '網站上線通知（客戶）', customerReceipt: '收款通知（客戶）',
     customerReminder: '即將到期提醒（客戶）', customerOverdue: '已到期通知（客戶）', customerSuspended: '已暫停通知（客戶）', customerMonthlyReport: '月報（客戶）', adminAutoSuspended: '自動暫停通知（管理員）', adminLongSuspended: '暫停滿 30 天通知（管理員）' };
@@ -93,9 +94,12 @@
     if (r.error) throw r.error;
     state.rows = r.data || [];
     // 版型（一頁／多頁）不在總覽 view 裡，另外讀 rental_sites 合併（管理員可讀全部）
-    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at').limit(2000);
+    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at,tier').limit(2000);
     var byId = {}; (lay.data || []).forEach(function (x) { byId[x.id] = x; });
-    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; });
+    // 待審核的自訂程式碼（進階方案）
+    var rv = await YC.client.from('site_code_reviews').select('site_id,hash,status,created_at,version_id,note').eq('status', 'pending').limit(500);
+    var pend = {}; (rv.data || []).forEach(function (x) { (pend[x.site_id] = pend[x.site_id] || []).push(x); });
+    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; x.tier = (l && l.tier) || 'basic'; x.codePending = (pend[x.id] || []).length; });
     loadIndustries();
     var s = await YC.client.from('settings').select('key,value').in('key', ['bank_transfer', 'plan']);
     state.bank = null; state.plan = null;
@@ -108,10 +112,17 @@
       c.from('site_events').select('id,type,detail,created_at').eq('site_id', id).order('created_at', { ascending: false }).order('id', { ascending: false }).limit(100),
       c.from('site_versions').select('id,created_at').eq('site_id', id).order('created_at', { ascending: false }).limit(20),
       c.from('payments').select('id,amount,months,method,paid_on,period_from,period_to,reference,confirmed_by,created_at').eq('site_id', id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(50),
-      c.from('site_reports').select('month,status,seo_score,geo_score,error,emailed_at').eq('site_id', id).order('month', { ascending: false }).limit(3)
+      c.from('site_reports').select('month,status,seo_score,geo_score,error,emailed_at').eq('site_id', id).order('month', { ascending: false }).limit(3),
+      c.from('site_code_reviews').select('hash,status,note,version_id,created_at,reviewed_at,reviewed_by').eq('site_id', id).order('created_at', { ascending: false }).limit(10)
     ]);
     rs.slice(0, 3).forEach(function (x) { if (x.error) throw x.error; });
-    return { events: rs[0].data || [], versions: rs[1].data || [], payments: rs[2].data || [], reports: rs[3].error ? [] : (rs[3].data || []) };
+    var reviews = rs[4].error ? [] : (rs[4].data || []);
+    // 審核要看程式碼：讀送審時的版本內容
+    var vids = reviews.map(function (x) { return x.version_id; }).filter(Boolean);
+    var vers = vids.length ? await c.from('site_versions').select('id,content').in('id', vids) : { data: [] };
+    var byV = {}; (vers.data || []).forEach(function (v) { byV[v.id] = v.content || {}; });
+    reviews.forEach(function (x) { var ct = byV[x.version_id] || {}; x.code = { head: (ct.code && ct.code.head) || '', body: (ct.code && ct.code.body) || '', blocks: (ct.blocks || []).filter(function (b) { return b.kind === 'html' && b.html && !b.hidden; }).map(function (b) { return { title: b.title, html: b.html }; }) }; });
+    return { events: rs[0].data || [], versions: rs[1].data || [], payments: rs[2].data || [], reports: rs[3].error ? [] : (rs[3].data || []), reviews: reviews };
   }
   async function call(action, siteId, params) {
     var r = await YC.client.functions.invoke('admin-site', { body: Object.assign({ action: action, site_id: siteId }, params || {}) });
@@ -253,7 +264,7 @@
     var v = view();
     root.innerHTML =
       '<div class="adm-chips"><div><b>' + rows.length + '</b><span>全部網站</span></div><div><b>' + count('pending') + '</b><span>待上線</span></div><div><b>' + count('live') + '</b><span>上線中</span></div>' +
-      '<div><b>' + count('overdue') + '</b><span>逾期</span></div><div><b>' + count('suspended') + '</b><span>已暫停</span></div><div><b>' + soon + '</b><span>7 天內到期</span></div><div><b>' + failed + '</b><span>最近部署失敗</span></div></div>' +
+      '<div><b>' + count('overdue') + '</b><span>逾期</span></div><div><b>' + count('suspended') + '</b><span>已暫停</span></div><div><b>' + soon + '</b><span>7 天內到期</span></div><div><b>' + failed + '</b><span>最近部署失敗</span></div><div><b>' + rows.filter(function (r) { return r.codePending; }).length + '</b><span>程式碼待審核</span></div></div>' +
       (state.simOpen ? simHtml() : '') +
       '<div class="adm-tools rn-tools">' +
       '<input type="search" id="rn-q" placeholder="搜尋 網址代稱／店名／Email" value="' + esc(state.q) + '" aria-label="搜尋">' +
@@ -267,7 +278,7 @@
       '<div class="adm-wrap"><table class="adm-table rn-table"><thead><tr><th>狀態</th><th>店名／代稱</th><th>會員</th><th>網址</th><th>到期日</th><th>最近部署</th><th>最近發佈</th></tr></thead><tbody>' +
       (v.length ? v.map(function (r) {
         var u = safeUrl(r.public_url);
-        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + '</div></td>' +
+        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.tier === 'pro' ? '・<b style="color:#e0b05a">進階</b>' : '') + (r.codePending ? '・<b class="rn-warn">程式碼待審核</b>' : '') + '</div></td>' +
           '<td style="word-break:break-all">' + esc(r.member_email) + '</td><td class="adm-url">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https:\/\//, '').replace(/\/$/, '')) + '</a>' : '<span class="rn-dim">—</span>') + (r.custom_domain ? '<div class="rn-sub">' + esc(r.custom_domain) + (r.domain_status === 'active' ? '（已生效）' : '（設定中）') + '</div>' : '') + '</td>' +
           '<td>' + dueText(r) + '</td><td>' + deployText(r) + '</td><td class="adm-time">' + (r.last_published_at ? esc(fmtDT(r.last_published_at)) : '<span class="rn-dim">—</span>') + '</td></tr>';
       }).join('') : '<tr><td colspan="7" class="adm-none">' + (rows.length ? '沒有符合條件的網站' : '還沒有客戶建立網站') + '</td></tr>') + '</tbody></table></div>';
@@ -347,6 +358,7 @@
     acts.push('<a class="m-btn sm" target="_blank" rel="noopener" href="' + esc(YC.url('builder/preview/') + '?site=' + encodeURIComponent(r.id)) + '">預覽最新版本</a>');
     var kv = [
       ['會員', esc(r.member_email)],
+      ['方案等級', (r.tier === 'pro' ? '<b style="color:#e0b05a">進階方案</b>' : '一般方案') + ' <button class="m-btn sm" data-act="tier">' + (r.tier === 'pro' ? '改回一般方案' : '改為進階方案') + '</button>'],
       ['行業／版型', esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.upgraded_at ? '<span class="rn-dim">（' + esc(fmtDT(r.upgraded_at)) + ' 由一頁版升級）</span>' : '')],
       ['網址', u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u) + '</a>' : '—'],
       ['服務到期', r.paid_until ? esc(r.paid_until) + (r.days_left == null ? '' : r.days_left < 0 ? '（已過 ' + (-r.days_left) + ' 天）' : '（剩 ' + r.days_left + ' 天）') : '—'],
@@ -366,6 +378,7 @@
       '<div class="rn-dh"><div><h2>' + esc(r.shop_name || '（未命名）') + '</h2><div>' + badge(r.status) + ' <span class="rn-sub" style="display:inline">代稱 ' + esc(r.slug) + '</span></div></div><button class="m-btn sm" id="rn-x" aria-label="關閉">關閉</button></div>' +
       '<div class="rn-acts">' + acts.join('') + '</div>' +
       '<dl class="rn-kv">' + kv.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join('') + '</dl>' +
+      reviewHtml(det.reviews || []) +
       '<h3 class="rn-h">自訂網域</h3><div id="rn-dom">' + domainHtml(r) + '</div>' +
       '<h3 class="rn-h">版本（最近 ' + det.versions.length + ' 版）</h3>' + (det.versions.length ? '<ul class="rn-vers">' + det.versions.map(function (v) {
         var isLive = v.id === r.live_version_id;
@@ -378,8 +391,29 @@
       '<h3 class="rn-h">事件時間軸</h3>' + (tl ? '<ul class="rn-tl">' + tl + '</ul>' : '<p class="rn-note">沒有事件。</p>');
     document.getElementById('rn-x').onclick = closeDrawer;
     Array.prototype.forEach.call(d.querySelectorAll('[data-act]'), function (b) { b.onclick = function () { doAction(b.getAttribute('data-act'), r); }; });
+    Array.prototype.forEach.call(d.querySelectorAll('[data-rv]'), function (b) { b.onclick = function () { askReview(r, b.getAttribute('data-rv'), b.getAttribute('data-ok') === '1'); }; });
     Array.prototype.forEach.call(d.querySelectorAll('[data-ver]'), function (b) { b.onclick = function () { askRestoreVersion(r, b.getAttribute('data-ver'), b.getAttribute('data-vt')); }; });
     bindDomain(r);
+  }
+  // 自訂程式碼審核：顯示送審的程式碼，核准或退回
+  var RV_LABEL = { pending: ['待審核', 'rn-warn'], approved: ['已核准', 'rn-ok'], rejected: ['已退回', 'rn-bad'] };
+  function reviewHtml(list) {
+    if (!list.length) return '';
+    return '<h3 class="rn-h">自訂程式碼審核</h3><ul class="rn-vers">' + list.map(function (x) {
+      var l = RV_LABEL[x.status] || RV_LABEL.pending, c = x.code || {};
+      var parts = [];
+      if (c.head) parts.push(['<head> 程式碼', c.head]);
+      if (c.body) parts.push(['頁面最後的程式碼', c.body]);
+      (c.blocks || []).forEach(function (b, i) { parts.push(['嵌入區塊 ' + (i + 1) + (b.title ? '：' + b.title : ''), b.html]); });
+      return '<li style="display:block"><div><span class="' + l[1] + '">' + l[0] + '</span>　<span class="rn-dim">送審 ' + esc(fmtDT(x.created_at)) + (x.reviewed_at ? '・處理 ' + esc(fmtDT(x.reviewed_at)) + (x.reviewed_by ? '（' + esc(x.reviewed_by) + '）' : '') : '') + '</span>' + (x.note ? '<div class="rn-sub">說明：' + esc(x.note) + '</div>' : '') + '</div>' +
+        parts.map(function (p) { return '<div class="rn-sub" style="margin-top:6px">' + esc(p[0]) + '</div><pre style="white-space:pre-wrap;word-break:break-all;max-height:220px;overflow:auto;font-size:12px;padding:8px;border:1px solid rgba(255,255,255,.15);border-radius:8px;margin:4px 0">' + esc(p[1]) + '</pre>'; }).join('') +
+        (x.status !== 'approved' ? '<button class="m-btn sm primary" data-rv="' + esc(x.hash) + '" data-ok="1">核准</button> ' : '') + (x.status !== 'rejected' ? '<button class="m-btn sm rn-danger" data-rv="' + esc(x.hash) + '" data-ok="0">退回</button>' : '') + '</li>';
+    }).join('') + '</ul><p class="rn-note">核准前網站照常更新但不含程式碼。核准後上線中的網站會自動重新部署；退回會寄信通知客戶。</p>';
+  }
+  function askReview(r, hash, ok) {
+    modal(ok ? '核准這段程式碼？' : '退回這段程式碼？', '<div class="rn-form"><p class="rn-note">' + (ok ? '核准後會放進正式網站，並寄信通知客戶。請確認程式碼來自可信任的服務、沒有可疑的轉址或收集個資。' : '程式碼不會放進網站，客戶會收到通知信。') + '</p>' +
+      '<label>給客戶的說明（選填）<textarea id="rn-rvnote" rows="2" maxlength="300"' + (ok ? '' : ' placeholder="例如：含有不明來源的外部程式，請改用官方提供的嵌入碼"') + '></textarea></label></div>', ok ? '核准' : '退回', !ok,
+      async function () { var res = await call('review_code', r.id, { hash: hash, approve: ok, note: document.getElementById('rn-rvnote').value.trim() }); toast(res.message || '完成'); await refreshAfter(r.id, ok); });
   }
   function domainHtml(r) {
     var has = !!r.custom_domain;
@@ -451,6 +485,11 @@
   function doAction(act, r) {
     var shop = esc(r.shop_name || r.slug);
     if (act === 'pay') return askPayment(r);
+    if (act === 'tier') {
+      var to = r.tier === 'pro' ? 'basic' : 'pro';
+      return confirmDialog(to === 'pro' ? '改為進階方案？' : '改回一般方案？', '<p class="rn-note">' + (to === 'pro' ? '開放預約行事曆、自訂程式碼（需審核）與多人協作。' : '網站會重新部署，拿掉自訂程式碼與預約行事曆；協作者會失去編輯權限（邀請紀錄保留）。') + '請記得同步調整收費。</p>', '確定', to === 'basic',
+        async function () { var res = await call('set_tier', r.id, { tier: to }); toast(res.message || '已更新'); await refreshAfter(r.id, to === 'basic' && (r.status === 'live' || r.status === 'overdue')); });
+    }
     if (act === 'republish') {
       return confirmDialog(r.status === 'suspended' ? '重新部署維護頁？' : '重新發佈？', '<p class="rn-note">' + (r.status === 'suspended' ? '會再部署一次「網站維護中」頁。' : '會用目前上線的版本重新部署一次（部署失敗時使用）。') + '</p>', '確定', false,
         async function () { var res = await call('republish', r.id); toast(res.message || '已排入'); await refreshAfter(r.id, true); });
