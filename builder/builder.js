@@ -60,7 +60,7 @@ async function loadLib() {
     import(base + 'templates/shared/slug.js'), import(base + 'templates/shared/palettes.js'), import(base + 'templates/shared/hours.js'),
     import(base + 'templates/shared/pages.js'), import(base + 'templates/shared/industries.js')
   ]);
-  S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, hours,
+  S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, derivePalette: pal.derivePalette, paletteFrom4: pal.paletteFrom4, colorWarnings: pal.colorWarnings, luminance: pal.luminance, hours,
     pagesFor: pages.pagesFor, normalizeLayout: pages.normalizeLayout, normalizePages: pages.normalizePages, defaultPages: pages.defaultPages, pagesFromSections: pages.pagesFromSections, LAYOUT_LABELS: pages.LAYOUT_LABELS,
     INDUSTRIES: ind.INDUSTRIES, INDUSTRY_GROUPS: ind.INDUSTRY_GROUPS, getIndustry: ind.getIndustry };
   // 方案（價格）模組：載入失敗時不影響編輯，只是不開放選多頁版、不顯示價格
@@ -459,37 +459,64 @@ function buildPanel() {
       paintSlug(); touch();
     }, 400);
   });
-  // 內建配色 + 自訂主色（自訂：選一個主色與淺色／深色底，其餘顏色自動搭配並保證文字清楚）
+  // 內建配色 + 完全自訂（背景、區塊底色、主色、文字 4 色都能調；也可以只挑主色讓系統自動搭配）
   const cur = L.parseCustomPalette(S.palette);
-  const customIn = h('input', { type: 'color', id: 'f-custom', value: cur ? cur.accent.toLowerCase() : '#2f6f5c', 'aria-label': '自訂主色' });
-  const modeSel = h('select', { id: 'f-custom-mode', 'aria-label': '自訂配色底色' },
+  const KEYS4 = [['bg', '背景'], ['surface', '區塊底色'], ['accent', '主色'], ['text', '文字']];
+  const start4 = S.content.style.colors || (cur ? (({ bg, surface, accent, text }) => ({ bg, surface, accent, text }))(L.getPalette(S.palette)) : null) || (({ bg, surface, accent, text }) => ({ bg, surface, accent, text }))(L.derivePalette('#2F6F5C', false));
+  const in4 = {};
+  const fields4 = KEYS4.map(([k, label]) => {
+    in4[k] = h('input', { type: 'color', id: 'f-c4-' + k, value: start4[k].toLowerCase() });
+    in4[k].addEventListener('input', () => applyCustom());
+    return h('label', { class: 'c4', for: 'f-c4-' + k }, in4[k], h('span', { text: label }));
+  });
+  const modeSel = h('select', { id: 'f-custom-mode', 'aria-label': '自動搭配的底色' },
     h('option', { value: 'l', text: '淺色底' }), h('option', { value: 'd', text: '深色底' }));
-  modeSel.value = cur && cur.dark ? 'd' : 'l';
+  modeSel.value = L.luminance(start4.bg) < 0.4 ? 'd' : 'l';
+  const autoBtn = h('button', { type: 'button', class: 'btn small', text: '依主色自動搭配' });
+  const warnBox = h('div', { class: 'msg warn', role: 'status' });
   const customSw = h('i', {});
   const customBtn = h('button', { type: 'button', class: 'pal pal-custom', 'data-id': 'custom', 'aria-pressed': String(!!cur) }, customSw, '自訂配色');
   const palBtns = L.PALETTE_IDS.map((id) => {
     const p = L.PALETTES[id];
     const b = h('button', { type: 'button', class: 'pal', 'data-id': id, 'aria-pressed': String(S.palette === id) },
       h('i', {}, [p.bg, p.surface, p.accent, p.text].map((c) => h('s', { style: 'background:' + c }))), p.label);
-    b.addEventListener('click', () => { setPalette(id); });
+    b.addEventListener('click', () => { S.content.style.colors = null; setPalette(id); });
     return b;
   });
   const allPalBtns = [...palBtns, customBtn];
+  const read4 = () => Object.fromEntries(KEYS4.map(([k]) => [k, in4[k].value.toUpperCase()]));
   function paintCustomSwatch() {
-    const p = L.getPalette(L.customPaletteId(customIn.value, modeSel.value === 'd'));
-    customSw.replaceChildren(...[p.bg, p.surface, p.accent, p.text].map((c) => h('s', { style: 'background:' + c })));
+    const c = read4();
+    customSw.replaceChildren(...[c.bg, c.surface, c.accent, c.text].map((x) => h('s', { style: 'background:' + x })));
+    const w = L.colorWarnings(c);
+    warnBox.textContent = w.length ? '提醒：' + w.join('；') + '。' : '';
+    warnBox.hidden = !w.length;
   }
   function setPalette(id) {
     S.palette = id;
     allPalBtns.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.id === id || (x.dataset.id === 'custom' && L.isCustomPalette(id)))));
     touch();
   }
-  function applyCustom() { paintCustomSwatch(); setPalette(L.customPaletteId(customIn.value, modeSel.value === 'd')); }
-  customIn.addEventListener('input', applyCustom); modeSel.addEventListener('change', applyCustom);
+  // 4 色存在內容裡；配色代碼仍記主色（相容舊版與資料庫格式）
+  function applyCustom() {
+    const c = read4();
+    paintCustomSwatch();
+    S.content.style.colors = c;
+    setPalette(L.customPaletteId(c.accent, L.luminance(c.bg) < 0.4));
+  }
+  function autoFill() {
+    const p = L.derivePalette(in4.accent.value.toUpperCase(), modeSel.value === 'd');
+    KEYS4.forEach(([k]) => { in4[k].value = p[k].toLowerCase(); });
+    applyCustom();
+  }
+  autoBtn.addEventListener('click', autoFill); modeSel.addEventListener('change', autoFill);
   customBtn.addEventListener('click', applyCustom);
   paintCustomSwatch();
-  const customRow = h('div', { class: 'custom-pal' }, h('span', { class: 'mute', text: '或自己挑主色：' }), customIn, modeSel,
-    h('div', { class: 'msg mute', text: '只要選一個主色（例如店招的顏色），其餘顏色會自動搭配，文字一定看得清楚。' }));
+  const customRow = h('div', { class: 'custom-pal' },
+    h('div', { class: 'c4-row' }, fields4),
+    h('div', { class: 'c4-auto' }, h('span', { class: 'mute', text: '不想一個個挑？' }), modeSel, autoBtn),
+    warnBox,
+    h('div', { class: 'msg mute', text: '點色塊就能改顏色，預覽會馬上更新。只挑主色再按「依主色自動搭配」，其餘 3 色會配好、文字一定看得清楚。' }));
   // 首頁樣式
   const sel = (path, opts, label) => {
     const id = 'f-' + path;
