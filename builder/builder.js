@@ -287,7 +287,7 @@ function renderPreview(now) {
         const t = a && d.getElementById(a);
         if (t) t.scrollIntoView({ block: 'start' }); else f.contentWindow.scrollTo(0, a === null ? frameScroll : 0);
         const replay = S.replayMotion; S.replayMotion = false;
-        startReveal(f, replay);
+        startReveal(f, replay); wireNav(f);
         d.addEventListener('click', (ev) => {
           const el = ev.target.closest && ev.target.closest('a'); if (!el) return;
           const href = el.getAttribute('href') || '';
@@ -323,6 +323,16 @@ function startReveal(f, replay) {
   setTimeout(show, replay ? 350 : 0);
   w.addEventListener('scroll', show, { passive: true });
   w.addEventListener('resize', show);
+}
+// 手機版的選單按鈕（≡）：同樣由編輯器代為處理，預覽裡點得開、關得起來
+function wireNav(f) {
+  const d = f.contentDocument; if (!d) return;
+  const b = d.querySelector('.nav-btn'), n = d.getElementById('site-nav');
+  if (!b || !n) return;
+  d.documentElement.classList.add('js-nav'); b.hidden = false;
+  const set = (o) => { b.setAttribute('aria-expanded', o ? 'true' : 'false'); n.classList.toggle('open', o); };
+  b.addEventListener('click', () => set(b.getAttribute('aria-expanded') !== 'true'));
+  n.addEventListener('click', (e) => { if (e.target.closest('a')) set(false); });
 }
 function goPage(key, anchor) {
   if (!S.pageList.some((p) => p.key === key)) return;
@@ -776,7 +786,7 @@ function showGroup(key, scroll) {
 function openGuide() {
   const steps = [
     ['1　填內容', '左邊依分類填寫：先選外觀，再填店家資料與照片。不用一次填完，系統每 2 秒自動儲存。'],
-    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換桌面版與手機版。灰色的 [提示文字] 不會出現在正式網站。'],
+    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換桌面版與手機版，選單、捲動動畫都能直接試。灰色的 [提示文字] 不會出現在正式網站。'],
     ['3　按發佈', '必填項目完成後，按右上角「發佈」。之後每次修改再按一次發佈，網站約 1–2 分鐘更新。'],
     ['小技巧', '改錯了可以按「復原」；想回到以前發佈的版本，到「版面與紀錄」的版本紀錄還原。']
   ];
