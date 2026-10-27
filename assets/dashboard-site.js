@@ -60,7 +60,7 @@
       var uid = YC.session.user.id;
       var cm = await YC.client.from('site_members').select('site_id').eq('member_id', uid).eq('status', 'active');
       var collabIds = cm.error ? [] : (cm.data || []).map(function (x) { return x.site_id; });
-      var cols = 'id,member_id,tier,slug,status,layout,content,public_url,paid_until,first_published_at,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status';
+      var cols = 'id,member_id,tier,slug,status,layout,content,public_url,paid_until,first_published_at,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status,upgrade_pending,upgrade_amount';
       var r = collabIds.length
         ? await YC.client.from('rental_sites').select(cols).or('member_id.eq.' + uid + ',id.in.(' + collabIds.join(',') + ')').order('created_at')
         : await YC.client.from('rental_sites').select(cols).eq('member_id', uid).order('created_at');
@@ -281,7 +281,7 @@
           : '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + '<br><span style="font-size:13px;color:#9a8f80">費用確認中，我們會與你聯絡確認。</span></p>';
       } catch (e2) { /* 略過 */ }
       var dl = daysLeft(s.paid_until);
-      var needPay = s.status === 'pending' || s.status === 'overdue' || s.status === 'suspended' || (dl != null && dl <= 14);
+      var needPay = s.upgrade_pending || s.status === 'pending' || s.status === 'overdue' || s.status === 'suspended' || (dl != null && dl <= 14);
       var st = status(s, e.data || []);
       var live = s.public_url && (s.status === 'live' || s.status === 'overdue');
       var name = (s.content && s.content.name) || s.slug;
@@ -293,6 +293,7 @@
         reportHtml(rep && !rep.error ? rep.data : []) +
         (plan && plan.text ? '<p style="margin:6px 0;font-size:13px;color:#9a8f80;white-space:pre-line">' + esc(plan.text) + '</p>' : '') +
         planHtml + '<p style="margin:6px 0;font-size:13px;color:#9a8f80">方案等級：' + (s.tier === 'pro' ? '<b style="color:#e0b05a">進階方案</b>（預約行事曆、自訂程式碼、多人協作）' : '一般方案（需要預約行事曆、自訂程式碼或多人協作，請用 LINE 聯絡我們升級進階方案）') + '</p>' +
+        (s.upgrade_pending ? '<div style="margin:12px 0 0;padding:12px 14px;border:1px solid #e0b05a;border-radius:10px;font-size:14px;line-height:1.7"><b style="color:#e0b05a">升級多頁版：待補差額 ' + esc(money(s.upgrade_amount || 0)) + '</b><br>請匯款到下方帳戶，匯款後用 LINE（@788cblaq）告訴我們帳號末五碼。我們確認收到後會自動發佈多頁版，在那之前網站維持一頁版。</div>' : '') +
         bankHtml(bank, needPay) +
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
           pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +
