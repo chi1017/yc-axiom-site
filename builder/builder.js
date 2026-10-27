@@ -52,6 +52,17 @@ const S = {
   events: [], dirty: false, saving: false, saveErr: false, lastSaved: null, fresh: new Set(), timers: {}, publishing: false, hist: [], hpos: 0, applying: false
 };
 
+// 版型模組可能還是瀏覽器快取的舊版（GitHub Pages 約 10 分鐘更新），缺新函式時用本機版本，編輯器不會因此打不開
+function colorWarningsLocal(pal) {
+  const cr = pal.contrast || ((a, b) => { const x = pal.luminance(a), y = pal.luminance(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); });
+  return (c) => {
+    const w = [];
+    if (cr(c.text, c.bg) < 4.5) w.push('文字和背景顏色太接近，可能看不清楚');
+    else if (cr(c.text, c.surface) < 4.5) w.push('文字和區塊底色太接近，有底色的區塊可能看不清楚');
+    if (cr(c.accent, c.bg) < 3) w.push('主色和背景太接近，按鈕和連結會不明顯');
+    return w;
+  };
+}
 // ── 載入共用版型模組 ──
 async function loadLib() {
   const base = tplBase();
@@ -60,7 +71,7 @@ async function loadLib() {
     import(base + 'templates/shared/slug.js'), import(base + 'templates/shared/palettes.js'), import(base + 'templates/shared/hours.js'),
     import(base + 'templates/shared/pages.js'), import(base + 'templates/shared/industries.js')
   ]);
-  S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, derivePalette: pal.derivePalette, paletteFrom4: pal.paletteFrom4, colorWarnings: pal.colorWarnings, luminance: pal.luminance, hours,
+  S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, derivePalette: pal.derivePalette, paletteFrom4: pal.paletteFrom4, colorWarnings: pal.colorWarnings || colorWarningsLocal(pal), luminance: pal.luminance, hours,
     pagesFor: pages.pagesFor, normalizeLayout: pages.normalizeLayout, normalizePages: pages.normalizePages, defaultPages: pages.defaultPages, pagesFromSections: pages.pagesFromSections, LAYOUT_LABELS: pages.LAYOUT_LABELS,
     INDUSTRIES: ind.INDUSTRIES, INDUSTRY_GROUPS: ind.INDUSTRY_GROUPS, getIndustry: ind.getIndustry };
   // 方案（價格）模組：載入失敗時不影響編輯，只是不開放選多頁版、不顯示價格
