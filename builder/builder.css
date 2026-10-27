@@ -160,3 +160,10 @@ textarea.code{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 10px;border:1px solid var(--line);border-radius:999px;font-size:13px}
 .chip button{border:0;background:none;color:var(--muted);cursor:pointer;font:inherit;padding:0 4px}
+/* 流暢度：搜尋設定、卡片定位提示 */
+.set-search{flex:1 1 220px;min-width:0;font:inherit;font-size:14px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.set-search:focus{outline:2px solid var(--accent);outline-offset:1px}
+#searchMsg{flex-basis:100%;margin:0}
+.card-flash{animation:cardflash 1.4s ease}
+@keyframes cardflash{0%,35%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 3px transparent}}
+@media(prefers-reduced-motion:reduce){.card-flash{animation:none}}

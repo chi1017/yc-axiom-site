@@ -1,6 +1,6 @@
 /* YC AXIOM 網站編輯器：左邊填內容、右邊即時預覽。
    預覽用的版型函式與「正式建置」是同一份程式（yc-axiom-sites 的 templates/shared/*），所以所見即所得。 */
-import { startReveal, wireNav } from './preview-fx.js?v=2026-10-27a';
+import { startReveal, wireNav, morphFrame, settleReveal, wireEditPills, flashSection, sectionKey } from './preview-fx.js?v=2026-10-28b';
 const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
@@ -277,6 +277,7 @@ function mount(site) {
 }
 
 let frameScroll = 0, pendingAnchor = null;
+const frameState = { ready: false, page: null };
 function renderPreview(now) {
   clearTimeout(S.timers.render);
   S.timers.render = setTimeout(() => {
@@ -292,10 +293,20 @@ function renderPreview(now) {
     if (!S.pageList.some((p) => p.key === S.page)) S.page = 'home';
     paintPageTabs();
     const f = $('#frame');
+    // 同一頁的內容更新：只改有變的地方（不重新載入），預覽不閃、不跳
+    if (frameState.ready && frameState.page === S.page && !S.replayMotion && morphFrame(f, r.html)) {
+      wireNav(f); settleReveal(f);
+      const a = pendingAnchor; pendingAnchor = null;
+      if (a) { try { const t = f.contentDocument.getElementById(a); if (t) { t.scrollIntoView({ block: 'start' }); flashSection(f, t); } } catch (e) { /* ignore */ } }
+      return;
+    }
+    frameState.ready = false; frameState.page = S.page;
     if (pendingAnchor === null) { try { frameScroll = f.contentWindow.scrollY || 0; } catch (e) { /* ignore */ } }
     f.onload = () => {
+      frameState.ready = true;
       try {
         const d = f.contentDocument;
+        wireEditPills(f, pickSection, (k) => { const c = cardForKey(k); const el = c && $('#' + c.card); const t = el && el.querySelector('h2'); return t ? '「' + t.textContent.replace(/（.*?）/g, '') + '」' : ''; });
         const a = pendingAnchor; pendingAnchor = null;
         const t = a && d.getElementById(a);
         if (t) t.scrollIntoView({ block: 'start' }); else f.contentWindow.scrollTo(0, a === null ? frameScroll : 0);
@@ -407,7 +418,33 @@ function scrollPreviewTo(anchor) {
     const want = ANCHOR_PAGE[anchor] && S.pageList.some((p) => p.key === ANCHOR_PAGE[anchor]) ? ANCHOR_PAGE[anchor] : null;
     if (want && want !== S.page) { goPage(want, anchor); return; }
   }
-  try { const d = $('#frame').contentDocument; const t = d && d.getElementById(anchor); if (t) t.scrollIntoView({ block: 'start' }); } catch (e) { /* ignore */ }
+  try {
+    const f = $('#frame'), d = f.contentDocument, t = d && d.getElementById(anchor);
+    if (t) { t.scrollIntoView({ block: 'start' }); if (S.lastFlash !== anchor) { S.lastFlash = anchor; flashSection(f, t); } }
+  } catch (e) { /* ignore */ }
+}
+// ── 預覽 → 左邊：點預覽上的「編輯」打開對應的設定卡片 ──
+function cardForKey(k) {
+  if (!k) return null;
+  if (k.startsWith('b-')) return { card: 'c-blocks', focus: () => { const i = S.content.blocks.findIndex((b) => 'b-' + b.id === k); const items = $('#blockBox') ? $('#blockBox').children : []; return items[i] && items[i].querySelector('input,textarea'); } };
+  const cal = S.content.bookingCal && S.content.bookingCal.enabled;
+  const M = { header: ['c-info', '#f-name'], top: ['c-info', '#f-name'], footer: ['c-info', '#f-name'], about: ['c-info', '#f-intro'], video: ['c-more', '#f-video'], menu: ['c-menu'], interior: ['c-photos'],
+    shop: ['c-shop'], reviews: ['c-more', '#reviewBox textarea'], news: ['c-news'], posts: ['c-posts'], faq: ['c-faq'], booking: cal ? ['c-cal'] : ['c-more', '#f-bookingForm'],
+    visit: ['c-hours'], info: ['c-hours'], contact: ['c-more', '#f-contactForm'] };
+  const m = M[k]; if (!m) return null;
+  return { card: m[0], focus: () => (m[1] ? $(m[1]) : $('#' + m[0]).querySelector('input:not([disabled]):not([type=checkbox]),textarea')) };
+}
+function pickSection(k) { const c = cardForKey(k); if (c) openCard(c.card, c.focus); }
+// 打開某張卡片（切到它的分組、捲到它、閃一下、游標放進第一個欄位）
+function openCard(id, focusFn) {
+  const c = $('#' + id); if (!c) return;
+  closeModal(); $('.app').dataset.tab = 'edit';
+  clearSearch();
+  if (c.hidden) showGroup(c.dataset.group || 'all', false);
+  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  c.classList.remove('card-flash'); void c.offsetWidth; c.classList.add('card-flash');
+  const el = focusFn && focusFn();
+  if (el) setTimeout(() => el.focus({ preventScroll: true }), 350);
 }
 
 // ── 自動儲存 ──
@@ -437,7 +474,7 @@ function touch() {
   if (!S.applying) { clearTimeout(S.timers.hist); S.timers.hist = setTimeout(recordHist, 700); }
   S.dirty = true; S.saveErr = false; setSaveText();
   $('#barName').textContent = S.content.name || '我的網站';
-  renderPreview(); refreshTodo();
+  renderPreview(); clearTimeout(S.timers.todo); S.timers.todo = setTimeout(refreshTodo, 400);
   clearTimeout(S.timers.save); S.timers.save = setTimeout(save, SAVE_DELAY);
 }
 function setSaveText() {
@@ -525,7 +562,8 @@ function field(label, path, o) {
 }
 function card(id, anchor, title, sub, ...kids) {
   const c = h('section', { class: 'card', id, 'data-anchor': anchor }, h('h2', { text: title }), sub ? h('p', { class: 'sub', text: sub }) : null, ...kids);
-  c.addEventListener('focusin', () => { if (anchor) scrollPreviewTo(anchor); });
+  // 換到另一張卡片時才把預覽捲過去（同一張卡片裡換欄位不會一直跳）
+  c.addEventListener('focusin', () => { if (anchor && S.focusAnchor !== anchor) { S.focusAnchor = anchor; scrollPreviewTo(anchor); } });
   return c;
 }
 
@@ -847,18 +885,45 @@ function buildGroupNav() {
   let cur = 'look';
   try { cur = localStorage.getItem('yc-builder-group') || 'look'; } catch (e) { /* ignore */ }
   if (!GROUPS.some((g) => g.key === cur)) cur = 'look';
-  const nav = h('nav', { class: 'group-nav', 'aria-label': '編輯分類' }, GROUPS.map((g) => h('button', { type: 'button', 'data-g': g.key, 'aria-pressed': 'false', onclick: () => showGroup(g.key, true) }, g.label)),
-    h('button', { type: 'button', class: 'guide-btn', onclick: () => openGuide(), title: '使用教學' }, '？ 教學'));
+  const search = h('input', { type: 'search', id: 'setSearch', class: 'set-search', placeholder: '找設定：例如 電話、配色、預約、字型', 'aria-label': '搜尋設定', autocomplete: 'off' });
+  search.addEventListener('input', () => runSearch(search.value));
+  search.addEventListener('keydown', (e) => { if (e.key === 'Escape') { search.value = ''; runSearch(''); } if (e.key === 'Enter') { const c = $('#panel section.card:not([hidden])'); if (c) openCard(c.id, () => c.querySelector('input:not([disabled]),textarea,select')); } });
+  const nav = h('nav', { class: 'group-nav', 'aria-label': '編輯分類' }, GROUPS.map((g) => h('button', { type: 'button', 'data-g': g.key, 'aria-pressed': 'false', onclick: () => { clearSearch(); showGroup(g.key, true); } }, g.label)),
+    h('button', { type: 'button', class: 'guide-btn', onclick: () => openGuide(), title: '使用教學' }, '？ 教學'), search, h('div', { id: 'searchMsg', class: 'msg mute', hidden: true }));
   P.prepend(nav);
   P.querySelectorAll('section.card').forEach((c) => { c.dataset.group = groupOf(c.id) || 'feature'; });
   showGroup(cur, false);
   let seen = false; try { seen = localStorage.getItem('yc-builder-guide') === '1'; } catch (e) { /* ignore */ }
   if (!seen) setTimeout(openGuide, 600);
 }
+// 搜尋設定：依卡片標題、說明與欄位名稱比對，只顯示符合的卡片
+const SYN = { 電話: '電話', 顏色: '配色 顏色 主色', 配色: '配色 顏色', 字: '字型 字體', 字型: '字型 字體 上傳', 預約: '預約 訂位 行事曆 時段', 訂位: '訂位 預約', 照片: '照片 圖片 主視覺', 圖片: '照片 圖片', 地址: '地址 地圖', 時間: '營業時間 時段', 價格: '價目 菜單 價格 商品', 網址: '網址 代稱 網域', 程式: '程式碼 嵌入', 追蹤: '程式碼 Analytics', 分享: '分享 搜尋', 英文: '英文' };
+let searchPrev = null;
+function clearSearch() { const s = $('#setSearch'); if (s && s.value) { s.value = ''; runSearch(''); } }
+function runSearch(q) {
+  const P = $('#panel'), msg = $('#searchMsg');
+  q = q.trim();
+  if (!q) {
+    msg.hidden = true;
+    if (searchPrev) { const g = searchPrev; searchPrev = null; showGroup(g, false); }
+    return;
+  }
+  if (!searchPrev) searchPrev = (P.querySelector('.group-nav button[aria-pressed=true]') || {}).dataset ? P.querySelector('.group-nav button[aria-pressed=true]').dataset.g : 'look';
+  const words = (SYN[q] || q).toLowerCase().split(/\s+/).filter(Boolean);
+  let n = 0;
+  P.querySelectorAll('section.card').forEach((c) => {
+    const text = (c.textContent + ' ' + [...c.querySelectorAll('input,textarea')].map((i) => i.placeholder || '').join(' ')).toLowerCase();
+    const hit = words.some((w) => text.includes(w));
+    c.hidden = !hit; if (hit) n++;
+  });
+  P.querySelectorAll('.group-nav button[data-g]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+  msg.hidden = false; msg.textContent = n ? '找到 ' + n + ' 張相關的設定卡片（按 Enter 直接打開第一張，按 Esc 清除）' : '找不到「' + q + '」，換個說法試試看';
+}
 function showGroup(key, scroll) {
   const P = $('#panel');
   P.querySelectorAll('.group-nav button[data-g]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.g === key)));
   P.querySelectorAll('section.card').forEach((c) => { c.hidden = key !== 'all' && c.dataset.group !== key; });
+  if (!$('#setSearch') || !$('#setSearch').value) searchPrev = null;
   try { localStorage.setItem('yc-builder-group', key); } catch (e) { /* ignore */ }
   if (scroll) P.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -1313,11 +1378,8 @@ function validate() {
   r.ok = r.errors.length === 0; return r;
 }
 function goField(field) {
-  const id = FIELD_CARD[field.split('.')[0]]; const c = id && $('#' + id); if (!c) return;
-  closeModal(); $('.app').dataset.tab = 'edit';
-  if (c.hidden) showGroup(c.dataset.group || 'all', false);
-  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  const i = c.querySelector('input:not([disabled]),textarea'); if (i && field !== 'photos.hero') setTimeout(() => i.focus({ preventScroll: true }), 300);
+  const id = FIELD_CARD[field.split('.')[0]]; if (!id) return;
+  openCard(id, () => (field === 'photos.hero' ? null : $('#' + id).querySelector('input:not([disabled]),textarea')));
 }
 function refreshTodo() {
   const box = $('#todo'); if (!box) return;
