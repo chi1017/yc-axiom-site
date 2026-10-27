@@ -16,7 +16,7 @@
     republish_queued: '重新發佈', version_restore_queued: '還原版本', domain_set: '設定網域', domain_checked: '檢查網域', domain_active: '網域生效', domain_failed: '網域設定失敗', domain_cleared: '移除網域',
     reminder_sent: '系統：寄出到期提醒', auto_overdue: '系統：到期，自動改為逾期', auto_live: '系統：到期日已延後，改回上線中', long_suspend_notified: '系統：暫停滿 30 天，已通知管理員', cron_anomaly: '系統：資料異常',
     monthly_report: '月報檢測完成', report_failed: '月報檢測失敗', photos_cleaned: '清理沒被引用的舊照片',
-    tier_changed: '變更方案等級', code_review_requested: '自訂程式碼送審', code_approved: '核准自訂程式碼', code_rejected: '退回自訂程式碼', collab_invited: '邀請協作者', collab_joined: '協作者加入', collab_removed: '移除協作者'
+    tier_changed: '變更方案等級', layout_upgraded: '客戶升級成多頁版', upgrade_paid: '確認收到升級差額', code_review_requested: '自訂程式碼送審', code_approved: '核准自訂程式碼', code_rejected: '退回自訂程式碼', collab_invited: '邀請協作者', collab_joined: '協作者加入', collab_removed: '移除協作者'
   };
   var MAIL_LABEL = { adminFirstPublish: '管理員通知', customerGoLive: '網站上線通知（客戶）', customerReceipt: '收款通知（客戶）',
     customerReminder: '即將到期提醒（客戶）', customerOverdue: '已到期通知（客戶）', customerSuspended: '已暫停通知（客戶）', customerMonthlyReport: '月報（客戶）', adminAutoSuspended: '自動暫停通知（管理員）', adminLongSuspended: '暫停滿 30 天通知（管理員）' };
@@ -94,12 +94,12 @@
     if (r.error) throw r.error;
     state.rows = r.data || [];
     // 版型（一頁／多頁）不在總覽 view 裡，另外讀 rental_sites 合併（管理員可讀全部）
-    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at,tier').limit(2000);
+    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at,tier,upgrade_pending,upgrade_amount').limit(2000);
     var byId = {}; (lay.data || []).forEach(function (x) { byId[x.id] = x; });
     // 待審核的自訂程式碼（進階方案）
     var rv = await YC.client.from('site_code_reviews').select('site_id,hash,status,created_at,version_id,note').eq('status', 'pending').limit(500);
     var pend = {}; (rv.data || []).forEach(function (x) { (pend[x.site_id] = pend[x.site_id] || []).push(x); });
-    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; x.tier = (l && l.tier) || 'basic'; x.codePending = (pend[x.id] || []).length; });
+    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; x.tier = (l && l.tier) || 'basic'; x.upgrade_pending = !!(l && l.upgrade_pending); x.upgrade_amount = l ? l.upgrade_amount : null; x.codePending = (pend[x.id] || []).length; });
     loadIndustries();
     var s = await YC.client.from('settings').select('key,value').in('key', ['bank_transfer', 'plan']);
     state.bank = null; state.plan = null;
@@ -264,7 +264,7 @@
     var v = view();
     root.innerHTML =
       '<div class="adm-chips"><div><b>' + rows.length + '</b><span>全部網站</span></div><div><b>' + count('pending') + '</b><span>待上線</span></div><div><b>' + count('live') + '</b><span>上線中</span></div>' +
-      '<div><b>' + count('overdue') + '</b><span>逾期</span></div><div><b>' + count('suspended') + '</b><span>已暫停</span></div><div><b>' + soon + '</b><span>7 天內到期</span></div><div><b>' + failed + '</b><span>最近部署失敗</span></div><div><b>' + rows.filter(function (r) { return r.codePending; }).length + '</b><span>程式碼待審核</span></div></div>' +
+      '<div><b>' + count('overdue') + '</b><span>逾期</span></div><div><b>' + count('suspended') + '</b><span>已暫停</span></div><div><b>' + soon + '</b><span>7 天內到期</span></div><div><b>' + failed + '</b><span>最近部署失敗</span></div><div><b>' + rows.filter(function (r) { return r.codePending; }).length + '</b><span>程式碼待審核</span></div><div><b>' + rows.filter(function (r) { return r.upgrade_pending; }).length + '</b><span>升級待補款</span></div></div>' +
       (state.simOpen ? simHtml() : '') +
       '<div class="adm-tools rn-tools">' +
       '<input type="search" id="rn-q" placeholder="搜尋 網址代稱／店名／Email" value="' + esc(state.q) + '" aria-label="搜尋">' +
@@ -278,7 +278,7 @@
       '<div class="adm-wrap"><table class="adm-table rn-table"><thead><tr><th>狀態</th><th>店名／代稱</th><th>會員</th><th>網址</th><th>到期日</th><th>最近部署</th><th>最近發佈</th></tr></thead><tbody>' +
       (v.length ? v.map(function (r) {
         var u = safeUrl(r.public_url);
-        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.tier === 'pro' ? '・<b style="color:#e0b05a">進階</b>' : '') + (r.codePending ? '・<b class="rn-warn">程式碼待審核</b>' : '') + '</div></td>' +
+        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.tier === 'pro' ? '・<b style="color:#e0b05a">進階</b>' : '') + (r.codePending ? '・<b class="rn-warn">程式碼待審核</b>' : '') + (r.upgrade_pending ? '・<b class="rn-warn">升級待補款 ' + esc(money(r.upgrade_amount || 0)) + '</b>' : '') + '</div></td>' +
           '<td style="word-break:break-all">' + esc(r.member_email) + '</td><td class="adm-url">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https:\/\//, '').replace(/\/$/, '')) + '</a>' : '<span class="rn-dim">—</span>') + (r.custom_domain ? '<div class="rn-sub">' + esc(r.custom_domain) + (r.domain_status === 'active' ? '（已生效）' : '（設定中）') + '</div>' : '') + '</td>' +
           '<td>' + dueText(r) + '</td><td>' + deployText(r) + '</td><td class="adm-time">' + (r.last_published_at ? esc(fmtDT(r.last_published_at)) : '<span class="rn-dim">—</span>') + '</td></tr>';
       }).join('') : '<tr><td colspan="7" class="adm-none">' + (rows.length ? '沒有符合條件的網站' : '還沒有客戶建立網站') + '</td></tr>') + '</tbody></table></div>';
@@ -338,6 +338,8 @@
     else if (e.type.indexOf('domain_') === 0) bits.push(d.domain || '', d.cf_status ? 'Cloudflare：' + d.cf_status : '', d.message || '');
     else if (e.type === 'restored') bits.push('狀態改為 ' + (STATUS[d.status_to] || d.status_to || ''));
     else if (e.type === 'terms_accepted') bits.push(d.version || '');
+    else if (e.type === 'layout_upgraded') bits.push(d.pending ? '待補差額 ' + money(d.amount || 0) + '（剩 ' + d.days + ' 天，' + (d.yearly ? '年繳' : '月繳') + '）' : '不用補差額');
+    else if (e.type === 'upgrade_paid') bits.push(d.waived ? '免收差額' : money(d.amount || 0), d.reference || '');
     if (d.simulated_as_of) bits.push('（模擬日期 ' + d.simulated_as_of + '）');
     if (d.by) bits.push(d.by === 'system' ? '系統排程' : '操作者 ' + d.by);
     return bits.filter(Boolean).join('　');
@@ -346,6 +348,7 @@
     var r = findRow(state.sel), d = document.getElementById('rn-drawer'), det = state.det; if (!r || !d || !det) return;
     var u = safeUrl(r.public_url), canDeploy = r.status === 'live' || r.status === 'overdue';
     var acts = [];
+    if (r.upgrade_pending) acts.push('<button class="m-btn primary sm" data-act="upgrade">確認收到升級差額 ' + esc(money(r.upgrade_amount || 0)) + '</button>');
     if (['pending', 'live', 'overdue', 'suspended'].indexOf(r.status) >= 0) acts.push('<button class="m-btn primary sm" data-act="pay">確認收款</button>');
     if (canDeploy || r.status === 'suspended') acts.push('<button class="m-btn sm" data-act="republish">' + (r.status === 'suspended' ? '重新部署維護頁' : '重新發佈') + '</button>');
     if (['pending', 'live', 'overdue'].indexOf(r.status) >= 0) acts.push('<button class="m-btn sm rn-danger" data-act="suspend">暫停網站</button>');
@@ -485,6 +488,11 @@
   function doAction(act, r) {
     var shop = esc(r.shop_name || r.slug);
     if (act === 'pay') return askPayment(r);
+    if (act === 'upgrade') {
+      return modal('確認收到升級差額？', '<div class="rn-form"><p class="rn-note">「' + shop + '」申請升級成多頁版，差額 <b>' + esc(money(r.upgrade_amount || 0)) + '</b>。確認後會自動發佈多頁版，並寄信通知客戶。下一期起依多頁版計費。</p>' +
+        '<label>匯款末五碼／備註（選填）<input type="text" id="rn-upref" maxlength="100"></label><label class="rn-chk"><input type="checkbox" id="rn-upwaive"> 免收差額（不記收款金額）</label></div>', '確認', false,
+        async function () { var res = await call('confirm_upgrade', r.id, { reference: document.getElementById('rn-upref').value.trim(), waived: document.getElementById('rn-upwaive').checked }); toast(res.message || '已確認'); await refreshAfter(r.id, true); });
+    }
     if (act === 'tier') {
       var to = r.tier === 'pro' ? 'basic' : 'pro';
       return confirmDialog(to === 'pro' ? '改為進階方案？' : '改回一般方案？', '<p class="rn-note">' + (to === 'pro' ? '開放預約行事曆、自訂程式碼（需審核）與多人協作。' : '網站會重新部署，拿掉自訂程式碼與預約行事曆；協作者會失去編輯權限（邀請紀錄保留）。') + '請記得同步調整收費。</p>', '確定', to === 'basic',

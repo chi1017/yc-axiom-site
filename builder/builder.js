@@ -5,7 +5,7 @@ const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
 const SAVE_DELAY = 2000, RENDER_DELAY = 150;
-const TERMS_VERSION = '2026-10-v3';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
+const TERMS_VERSION = '2026-10-v4';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
 const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
 // 標題字型檔（預覽用完整的常用字版本；正式網站只放用到的字）
 const FONT_FILE = { serif: 'NotoSerifTC-Bold-common.woff2', sans: 'NotoSansTC-Bold-common.woff2', round: 'Huninn-common.woff2', kai: 'LXGWWenKaiTC-Bold-common.woff2' };
@@ -528,7 +528,7 @@ function deriveStatus() {
 }
 async function refreshStatus() {
   const [s, e] = await Promise.all([
-    YC.client.from('rental_sites').select('status,public_url,paid_until,live_version_id,first_published_at,last_published_at,cf_project_name,terms_accepted_at,terms_version').eq('id', S.site.id).single(),
+    YC.client.from('rental_sites').select('status,public_url,paid_until,live_version_id,first_published_at,last_published_at,cf_project_name,terms_accepted_at,terms_version,upgrade_pending,upgrade_amount').eq('id', S.site.id).single(),
     YC.client.from('site_events').select('type,detail,created_at').eq('site_id', S.site.id).order('created_at', { ascending: false }).limit(20)
   ]);
   if (s.data) Object.assign(S.site, s.data);
@@ -1003,26 +1003,35 @@ function paintLayout() {
   box.replaceChildren(h('span', { text: '版型：多頁版' }), h('div', { class: 'msg mute', style: 'margin:0 0 4px', text: '要有哪些頁面（沒有內容的頁面不會出現在正式網站）：' }),
     h('label', {}, home, '首頁', h('small', { class: 'mute', text: '　一定會有' })), ...list);
 }
-function askUpgrade() {
+// 升級成多頁版：已付費、還有剩餘天數的網站要補差額；確認收到差額後才發佈多頁版（在那之前正式網站維持一頁版）
+async function askUpgrade() {
   const L = S.lib;
   const pages = L.pagesFromSections(S.sections);
   const names = L.pagesFor(S.site.template).filter((p) => pages[p.key]).map((p) => p.label).join('、');
   const live = ['live', 'overdue', 'pending'].includes(S.site.status);
-  const goBtn = h('button', { class: 'btn primary' }, '確定升級');
+  let q = { amount: 0, days: 0, yearly: false };
+  try { const r = await YC.client.functions.invoke('member-site', { body: { action: 'upgrade_quote', site_id: S.site.id } }); if (r.data && r.data.ok) q = r.data; } catch (e) { /* 取不到就照 0 顯示，送出時伺服器會再算一次 */ }
+  const money = (n) => 'NT$ ' + Number(n).toLocaleString('en-US');
+  const goBtn = h('button', { class: 'btn primary' }, q.amount ? '確定升級（補差額 ' + money(q.amount) + '）' : '確定升級');
   goBtn.addEventListener('click', async () => {
     goBtn.disabled = true; goBtn.textContent = '升級中…';
     if (!(await save())) { goBtn.disabled = false; goBtn.textContent = '確定升級'; toast('目前的內容還沒儲存成功，請稍後再試', 5000); return; }
-    const r = await YC.client.from('rental_sites').update({ layout: 'multi', pages }).eq('id', S.site.id).select('layout,pages,upgraded_at').single();
-    if (r.error) { goBtn.disabled = false; goBtn.textContent = '確定升級'; toast('升級失敗：' + r.error.message, 6000); return; }
-    Object.assign(S.site, r.data);
-    S.layout = 'multi'; S.pages = L.normalizePages(r.data.pages); S.page = 'home';
-    closeModal(); paintLayout(); renderPreview(true); refreshTodo();
-    toast('已升級成多頁版' + (live ? '，按「發佈」後正式網站才會更新' : ''), 5000);
+    const r = await YC.client.functions.invoke('member-site', { body: { action: 'upgrade_layout', site_id: S.site.id, pages } });
+    let j = r.data;
+    if (r.error) { try { j = await r.error.context.json(); } catch (e) { j = null; } goBtn.disabled = false; goBtn.textContent = '確定升級'; toast((j && j.message) || '升級失敗，請稍後再試', 6000); return; }
+    Object.assign(S.site, { layout: 'multi', pages: j.pages, upgraded_at: j.upgraded_at, upgrade_pending: j.upgrade_pending, upgrade_amount: j.amount });
+    S.layout = 'multi'; S.pages = L.normalizePages(j.pages); S.page = 'home';
+    closeModal(); paintLayout(); paintLinks(); renderPreview(true); refreshTodo();
+    toast(j.message, 8000);
   });
+  const fee = q.amount
+    ? h('p', {}, h('strong', { text: '升級差額：' + money(q.amount) }), '（這一期還剩 ' + q.days + ' 天，' + (q.yearly ? '年繳' : '月繳') + '，依兩種方案的價差按天數計算）。升級後你可以先編輯、預覽多頁版；我們確認收到差額後，會自動發佈多頁版，在那之前正式網站維持一頁版。')
+    : h('p', { class: 'msg mute', text: '你的網站目前沒有剩餘的已付天數，升級不用補差額，' + (live ? '升級後按「發佈」正式網站就會變成多頁。' : '開通時依多頁版收費。') });
   modal('升級成多頁版？', [
     h('p', { text: '升級後，網站會分成首頁和幾個獨立頁面，預設開啟：' + names + '。之後可以自己勾選要哪些頁面。' }),
     h('p', {}, h('strong', { text: '升級後不能改回一頁版。' }), '你填的內容都會保留，不必重填。'),
-    h('p', { class: 'msg mute', text: (priceText('multi') ? '多頁版' + priceText('multi') + '。升級不另收費，目前這一期已付的費用不變，下一期起改依多頁版計費。' : '多頁版的費用確認中，若與一頁版不同，會在下一期續約前與你確認。') + (live ? '升級後要按「發佈」，正式網站才會變成多頁。' : '') })],
+    fee,
+    h('p', { class: 'msg mute', text: priceText('multi') ? '下一期起依多頁版計費：' + priceText('multi') + '。' : '' })],
   [h('button', { class: 'btn', onclick: closeModal }, '先不要'), goBtn]);
 }
 
@@ -1039,6 +1048,13 @@ function paintSlug() {
 function paintLinks() {
   const b = $('#links'); if (!b) return;
   const live = S.site.public_url && ['live', 'overdue'].includes(S.site.status);
+  if (S.site.upgrade_pending) {
+    b.hidden = false;
+    b.replaceChildren(h('h2', { text: '多頁版等待補差額' }),
+      h('p', { class: 'sub', text: '請匯款升級差額 NT$ ' + Number(S.site.upgrade_amount || 0).toLocaleString('en-US') + '（匯款資訊在會員專區），匯款後用 LINE（@788cblaq）告訴我們帳號末五碼。確認收到後會自動發佈多頁版。' }),
+      h('p', { class: 'sub', style: 'margin:0', text: '在那之前可以繼續編輯與預覽多頁版，按「發佈」會先存成待上線的版本，正式網站維持一頁版' + (live ? '（' + S.site.public_url + '）' : '') + '。' }));
+    return;
+  }
   b.hidden = !live;
   if (live) b.replaceChildren(h('h2', { text: '你的網站已上線' }), h('p', { class: 'sub' }, '網址：', h('a', { href: S.site.public_url, target: '_blank', rel: 'noopener', text: S.site.public_url })),
     h('p', { class: 'sub', style: 'margin:0', text: '修改內容後按右上角「發佈」，約 1–2 分鐘更新到正式網站。' }));
