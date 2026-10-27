@@ -109,7 +109,7 @@ input.bad,textarea.bad{border-color:var(--danger)}
  .bar-tabs{display:inline-flex;order:3;border:1px solid var(--line);border-radius:8px;overflow:hidden}
  .bar-tabs button{font:inherit;border:0;background:var(--bg2);color:var(--muted);padding:6px 14px}
  .bar-tabs button[aria-selected=true]{background:var(--accent);color:var(--on);font-weight:700}
- #btnPublish{order:4}
+ #btnFull{order:4}#btnPublish{order:5}
  .split{flex:1;overflow:hidden}.panel,.view{height:100%}
  .app[data-tab=edit] .view{display:none}.app[data-tab=view] .panel{display:none}
  .view-hint{display:none}
