@@ -27,6 +27,11 @@ export const PLANS = {
   }
 };
 
+// 進階功能（預約行事曆、自訂程式碼與嵌入、多人協作）：加購，一頁版與多頁版都能加。
+// 必須與 yc-axiom-sites 的 supabase/functions/_shared/plans.mjs 一致。
+export const PRO_ADDON = { name: '進階功能', monthly: 400, yearPaidMonths: 10 };
+export const monthlyOf = (layout, tier) => planFor(layout).monthly + (tier === 'pro' ? PRO_ADDON.monthly : 0);
+
 // 相容舊的呼叫方式：PLAN 一律是一頁版
 export const PLAN = PLANS.single;
 
@@ -47,14 +52,15 @@ export const STRIKE_STYLE = 'text-decoration:none;display:inline-block;padding:0
 
 // 依租用月數算應付金額：每滿 12 個月付 10 個月，其餘月份按月計算。
 // layout 省略時是一頁版；方案價格未定案時回傳 null。
-export function quote(months, layout) {
+export function quote(months, layout, tier) {
   const P = planFor(layout);
   if (!hasPrice(P)) return null;
+  const monthly = monthlyOf(layout, tier);
   const n = Math.floor(Number(months));
   if (!Number.isFinite(n) || n < 1) return null;
   const years = Math.floor(n / 12);
   const paidMonths = years * P.yearPaidMonths + (n % 12);
-  return { months: n, paidMonths, amount: paidMonths * P.monthly, freeMonths: n - paidMonths };
+  return { months: n, paidMonths, amount: paidMonths * monthly, monthly, freeMonths: n - paidMonths };
 }
 
 export const YEAR_AMOUNT = quote(12).amount;   // 一頁版 5,990

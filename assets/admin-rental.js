@@ -16,7 +16,7 @@
     republish_queued: '重新發佈', version_restore_queued: '還原版本', domain_set: '設定網域', domain_checked: '檢查網域', domain_active: '網域生效', domain_failed: '網域設定失敗', domain_cleared: '移除網域',
     reminder_sent: '系統：寄出到期提醒', auto_overdue: '系統：到期，自動改為逾期', auto_live: '系統：到期日已延後，改回上線中', long_suspend_notified: '系統：暫停滿 30 天，已通知管理員', cron_anomaly: '系統：資料異常',
     monthly_report: '月報檢測完成', report_failed: '月報檢測失敗', photos_cleaned: '清理沒被引用的舊照片',
-    tier_changed: '變更方案等級', layout_upgraded: '客戶升級成多頁版', upgrade_paid: '確認收到升級差額', code_review_requested: '自訂程式碼送審', code_approved: '核准自訂程式碼', code_rejected: '退回自訂程式碼', collab_invited: '邀請協作者', collab_joined: '協作者加入', collab_removed: '移除協作者'
+    tier_changed: '變更方案等級', layout_upgraded: '客戶升級成多頁版', upgrade_paid: '確認收到升級差額', pro_requested: '客戶申請進階功能', pro_paid: '確認收到進階差額', next_plan_set: '設定下一期方案', plan_downgraded: '續約時套用降級', code_review_requested: '自訂程式碼送審', code_approved: '核准自訂程式碼', code_rejected: '退回自訂程式碼', collab_invited: '邀請協作者', collab_joined: '協作者加入', collab_removed: '移除協作者'
   };
   var MAIL_LABEL = { adminFirstPublish: '管理員通知', customerGoLive: '網站上線通知（客戶）', customerReceipt: '收款通知（客戶）',
     customerReminder: '即將到期提醒（客戶）', customerOverdue: '已到期通知（客戶）', customerSuspended: '已暫停通知（客戶）', customerMonthlyReport: '月報（客戶）', adminAutoSuspended: '自動暫停通知（管理員）', adminLongSuspended: '暫停滿 30 天通知（管理員）' };
@@ -94,12 +94,12 @@
     if (r.error) throw r.error;
     state.rows = r.data || [];
     // 版型（一頁／多頁）不在總覽 view 裡，另外讀 rental_sites 合併（管理員可讀全部）
-    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at,tier,upgrade_pending,upgrade_amount').limit(2000);
+    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at,tier,upgrade_pending,upgrade_amount,pro_pending,pro_amount,next_layout,next_tier').limit(2000);
     var byId = {}; (lay.data || []).forEach(function (x) { byId[x.id] = x; });
     // 待審核的自訂程式碼（進階方案）
     var rv = await YC.client.from('site_code_reviews').select('site_id,hash,status,created_at,version_id,note').eq('status', 'pending').limit(500);
     var pend = {}; (rv.data || []).forEach(function (x) { (pend[x.site_id] = pend[x.site_id] || []).push(x); });
-    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; x.tier = (l && l.tier) || 'basic'; x.upgrade_pending = !!(l && l.upgrade_pending); x.upgrade_amount = l ? l.upgrade_amount : null; x.codePending = (pend[x.id] || []).length; });
+    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; x.tier = (l && l.tier) || 'basic'; x.upgrade_pending = !!(l && l.upgrade_pending); x.upgrade_amount = l ? l.upgrade_amount : null; x.pro_pending = !!(l && l.pro_pending); x.pro_amount = l ? l.pro_amount : null; x.next_layout = l ? l.next_layout : null; x.next_tier = l ? l.next_tier : null; x.codePending = (pend[x.id] || []).length; });
     loadIndustries();
     var s = await YC.client.from('settings').select('key,value').in('key', ['bank_transfer', 'plan']);
     state.bank = null; state.plan = null;
@@ -264,7 +264,7 @@
     var v = view();
     root.innerHTML =
       '<div class="adm-chips"><div><b>' + rows.length + '</b><span>全部網站</span></div><div><b>' + count('pending') + '</b><span>待上線</span></div><div><b>' + count('live') + '</b><span>上線中</span></div>' +
-      '<div><b>' + count('overdue') + '</b><span>逾期</span></div><div><b>' + count('suspended') + '</b><span>已暫停</span></div><div><b>' + soon + '</b><span>7 天內到期</span></div><div><b>' + failed + '</b><span>最近部署失敗</span></div><div><b>' + rows.filter(function (r) { return r.codePending; }).length + '</b><span>程式碼待審核</span></div><div><b>' + rows.filter(function (r) { return r.upgrade_pending; }).length + '</b><span>升級待補款</span></div></div>' +
+      '<div><b>' + count('overdue') + '</b><span>逾期</span></div><div><b>' + count('suspended') + '</b><span>已暫停</span></div><div><b>' + soon + '</b><span>7 天內到期</span></div><div><b>' + failed + '</b><span>最近部署失敗</span></div><div><b>' + rows.filter(function (r) { return r.codePending; }).length + '</b><span>程式碼待審核</span></div><div><b>' + rows.filter(function (r) { return r.upgrade_pending; }).length + '</b><span>升級待補款</span></div><div><b>' + rows.filter(function (r) { return r.pro_pending; }).length + '</b><span>進階待補款</span></div></div>' +
       (state.simOpen ? simHtml() : '') +
       '<div class="adm-tools rn-tools">' +
       '<input type="search" id="rn-q" placeholder="搜尋 網址代稱／店名／Email" value="' + esc(state.q) + '" aria-label="搜尋">' +
@@ -278,7 +278,7 @@
       '<div class="adm-wrap"><table class="adm-table rn-table"><thead><tr><th>狀態</th><th>店名／代稱</th><th>會員</th><th>網址</th><th>到期日</th><th>最近部署</th><th>最近發佈</th></tr></thead><tbody>' +
       (v.length ? v.map(function (r) {
         var u = safeUrl(r.public_url);
-        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.tier === 'pro' ? '・<b style="color:#e0b05a">進階</b>' : '') + (r.codePending ? '・<b class="rn-warn">程式碼待審核</b>' : '') + (r.upgrade_pending ? '・<b class="rn-warn">升級待補款 ' + esc(money(r.upgrade_amount || 0)) + '</b>' : '') + '</div></td>' +
+        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.tier === 'pro' ? '・<b style="color:#e0b05a">進階</b>' : '') + (r.codePending ? '・<b class="rn-warn">程式碼待審核</b>' : '') + (r.upgrade_pending ? '・<b class="rn-warn">升級待補款 ' + esc(money(r.upgrade_amount || 0)) + '</b>' : '') + (r.pro_pending ? '・<b class="rn-warn">進階待補款 ' + esc(money(r.pro_amount || 0)) + '</b>' : '') + (r.next_layout || r.next_tier ? '・<b class="rn-warn">下期降級</b>' : '') + '</div></td>' +
           '<td style="word-break:break-all">' + esc(r.member_email) + '</td><td class="adm-url">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https:\/\//, '').replace(/\/$/, '')) + '</a>' : '<span class="rn-dim">—</span>') + (r.custom_domain ? '<div class="rn-sub">' + esc(r.custom_domain) + (r.domain_status === 'active' ? '（已生效）' : '（設定中）') + '</div>' : '') + '</td>' +
           '<td>' + dueText(r) + '</td><td>' + deployText(r) + '</td><td class="adm-time">' + (r.last_published_at ? esc(fmtDT(r.last_published_at)) : '<span class="rn-dim">—</span>') + '</td></tr>';
       }).join('') : '<tr><td colspan="7" class="adm-none">' + (rows.length ? '沒有符合條件的網站' : '還沒有客戶建立網站') + '</td></tr>') + '</tbody></table></div>';
@@ -348,6 +348,8 @@
     var r = findRow(state.sel), d = document.getElementById('rn-drawer'), det = state.det; if (!r || !d || !det) return;
     var u = safeUrl(r.public_url), canDeploy = r.status === 'live' || r.status === 'overdue';
     var acts = [];
+    if (r.pro_pending) acts.push('<button class="m-btn primary sm" data-act="pro">確認收到進階差額 ' + esc(money(r.pro_amount || 0)) + '</button>');
+    if (r.next_layout || r.next_tier) acts.push('<button class="m-btn sm" data-act="clearnext">取消下期降級</button>');
     if (r.upgrade_pending) acts.push('<button class="m-btn primary sm" data-act="upgrade">確認收到升級差額 ' + esc(money(r.upgrade_amount || 0)) + '</button>');
     if (['pending', 'live', 'overdue', 'suspended'].indexOf(r.status) >= 0) acts.push('<button class="m-btn primary sm" data-act="pay">確認收款</button>');
     if (canDeploy || r.status === 'suspended') acts.push('<button class="m-btn sm" data-act="republish">' + (r.status === 'suspended' ? '重新部署維護頁' : '重新發佈') + '</button>');
@@ -361,6 +363,7 @@
     acts.push('<a class="m-btn sm" target="_blank" rel="noopener" href="' + esc(YC.url('builder/preview/') + '?site=' + encodeURIComponent(r.id)) + '">預覽最新版本</a>');
     var kv = [
       ['會員', esc(r.member_email)],
+      ['下一期', r.next_layout || r.next_tier ? '<span class="rn-warn">客戶申請' + [r.next_layout === 'single' ? '改回一頁版' : '', r.next_tier === 'basic' ? '取消進階功能' : ''].filter(Boolean).join('、') + '（續約確認收款時生效）</span>' : '<span class="rn-dim">不變</span>'],
       ['方案等級', (r.tier === 'pro' ? '<b style="color:#e0b05a">進階方案</b>' : '一般方案') + ' <button class="m-btn sm" data-act="tier">' + (r.tier === 'pro' ? '改回一般方案' : '改為進階方案') + '</button>'],
       ['行業／版型', esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.upgraded_at ? '<span class="rn-dim">（' + esc(fmtDT(r.upgraded_at)) + ' 由一頁版升級）</span>' : '')],
       ['網址', u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u) + '</a>' : '—'],
@@ -488,6 +491,15 @@
   function doAction(act, r) {
     var shop = esc(r.shop_name || r.slug);
     if (act === 'pay') return askPayment(r);
+    if (act === 'pro') {
+      return modal('確認收到進階功能差額？', '<div class="rn-form"><p class="rn-note">「' + shop + '」申請加購進階功能，差額 <b>' + esc(money(r.pro_amount || 0)) + '</b>。確認後立即開通並寄信通知客戶，下一期起每月多 NT$ 400。</p>' +
+        '<label>匯款末五碼／備註（選填）<input type="text" id="rn-proref" maxlength="100"></label><label class="rn-chk"><input type="checkbox" id="rn-prowaive"> 免收差額（不記收款金額）</label></div>', '確認', false,
+        async function () { var res = await call('confirm_pro', r.id, { reference: document.getElementById('rn-proref').value.trim(), waived: document.getElementById('rn-prowaive').checked }); toast(res.message || '已確認'); await refreshAfter(r.id, r.status === 'live' || r.status === 'overdue'); });
+    }
+    if (act === 'clearnext') {
+      return confirmDialog('取消下期降級？', '<p class="rn-note">客戶申請的「下一期改方案」會取消，續約時照目前的方案收費。</p>', '取消申請', false,
+        async function () { var res = await call('set_next', r.id, { next_layout: null, next_tier: null }); toast(res.message || '已更新'); await refreshAfter(r.id, false); });
+    }
     if (act === 'upgrade') {
       return modal('確認收到升級差額？', '<div class="rn-form"><p class="rn-note">「' + shop + '」申請升級成多頁版，差額 <b>' + esc(money(r.upgrade_amount || 0)) + '</b>。確認後會自動發佈多頁版，並寄信通知客戶。下一期起依多頁版計費。</p>' +
         '<label>匯款末五碼／備註（選填）<input type="text" id="rn-upref" maxlength="100"></label><label class="rn-chk"><input type="checkbox" id="rn-upwaive"> 免收差額（不記收款金額）</label></div>', '確認', false,
@@ -559,10 +571,12 @@
       pv.textContent = '服務期間 ' + from + ' → ' + addMonths(from, n) + (pend ? '（首次上線）' : '');
       if (PMOD) {
         // 依網站的版型算應收金額；多頁版價格未定案時不預填，請自行輸入與客戶談定的金額
-        var P = PMOD.planFor ? PMOD.planFor(r.layout) : PMOD.PLAN;
-        var q = PMOD.quote(n, r.layout);
+        // 續約時套用客戶申請的下期降級（首次上線不套用）
+        var lay = pend ? r.layout : (r.next_layout || r.layout), tr = pend ? r.tier : (r.next_tier || r.tier);
+        var P = PMOD.planFor ? PMOD.planFor(lay) : PMOD.PLAN;
+        var q = PMOD.quote(n, lay, tr);
         if (q) {
-          pv.textContent += '　｜　依方案「' + P.name + '」應收 ' + PMOD.money(q.amount) + (q.freeMonths ? '（' + q.months + ' 個月只收 ' + q.paidMonths + ' 個月）' : '');
+          pv.textContent += '　｜　依方案「' + P.name + (tr === 'pro' ? '＋進階功能' : '') + '」應收 ' + PMOD.money(q.amount) + (q.freeMonths ? '（' + q.months + ' 個月只收 ' + q.paidMonths + ' 個月）' : '') + (!pend && (r.next_layout || r.next_tier) ? '（已套用客戶申請的下期降級，收款後生效）' : '');
           if (!amtTouched) amtEl.value = String(q.amount);   // 預填金額，仍可自行修改
         } else {
           pv.textContent += '　｜　「' + P.name + '」的價格尚未定案，請輸入與客戶確認的金額';
