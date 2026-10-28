@@ -1584,3 +1584,13 @@ a.service-more:hover { text-decoration: underline; text-underline-offset: 3px; }
 nav { padding-top: env(safe-area-inset-top, 0px); }
 nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
 @media (min-width: 769px) { nav .nav-inner { padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); } }
+/* 服務頁：三項主力（整排大卡）＋其他服務 */
+.service-more-row { display: flex; flex-wrap: wrap; gap: 4px 28px; }
+.services-other { margin-top: 72px; margin-bottom: 20px; }
+.services-other .sp-note { margin-top: 6px; }
+.service-card--other .service-module-tag { opacity: .8; }
+.matrix-table tr.matrix-group td { padding-top: 22px; font-family: var(--f-ui); font-weight: 700; font-size: 13px; letter-spacing: .08em; color: var(--accent); background: transparent; border-bottom: 1px solid var(--border); }
+/* 首頁：其他服務一行 */
+.rh-other { margin-top: 14px; font-size: 14.5px; color: var(--text-dim); line-height: 1.9; }
+.rh-other a { color: var(--text); text-decoration: underline; text-decoration-color: rgba(95, 163, 150, .5); text-underline-offset: 3px; }
+.rh-other a:hover { color: var(--accent); }
