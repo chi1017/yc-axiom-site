@@ -329,6 +329,11 @@
         m.classList.toggle('open');
         document.body.style.overflow = m.classList.contains('open') ? 'hidden' : '';
     }
+    // 手機選單：按 Esc 關閉
+    document.addEventListener('keydown', function (e) {
+        var m = document.getElementById('mobile-menu');
+        if (e.key === 'Escape' && m && m.classList.contains('open')) toggleMobileMenu();
+    });
 
 ;
 
@@ -556,7 +561,7 @@
     function addMobile(label, href, onclick) {
         if (!mm) return;
         var a = document.createElement('a');
-        a.className = 'mobile-nav-btn'; a.href = href; a.textContent = label;
+        a.className = 'mobile-nav-btn mobile-member'; a.href = href; a.textContent = label;
         if (onclick) a.onclick = function (e) { e.preventDefault(); onclick(); };
         mm.appendChild(a); mobileEls.push(a);
     }
