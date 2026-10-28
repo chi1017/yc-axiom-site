@@ -1580,3 +1580,7 @@ a.service-more:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 [data-theme="light"] .rh-services, [data-theme="light"] .rh-case, [data-theme="light"] .rh-promises, [data-theme="light"] .rh-art { --glass-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.74)); }
 [data-theme="light"] .rh-promises, [data-theme="light"] .rh-case, [data-theme="light"] .rh-services { background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.74)); }
+/* 加到主畫面（全螢幕）時：上方避開狀態列、左右避開瀏海；下方分頁列已經預留 iPhone 底部橫條的位置 */
+nav { padding-top: env(safe-area-inset-top, 0px); }
+nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 769px) { nav .nav-inner { padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); } }
