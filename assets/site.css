@@ -1554,3 +1554,16 @@ a.service-more:hover { text-decoration: underline; text-underline-offset: 3px; }
   [data-theme="light"] .mobile-social-a { border-color: rgba(20, 50, 45, 0.18); }
 }
 @media (max-width: 360px) { .has-tabbar .nav-logo-sub { display: none; } }
+/* 手機返回鍵（首頁以外） */
+.nav-back { display: none; }
+@media (max-width: 768px) {
+  .has-tabbar .nav-back {
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    width: 40px; height: 40px; margin: 0 4px 0 -10px; padding: 0; border: 0; border-radius: 10px;
+    background: none; color: var(--text-bright); cursor: pointer;
+  }
+  .has-tabbar .nav-back:active { background: rgba(255, 255, 255, 0.08); }
+  .has-back .nav-logo-sub { display: none; }
+  .has-back .nav-inner { justify-content: flex-start; }
+  .has-back .nav-right { margin-left: auto; }
+}

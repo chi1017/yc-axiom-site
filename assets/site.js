@@ -641,6 +641,22 @@
     });
     document.body.appendChild(nav);
     document.documentElement.classList.add('has-tabbar');
+    // 返回鍵（首頁以外）：從本站其他頁進來就回上一頁；直接打開（或從主畫面的 App 打開）就回上一層
+    var inner = document.querySelector('nav .nav-inner');
+    if (rel && rel !== 'index.html' && inner && !document.getElementById('yc-back')) {
+        var parts = rel.replace(/index\.html$/, '').split('/').filter(Boolean);
+        var up = parts.length > 1 ? root + parts.slice(0, -1).join('/') + '/' : root;
+        var back = document.createElement('button');
+        back.type = 'button'; back.id = 'yc-back'; back.className = 'nav-back'; back.setAttribute('aria-label', '返回上一頁');
+        back.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+        back.addEventListener('click', function () {
+            var fromSite = false;
+            try { fromSite = !!document.referrer && new URL(document.referrer).href.indexOf(root) === 0 && document.referrer !== location.href; } catch (e) {}
+            if (fromSite && history.length > 1) history.back(); else location.href = up;
+        });
+        inner.insertBefore(back, inner.firstChild);
+        document.documentElement.classList.add('has-back');
+    }
     if (mm) {
         // 選單打開時，「選單」分頁亮起
         var mb = nav.querySelector('[data-k="menu"]');
