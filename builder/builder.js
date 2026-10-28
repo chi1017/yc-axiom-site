@@ -292,6 +292,8 @@ function renderPreview(now) {
     S.pageList = r.pages || [];
     if (!S.pageList.some((p) => p.key === S.page)) S.page = 'home';
     paintPageTabs();
+    // 手機版在「編輯」分頁時看不到預覽：先不更新預覽框，切到「預覽」時再更新（打字更順）
+    if (isMob() && $('.app').dataset.tab !== 'view') return;
     const f = $('#frame');
     // 同一頁的內容更新：只改有變的地方（不重新載入），預覽不閃、不跳
     if (frameState.ready && frameState.page === S.page && !S.replayMotion && morphFrame(f, r.html)) {
