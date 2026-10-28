@@ -1181,7 +1181,7 @@ body::before {
         radial-gradient(900px 620px at 8% -6%, rgba(95, 163, 150, 0.34), transparent 62%),
         radial-gradient(800px 600px at 96% 22%, rgba(70, 130, 190, 0.28), transparent 60%),
         radial-gradient(900px 700px at 40% 108%, rgba(95, 163, 150, 0.20), transparent 62%);
-    animation: ambientDrift 26s ease-in-out infinite alternate;
+    /* 環境光不再緩慢飄動：上面有許多毛玻璃（backdrop-filter），背景每一格都在動會讓毛玻璃每格重算，電腦版首頁只剩約 30fps */
 }
 body::after {
     content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -1567,3 +1567,16 @@ a.service-more:hover { text-decoration: underline; text-underline-offset: 3px; }
   .has-back .nav-inner { justify-content: flex-start; }
   .has-back .nav-right { margin-left: auto; }
 }
+/* 手機選單：背景本來就幾乎不透明，拿掉毛玻璃，打開／關閉時不掉幀 */
+@media (max-width: 768px) {
+  #mobile-menu { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(11, 10, 9, 0.985); }
+  [data-theme="light"] #mobile-menu { background: rgba(246, 243, 236, 0.99); }
+}
+/* 首頁大面積的玻璃面板（作品卡、服務列表、主視覺底板）：改用調好的半透明底色，不即時模糊背景。
+   畫面幾乎一樣，但電腦版首頁捲動從約 30fps 回到 60fps（即時模糊大面積會讓每一格都重算） */
+.rh-services, .rh-case, .rh-promises, .rh-art::before, .rh-bar, .rh-cap { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+:root:not([data-theme="light"]) .rh-services, :root:not([data-theme="light"]) .rh-case, :root:not([data-theme="light"]) .rh-promises, :root:not([data-theme="light"]) .rh-art {
+  --glass-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%), linear-gradient(rgba(9, 14, 14, 0.64), rgba(9, 14, 14, 0.64));
+}
+[data-theme="light"] .rh-services, [data-theme="light"] .rh-case, [data-theme="light"] .rh-promises, [data-theme="light"] .rh-art { --glass-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.74)); }
+[data-theme="light"] .rh-promises, [data-theme="light"] .rh-case, [data-theme="light"] .rh-services { background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.74)); }

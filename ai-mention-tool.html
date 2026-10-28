@@ -143,8 +143,11 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window.addEventListener('message', function (e) {
     if (e.source !== parent || !e.data || e.data.type !== 'seo-viewport') return;
-    de.style.setProperty('--vt', e.data.top + 'px');
-    de.style.setProperty('--vh', e.data.height + 'px');
+    // 只把可視範圍設在需要它的少數元素上（設在 html 上會讓整份報告每次捲動都重新計算樣式，造成卡頓）
+    window.__ycVt = e.data.top; window.__ycVh = e.data.height;
+    var vt = e.data.top + 'px', vh = e.data.height + 'px';
+    Array.prototype.forEach.call(document.querySelectorAll('.pdf-overlay, #toast, #mTocFab'), function (el) { el.style.setProperty('--vt', vt); el.style.setProperty('--vh', vh); });
+    window.dispatchEvent(new Event('yc-viewport'));
   });
 })();
 </script>

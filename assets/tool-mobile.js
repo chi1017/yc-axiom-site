@@ -104,13 +104,12 @@
     }
     fabEl.classList.toggle('show', !!show);
   }
-  function px(name, def) { var v = parseFloat(getComputedStyle(de).getPropertyValue(name)); return isNaN(v) ? def : v; }
   function placeFab() {
     var toc = document.getElementById('mToc');
     if (!toc || !mq.matches) { fab(false); return; }
     var embedded = de.classList.contains('embedded');
-    var vt = embedded ? px('--vt', 0) : window.scrollY;
-    var vh = embedded ? px('--vh', window.innerHeight) : window.innerHeight;
+    var vt = embedded ? (window.__ycVt || 0) : window.scrollY;
+    var vh = embedded ? (window.__ycVh || window.innerHeight) : window.innerHeight;
     var r = toc.getBoundingClientRect(), top = r.top + (embedded ? 0 : window.scrollY);
     var res = results.getBoundingClientRect(), resBottom = res.bottom + (embedded ? 0 : window.scrollY);
     fab(top + r.height < vt && resBottom > vt + 120);
@@ -119,7 +118,7 @@
 
   new MutationObserver(queue).observe(results, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
   if (mq.addEventListener) mq.addEventListener('change', queue);
-  window.addEventListener('message', function (e) { if (e.data && e.data.type === 'seo-viewport') setTimeout(placeFab, 0); });
+  window.addEventListener('yc-viewport', placeFab);
   window.addEventListener('scroll', placeFab, { passive: true });
   queue();
 })();
