@@ -1454,3 +1454,18 @@ a.service-more:hover { text-decoration: underline; text-underline-offset: 3px; }
 .works-note .work-badge { margin: 0 4px; }
 @media (max-width: 900px) { .sp-grid { grid-template-columns: 1fr; } .sp-svc-list { grid-template-columns: 1fr; } .sp-facts { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .sp-price td { display: block; padding: 10px 0 0; border: 0; } .sp-price td.sp-price-v { text-align: left; padding: 2px 0 14px; border-bottom: 1px solid var(--border); } }
+
+/* ── 導覽列整理（2026-10）：首頁由 Logo 進入、聯絡改由「免費諮詢」進入，主選單 7 項；
+   寬度不夠時改用「選單」按鈕，避免右側的會員專區、免費諮詢、主題切換被擠出畫面 ── */
+.nav-links { gap: 32px; }
+.nav-logo { flex-shrink: 0; }
+.nav-right { flex-shrink: 0; }
+@media (max-width: 1280px) { .nav-links { gap: 22px; } }
+@media (max-width: 1120px) {
+  .nav-links { display: none; }
+  .hamburger { display: block; }
+}
+/* 手機寬度：右側只留主題切換與「選單」，「免費諮詢」改由選單裡的「聯絡」進入，避免 Logo 被擠到 */
+@media (max-width: 520px) {
+  nav .nav-right .nav-cta { display: none; }
+}
