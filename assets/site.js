@@ -296,8 +296,12 @@
             raf = 0;
             if (!fr.contentWindow) return;
             var r = fr.getBoundingClientRect();
-            var top = Math.max(0, 96 - r.top);
-            var bottom = Math.min(r.height, window.innerHeight - r.top);
+            // 上方導覽列與手機的下方分頁列會蓋住畫面，扣掉之後才是看得到的範圍
+            var nv = document.querySelector('nav'), tb = document.getElementById('yc-tabbar');
+            var head = nv ? Math.max(0, nv.getBoundingClientRect().bottom) : 96;
+            var foot = tb && getComputedStyle(tb).display !== 'none' ? tb.getBoundingClientRect().height : 0;
+            var top = Math.max(0, head - r.top);
+            var bottom = Math.min(r.height, window.innerHeight - foot - r.top);
             fr.contentWindow.postMessage({ type: 'seo-viewport', top: top, height: Math.max(0, bottom - top) }, '*');
         }
         function queue() { if (!raf) raf = requestAnimationFrame(sendViewport); }
