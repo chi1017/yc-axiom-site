@@ -7,20 +7,27 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#14110f">
 <link rel="icon" type="image/png" href="../favicon-32.png">
-<link rel="stylesheet" href="builder.css?v=2026-10-28c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="app-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="網站編輯器">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="builder.css?v=2026-10-28d">
 </head>
 <body>
 <div id="app" class="app" hidden>
   <header class="bar">
     <a class="bar-back" href="../dashboard/" title="回到會員專區" aria-label="回到會員專區">←<span class="bb-t"> 會員專區</span></a>
-    <div class="bar-title"><strong id="barName">我的網站</strong><span id="barStatus" class="badge"></span><span id="siteSwitch" class="site-switch"></span></div>
+    <button type="button" class="m-back" id="mBack" aria-label="回到設定清單">‹</button>
+    <div class="bar-title"><strong id="barName">我的網站</strong><strong id="mCardTitle" class="m-card-title"></strong><span id="barStatus" class="badge"></span><span id="siteSwitch" class="site-switch"></span></div>
     <div class="bar-undo"><button type="button" class="btn small" id="btnUndo" title="復原（Ctrl＋Z）" disabled>↶ 復原</button><button type="button" class="btn small" id="btnRedo" title="重做（Ctrl＋Shift＋Z）" disabled>↷ 重做</button></div>
     <div class="bar-save" id="saveState" role="status" aria-live="polite"></div>
     <div class="bar-tabs" role="tablist" aria-label="手機版切換">
       <button type="button" role="tab" id="tabEdit" aria-selected="true">編輯</button>
       <button type="button" role="tab" id="tabView" aria-selected="false">預覽</button>
     </div>
-    <button type="button" class="btn bar-more" id="btnMore" aria-haspopup="dialog">更多</button>
+    <button type="button" class="btn bar-more" id="btnMore" aria-haspopup="dialog" aria-label="更多"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg></button>
     <button type="button" class="btn" id="btnFull" title="在新分頁用整個畫面看網站（還沒發佈也可以）">全螢幕預覽</button>
     <button type="button" class="btn primary" id="btnPublish">發佈</button>
   </header>
@@ -39,6 +46,13 @@
       <div class="stage" id="stage"><iframe id="frame" title="網站預覽" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div>
     </section>
   </div>
+  <nav class="mtabs" id="mtabs" aria-label="編輯分類">
+    <button type="button" data-k="look"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg><span>外觀</span></button>
+    <button type="button" data-k="info"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v10h16V10"/><path d="M3 10l2-6h14l2 6"/><path d="M3 10c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3"/><path d="M10 20v-5h4v5"/></svg><span>店家</span></button>
+    <button type="button" data-k="content"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg><span>內容</span></button>
+    <button type="button" data-k="feature"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span>功能</span></button>
+    <button type="button" data-k="view"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>預覽</span></button>
+  </nav>
 </div>
 <div id="gate" class="gate"><div class="gate-card"><p>載入中…</p></div></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -47,6 +61,6 @@
 <script src="../assets/supabase-config.js"></script>
 <script src="../assets/vendor/supabase-2.117.2.min.js"></script>
 <script src="../assets/yc-auth.js?v=2026-10-16"></script>
-<script type="module" src="builder.js?v=2026-10-28e"></script>
+<script type="module" src="builder.js?v=2026-10-28f"></script>
 </body>
 </html>
