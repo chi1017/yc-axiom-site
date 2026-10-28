@@ -107,7 +107,7 @@ export function wireNav(f) {
 const PILL_CSS = '.yc-hover{outline:2px dashed rgba(47,127,112,.75)!important;outline-offset:-2px}' +
   '.yc-flash{animation:ycflash 1.2s ease}@keyframes ycflash{0%,40%{box-shadow:inset 0 0 0 3px rgba(47,127,112,.9)}100%{box-shadow:inset 0 0 0 3px rgba(47,127,112,0)}}' +
   '.yc-pill{position:absolute;z-index:2147483000;display:none;font:600 13px/1 -apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:8px 12px;border-radius:999px;border:0;background:#2f7f70;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}' +
-  '.yc-pill:hover{background:#25695c}';
+  '.yc-pill:hover{background:#25695c}@media(hover:none){.yc-pill{font-size:15px;padding:12px 18px}}';
 export function sectionKey(el) {
   if (!el) return '';
   if (el.matches('header.top')) return 'header';
@@ -144,6 +144,24 @@ export function wireEditPills(f, onPick, labelOf) {
     pill.style.left = Math.max(8, w.scrollX + r.right - pill.offsetWidth - 12) + 'px';
   });
   d.addEventListener('mouseleave', hide);
+  // 手機與平板（沒有滑鼠）：點一下區塊顯示「編輯」按鈕，再點按鈕跳到設定；點連結、按鈕照常
+  const touchy = () => w.matchMedia('(hover: none)').matches || (w.parent && w.parent.matchMedia && w.parent.matchMedia('(hover: none)').matches);
+  d.addEventListener('click', (e) => {
+    if (!touchy() || e.target === pill) return;
+    if (e.target.closest && e.target.closest('a, button, input, select, textarea, label, summary, iframe, video')) return;
+    const el = e.target.closest && e.target.closest('main > section, header.top, footer');
+    const key = sectionKey(el);
+    if (!el || !key) { hide(); return; }
+    if (curEl) curEl.classList.remove('yc-hover');
+    curEl = el; el.classList.add('yc-hover');
+    pill.textContent = '✎ 編輯' + (labelOf ? labelOf(key) : '');
+    pill.dataset.key = key;
+    pill.style.display = 'block';
+    const r = el.getBoundingClientRect();
+    const y = key === 'header' ? r.bottom + 6 : Math.min(Math.max(e.clientY - 56, Math.max(r.top, 0) + 10), r.bottom - 50);
+    pill.style.top = (w.scrollY + y) + 'px';
+    pill.style.left = Math.max(8, Math.min(w.scrollX + e.clientX - pill.offsetWidth / 2, w.scrollX + w.innerWidth - pill.offsetWidth - 8)) + 'px';
+  });
   pill.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); onPick(pill.dataset.key); });
 }
 // 左邊在改某個區塊時，預覽裡那個區塊閃一下

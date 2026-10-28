@@ -2,17 +2,17 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>網站編輯器 - YC AXIOM</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#14110f">
 <link rel="icon" type="image/png" href="../favicon-32.png">
-<link rel="stylesheet" href="builder.css?v=2026-10-28b">
+<link rel="stylesheet" href="builder.css?v=2026-10-28c">
 </head>
 <body>
 <div id="app" class="app" hidden>
   <header class="bar">
-    <a class="bar-back" href="../dashboard/" title="回到會員專區">← 會員專區</a>
+    <a class="bar-back" href="../dashboard/" title="回到會員專區" aria-label="回到會員專區">←<span class="bb-t"> 會員專區</span></a>
     <div class="bar-title"><strong id="barName">我的網站</strong><span id="barStatus" class="badge"></span><span id="siteSwitch" class="site-switch"></span></div>
     <div class="bar-undo"><button type="button" class="btn small" id="btnUndo" title="復原（Ctrl＋Z）" disabled>↶ 復原</button><button type="button" class="btn small" id="btnRedo" title="重做（Ctrl＋Shift＋Z）" disabled>↷ 重做</button></div>
     <div class="bar-save" id="saveState" role="status" aria-live="polite"></div>
@@ -20,6 +20,7 @@
       <button type="button" role="tab" id="tabEdit" aria-selected="true">編輯</button>
       <button type="button" role="tab" id="tabView" aria-selected="false">預覽</button>
     </div>
+    <button type="button" class="btn bar-more" id="btnMore" aria-haspopup="dialog">更多</button>
     <button type="button" class="btn" id="btnFull" title="在新分頁用整個畫面看網站（還沒發佈也可以）">全螢幕預覽</button>
     <button type="button" class="btn primary" id="btnPublish">發佈</button>
   </header>
@@ -31,6 +32,7 @@
           <button type="button" id="devDesk" aria-pressed="true">桌面版</button>
           <button type="button" id="devMob" aria-pressed="false">手機版</button>
         </div>
+        <button type="button" class="btn small mob-only" id="btnFull2">全螢幕預覽</button>
         <div class="seg pages" id="pageTabs" role="group" aria-label="預覽頁面" hidden></div>
         <span class="view-hint">這是預覽，灰色 [提示文字] 不會出現在正式網站上</span>
       </div>
@@ -45,6 +47,6 @@
 <script src="../assets/supabase-config.js"></script>
 <script src="../assets/vendor/supabase-2.117.2.min.js"></script>
 <script src="../assets/yc-auth.js?v=2026-10-16"></script>
-<script type="module" src="builder.js?v=2026-10-28d"></script>
+<script type="module" src="builder.js?v=2026-10-28e"></script>
 </body>
 </html>

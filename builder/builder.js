@@ -1,6 +1,6 @@
 /* YC AXIOM 網站編輯器：左邊填內容、右邊即時預覽。
    預覽用的版型函式與「正式建置」是同一份程式（yc-axiom-sites 的 templates/shared/*），所以所見即所得。 */
-import { startReveal, wireNav, morphFrame, settleReveal, wireEditPills, flashSection, sectionKey } from './preview-fx.js?v=2026-10-28b';
+import { startReveal, wireNav, morphFrame, settleReveal, wireEditPills, flashSection, sectionKey } from './preview-fx.js?v=2026-10-28c';
 const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
@@ -211,8 +211,8 @@ function showCreate() {
 
 // ── 編輯器 ──
 // 上方的網站切換（有多個網站時）與「建立新網站」
-function paintSiteSwitch() {
-  const box = $('#siteSwitch'); if (!box) return;
+function paintSiteSwitch(into) {
+  const box = into || $('#siteSwitch'); if (!box) return;
   const list = S.mySites || [];
   const sel = h('select', { class: 'sel', 'aria-label': '切換網站' },
     list.map((x) => h('option', { value: x.id, text: ((x.content && x.content.name) || x.slug) + '（' + x.slug + '）' + (x.member_id !== YC.session.user.id ? '・協作' : '') })),
@@ -441,7 +441,7 @@ function pickSection(k) { const c = cardForKey(k); if (c) openCard(c.card, c.foc
 // 打開某張卡片（切到它的分組、捲到它、閃一下、游標放進第一個欄位）
 function openCard(id, focusFn) {
   const c = $('#' + id); if (!c) return;
-  closeModal(); $('.app').dataset.tab = 'edit';
+  closeModal(); setTab('edit');
   clearSearch();
   if (c.hidden) showGroup(c.dataset.group || 'all', false);
   c.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1490,6 +1490,34 @@ async function publish() {
 // 是否需要（重新）同意條款：從沒同意過，或同意的不是目前版本
 function needTerms() { return !S.site.terms_accepted_at || (S.site.terms_version || '') !== TERMS_VERSION; }
 
+// 手機版：編輯／預覽切換
+function setTab(t) {
+  const app = $('.app'); if (!app) return;
+  const changed = app.dataset.tab && app.dataset.tab !== t;
+  app.dataset.tab = t;
+  const te = $('#tabEdit'), tv = $('#tabView');
+  if (te) te.setAttribute('aria-selected', String(t === 'edit'));
+  if (tv) tv.setAttribute('aria-selected', String(t === 'view'));
+  if (changed && matchMedia('(max-width:860px)').matches) {
+    window.scrollTo(0, 0);
+    if (t === 'view' && !setTab.tipped) { setTab.tipped = true; toast('點預覽上的區塊，就能跳到那裡的設定', 3200); }
+  }
+}
+// 手機版的「更多」：全螢幕預覽、切換網站、刪除、教學、回會員專區
+function openMoreSheet() {
+  const d = deriveStatus();
+  const sw = h('div', { class: 'more-switch' }); paintSiteSwitch(sw);
+  const m = modal(((S.content && S.content.name) || S.site.slug), [
+    h('p', { class: 'more-status' }, h('span', { class: 'badge ' + d.cls, text: d.text }), ' ' + S.site.slug),
+    h('div', { class: 'more-list' },
+      h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openFullPreview(); } }, '全螢幕預覽'),
+      h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openGuide(); } }, '使用教學'),
+      h('a', { class: 'btn', href: '../dashboard/' }, '回到會員專區')),
+    h('div', { class: 'field', style: 'margin-top:14px' }, h('span', { text: '切換網站' }), sw)],
+    [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '關閉')]);
+  m.classList.add('sheet');
+}
+
 function bindChrome() {
   if (bindChrome.done) return; bindChrome.done = true;
   $('#btnPublish').addEventListener('click', publish);
@@ -1497,10 +1525,15 @@ function bindChrome() {
   const stage = $('#stage'), d = $('#devDesk'), m = $('#devMob');
   d.addEventListener('click', () => { stage.classList.remove('mob'); d.setAttribute('aria-pressed', 'true'); m.setAttribute('aria-pressed', 'false'); });
   m.addEventListener('click', () => { stage.classList.add('mob'); m.setAttribute('aria-pressed', 'true'); d.setAttribute('aria-pressed', 'false'); });
-  const app = $('.app'); app.dataset.tab = 'edit';
-  const te = $('#tabEdit'), tv = $('#tabView');
-  te.addEventListener('click', () => { app.dataset.tab = 'edit'; te.setAttribute('aria-selected', 'true'); tv.setAttribute('aria-selected', 'false'); });
-  tv.addEventListener('click', () => { app.dataset.tab = 'view'; tv.setAttribute('aria-selected', 'true'); te.setAttribute('aria-selected', 'false'); renderPreview(); });
+  setTab('edit');
+  $('#tabEdit').addEventListener('click', () => setTab('edit'));
+  $('#tabView').addEventListener('click', () => { setTab('view'); renderPreview(); });
+  $('#btnFull2').addEventListener('click', openFullPreview);
+  $('#btnMore').addEventListener('click', openMoreSheet);
+  // 手機：打字時（鍵盤打開）先收起下方的工具列，避免擋住正在輸入的欄位
+  const app = $('.app');
+  document.addEventListener('focusin', (e) => { if (e.target.matches && e.target.matches('#panel input:not([type=checkbox]):not([type=radio]):not([type=color]), #panel textarea, #panel select')) app.classList.add('typing'); });
+  document.addEventListener('focusout', () => setTimeout(() => { const a = document.activeElement; if (!(a && a.matches && a.matches('#panel input, #panel textarea, #panel select'))) app.classList.remove('typing'); }, 80));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();
     // 輸入框裡交給瀏覽器自己的復原；其他地方 Ctrl/⌘+Z 復原、Ctrl/⌘+Shift+Z 或 Ctrl+Y 重做
