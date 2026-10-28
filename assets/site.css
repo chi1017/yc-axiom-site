@@ -820,19 +820,21 @@
     .bento-card--large, .bento-card--wide, .bento-card { grid-column: span 1; min-height: 200px; }
 }
 
-/* ── Page Loader ── */
+/* ── Page Loader（2026-10）：Logo 描線 → YC AXIOM → 標語逐字浮現、「光芒」「實力」掃過一道光；
+   離開時：標語往上淡出、Logo 放出一圈光後淡出，最後整個畫面淡出。每個分頁階段只播一次，點一下可略過。 ── */
 #page-loader {
-    position: fixed; inset: 0; z-index: 100000;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+    position: fixed; inset: 0; z-index: 100000; padding: 24px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
     background-color: var(--black);
     background-image:
-        radial-gradient(600px circle at 50% 42%, rgba(95, 163, 150, 0.10), transparent 60%),
-        radial-gradient(500px circle at 80% 90%, rgba(177, 139, 87, 0.04), transparent 55%);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s linear 0.7s;
+        radial-gradient(640px circle at 50% 40%, rgba(95, 163, 150, 0.11), transparent 60%),
+        radial-gradient(500px circle at 80% 90%, rgba(177, 139, 87, 0.05), transparent 55%);
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.45s, visibility 0s linear 1.05s;
+    cursor: default;
 }
-#page-loader.is-done { opacity: 0; transform: scale(1.03); visibility: hidden; pointer-events: none; }
+#page-loader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
 html.is-loading, html.is-loading body { overflow: hidden; }
-.loader-mark { position: relative; width: 112px; height: 112px; display: grid; place-items: center; }
+.loader-mark { position: relative; width: clamp(88px, 22vw, 112px); aspect-ratio: 1; display: grid; place-items: center; }
 .loader-mark::before {
     content: ''; position: absolute; inset: -18px; border-radius: 50%;
     background: radial-gradient(circle, rgba(95, 163, 150, 0.22), transparent 68%);
@@ -844,27 +846,47 @@ html.is-loading, html.is-loading body { overflow: hidden; }
 .loader-y1 { animation: loaderDraw 0.45s cubic-bezier(0.65, 0, 0.35, 1) 0.75s forwards; }
 .loader-y2 { animation: loaderDraw 0.45s cubic-bezier(0.65, 0, 0.35, 1) 0.95s forwards; }
 .loader-y3 { animation: loaderDraw 0.4s cubic-bezier(0.65, 0, 0.35, 1) 1.15s forwards; }
-.loader-text { text-align: center; opacity: 0; transform: translateY(8px); animation: loaderRise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.9s forwards; }
-.loader-name { font-family: var(--f-ui); font-weight: 700; font-size: 18px; letter-spacing: 0.05em;  color: var(--text-bright); }
-.loader-sub { margin-top: 6px; font-family: var(--f-ui); font-weight: 600; font-size: 12px; letter-spacing: 0.05em; color: rgba(95, 163, 150, 0.85); }
-.loader-bar { position: relative; width: 120px; height: 2px; overflow: hidden; border-radius: 2px; background: rgba(245, 240, 230, 0.08); opacity: 0; animation: loaderRise 0.6s ease 1.1s forwards; }
-.loader-bar::after {
-    content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%;
-    background: linear-gradient(90deg, transparent, var(--accent), #8FBFB4, transparent);
-    box-shadow: 0 0 10px var(--accent); animation: loaderSweep 1.2s ease-in-out infinite;
-}
+.loader-flare { position: absolute; left: 50%; top: 50%; width: 140px; height: 140px; margin: -70px 0 0 -70px; border-radius: 50%; pointer-events: none; opacity: 0;
+    background: radial-gradient(circle, rgba(140, 210, 194, 0.55), rgba(95, 163, 150, 0.18) 45%, transparent 70%); }
+.loader-text { text-align: center; max-width: 100%; }
+.loader-name { font-family: var(--f-ui); font-weight: 700; font-size: 13px; letter-spacing: 0.32em; padding-left: 0.32em; color: rgba(245, 240, 230, 0.62);
+    opacity: 0; transform: translateY(8px); animation: loaderRise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.05s forwards; }
+.loader-slogan { margin: 14px 0 0; font-family: "Noto Serif TC", var(--f-ui), serif; font-weight: 600; font-size: clamp(20px, 3.2vw, 30px); line-height: 1.55; letter-spacing: 0.06em; color: var(--text-bright); }
+.ls-line { display: inline; }
+.lc { display: inline-block; opacity: 0; transform: translateY(0.45em); filter: blur(6px);
+    animation: loaderChar 0.65s cubic-bezier(0.16, 1, 0.3, 1) calc(1.35s + var(--i) * 0.045s) forwards; }
+.lc.hl { color: transparent; -webkit-background-clip: text; background-clip: text;
+    background-image: linear-gradient(100deg, #8CD2C2 0%, #5FA396 35%, #FFFFFF 50%, #5FA396 65%, #8CD2C2 100%);
+    background-size: 300% 100%; background-position: 100% 0;
+    animation: loaderChar 0.65s cubic-bezier(0.16, 1, 0.3, 1) calc(1.35s + var(--i) * 0.045s) forwards, loaderShine 0.9s ease-in-out 2.2s forwards; }
+/* 離開 */
+#page-loader.is-done .loader-text { animation: loaderOutUp 0.5s cubic-bezier(0.4, 0, 1, 1) forwards; }
+#page-loader.is-done .loader-mark { animation: loaderMarkOut 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards; }
+#page-loader.is-done .loader-mark::before { animation: none; opacity: 0; }
+#page-loader.is-done .loader-flare { animation: loaderFlare 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; }
 @keyframes loaderDraw { to { stroke-dashoffset: 0; } }
 @keyframes loaderRise { to { opacity: 1; transform: translateY(0); } }
+@keyframes loaderChar { to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes loaderShine { from { background-position: 100% 0; } to { background-position: 0 0; } }
 @keyframes loaderGlow { 0%, 100% { opacity: 0.25; transform: scale(0.94); } 50% { opacity: 0.9; transform: scale(1.06); } }
-@keyframes loaderSweep { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+@keyframes loaderOutUp { to { opacity: 0; transform: translateY(-14px); filter: blur(4px); } }
+@keyframes loaderMarkOut { 0% { transform: none; opacity: 1; } 35% { transform: scale(1.08); opacity: 1; } 80% { opacity: 0; } 100% { transform: scale(1.16); opacity: 0; } }
+@keyframes loaderFlare { 0% { opacity: 0; transform: scale(0.6); } 35% { opacity: 1; } 100% { opacity: 0; transform: scale(2.6); } }
+@media (max-width: 640px) {
+    #page-loader { gap: 22px; }
+    .ls-line { display: block; }
+    .loader-slogan { font-size: clamp(19px, 5.6vw, 24px); }
+}
 @media (prefers-reduced-motion: reduce) {
     .loader-draw { stroke-dashoffset: 0; animation: none; }
-    .loader-text, .loader-bar { opacity: 1; transform: none; animation: none; }
-    .loader-mark::before, .loader-bar::after { animation: none; }
-    #page-loader, #page-loader.is-done { transition-duration: 0.2s; transform: none; }
+    .loader-name, .lc, .lc.hl { opacity: 1; transform: none; filter: none; animation: none; }
+    .lc.hl { background-position: 50% 0; }
+    .loader-mark::before { animation: none; }
+    #page-loader.is-done .loader-text, #page-loader.is-done .loader-mark, #page-loader.is-done .loader-flare { animation: none; }
+    #page-loader, #page-loader.is-done { transition: opacity 0.3s ease, visibility 0s linear 0.3s; }
 }
-    
-#page-loader{display:none!important}
+[data-theme="light"] .loader-name { color: rgba(40, 34, 24, 0.6); }
+[data-theme="light"] .lc.hl { background-image: linear-gradient(100deg, #2F7A6D 0%, #3C7A6D 35%, #8CD2C2 50%, #3C7A6D 65%, #2F7A6D 100%); }
 
 /* ── Theme toggle (dark = default brand look, light = opt-in) ── */
 :root { color-scheme: dark; --on-accent: #0B0A09; }

@@ -59,7 +59,7 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Italianno&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="../../assets/site.css?v=2026-10-28b">
+<link rel="stylesheet" href="../../assets/site.css?v=2026-10-28c">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -209,7 +209,7 @@
 <body>
 
 <!-- Page Loader -->
-<div id="page-loader" role="status" aria-live="polite" aria-label="頁面載入中">
+<div id="page-loader" role="status" aria-live="polite" aria-label="YC 網站設計，讓你的品牌自帶光芒與實力。頁面載入中">
     <div class="loader-mark">
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
@@ -223,11 +223,11 @@
             <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
         </svg>
     </div>
-    <div class="loader-text">
+    <span class="loader-flare" aria-hidden="true"></span>
+    <div class="loader-text" aria-hidden="true">
         <div class="loader-name">YC AXIOM</div>
-        <div class="loader-sub">[品牌與工程]</div>
+        <p class="loader-slogan"><span class="ls-line"><span class="lc" style="--i:0">Y</span><span class="lc" style="--i:1">C</span><span class="lc" style="--i:2">&nbsp;</span><span class="lc" style="--i:3">網</span><span class="lc" style="--i:4">站</span><span class="lc" style="--i:5">設</span><span class="lc" style="--i:6">計</span><span class="lc" style="--i:7">，</span></span><span class="ls-line"><span class="lc" style="--i:8">讓</span><span class="lc" style="--i:9">你</span><span class="lc" style="--i:10">的</span><span class="lc" style="--i:11">品</span><span class="lc" style="--i:12">牌</span><span class="lc" style="--i:13">自</span><span class="lc" style="--i:14">帶</span><span class="lc hl" style="--i:15">光</span><span class="lc hl" style="--i:16">芒</span><span class="lc" style="--i:17">與</span><span class="lc hl" style="--i:18">實</span><span class="lc hl" style="--i:19">力</span><span class="lc" style="--i:20">。</span></span></p>
     </div>
-    <div class="loader-bar"></div>
 </div>
 <script>
 (function () {
@@ -235,16 +235,17 @@
     if (!loader) return;
     try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
     root.classList.add('is-loading');
-    var start = Date.now(), MIN = 1700, MAX = 5000, closed = false;
+    var start = Date.now(), MIN = 3200, MAX = 6500, closed = false;
     function close() {
         if (closed) return; closed = true;
         loader.classList.add('is-done');
         root.classList.remove('is-loading');
-        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 900);
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 1300);
     }
     function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
     if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
     setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+    loader.addEventListener('click', close); /* 點一下就能略過 */
 })();
 </script>
 
