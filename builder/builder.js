@@ -444,7 +444,7 @@ function openCard(id, focusFn) {
   closeModal(); setTab('edit');
   clearSearch();
   if (c.hidden) showGroup(c.dataset.group || 'all', false);
-  c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (isMob()) { enterCard(c); } else c.scrollIntoView({ behavior: 'smooth', block: 'start' });
   c.classList.remove('card-flash'); void c.offsetWidth; c.classList.add('card-flash');
   const el = focusFn && focusFn();
   if (el) setTimeout(() => el.focus({ preventScroll: true }), 350);
@@ -895,7 +895,10 @@ function buildGroupNav() {
     h('button', { type: 'button', class: 'guide-btn', onclick: () => openGuide(), title: '使用教學' }, '？ 教學'), search, h('div', { id: 'searchMsg', class: 'msg mute', hidden: true }));
   P.prepend(nav);
   P.querySelectorAll('section.card').forEach((c) => { c.dataset.group = groupOf(c.id) || 'feature'; });
+  buildMobList();
+  const reopen = $('.app').dataset.mode === 'card' && S.mCardId;
   showGroup(cur, false);
+  if (reopen) { const c = $('#' + S.mCardId); if (c) { if (c.hidden) showGroup(c.dataset.group || 'all', false); enterCard(c, true); } else $('.app').dataset.mode = 'list'; }
   let seen = false; try { seen = localStorage.getItem('yc-builder-guide') === '1'; } catch (e) { /* ignore */ }
   if (!seen) setTimeout(openGuide, 600);
 }
@@ -920,6 +923,7 @@ function runSearch(q) {
     c.hidden = !hit; if (hit) n++;
   });
   P.querySelectorAll('.group-nav button[data-g]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+  paintMobList();
   msg.hidden = false; msg.textContent = n ? '找到 ' + n + ' 張相關的設定卡片（按 Enter 直接打開第一張，按 Esc 清除）' : '找不到「' + q + '」，換個說法試試看';
 }
 function showGroup(key, scroll) {
@@ -929,6 +933,7 @@ function showGroup(key, scroll) {
   if (!$('#setSearch') || !$('#setSearch').value) searchPrev = null;
   try { localStorage.setItem('yc-builder-group', key); } catch (e) { /* ignore */ }
   if (scroll) P.scrollTo({ top: 0, behavior: 'smooth' });
+  paintMobList();
 }
 // 第一次進編輯器的簡短引導（之後可按「？ 教學」再看）
 function openGuide() {
@@ -1490,6 +1495,69 @@ async function publish() {
 // 是否需要（重新）同意條款：從沒同意過，或同意的不是目前版本
 function needTerms() { return !S.site.terms_accepted_at || (S.site.terms_version || '') !== TERMS_VERSION; }
 
+// ── 手機版（像 App 一樣）：下方分頁 → 設定清單 → 點一項進入那一頁設定，左上「‹」或手機的返回鍵回清單 ──
+const isMob = () => matchMedia('(max-width:860px)').matches;
+function buildMobList() {
+  const P = $('#panel');
+  const q = h('input', { type: 'search', class: 'm-search', placeholder: '搜尋設定，例如 電話、配色、預約', 'aria-label': '搜尋設定', autocomplete: 'off' });
+  q.addEventListener('input', () => { const s = $('#setSearch'); if (s) { s.value = q.value; runSearch(q.value); } paintMobList(); });
+  const head = h('div', { id: 'mhead', class: 'mhead' }, h('h1', { id: 'mH1', class: 'm-h1' }), q);
+  const rows = h('div', { id: 'mrows', class: 'mrows', role: 'list' });
+  const nav = P.querySelector('.group-nav'); nav.after(head);
+  const first = P.querySelector('section.card'); if (first) first.before(rows); else P.append(rows);
+  P.dataset.mode = 'list';
+}
+function paintMobList() {
+  const P = $('#panel'), rows = $('#mrows'); if (!rows) return;
+  const s = $('#setSearch'), searching = !!(s && s.value.trim());
+  const pressed = P.querySelector('.group-nav button[aria-pressed=true]');
+  const g = GROUPS.find((x) => pressed && x.key === pressed.dataset.g);
+  $('#mH1').textContent = searching ? '搜尋結果' : (g ? g.label : '設定');
+  rows.replaceChildren(...[...P.querySelectorAll('section.card')].filter((c) => !c.hidden).map((c) => {
+    const t = c.querySelector('h2'), sub = c.querySelector('.sub');
+    const title = t ? t.textContent.replace(/（.*?）/g, '').trim() : c.id;
+    return h('button', { type: 'button', class: 'mrow', role: 'listitem', onclick: () => openCard(c.id) },
+      h('span', { class: 'mrow-t' }, h('strong', { text: title }), sub ? h('small', { text: sub.textContent.trim() }) : ''),
+      h('span', { class: 'mrow-go', 'aria-hidden': 'true', text: '›' }));
+  }));
+  if (searching && !rows.children.length) rows.append(h('p', { class: 'msg mute', text: '找不到相關的設定，換個說法試試看' }));
+  paintMobTabs();
+}
+function paintMobTabs() {
+  const app = $('.app'), P = $('#panel'); if (!app) return;
+  const pressed = P && P.querySelector('.group-nav button[aria-pressed=true]');
+  const cur = app.dataset.tab === 'view' ? 'view' : (pressed ? pressed.dataset.g : '');
+  document.querySelectorAll('#mtabs button').forEach((b) => b.setAttribute('aria-current', b.dataset.k === cur ? 'page' : 'false'));
+}
+function enterCard(c, keepScroll) {
+  const P = $('#panel'), app = $('.app');
+  if (P.dataset.mode !== 'card' && !keepScroll) S.mListScroll = P.scrollTop;
+  S.mCardId = c.id;
+  P.querySelectorAll('section.card.is-open').forEach((x) => x.classList.remove('is-open'));
+  c.classList.add('is-open'); P.dataset.mode = 'card'; app.dataset.mode = 'card';
+  const t = c.querySelector('h2'); $('#mCardTitle').textContent = t ? t.textContent.replace(/（.*?）/g, '').trim() : '';
+  P.scrollTop = 0;
+  if (!(history.state && history.state.mcard)) history.pushState({ mcard: c.id }, '');
+}
+function leaveCard() {
+  const P = $('#panel'), app = $('.app'); if (!P || P.dataset.mode !== 'card') return;
+  P.querySelectorAll('section.card.is-open').forEach((x) => x.classList.remove('is-open'));
+  P.dataset.mode = 'list'; app.dataset.mode = 'list';
+  paintMobList(); P.scrollTop = S.mListScroll || 0;
+}
+function backToList() { if (history.state && history.state.mcard) history.back(); else leaveCard(); }
+window.addEventListener('popstate', () => leaveCard());
+// 「更多」裡加到主畫面的說明
+function openInstallHelp() {
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  modal('加到手機主畫面', [h('p', { text: '加到主畫面後，編輯器會像 App 一樣用整個螢幕打開，不會有瀏覽器的網址列。' }),
+    h('ol', {}, ...(ios
+      ? [h('li', { text: '用 Safari 打開這一頁' }), h('li', { text: '點下方的「分享」按鈕' }), h('li', { text: '選「加入主畫面」，再按「新增」' })]
+      : [h('li', { text: '用 Chrome 打開這一頁' }), h('li', { text: '點右上角的「⋮」' }), h('li', { text: '選「加到主畫面」或「安裝應用程式」' })])),
+    h('p', { class: 'msg mute', text: '第一次從主畫面打開時，可能需要重新登入一次。' })],
+  [h('button', { type: 'button', class: 'btn primary', onclick: closeModal }, '知道了')]).classList.add('sheet');
+}
+
 // 手機版：編輯／預覽切換
 function setTab(t) {
   const app = $('.app'); if (!app) return;
@@ -1498,6 +1566,7 @@ function setTab(t) {
   const te = $('#tabEdit'), tv = $('#tabView');
   if (te) te.setAttribute('aria-selected', String(t === 'edit'));
   if (tv) tv.setAttribute('aria-selected', String(t === 'view'));
+  paintMobTabs();
   if (changed && matchMedia('(max-width:860px)').matches) {
     window.scrollTo(0, 0);
     if (t === 'view' && !setTab.tipped) { setTab.tipped = true; toast('點預覽上的區塊，就能跳到那裡的設定', 3200); }
@@ -1511,6 +1580,9 @@ function openMoreSheet() {
     h('p', { class: 'more-status' }, h('span', { class: 'badge ' + d.cls, text: d.text }), ' ' + S.site.slug),
     h('div', { class: 'more-list' },
       h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openFullPreview(); } }, '全螢幕預覽'),
+      $('#c-order') ? h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openCard('c-order'); } }, '首頁區塊順序') : '',
+      $('#c-history') ? h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openCard('c-history'); } }, '版本紀錄與還原') : '',
+      h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openInstallHelp(); } }, '加到手機主畫面'),
       h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openGuide(); } }, '使用教學'),
       h('a', { class: 'btn', href: '../dashboard/' }, '回到會員專區')),
     h('div', { class: 'field', style: 'margin-top:14px' }, h('span', { text: '切換網站' }), sw)],
@@ -1530,6 +1602,16 @@ function bindChrome() {
   $('#tabView').addEventListener('click', () => { setTab('view'); renderPreview(); });
   $('#btnFull2').addEventListener('click', openFullPreview);
   $('#btnMore').addEventListener('click', openMoreSheet);
+  $('#mBack').addEventListener('click', backToList);
+  document.querySelectorAll('#mtabs button').forEach((b) => b.addEventListener('click', () => {
+    const k = b.dataset.k, P = $('#panel');
+    if (k === 'view') { setTab('view'); renderPreview(); return; }
+    const wasCard = P.dataset.mode === 'card';
+    leaveCard(); S.mListScroll = 0;
+    if (wasCard && history.state && history.state.mcard) history.back();
+    setTab('edit'); clearSearch(); const ms = P.querySelector('.m-search'); if (ms) ms.value = '';
+    showGroup(k, false); P.scrollTop = 0;
+  }));
   // 手機：打字時（鍵盤打開）先收起下方的工具列，避免擋住正在輸入的欄位
   const app = $('.app');
   document.addEventListener('focusin', (e) => { if (e.target.matches && e.target.matches('#panel input:not([type=checkbox]):not([type=radio]):not([type=color]), #panel textarea, #panel select')) app.classList.add('typing'); });
