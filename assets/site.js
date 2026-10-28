@@ -600,3 +600,57 @@
     window.addEventListener('storage', render);
     setInterval(render, 1500);
 })();
+
+/* ── 手機版（App 樣式）：下方固定分頁列（首頁／服務／網站租用／LINE 諮詢／選單）。
+   只在手機寬度顯示；選單鍵打開原本的全螢幕選單，Threads、Instagram 移到選單最下面。 ── */
+(function () {
+    'use strict';
+    if (/\/admin\//.test(location.pathname) || document.getElementById('yc-tabbar')) return;
+    var mm = document.getElementById('mobile-menu');
+    var me = document.querySelector('script[src*="assets/site.js"]');
+    var root = me ? new URL('../', me.src).href : location.origin + '/';
+    var rel = location.href.indexOf(root) === 0 ? location.href.slice(root.length).split(/[?#]/)[0] : '';
+    var cur = (rel === '' || rel === 'index.html') ? 'home' : /^services\//.test(rel) ? 'services' : /^rental\//.test(rel) ? 'rental' : '';
+    var lineA = document.querySelector('a.line-float');
+    var ico = function (d) { return '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
+    var tabs = [
+        { k: 'home', href: root, label: '首頁', icon: ico('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>') },
+        { k: 'services', href: root + 'services/', label: '服務', icon: ico('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/>') },
+        { k: 'rental', href: root + 'rental/', label: '網站租用', icon: ico('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>') },
+        { k: 'line', href: lineA ? lineA.getAttribute('href') : '', label: 'LINE 諮詢', icon: lineA && lineA.querySelector('svg') ? lineA.querySelector('svg').outerHTML.replace(/width="\d+"/, 'width="24"').replace(/height="\d+"/, 'height="24"') : '' },
+        { k: 'menu', label: '選單', icon: ico('<path d="M4 7h16M4 12h16M4 17h16"/>') }
+    ];
+    var nav = document.createElement('div');   // 不用 <nav>：網站樣式裡的 nav 規則是給上方導覽列的
+    nav.id = 'yc-tabbar'; nav.className = 'tabbar'; nav.setAttribute('role', 'navigation'); nav.setAttribute('aria-label', '主要分頁');
+    tabs.forEach(function (t) {
+        if (t.k === 'line' && !t.href) return;
+        var el;
+        if (t.k === 'menu') {
+            if (!mm) return;
+            el = document.createElement('button'); el.type = 'button';
+            el.setAttribute('aria-expanded', 'false'); el.setAttribute('aria-controls', 'mobile-menu');
+            el.addEventListener('click', function () { if (typeof toggleMobileMenu === 'function') toggleMobileMenu(); });
+        } else {
+            el = document.createElement('a'); el.href = t.href;
+            if (t.k === 'line') { el.target = '_blank'; el.rel = 'noopener'; el.className = 'tab-line'; el.setAttribute('aria-label', lineA.getAttribute('aria-label') || 'LINE 諮詢'); }
+            if (t.k === cur) el.setAttribute('aria-current', 'page');
+        }
+        el.dataset.k = t.k;
+        el.innerHTML = t.icon + '<span>' + t.label + '</span>';
+        nav.appendChild(el);
+    });
+    document.body.appendChild(nav);
+    document.documentElement.classList.add('has-tabbar');
+    if (mm) {
+        // 選單打開時，「選單」分頁亮起
+        var mb = nav.querySelector('[data-k="menu"]');
+        new MutationObserver(function () { if (mb) mb.setAttribute('aria-expanded', mm.classList.contains('open') ? 'true' : 'false'); }).observe(mm, { attributes: true, attributeFilter: ['class'] });
+        // Threads、Instagram：手機上放進選單
+        var sf = document.querySelectorAll('.social-float a.sf-threads, .social-float a.sf-ig');
+        if (sf.length && !mm.querySelector('.mobile-social')) {
+            var row = document.createElement('div'); row.className = 'mobile-social';
+            sf.forEach(function (a) { var c = a.cloneNode(true); c.removeAttribute('data-tip'); c.className = 'mobile-social-a'; c.insertAdjacentHTML('beforeend', '<span>' + (a.classList.contains('sf-ig') ? 'Instagram' : 'Threads') + '</span>'); row.appendChild(c); });
+            mm.appendChild(row);
+        }
+    }
+})();

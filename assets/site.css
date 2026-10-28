@@ -1518,3 +1518,39 @@ a.service-more:hover { text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 1120px) { .hamburger { min-height: 44px; } }
 @media (max-width: 900px) { .theme-toggle { width: 44px; height: 44px; } }
 [data-theme="light"] #mobile-menu .mobile-nav-btn[aria-current="page"] { color: var(--accent); border-color: var(--accent); }
+/* ── 手機版 App 樣式（2026-10）：下方分頁列，上方只留 Logo、免費諮詢、主題切換 ── */
+.tabbar { display: none; }
+.mobile-social { display: none; }
+@media (max-width: 768px) {
+  html { -webkit-tap-highlight-color: transparent; }
+  .has-tabbar .tabbar {
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 61;
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px));
+    background: rgba(14, 13, 12, 0.88); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(245, 240, 230, 0.1);
+  }
+  .tabbar > a, .tabbar > button {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 54px;
+    border: 0; background: none; border-radius: 12px; cursor: pointer; text-decoration: none;
+    font-family: var(--f-ui); font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--text-dim);
+  }
+  .tabbar > a:active, .tabbar > button:active { background: rgba(255, 255, 255, 0.06); }
+  .tabbar [aria-current="page"], .tabbar button[aria-expanded="true"] { color: var(--accent); }
+  .tabbar [aria-current="page"] svg { stroke-width: 2.2; }
+  .tabbar .tab-line { color: #06C755; }
+  [data-theme="light"] .has-tabbar .tabbar, [data-theme="light"] .tabbar { background: rgba(250, 248, 243, 0.92); border-top-color: rgba(20, 50, 45, 0.12); }
+  /* 分頁列取代懸浮按鈕與選單鍵 */
+  .has-tabbar .line-float, .has-tabbar .social-float { display: none !important; }
+  .has-tabbar .hamburger { display: none !important; }
+  .has-tabbar nav .nav-right .nav-cta { display: inline-flex !important; min-height: 40px; padding: 0 14px; font-size: 13px; }
+  .has-tabbar body { padding-bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
+  .has-tabbar footer { padding-bottom: 32px; }
+  .has-tabbar #mobile-menu { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  .has-tabbar #mobile-menu .mobile-close { display: none !important; }
+  .has-tabbar #mobile-menu { padding-top: calc(24px + env(safe-area-inset-top, 0px)); }
+  .has-tabbar .mobile-social { display: flex; grid-column: 1 / -1; gap: 10px; margin-top: 6px; }
+  .mobile-social-a { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; border-radius: 10px; border: 1px solid rgba(245, 240, 230, 0.16); color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 14px; }
+  .mobile-social-a svg { width: 18px; height: 18px; }
+  [data-theme="light"] .mobile-social-a { border-color: rgba(20, 50, 45, 0.18); }
+}
+@media (max-width: 360px) { .has-tabbar .nav-logo-sub { display: none; } }
