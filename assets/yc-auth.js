@@ -85,10 +85,13 @@
   }
   YC.signInWithGoogle = async function () {
     if (!YC.client) throw new Error('會員功能尚未啟用');
-    var r = await YC.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: returnUrl(), skipBrowserRedirect: true } });
+    // prompt=select_account：每次都讓 Google 顯示帳號選擇畫面，手機或電腦登入多個 Google 帳號時可以選要用哪一個
+    var r = await YC.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: returnUrl(), skipBrowserRedirect: true, queryParams: { prompt: 'select_account' } } });
     if (r.error) throw r.error;
     (window.top || window).location.href = r.data.url;   // Google 不允許在 iframe 內開啟，必須整頁跳轉
   };
+  // 切換 Google 帳號：直接開 Google 帳號選擇畫面，選好後回到這一頁，換成新帳號的登入狀態（不會刪除任何資料）
+  YC.switchAccount = function () { return YC.signInWithGoogle(); };
   YC.signInWithEmail = async function (email) {
     if (!YC.features.magicLink) throw new Error('Email 魔法連結尚未開放');
     var r = await YC.client.auth.signInWithOtp({ email: email, options: { emailRedirectTo: returnUrl(), shouldCreateUser: true } });
@@ -320,8 +323,9 @@
         '<a href="' + esc(YC.url('dashboard/')) + '" target="_top">會員專區</a>' +
         (YC.isAdmin() ? '<a href="' + esc(YC.url('admin/')) + '" target="_top">管理後台</a>' : '') +
         '<a href="' + esc(YC.url('privacy/')) + '" target="_blank" rel="noopener">隱私權政策</a>' +
-        '<button id="yc-logout">登出</button></div>';
+        '<button id="yc-switch">切換 Google 帳號</button><button id="yc-logout">登出</button></div>';
       host.querySelector('#yc-me').onclick = function (e) { e.stopPropagation(); host.classList.toggle('open'); };
+      host.querySelector('#yc-switch').onclick = function () { YC.switchAccount().catch(function (e) { alert('無法切換帳號：' + (e.message || e)); }); };
       host.querySelector('#yc-logout').onclick = function () { YC.signOut(); };
     }
     document.addEventListener('click', function () { host.classList.remove('open'); });

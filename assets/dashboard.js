@@ -67,10 +67,11 @@
       '<div class="mem-bar"><div class="mem-who">登入身分：' + esc(mail) + '</div>' +
       '<div class="mem-actions"><a class="m-btn" href="../seo/">SEO 檢測</a><a class="m-btn" href="../geo/">AI 可見度檢測</a>' +
       '<a class="m-btn primary" href="' + esc(LINE) + '" target="_blank" rel="noopener">免費 15 分鐘諮詢</a>' +
-      '<button class="m-btn" id="d-logout">登出</button></div></div>' +
+      '<button class="m-btn" id="d-switch">切換 Google 帳號</button><button class="m-btn" id="d-logout">登出</button></div></div>' +
       '<div id="d-body"></div>' +
       '<div class="mem-danger"><p>想停止使用？可刪除帳號與全部資料（網站、檢測紀錄、同意紀錄），立即清除、無法復原。詳見<a href="../privacy/">隱私權政策</a>。</p>' +
       '<button class="m-btn danger sm" id="d-delacc">刪除我的帳號與所有資料</button></div>';
+    document.getElementById('d-switch').onclick = switchAccount;
     document.getElementById('d-logout').onclick = function () { YC.signOut(); };
     document.getElementById('d-delacc').onclick = confirmDeleteAccount;
   }
@@ -251,5 +252,10 @@
     rendering = false;
     if (again) { again = false; render(); }
   }
-  YC.onChange(function () { if (state.deleted) return; if (!YC.loggedIn() || !YC.consented()) root.innerHTML = ''; render(); });
+  function switchAccount() { YC.switchAccount().catch(function (e) { alert('無法切換帳號：' + (e.message || e)); }); }
+  // 從網站上方「切換 Google 帳號」進來（?switch=1）：直接打開 Google 帳號選擇畫面
+  var wantSwitch = /[?&]switch=1/.test(location.search);
+  if (wantSwitch) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) { /* ignore */ } }
+  YC.onChange(function () { if (wantSwitch && YC.enabled) { wantSwitch = false; switchAccount(); return; }
+    if (state.deleted) return; if (!YC.loggedIn() || !YC.consented()) root.innerHTML = ''; render(); });
 })();
