@@ -593,11 +593,13 @@
         menu.appendChild(item('網站編輯器', root + 'builder/'));
         if (s.admin) menu.appendChild(item('管理後台', root + 'admin/'));
         var sep = document.createElement('li'); sep.className = 'sep'; sep.setAttribute('role', 'separator'); menu.appendChild(sep);
+        menu.appendChild(item('切換 Google 帳號', root + 'dashboard/?switch=1'));
         var lo = document.createElement('li'), b = document.createElement('button');
         b.type = 'button'; b.textContent = '登出'; b.onclick = signOut; lo.appendChild(b); menu.appendChild(lo);
         addMobile('會員專區', root + 'dashboard/');
         addMobile('網站編輯器', root + 'builder/');
         if (s.admin) addMobile('管理後台', root + 'admin/');
+        addMobile('切換 Google 帳號', root + 'dashboard/?switch=1');
         addMobile('登出', '#', signOut);
     }
     render();

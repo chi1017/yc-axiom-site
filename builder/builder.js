@@ -1586,7 +1586,8 @@ function openMoreSheet() {
       $('#c-history') ? h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openCard('c-history'); } }, '版本紀錄與還原') : '',
       h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openInstallHelp(); } }, '加到手機主畫面'),
       h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openGuide(); } }, '使用教學'),
-      h('a', { class: 'btn', href: '../dashboard/' }, '回到會員專區')),
+      h('a', { class: 'btn', href: '../dashboard/' }, '回到會員專區'),
+      h('button', { type: 'button', class: 'btn', onclick: async () => { closeModal(); if (S.dirty || S.saving) await save(); S.dirty = false; YC.switchAccount().catch((e) => toast('無法切換帳號：' + (e.message || e))); } }, '切換 Google 帳號')),
     h('div', { class: 'field', style: 'margin-top:14px' }, h('span', { text: '切換網站' }), sw)],
     [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '關閉')]);
   m.classList.add('sheet');
