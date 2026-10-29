@@ -1,6 +1,6 @@
 /* 預覽「最新送出的版本」：網站擁有者或管理員才看得到（由資料庫的 RLS 決定）。
    用的是與正式部署相同的版型函式，只是圖片網址改指向 Supabase，所以看到的就是上線後的樣子。 */
-import { startReveal, wireNav } from '../preview-fx.js?v=2026-10-28c';
+import { startReveal, wireNav } from '../preview-fx.js';
 const YC = window.YC;
 const $ = (s) => document.querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
@@ -25,7 +25,8 @@ async function run() {
   done = true;
   try {
     const base = tplBase();
-    const lib = await import(base + 'templates/shared/site.js');
+    let lib;
+    try { lib = (await import(base + 'templates/dist/builder-lib.js')).site; } catch (e) { lib = await import(base + 'templates/shared/site.js'); }
     const s = await YC.client.from('rental_sites').select('id,slug,template,status,palette,sections,content,public_url,layout,pages').eq('id', id).maybeSingle();
     if (s.error) throw s.error;
     if (!s.data) { done = false; return say('找不到這個網站，或你沒有檢視權限'); }
