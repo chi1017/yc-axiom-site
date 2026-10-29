@@ -1692,3 +1692,21 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
   .pricing-tabs { display: grid; grid-template-columns: 1fr 1fr; flex-direction: row; margin-bottom: 28px; }
   .pricing-tab { padding: 12px 8px; font-size: 14px; }
 }
+
+/* ── 定價比較表：手機一次看一個方案 ── */
+.pc-pick, .pc-m-only { display: none; }
+@media (max-width: 640px) {
+  .pc-m-only { display: inline; }
+  .pc-pick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+  .pc-pick-b { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 8px 4px; min-height: 40px; cursor: pointer; }
+  .pc-pick-b.is-on { background: var(--accent); border-color: var(--accent); color: #0b0a09; }
+  .pc-wrap { overflow: visible; }
+  .pc-table { min-width: 0; table-layout: fixed; }
+  .pc-table th:not(:first-child), .pc-table td { display: none; }
+  .pc-wrap[data-col="1"] .pc-table :is(th, td):nth-child(2),
+  .pc-wrap[data-col="2"] .pc-table :is(th, td):nth-child(3),
+  .pc-wrap[data-col="3"] .pc-table :is(th, td):nth-child(4),
+  .pc-wrap[data-col="4"] .pc-table :is(th, td):nth-child(5) { display: table-cell; }
+  .pc-table tbody th, .pc-table thead th:first-child { width: 32%; }
+  .pc-table th:first-child { position: static; }
+}
