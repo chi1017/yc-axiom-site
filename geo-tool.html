@@ -444,7 +444,9 @@ function shareReport() { return; }
 </script>
 <script>window.YC_BASE = './';</script>
 <script src="assets/supabase-config.js?v=2026-10-15"></script>
-<script src="assets/vendor/supabase-2.117.2.min.js"></script>
+<script>/* 嵌在官網頁面裡時，直接借用外層已載入的登入套件，不重複下載與解析（約 210KB）；單獨打開工具時才自己載入 */
+(function(){var p=null;try{if(window.parent!==window&&window.parent.supabase&&window.parent.supabase.createClient)p=window.parent.supabase;}catch(e){}
+if(p){window.supabase=p;}else{document.write('<script src="assets/vendor/supabase-2.117.2.min.js"><\/script>');}})();</script>
 <script src="assets/yc-auth.js?v=2026-10-28a"></script>
 <script src="assets/geo-tool-members.js?v=2026-10-16"></script>
 <script src="assets/cross-links.js?v=2026-10-15"></script>

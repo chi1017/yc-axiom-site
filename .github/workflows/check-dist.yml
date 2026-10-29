@@ -1,0 +1,22 @@
+name: Check dist
+
+# 網站實際載入的是 assets/dist、builder/dist 裡的壓縮檔；這個檢查確保它們和原始檔一致（忘了 npm run build 時會失敗）
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run check

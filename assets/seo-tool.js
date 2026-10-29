@@ -1,0 +1,4583 @@
+/* SEO 分析工具（seo-tool.html）的主程式。修改後執行 npm run build 產生 assets/dist/seo-tool.min.js */
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let keywords = [];
+let uploadedFiles = [];
+let selectedIdx = -1;
+let currentReport = null;
+let abortController = null;
+// 檢測紀錄、品牌設定、輸入欄位、忽略規則只存在 sessionStorage：關掉分頁／網頁就全部清除，不留在裝置上。
+// 登入會員的檢測紀錄存在資料庫（會員專區），不在這裡。
+const tmpStore = (() => { try { const s = window.sessionStorage; s.setItem('_yc_t', '1'); s.removeItem('_yc_t'); return s; } catch (e) { const m = {}; return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, removeItem: k => { delete m[k]; } }; } })();
+// 清掉舊版留在 localStorage 的紀錄（舊版會把紀錄長期留在瀏覽器）
+['seo_hist_v8','seo_brand_v13','seo_ignore_v18','seo_biz_bizName','seo_biz_bizType'].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+let history = JSON.parse(tmpStore.getItem('seo_hist_v8') || '[]');
+const tabState = {
+  t1: { mode:'url', html:null, label:'' },
+  t2: { mode:'url', html:null, label:'' },
+  t3: { mode:'url', html:null, label:'' },
+};
+updateHistCount();
+
+// ═══════════════════════════════════════════════════════
+//  TABS & SOURCE TOGGLE
+// ═══════════════════════════════════════════════════════
+function switchTab(name) {
+  ['file','paste','kw','serp'].forEach((n,i) => {
+    document.querySelectorAll('.tab-btn')[i].classList.toggle('active', n===name);
+    document.getElementById('tab-'+n).classList.toggle('active', n===name);
+  });
+}
+function switchSource(tab, mode) {
+  tabState[tab].mode = mode;
+  document.getElementById(`${tab}SrcUrl`).style.display = mode==='url'?'block':'none';
+  document.getElementById(`${tab}SrcFile`).style.display = mode==='file'?'block':'none';
+  document.getElementById(`${tab}BtnUrl`).classList.toggle('active', mode==='url');
+  document.getElementById(`${tab}BtnFile`).classList.toggle('active', mode==='file');
+}
+
+// ═══════════════════════════════════════════════════════
+//  URL FETCH
+// ═══════════════════════════════════════════════════════
+// ── timeout-safe fetch helper (replaces AbortSignal.timeout for broad compatibility) ──
+function rawFetch(url, ms) {
+  const ac = new AbortController();
+  const tid = setTimeout(() => ac.abort(), ms);
+  return fetch(url, { signal: ac.signal }).finally(() => clearTimeout(tid));
+}
+// 抓網頁優先走本站自己的抓取服務（Supabase Edge Function fetch-page，回傳格式與 allorigins 相同）；
+// 只有它連不上時才退回公開代理。目標網站的狀態碼（404、403…）放在 status.http_code，不算失敗。
+const AO_PREFIX = 'https://api.allorigins.win/get?url=';
+const OWN_ERR = { host_not_allowed:'這個網址不能檢測（內網或本機位址）', dns_failed:'找不到這個網域，請確認網址拼寫', bad_url:'網址格式不正確', bad_protocol:'只支援 http／https 網址', bad_host:'網址格式不正確', port_not_allowed:'不支援這個連接埠', credentials_not_allowed:'網址不可包含帳號密碼', too_many_redirects:'網站轉址次數過多', rate_limited:'查詢太頻繁，請稍等一分鐘再試', timeout:'網站回應逾時', fetch_failed:'我們的伺服器無法連到這個網站，可能被網站的安全設定擋住。你的網站本身不一定有問題，請改用『上傳 HTML』檢測。', origin_not_allowed:'目前的網頁來源不被允許' };
+function ownProxyBase() {
+  const c = window.YC_CONFIG;
+  return c && c.supabaseUrl ? String(c.supabaseUrl).replace(/\/$/, '') + '/functions/v1/fetch-page?url=' : null;
+}
+async function fetchWithTimeout(url, ms) {
+  const own = ownProxyBase();
+  if (own && url.indexOf(AO_PREFIX) === 0) {
+    try {
+      const r = await rawFetch(own + url.slice(AO_PREFIX.length), ms);
+      if (r.ok) return r;
+      let code = ''; try { code = (await r.json()).error || ''; } catch (_) {}
+      if (code) { const e = new Error(OWN_ERR[code] || ('服務回應 ' + r.status)); e.definitive = true; throw e; }
+    } catch (e) { if (e && e.definitive) throw e; }
+  }
+  return rawFetch(url, ms);
+}
+
+const PROXIES = [
+  u => ({ ep:`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, parse: async r=>{const j=await r.json();const c=j.status&&j.status.http_code;if(c>=400){const e=new Error(`網站回應 HTTP ${c}`+(c===401||c===403||c===429||c===503?'（網站可能擋掉了自動檢測）':''));e.definitive=true;throw e;}return j.contents;} }),
+  u => ({ ep:`https://corsproxy.io/?${encodeURIComponent(u)}`,              parse: async r=>r.text() }),
+  u => ({ ep:`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, parse: async r=>r.text() }),
+];
+function onUrlInput(tab) {
+  document.getElementById(`${tab}ClearBtn`).style.display = document.getElementById(`${tab}Url`).value.trim() ? 'flex':'none';
+}
+function clearUrl(tab) {
+  document.getElementById(`${tab}Url`).value='';
+  document.getElementById(`${tab}ClearBtn`).style.display='none';
+  setUrlStatus(tab,null);
+  document.getElementById(`${tab}FetchedWrap`).style.display='none';
+  tabState[tab].html=null; tabState[tab].label='';
+  if(tab==='t2'){document.getElementById('kwFileWrap').style.display='none';}
+  if(tab==='t3'){document.getElementById('compFileWrap').style.display='none';}
+}
+async function fetchUrl(tab) {
+  let url = document.getElementById(`${tab}Url`).value.trim();
+  if(!url){setUrlStatus(tab,'error','⚠ 請輸入網址');return;}
+  if(!/^https?:\/\//i.test(url)) url='https://'+url;
+  document.getElementById(`${tab}Url`).value=url;
+  if(tab==='t1') resetResults();
+  const btn=document.getElementById(`${tab}FetchBtn`);
+  const icon=document.getElementById(`${tab}FetchIcon`);
+  btn.disabled=true; icon.innerHTML='<span class="spin">⟳</span>';
+  tabState[tab].html=null; tabState[tab].label='';
+  document.getElementById(`${tab}FetchedWrap`).style.display='none';
+  if(tab==='t2') document.getElementById('kwFileWrap').style.display='none';
+  if(tab==='t3') document.getElementById('compFileWrap').style.display='none';
+  let html=null, lastErr='';
+  for(let i=0;i<PROXIES.length;i++){
+    try{
+      setUrlStatus(tab,'loading',i===0?'⟳ 正在抓取網頁…':`⟳ 嘗試備用服務 ${i}/${PROXIES.length-1}...`);
+      const {ep,parse}=PROXIES[i](url);
+      const resp=await fetchWithTimeout(ep, 12000);
+      if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const t=await parse(resp);
+      if(t&&t.length>200){html=t;break;}
+      throw new Error('回應內容過短');
+    }catch(e){lastErr=e.message;html=null;if(e.definitive)break;}
+  }
+  btn.disabled=false; icon.textContent='⬇';
+  if(!html){
+    const blocked = lastErr==='我們的伺服器無法連到這個網站，可能被網站的安全設定擋住。你的網站本身不一定有問題，請改用『上傳 HTML』檢測。';
+    setUrlStatus(tab,'error', blocked ? `✗ ${lastErr}` : `✗ 無法抓取（${lastErr}）。請確認網址，或改用「上傳 HTML」檢測。`, tab);
+    if(tab==='t1') resetResults();
+    return;
+  }
+  tabState[tab].html=html; tabState[tab].label=url;
+  setUrlStatus(tab,null);
+  const tmpDoc=new DOMParser().parseFromString(html,'text/html');
+  const title=tmpDoc.querySelector('title')?.textContent?.trim()||'（無 Title）';
+  const bodyLen=(tmpDoc.body?.textContent||'').trim().length;
+  document.getElementById(`${tab}FetchedWrap`).style.display='block';
+  document.getElementById(`${tab}FetchedBadge`).innerHTML=
+    `✓ 已抓取 · <strong style="color:#fff">${escHtml(title)}</strong>
+     <span style="font-size:11px;color:rgba(52,211,153,0.6);margin-left:6px;word-break:break-all">${escHtml(url.length>60?url.slice(0,57)+'…':url)}</span>`;
+  if(tab==='t1') document.getElementById('t1SpaWarn').style.display=detectJsSite(html).is?'flex':'none';
+  if(tab==='t2') extractKeywordsFromHtml(html,url);
+  if(tab==='t3') showCompPreview(html,url);
+}
+function setUrlStatus(tab,type,msg,uploadTab){
+  const el=document.getElementById(`${tab}UrlStatus`);
+  if(!type){el.style.display='none';return;}
+  el.style.display='flex'; el.className='url-status '+(type==='loading'?'url-status-loading':'url-status-error');
+  el.textContent=msg;
+  if(uploadTab){
+    // 抓取失敗：在錯誤訊息旁放「改用上傳 HTML」按鈕，點了切換到上傳分頁
+    const b=document.createElement('button');
+    b.type='button'; b.className='url-status-btn'; b.textContent='改用上傳 HTML';
+    b.onclick=function(){ switchSource(uploadTab,'file'); el.style.display='none'; };
+    el.appendChild(b);
+  }
+}
+// 清空上一次的分數與結果，避免失敗或重新檢測時還顯示上一個網站的結果
+function resetResults(){
+  const res=document.getElementById('results'); if(res) res.style.display='none';
+  currentReport=null;
+  const set=(id,t)=>{const e=document.getElementById(id); if(e) e.textContent=t;};
+  set('scoreTitle','—'); set('scoreSummary','');
+  const num=document.getElementById('scoreNum'); if(num) num.innerHTML='0<div class="score-lbl">/100</div>';
+  const ring=document.getElementById('scoreRing'); if(ring) ring.style.strokeDashoffset=289;
+  ['metricPills','scoreBreakdown'].forEach(id=>{const e=document.getElementById(id); if(e) e.innerHTML='';});
+  const cta=document.getElementById('seoCta'); if(cta) cta.classList.remove('show');
+  const w=document.getElementById('jsWarn'); if(w) w.classList.remove('show');
+  const sg=document.getElementById('jsSuggest'); if(sg) sg.style.display='none';
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ═══════════════════════════════════════════════════════
+//  FILE UPLOAD
+// ═══════════════════════════════════════════════════════
+['dropZone'].forEach(id=>{
+  const dz=document.getElementById(id);
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag-over');handleFiles([...e.dataTransfer.files]);});
+});
+document.getElementById('fileInput').addEventListener('change',e=>{handleFiles([...e.target.files]);e.target.value='';});
+function handleFiles(files){
+  const html=files.filter(f=>/\.html?$/i.test(f.name));
+  if(!html.length){showErr('請選擇 .html 或 .htm 格式的檔案！');return;}
+  hideErr();
+  html.forEach(file=>{
+    if(uploadedFiles.find(f=>f.name===file.name)) return;
+    const r=new FileReader();
+    r.onload=e=>{
+      uploadedFiles.push({name:file.name,size:file.size,content:e.target.result});
+      if(uploadedFiles.length===1) selectedIdx=0;
+      renderFileList();
+    };
+    r.readAsText(file);
+  });
+}
+function selectFile(i){selectedIdx=i;renderFileList();}
+function removeFile(i){uploadedFiles.splice(i,1);if(selectedIdx>=uploadedFiles.length)selectedIdx=uploadedFiles.length-1;renderFileList();}
+function clearFiles(){uploadedFiles=[];selectedIdx=-1;renderFileList();}
+function renderFileList(){
+  const wrap=document.getElementById('fileListWrap');
+  if(!uploadedFiles.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  document.getElementById('fileCountLabel').textContent=uploadedFiles.length+' 個檔案';
+  document.getElementById('fileList').innerHTML=uploadedFiles.map((f,i)=>{
+    const sel=i===selectedIdx;
+    return `<div class="file-item${sel?' selected':''}" onclick="selectFile(${i})">
+      <div class="file-icon">📄</div>
+      <div class="file-info"><div class="file-name">${escHtml(f.name)}</div>
+      <div class="file-meta">${(f.size/1024).toFixed(1)} KB${sel?' · <span style="color:#34d399">已選取</span>':''}</div></div>
+      <button class="file-remove" onclick="event.stopPropagation();removeFile(${i})">×</button>
+    </div>`;
+  }).join('');
+}
+
+// Tab 2 & 3 file handlers
+const dz2=document.getElementById('dropZone2'),fi2=document.getElementById('fileInput2');
+dz2.addEventListener('dragover',e=>{e.preventDefault();dz2.classList.add('drag-over');});
+dz2.addEventListener('dragleave',()=>dz2.classList.remove('drag-over'));
+dz2.addEventListener('drop',e=>{e.preventDefault();dz2.classList.remove('drag-over');handleKwFile(e.dataTransfer.files[0]);});
+fi2.addEventListener('change',e=>{if(e.target.files[0])handleKwFile(e.target.files[0]);e.target.value='';});
+function handleKwFile(file){
+  if(!file||!/\.html?$/i.test(file.name)){showErr('請選擇 .html 格式的檔案！');return;}
+  const r=new FileReader();r.onload=e=>extractKeywordsFromHtml(e.target.result,file.name);r.readAsText(file);
+}
+function extractKeywordsFromHtml(html,label){
+  const clean=html.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<style[\s\S]*?<\/style>/gi,'').replace(/<[^>]+>/g,' ');
+  const words=clean.match(/[\u4e00-\u9fff]{2,6}/g)||[];
+  const freq={};words.forEach(w=>{freq[w]=(freq[w]||0)+1;});
+  const top=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  document.getElementById('kwFileName').textContent='✓ '+(label.length>50?label.slice(0,47)+'…':label);
+  document.getElementById('kwFileWrap').style.display='block';
+  document.getElementById('kwExtracted').innerHTML='<p style="font-size:12px;color:var(--text2);margin-bottom:8px">偵測到的高頻關鍵字（點擊新增）：</p><div style="display:flex;flex-wrap:wrap;gap:6px">'+
+    top.map(([w,c])=>`<span onclick="addKwFromExtract('${escHtml(w)}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(95,163,150,0.1);border:1px solid rgba(95,163,150,0.2);color:var(--accent2);padding:3px 10px;border-radius:20px;font-size:12px;transition:background 0.2s" onmouseover="this.style.background='rgba(95,163,150,0.25)'" onmouseout="this.style.background='rgba(95,163,150,0.1)'">${escHtml(w)} <span style="opacity:0.6;font-size:10px">${c}次</span></span>`).join('')+'</div>';
+}
+function addKwFromExtract(kw){if(keywords.length>=10||keywords.includes(kw))return;keywords.push(kw);renderKwTags();}
+function clearKwSource(){tabState.t2.html=null;tabState.t2.label='';clearUrl('t2');document.getElementById('kwFileWrap').style.display='none';document.getElementById('kwExtracted').innerHTML='';fi2.value='';}
+
+const dz3=document.getElementById('dropZone3'),fi3=document.getElementById('fileInput3');
+dz3.addEventListener('dragover',e=>{e.preventDefault();dz3.classList.add('drag-over');});
+dz3.addEventListener('dragleave',()=>dz3.classList.remove('drag-over'));
+dz3.addEventListener('drop',e=>{e.preventDefault();dz3.classList.remove('drag-over');handleCompFile(e.dataTransfer.files[0]);});
+fi3.addEventListener('change',e=>{if(e.target.files[0])handleCompFile(e.target.files[0]);e.target.value='';});
+function handleCompFile(file){
+  if(!file||!/\.html?$/i.test(file.name)){showErr('請選擇 .html 格式的檔案！');return;}
+  const r=new FileReader();r.onload=e=>{tabState.t3.html=e.target.result;tabState.t3.label=file.name;showCompPreview(e.target.result,file.name);};r.readAsText(file);
+}
+function showCompPreview(html,label){
+  const tM=html.match(/<title[^>]*>(.*?)<\/title>/i);
+  const dM=html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)/i);
+  document.getElementById('compFileName').textContent='✓ 競爭對手：'+(label.length>50?label.slice(0,47)+'…':label);
+  document.getElementById('compFileWrap').style.display='block';
+  document.getElementById('compPreview').innerHTML=`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">對手 Title</div>
+      <div style="font-size:13px;color:var(--text)">${tM?escHtml(tM[1]):'（未設定）'}</div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px">對手 Description</div>
+      <div style="font-size:13px;color:var(--text)">${dM?escHtml(dM[1]):'（未設定）'}</div>
+    </div>`;
+}
+function clearCompSource(){tabState.t3.html=null;tabState.t3.label='';clearUrl('t3');document.getElementById('compFileWrap').style.display='none';document.getElementById('compPreview').innerHTML='';fi3.value='';}
+
+// Keywords
+document.getElementById('kwInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addKw();}});
+function addKw(){const v=document.getElementById('kwInput').value.trim();if(!v||keywords.length>=10||keywords.includes(v))return;keywords.push(v);renderKwTags();document.getElementById('kwInput').value='';}
+function removeKw(kw){keywords=keywords.filter(k=>k!==kw);renderKwTags();}
+function renderKwTags(){
+  document.getElementById('kwTags').innerHTML=keywords.map(k=>`<span class="kw-tag">${escHtml(k)}<button onclick="removeKw('${escHtml(k)}')">×</button></span>`).join('');
+  // Update keyword counter inline (no wrapper needed)
+  const area = document.getElementById('kwTags');
+  let counter = document.getElementById('kwCounter');
+  if(!counter && area){
+    counter = document.createElement('div');
+    counter.id = 'kwCounter';
+    counter.style.cssText = 'font-size:11px;color:var(--text3);margin-top:6px;';
+    area.parentNode.insertBefore(counter, area.nextSibling);
+  }
+  if(counter) counter.textContent = keywords.length > 0 ? `已新增 ${keywords.length}/10 個關鍵字` : '';
+}
+function toggleSec(h){h.classList.toggle('open');h.nextElementSibling.classList.toggle('open');}
+
+// History
+function toggleHistory(){document.getElementById('historyPanel').classList.toggle('open');renderHistory();}
+function renderHistory(){
+  const c=document.getElementById('historyList');
+  if(!history.length){c.innerHTML='<div class="empty-hist">還沒有分析紀錄</div>';return;}
+  c.innerHTML=history.slice().reverse().map((h,i)=>`
+    <div class="hist-item" onclick="loadHist(${history.length-1-i})">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <span class="hi-score" style="color:${scoreColor(h.score)};flex-shrink:0">${h.score}</span>
+        <div style="min-width:0"><div class="hi-name">${escHtml(h.name)}</div><div class="hi-date">${h.date}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);flex-shrink:0">${h.pass}✓ ${h.warn}! ${h.fail}✗</div>
+    </div>`).join('');
+}
+function loadHist(i){document.getElementById('historyPanel').classList.remove('open');renderResults(history[i].report);}
+function clearHistory(){if(!confirm('確定清除所有紀錄？'))return;history=[];tmpStore.setItem('seo_hist_v8','[]');updateHistCount();renderHistory();}
+function updateHistCount(){document.getElementById('histCount').textContent=history.length;}
+function scoreColor(s){return s>=80?'#10b981':s>=60?'#f59e0b':'#ef4444';}
+
+// ═══════════════════════════════════════════════════════
+//  v12: CONTENT ANALYSIS ENGINE
+//  1. TF-IDF + LSI Keywords
+//  2. Content Gap Analysis
+//  3. Heading Structure + FAQ Detection
+// ═══════════════════════════════════════════════════════
+
+// ── 停用詞（中英文混合）──
+const STOP_WORDS_ZH = new Set(['的','了','在','是','我','有','和','就','不','人','都','一','一個','上','也','很','到','說','要','去','你','會','著','沒有','看','好','自己','這','那','但','而','如果','因為','所以','可以','他','她','它','我們','你們','他們','這個','那個','這些','那些','什麼','怎麼','為什麼','哪裡','哪個','更','還','又','再','只','才','就是','已經','可能','一樣','非常','每','些','被','把','對','從','用','讓','給','跟','與','或','及','並','其','來','後','前','中','大','小','多','少','等','等等']);
+const STOP_WORDS_EN = new Set(['the','a','an','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','need','dare','ought','used','to','of','in','for','on','with','at','by','from','as','into','through','about','like','after','over','between','out','against','during','without','before','under','around','among','because','if','when','then','than','so','but','and','or','not','no','yes','this','that','these','those','it','its','my','your','his','her','we','they','all','both','each','few','more','most','other','some','such','same','just','here','there','where','how','why','what','which','who','whom']);
+
+function isStopWord(w) {
+  const lower = w.toLowerCase();
+  if (STOP_WORDS_EN.has(lower)) return true;
+  if (STOP_WORDS_ZH.has(w)) return true;
+  if (w.length <= 1) return true;
+  if (/^\d+$/.test(w)) return true;
+  return false;
+}
+
+// ── 分詞：Intl.Segmenter('zh-TW', { granularity: 'word' })，只保留 isWordLike 的詞 ──
+let _zhSegmenter = null;
+try { _zhSegmenter = new Intl.Segmenter('zh-TW', { granularity: 'word' }); } catch (e) { _zhSegmenter = null; }
+function tokenize(text) {
+  const tokens = [];
+  if (!_zhSegmenter) {
+    // 舊瀏覽器沒有 Intl.Segmenter：只取英文單字與連續中文片段（不再做二字／三字切片）
+    (String(text).match(/[a-zA-Z]{2,}|[\u3400-\u9fff]{2,}/g) || []).forEach(w => { const t = /^[a-zA-Z]/.test(w) ? w.toLowerCase() : w; if (!isStopWord(t)) tokens.push(t); });
+    return tokens;
+  }
+  for (const seg of _zhSegmenter.segment(String(text))) {
+    if (!seg.isWordLike) continue;
+    let w = seg.segment;
+    if (/^[a-zA-Z][a-zA-Z'’-]*$/.test(w)) { w = w.toLowerCase(); if (w.length < 2) continue; }
+    else if (!/[\u3400-\u9fff]/.test(w)) continue;      // 數字、符號、其他文字不算詞
+    if (!isStopWord(w)) tokens.push(w);
+  }
+  return tokens;
+}
+
+// ── TF-IDF（單文件版：用 IDF 模擬常見中文 SEO 詞的重要性）──
+// 純英文的 CSS／程式碼常見字：不是頁面內容，從高頻詞排除
+const CODE_WORDS = new Set(['px','em','rem','vh','vw','pt','rgb','rgba','hsl','hsla','important','background','color','width','height','min','max','margin','padding','border','radius','font','family','weight','display','flex','grid','block','inline','none','auto','solid','position','absolute','relative','fixed','sticky','overflow','hidden','visible','opacity','transform','transition','animation','keyframes','translate','rotate','scale','cursor','pointer','shadow','gradient','linear','repeat','align','justify','nowrap','gap','zindex','webkit','moz','var','calc','url','src','href','class','style','script','div','span','svg','path','img','png','jpg','jpeg','gif','webp','css','js','json','html','http','https','www','com','function','return','const','let','else','true','false','null','undefined','typeof','this','async','await','constructor','prototype','tostring','valueof','hasownproperty','foreach','nbsp','amp','quot','lt','gt','utf','charset','viewport','stylesheet','preload','defer']);
+function isCodeWord(w) { return /^[a-z]+$/i.test(w) && CODE_WORDS.has(w.toLowerCase()); }
+
+function computeTFIDF(bodyText, title, desc, h1Text, h2Texts, kwList) {
+  const fullText = `${title} ${title} ${h1Text} ${h1Text} ${desc} ${h2Texts.join(' ')} ${bodyText}`;
+  const tokens = tokenize(fullText).filter(t => !isCodeWord(t));
+  if (!tokens.length) return [];
+
+  // TF: term frequency in document（用無原型物件，避免 constructor / toString 等字壞掉）
+  const tf = Object.create(null);
+  tokens.forEach(t => { tf[t] = (tf[t] || 0) + 1; });
+  const maxTF = Math.max(1, ...Object.values(tf));
+
+  // Position bonus: extra weight if term appears in title/h1/h2
+  const titleTokens = new Set(tokenize(title + ' ' + h1Text));
+  const h2Tokens = new Set(tokenize(h2Texts.join(' ')));
+
+  // Build scored list
+  const kwLowers = kwList.map(k => k.toLowerCase());
+  const entries = Object.entries(tf)
+    .filter(([word]) => word.length >= 2 && !isStopWord(word) && !isCodeWord(word))
+    .map(([word, count]) => {
+      const normTF = count / maxTF;
+      // Fake IDF: shorter, high-frequency words get penalised; longer terms are rarer → higher IDF
+      const idf = 1 + Math.log(1 + word.length * 0.4);
+      let score = normTF * idf;
+      if (titleTokens.has(word)) score *= 1.8;
+      if (h2Tokens.has(word)) score *= 1.3;
+      // Tag as keyword-related
+      const relatedKw = kwLowers.find(k => k.includes(word) || word.includes(k));
+      const inPage = count >= 2;
+      return { word, count, score, relatedKw: relatedKw || null, inPage };
+    })
+    .filter(e => Number.isFinite(e.score))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 40);
+
+  return entries;
+}
+
+// ── LSI 關鍵字資料庫（依主題領域）──
+const LSI_DATABASE = {
+  // 餐廳/食物
+  餐廳:    ['菜單','推薦','評價','環境','用餐','特色','外帶','內用','訂位','停車'],
+  美食:    ['口味','食材','料理','主廚','特色','隱藏版','必點','招牌','份量','價格'],
+  滷肉飯:  ['白飯','排骨飯','滷蛋','豬腳','滷汁','便當','小菜','古早味','台式'],
+  // SEO/數位行銷
+  seo:     ['關鍵字','排名','流量','反向連結','內容行銷','技術SEO','on-page','優化','SERP','索引'],
+  網站:    ['設計','開發','前端','後端','響應式','速度','效能','主機','域名','CMS'],
+  // 本地商家
+  台中:    ['大雅','西屯','北屯','南屯','豐原','潭子','烏日','太平','霧峰','大里'],
+  // 房地產
+  房子:    ['坪數','格局','裝潢','建材','社區','停車場','公設','管委會','屋齡','建商'],
+  // 旅遊
+  旅遊:    ['行程','景點','住宿','交通','票價','開放時間','停車','伴手禮','季節','天氣'],
+  // 通用商業
+  服務:    ['品質','專業','費用','報價','預約','聯絡','保固','售後','評價','推薦'],
+  價格:    ['優惠','折扣','方案','費用','報價','收費','免費','促銷','活動','方案'],
+};
+
+function findLSIKeywords(kwList, bodyText, tfidfEntries) {
+  const bodyLower = bodyText.toLowerCase();
+  const results = [];
+
+  kwList.forEach(kw => {
+    const kwL = kw.toLowerCase();
+    // Find matching LSI group
+    let lsiGroup = null;
+    for (const [key, words] of Object.entries(LSI_DATABASE)) {
+      if (kwL.includes(key.toLowerCase()) || key.toLowerCase().includes(kwL)) {
+        lsiGroup = { key, words };
+        break;
+      }
+    }
+
+    // Also derive from TF-IDF: top words semantically close to keyword
+    const tfidfRelated = tfidfEntries
+      .filter(e => e.relatedKw === kwL || (e.word !== kwL && e.score > 0.3))
+      .slice(0, 8)
+      .map(e => e.word);
+
+    const lsiWords = lsiGroup ? [...new Set([...lsiGroup.words, ...tfidfRelated])] : tfidfRelated;
+
+    const tagged = lsiWords.map(w => ({
+      word: w,
+      present: bodyLower.includes(w.toLowerCase()),
+      inTitle: (document.getElementById('scoreTitle') ? false : false), // computed later
+    }));
+
+    results.push({ kw, lsiGroup: lsiGroup?.key, words: tagged });
+  });
+
+  return results;
+}
+
+// ── 內容缺口分析 ──
+const CONTENT_CLUSTERS = {
+  // 關鍵字 → [應該同時出現的相關詞]
+  '餐廳':     { must:['菜單','地址','電話','營業時間'], good:['停車','訂位','評價','環境','招牌'] },
+  '美食':     { must:['特色','推薦'], good:['口味','食材','份量','價格','照片'] },
+  '滷肉飯':   { must:['滷汁','白飯'], good:['滷蛋','小菜','價格','台式','古早味'] },
+  '服務':     { must:['專業','聯絡'], good:['費用','保固','評價','預約','流程'] },
+  'seo':      { must:['關鍵字','排名'], good:['反向連結','內容','技術','流量','分析'] },
+  '網站':     { must:['設計','開發'], good:['響應式','速度','SEO','維護','費用'] },
+  '旅遊':     { must:['景點','交通'], good:['住宿','票價','行程','季節','美食'] },
+  '價格':     { must:['費用','方案'], good:['優惠','折扣','比較','報價','免費'] },
+  '房子':     { must:['坪數','格局'], good:['裝潢','停車','社區','建商','交通'] },
+  '台中':     { must:['地址','交通'], good:['停車','營業時間','地圖','附近','推薦'] },
+  // Generic fallback for any kw
+  '_default': { must:[], good:['介紹','特色','推薦','聯絡','地址','評價'] },
+};
+
+function analyzeContentGap(kwList, bodyText) {
+  const bodyLower = bodyText.toLowerCase();
+  const gaps = [];
+
+  kwList.forEach(kw => {
+    const kwL = kw.toLowerCase();
+    // Find best matching cluster
+    let cluster = CONTENT_CLUSTERS['_default'];
+    for (const [key, val] of Object.entries(CONTENT_CLUSTERS)) {
+      if (key === '_default') continue;
+      if (kwL.includes(key) || key.includes(kwL.slice(0, 2))) { cluster = val; break; }
+    }
+
+    const mustPresent   = cluster.must.filter(w => bodyLower.includes(w));
+    const mustMissing   = cluster.must.filter(w => !bodyLower.includes(w));
+    const goodPresent   = cluster.good.filter(w => bodyLower.includes(w));
+    const goodMissing   = cluster.good.filter(w => !bodyLower.includes(w));
+
+    // Also look at TF-IDF context: words that co-occur with keyword in top pages
+    const coverageScore = cluster.must.length
+      ? Math.round((mustPresent.length / cluster.must.length) * 60 + (goodPresent.length / Math.max(cluster.good.length, 1)) * 40)
+      : Math.round((goodPresent.length / Math.max(cluster.good.length, 1)) * 100);
+
+    gaps.push({ kw, mustPresent, mustMissing, goodPresent, goodMissing, coverageScore });
+  });
+
+  return gaps;
+}
+
+// ── 段落結構分析 ──
+function analyzeHeadingStructure(doc) {
+  const headings = [...doc.querySelectorAll('h1,h2,h3,h4')].map(h => ({
+    tag: h.tagName.toLowerCase(),
+    text: h.textContent.trim(),
+    level: parseInt(h.tagName[1]),
+  }));
+
+  // FAQ detection: look for Q&A patterns
+  const allText = doc.body?.textContent || '';
+  const faqPatterns = [
+    /[QqＱ][\s\uFF1A:：]\s*(.{5,80})/g,
+    /常見問題[：:]\s*(.{5,80})/g,
+    /[Ａa][\s\uFF1A:：]\s*(.{5,80})/g,
+  ];
+  // Also check for FAQ schema
+  const faqSchema = [...doc.querySelectorAll('script[type="application/ld+json"]')].some(s => {
+    try { return JSON.parse(s.textContent)['@type'] === 'FAQPage'; } catch { return false; }
+  });
+  // Detect Q&A heading pattern: heading with "?" or "如何" "什麼" "為何" "幾"
+  const faqHeadings = headings.filter(h =>
+    /[？?]/.test(h.text) ||
+    /^(如何|什麼是|為什麼|哪|幾|多少|可以|需要|怎麼|是否|有沒有)/.test(h.text)
+  );
+
+  // Structure issues
+  const issues = [];
+  let prevLevel = 1;
+  let skippedLevels = false;
+  for (const h of headings) {
+    if (h.level > prevLevel + 1) { skippedLevels = true; break; }
+    prevLevel = h.level;
+  }
+  if (skippedLevels) issues.push({ type:'warn', msg:'標題層級有跳躍（如從 H1 直接到 H3），建議保持連續層級' });
+
+  const h2Count = headings.filter(h => h.tag === 'h2').length;
+  const h3Count = headings.filter(h => h.tag === 'h3').length;
+  if (h2Count === 0) issues.push({ type:'fail', msg:'沒有 H2 標題，建議用 H2 分段組織主要內容（有助 Google 理解頁面結構）' });
+  if (h2Count > 0 && h3Count === 0 && allText.length > 800)
+    issues.push({ type:'info', msg:'有 H2 但無 H3，較長篇幅建議加入 H3 進一步細分段落' });
+  if (headings.length > 0 && headings[headings.length-1].level < 2)
+    issues.push({ type:'info', msg:'頁面標題偏少，豐富的標題層級有助 Google 理解各段重點' });
+
+  const hasFAQ = faqHeadings.length >= 2 || faqSchema;
+  const faqMissing = !hasFAQ && allText.length > 600;
+
+  return { headings, issues, faqHeadings, faqSchema, hasFAQ, faqMissing, h2Count, h3Count };
+}
+
+// ── 渲染內容分析結果 ──
+function renderContentAnalysis(report) {
+  const info = report.info || {};
+  const bodyText = info.bodyText || '';
+  const kwList = report.kwResults?.map(k => k.keyword) || keywords;
+
+  const sec = document.getElementById('contentAnalysisSection');
+  const el  = document.getElementById('contentAnalysisResult');
+  const badge = document.getElementById('contentAnalysisBadge');
+
+  if (!bodyText || bodyText.trim().length < 100) {
+    sec.style.display = 'none'; return;
+  }
+  sec.style.display = 'block';
+
+  // Parse doc from stored HTML
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(
+    report._rawHtml || document.documentElement.outerHTML, 'text/html'
+  );
+
+  const h2Texts = [...doc.querySelectorAll('h2')].map(h => h.textContent);
+  const h1Text  = info.h1Text || '';
+
+  // 1. TF-IDF
+  const tfidfEntries = computeTFIDF(bodyText, info.title || '', info.description || '', h1Text, h2Texts, kwList);
+
+  // 2. LSI
+  const lsiResults = findLSIKeywords(kwList, bodyText, tfidfEntries);
+
+  // 3. Content Gap
+  const gapResults = analyzeContentGap(kwList, bodyText);
+
+  // 4. Structure
+  const structResult = analyzeHeadingStructure(doc);
+
+  // Badge
+  const gapIssues = gapResults.filter(g => g.mustMissing.length > 0).length;
+  const structIssues = structResult.issues.filter(i => i.type !== 'info').length;
+  badge.textContent = `${tfidfEntries.length} 個高頻詞 · ${gapIssues} 個缺口 · ${structIssues ? structIssues + ' 個結構問題' : '結構正常'}`;
+
+  // ── Render ──
+  let html = `<div class="ca-tabs">
+    <button class="ca-tab active" onclick="switchCaTab('tfidf',this)">📊 TF-IDF 高頻詞 & LSI</button>
+    <button class="ca-tab" onclick="switchCaTab('gap',this)">🔍 內容缺口</button>
+    <button class="ca-tab" onclick="switchCaTab('struct',this)">🏗 段落結構</button>
+  </div>`;
+
+  // ── Tab 1: TF-IDF + LSI ──
+  html += `<div id="ca-tfidf" class="ca-pane active">`;
+
+  // Top 20 TF-IDF
+  const top20 = tfidfEntries.slice(0, 20);
+  const maxScore = (top20[0] && top20[0].score > 0) ? top20[0].score : 1;
+  html += `<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">頁面高頻詞排行（TF-IDF 估算）</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">
+      越高排名的詞代表在此頁面越「獨特且重要」。<span style="color:#34d399">綠色</span>＝與你的關鍵字相關；<span style="color:#f87171">未標色</span>＝頁面自有詞。
+    </div>
+    <div class="tfidf-grid" style="margin-bottom:20px">`;
+
+  top20.forEach((e, i) => {
+    const pct = Number.isFinite(e.score / maxScore) ? Math.round((e.score / maxScore) * 100) : 0;
+    const color = e.relatedKw ? '#10b981' : 'var(--accent)';
+    const badge2 = e.relatedKw
+      ? `<span style="font-size:10px;background:rgba(16,185,129,0.12);color:#34d399;padding:1px 6px;border-radius:8px;border:1px solid rgba(16,185,129,0.25)">關聯「${escHtml(e.relatedKw)}」</span>`
+      : '';
+    html += `<div class="tfidf-row">
+      <span class="tfidf-rank">${i+1}</span>
+      <span class="tfidf-word">${escHtml(e.word)}</span>
+      ${badge2}
+      <span style="font-size:11px;color:var(--text3)">×${e.count}</span>
+      <div class="tfidf-bar-wrap"><div class="tfidf-bar" style="width:${pct}%;background:${color}"></div></div>
+      <span class="tfidf-score">${pct}%</span>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // LSI section
+  if (lsiResults.length && kwList.length) {
+    html += `<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:6px">語意相關詞（LSI Keywords）</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px">
+        這些詞通常和你的關鍵字一起出現，加入頁面可加強語意相關性。
+        <span class="lsi-chip lsi-match" style="font-size:11px">✓ 已出現</span>
+        <span class="lsi-chip lsi-miss" style="font-size:11px">✗ 缺少</span>
+      </div>`;
+
+    lsiResults.forEach(r => {
+      if (!r.words.length) return;
+      html += `<div style="margin-bottom:14px">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">關鍵字「<strong style="color:var(--accent2)">${escHtml(r.kw)}</strong>」的語意相關詞：</div>
+        <div>`;
+      r.words.forEach(w => {
+        const cls = w.present ? 'lsi-match' : 'lsi-miss';
+        const icon = w.present ? '✓' : '✗';
+        html += `<span class="lsi-chip ${cls}">${icon} ${escHtml(w.word)}</span>`;
+      });
+      html += `</div></div>`;
+    });
+  } else if (!kwList.length) {
+    html += `<div style="padding:12px 14px;background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.15);border-radius:var(--radius-sm);font-size:12px;color:var(--text3)">
+      💡 請在「🔑 關鍵字」頁籤加入目標關鍵字，即可看到 LSI 語意相關詞分析。
+    </div>`;
+  }
+
+  html += `</div>`; // end ca-tfidf
+
+  // ── Tab 2: Content Gap ──
+  html += `<div id="ca-gap" class="ca-pane">`;
+
+  if (!kwList.length) {
+    html += `<div style="padding:14px;background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.15);border-radius:var(--radius-sm);font-size:13px;color:var(--text3)">
+      💡 請先在「🔑 關鍵字」頁籤加入目標關鍵字，才能進行內容缺口分析。
+    </div>`;
+  } else {
+    html += `<div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">
+      分析你的頁面是否缺少與關鍵字強相關的內容元素。
+      <span style="background:rgba(239,68,68,0.1);color:#f87171;padding:2px 8px;border-radius:8px;font-size:11px">✗ 缺少</span> 代表通常搜尋此關鍵字的用戶期望看到，但你的頁面沒有的內容。
+    </div>`;
+
+    gapResults.forEach(g => {
+      const coverColor = g.coverageScore >= 70 ? '#10b981' : g.coverageScore >= 40 ? '#f59e0b' : '#ef4444';
+      html += `<div class="gap-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+          <div class="gap-kw">關鍵字：${escHtml(g.kw)}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:80px;height:5px;background:var(--border2);border-radius:3px;overflow:hidden">
+              <div style="height:5px;width:${g.coverageScore}%;background:${coverColor};border-radius:3px"></div>
+            </div>
+            <span style="font-size:12px;color:${coverColor};font-weight:600">${g.coverageScore}%</span>
+            <span style="font-size:11px;color:var(--text3)">內容覆蓋度</span>
+          </div>
+        </div>`;
+
+      if (g.mustMissing.length) {
+        html += `<div style="margin-bottom:8px">
+          <div style="font-size:11px;color:#f87171;margin-bottom:5px;font-weight:500">✗ 核心缺失（這些元素對此主題幾乎必備）：</div>
+          <div class="gap-missing">
+            ${g.mustMissing.map(w => `<span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;padding:3px 10px;border-radius:20px;font-size:12px">${escHtml(w)}</span>`).join('')}
+          </div>
+        </div>`;
+      }
+      if (g.mustPresent.length) {
+        html += `<div style="margin-bottom:8px">
+          <div style="font-size:11px;color:#34d399;margin-bottom:5px;font-weight:500">✓ 核心已涵蓋：</div>
+          <div class="gap-present">
+            ${g.mustPresent.map(w => `<span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);color:#34d399;padding:3px 10px;border-radius:20px;font-size:12px">${escHtml(w)}</span>`).join('')}
+          </div>
+        </div>`;
+      }
+      if (g.goodMissing.length) {
+        html += `<div>
+          <div style="font-size:11px;color:#fbbf24;margin-bottom:5px;font-weight:500">⚠ 建議補充（加入可提升內容完整度）：</div>
+          <div class="gap-missing">
+            ${g.goodMissing.map(w => `<span style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:#fbbf24;padding:3px 10px;border-radius:20px;font-size:12px">${escHtml(w)}</span>`).join('')}
+          </div>
+        </div>`;
+      }
+      html += `</div>`;
+    });
+  }
+  html += `</div>`; // end ca-gap
+
+  // ── Tab 3: Structure ──
+  html += `<div id="ca-struct" class="ca-pane">`;
+
+  // Structure issues
+  if (structResult.issues.length) {
+    html += `<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">`;
+    structResult.issues.forEach(iss => {
+      const color = iss.type==='fail'?'#f87171':iss.type==='warn'?'#fbbf24':'var(--accent2)';
+      const icon  = iss.type==='fail'?'✗':iss.type==='warn'?'⚠':'ℹ';
+      html += `<div style="display:flex;gap:8px;align-items:flex-start;padding:10px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px">
+        <span style="color:${color};flex-shrink:0">${icon}</span>
+        <span style="color:var(--text2)">${escHtml(iss.msg)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="display:flex;gap:8px;align-items:center;padding:10px 13px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius-sm);font-size:12px;color:#34d399;margin-bottom:16px">
+      ✓ <span>標題層級結構正常，無跳躍問題</span>
+    </div>`;
+  }
+
+  // Summary stats
+  html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+    ${[
+      { label:'H2', val: structResult.h2Count, color: structResult.h2Count > 0 ? '#34d399' : '#ef4444' },
+      { label:'H3', val: structResult.h3Count, color: structResult.h3Count > 0 ? '#34d399' : 'var(--text3)' },
+      { label:'全部標題', val: structResult.headings.length, color: 'var(--accent2)' },
+      { label:'FAQ 結構', val: structResult.hasFAQ ? '✓ 有' : '✗ 無', color: structResult.hasFAQ ? '#34d399' : '#f59e0b' },
+    ].map(s => `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;min-width:80px">
+      <div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:18px;font-weight:700;color:${s.color}">${s.val}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">${s.label}</div>
+    </div>`).join('')}
+  </div>`;
+
+  // Heading tree
+  if (structResult.headings.length) {
+    html += `<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">標題層次樹狀圖</div>
+      <div style="margin-bottom:20px">`;
+    structResult.headings.forEach(h => {
+      const isH1 = h.tag === 'h1';
+      if (isH1) return; // skip H1, already shown
+      const cls = h.tag === 'h2' ? 'struct-h2' : h.tag === 'h3' ? 'struct-h3' : 'struct-h4';
+      const isFaqH = structResult.faqHeadings.some(fh => fh.text === h.text);
+      const faqBadge = isFaqH ? `<span style="font-size:10px;background:rgba(16,185,129,0.15);color:#34d399;padding:1px 6px;border-radius:8px;border:1px solid rgba(16,185,129,0.25);margin-left:6px">FAQ ✓</span>` : '';
+      html += `<div class="struct-node ${cls}">
+        <span class="struct-tag">${h.tag.toUpperCase()}</span>
+        <span class="struct-text">${escHtml(h.text.slice(0, 80))}${h.text.length > 80 ? '…' : ''}${faqBadge}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px">頁面沒有偵測到 H2/H3 標題</div>`;
+  }
+
+  // FAQ analysis
+  html += `<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">FAQ 結構分析</div>`;
+  if (structResult.hasFAQ) {
+    html += `<div style="padding:10px 14px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius-sm);font-size:12px;color:#34d399;margin-bottom:12px">
+      ✓ 偵測到 FAQ 問答結構（${structResult.faqSchema ? '已有 FAQPage Schema' : '建議同步加入 FAQPage Schema 讓 Google 顯示精選摘要'}）
+    </div>`;
+    if (structResult.faqHeadings.length) {
+      html += structResult.faqHeadings.map(h => `<div class="faq-item">
+        <div class="faq-q">❓ ${escHtml(h.text)}</div>
+        <div class="faq-a">（已偵測為問答型標題）</div>
+      </div>`).join('');
+    }
+  } else {
+    html += `<div style="padding:12px 14px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.7">
+      <div style="color:#fbbf24;font-weight:500;margin-bottom:6px">⚠ 未偵測到 FAQ 結構</div>
+      Google 精選摘要（Featured Snippets）特別偏好 FAQ 形式的內容。建議：<br>
+      1. 將部分 H2/H3 改寫為疑問句（如「如何…」「${kwList[0]||'關鍵字'}是什麼？」「費用多少？」）<br>
+      2. 在問題下方用簡潔段落回答（50–100 字）<br>
+      3. 加入 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 5px;border-radius:3px">FAQPage</code> JSON-LD 讓 Google 正確識別
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text3)">
+      <div style="color:var(--text2);font-weight:500;margin-bottom:8px">📋 FAQPage Schema 範例：</div>
+      <code style="display:block;white-space:pre-wrap;font-size:11px;line-height:1.7;color:var(--accent2)">${escHtml(`{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [{
+    "@type": "Question",
+    "name": "${kwList[0] ? kwList[0] + '是什麼？' : '你的問題？'}",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "簡潔回答（50-100字）..."
+    }
+  }]
+}`)}</code>
+    </div>`;
+  }
+
+  html += `</div>`; // end ca-struct
+  el.innerHTML = html;
+}
+
+function switchCaTab(name, btn) {
+  document.querySelectorAll('.ca-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.ca-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ca-' + name).classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+//  SEO ANALYSIS ENGINE
+// ═══════════════════════════════════════════════════════
+// 偵測 JavaScript 渲染網站（SEO／GEO 兩個工具共用同一套標準，改動時兩邊要一起改）：
+// 可見文字（中文字＋英文單字，與 GEO 引擎算法相同）少於 200 字，或偵測到前端框架且少於 600 字（GEO 認定「足夠」的字數）
+function detectJsSite(html){
+  let doc; try{ doc=new DOMParser().parseFromString(html||'','text/html'); }catch(e){ return {is:false,textLen:0,frameworks:[]}; }
+  const vt=cleanBodyText(doc);
+  const textLen=(vt.match(/[\u3400-\u9fff\uf900-\ufaff]/g)||[]).length+(vt.match(/[A-Za-z]{2,}/g)||[]).length;
+  const src=String(html||'');
+  const fw=[];
+  if(/id=["']__next["']|__NEXT_DATA__/i.test(src)) fw.push('Next.js');
+  if(/id=["']__nuxt["']|window\.__NUXT__/i.test(src)) fw.push('Nuxt');
+  if(/data-reactroot|<div id=["']root["']>\s*<\/div>|react-dom|__REACT_DEVTOOLS/i.test(src)) fw.push('React');
+  if(/data-v-app|<div id=["']app["']>\s*<\/div>|vue(?:\.runtime)?(?:\.global)?(?:\.prod)?(?:\.min)?\.js/i.test(src)) fw.push('Vue');
+  if(/ng-version=|<app-root/i.test(src)) fw.push('Angular');
+  if(/___gatsby|id=["']svelte["']/i.test(src)) fw.push('Gatsby/Svelte');
+  const is = textLen<200 || (fw.length>0 && textLen<600);
+  return {is,textLen,frameworks:fw};
+}
+function cleanBodyText(doc){
+  if(!doc||!doc.body) return '';
+  const clone=doc.body.cloneNode(true);
+  clone.querySelectorAll('script,style,noscript,svg,template').forEach(n=>n.remove());
+  let t=clone.textContent||'';
+  // 保險：頁面上若以文字形式出現的標籤／屬性（如 style="..."、class="..."）也一併去除
+  t=t.replace(/<[^>]*>/g,' ').replace(/\b[\w:-]+\s*=\s*("[^"]*"|'[^']*')/g,' ');
+  return t;
+}
+function analyzeHTML(html, kwList, bizName, bizType, sourceLabel, sourceDomain) {
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(html,'text/html');
+  const checks=[],actions=[],info={};
+  const q=sel=>doc.querySelector(sel);
+  const qa=sel=>[...doc.querySelectorAll(sel)];
+  const text=el=>el?el.textContent.trim():'';
+  const attr=(sel,a)=>{const el=q(sel);return el?(el.getAttribute(a)||'').trim():'';}
+  // 正文：先移除 <script>、<style>、<noscript>、<svg>，只取可見文字（不含任何 HTML 屬性內容）
+  const bodyText=cleanBodyText(doc);
+
+  // 1. Title
+  const title=text(q('title'));info.title=title;
+  if(!title){checks.push({status:'fail',title:'Title Tag 缺失',detail:'未找到 <title> 標籤，必須加入。'});actions.push({priority:'high',title:'加入 <title> 標籤',detail:'建議 30–60 字。'});}
+  else if(title.length<10) checks.push({status:'warn',title:'Title 過短',detail:`目前 ${title.length} 字，建議至少 20 字。`});
+  else if(title.length>70) checks.push({status:'warn',title:'Title 過長',detail:`目前 ${title.length} 字（上限 70），Google 搜尋結果可能被截斷。`});
+  else checks.push({status:'pass',title:'Title Tag 長度正常',detail:`「${title.slice(0,50)}…」長度 ${title.length} 字。`});
+
+  // 2. Meta Description
+  const desc=attr('meta[name="description"]','content');info.description=desc;
+  if(!desc){checks.push({status:'fail',title:'Meta Description 缺失',detail:'對點擊率（CTR）影響很大。'});actions.push({priority:'high',title:'補充 Meta Description',detail:'建議 80–160 字，包含主要關鍵字。'});}
+  else if(desc.length<50){checks.push({status:'fail',title:'Meta Description 過短，需修正',detail:`目前 ${desc.length} 字，建議 80–160 字。`});actions.push({priority:'high',title:'補足 Meta Description',detail:`目前只有 ${desc.length} 字，建議寫到 80–160 字，並包含主要關鍵字。`});}
+  else if(desc.length<80) checks.push({status:'warn',title:'Meta Description 稍短，建議 80–160 字',detail:`目前 ${desc.length} 字，建議 80–160 字。`});
+  else if(desc.length>160) checks.push({status:'warn',title:'Meta Description 過長',detail:`目前 ${desc.length} 字，超過 160 字可能被截斷。`});
+  else checks.push({status:'pass',title:'Meta Description 長度正常',detail:`長度 ${desc.length} 字，符合建議範圍（80–160）。`});
+
+  // 3. H1
+  const h1s=qa('h1');info.h1Count=h1s.length;info.h1Text=h1s.map(h=>h.textContent.trim()).join(' / ');
+  if(!h1s.length){checks.push({status:'fail',title:'H1 標題缺失',detail:'搜尋引擎無法判斷頁面主題。'});actions.push({priority:'high',title:'加入 H1 主標題',detail:'包含主要關鍵字，每頁只用一個 H1。'});}
+  else if(h1s.length>1) checks.push({status:'warn',title:`H1 數量過多（${h1s.length} 個）`,detail:'建議每頁只有一個 H1。'});
+  else checks.push({status:'pass',title:'H1 標題正常',detail:`「${h1s[0].textContent.trim().slice(0,60)}」`});
+
+  // 4. H2/H3
+  const h2s=qa('h2'),h3s=qa('h3');info.h2Count=h2s.length;info.h3Count=h3s.length;
+  if(!h2s.length&&!h3s.length){checks.push({status:'warn',title:'缺乏 H2/H3 層級結構',detail:'建議使用 H2/H3 組織內容。'});actions.push({priority:'medium',title:'補充 H2/H3 標題層級',detail:'H2 作主段落、H3 作次標題。'});}
+  else checks.push({status:'pass',title:`標題層級完整（H2:${h2s.length}, H3:${h3s.length}）`,detail:'結構清晰，有助爬蟲理解。'});
+
+  // 5. Viewport
+  const viewport=attr('meta[name="viewport"]','content');
+  if(!viewport){checks.push({status:'fail',title:'缺少 Viewport Meta',detail:'行動裝置無法正常顯示，Google 行動優先索引會受影響。'});actions.push({priority:'high',title:'加入 Viewport 標籤',detail:'<meta name="viewport" content="width=device-width, initial-scale=1">。'});}
+  else checks.push({status:'pass',title:'Viewport 已設定',detail:viewport});
+
+  // 6. Lang
+  const lang=doc.documentElement.getAttribute('lang');
+  // 頁面主要文字是否為中文（中文字占比過半、且不是日文）
+  const _vt=cleanBodyText(doc);
+  const _han=(_vt.match(/[\u3400-\u9fff\uf900-\ufaff]/g)||[]).length, _kana=(_vt.match(/[\u3040-\u30ff]/g)||[]).length, _lat=(_vt.match(/[A-Za-z]{2,}/g)||[]).length;
+  const isZhContent=_han>=30 && _han>=_lat && _kana<_han*0.1;
+  info.langMismatch=!!(lang && isZhContent && !/^zh/i.test(lang.trim()));
+  if(!lang) checks.push({status:'warn',title:'缺少 lang 屬性',detail:isZhContent?'頁面主要為中文，建議設定 <html lang="zh-TW">。':'<html lang="zh-TW"> 有助搜尋引擎了解語言。'});
+  else if(info.langMismatch){checks.push({status:'warn',title:`語言設定與內容不符（lang="${lang}"）`,detail:`頁面主要文字是中文，但 lang 屬性是「${lang}」。搜尋引擎與翻譯工具可能誤判語言。`});actions.push({priority:'medium',title:'修正 lang 屬性',detail:'把 <html lang="'+lang+'"> 改成 <html lang="zh-TW">（繁體中文）。'});}
+  else checks.push({status:'pass',title:`語言屬性已設定（lang="${lang}"）`,detail:'有助多語系索引。'});
+
+  // 7. Robots
+  const robotsMeta=attr('meta[name="robots"]','content');
+  if(robotsMeta&&(robotsMeta.includes('noindex')||robotsMeta.includes('nofollow'))){
+    checks.push({status:'fail',title:'⚠ Robots 設定禁止索引',detail:`meta robots: "${robotsMeta}"，頁面可能無法被 Google 索引！`});
+    actions.push({priority:'high',title:'檢查 Robots Meta',detail:'正式上線頁面應為 "index, follow"。'});
+  }else{checks.push({status:'pass',title:'Robots Meta 正常',detail:robotsMeta||'預設允許索引'});}
+
+  // 8. Charset
+  const charset=attr('meta[charset]','charset')||attr('meta[http-equiv="Content-Type"]','content');
+  if(!charset) checks.push({status:'warn',title:'未設定字符編碼',detail:'建議加入 <meta charset="UTF-8">。'});
+  else checks.push({status:'pass',title:`字符編碼已設定（${charset.toUpperCase().replace('CHARSET=','').split(';')[0]}）`,detail:'UTF-8 確保中文正確顯示。'});
+
+  // 9. Open Graph
+  const ogTitle=attr('meta[property="og:title"]','content');
+  const ogDesc=attr('meta[property="og:description"]','content');
+  const ogImg=attr('meta[property="og:image"]','content');
+  const ogUrl=attr('meta[property="og:url"]','content');
+  const ogType=attr('meta[property="og:type"]','content');
+  const twCard=attr('meta[name="twitter:card"]','content');
+  const twTitle=attr('meta[name="twitter:title"]','content');
+  const twDesc=attr('meta[name="twitter:description"]','content');
+  const twImg=attr('meta[name="twitter:image"]','content');
+  info.og={title:ogTitle,desc:ogDesc,img:ogImg,url:ogUrl,type:ogType};
+  info.tw={card:twCard,title:twTitle||ogTitle,desc:twDesc||ogDesc,img:twImg||ogImg};
+  if(!ogTitle&&!ogDesc){checks.push({status:'warn',title:'Open Graph 標籤缺失',detail:'LINE、FB 分享預覽不完整。'});actions.push({priority:'low',title:'加入 Open Graph 標籤',detail:'加入 og:title、og:description、og:image。'});}
+  else if(!ogImg) checks.push({status:'warn',title:'Open Graph 缺少 og:image',detail:'分享時無法顯示預覽圖，建議加入 1200×630px 的圖片。'});
+  else checks.push({status:'pass',title:'Open Graph 標籤完整',detail:`og:title ✓ og:desc ✓ og:image ✓`});
+
+  // 10. Internal links (domain-aware)
+  const links=qa('a[href]');
+  const extLinks=links.filter(l=>{
+    const h=l.getAttribute('href')||'';
+    if(!h||h.startsWith('mailto')||h.startsWith('tel')||h.startsWith('#')) return false;
+    if(!h.startsWith('http')) return false;
+    try{return sourceDomain?new URL(h).hostname!==sourceDomain:true;}catch{return false;}
+  });
+  const intLinks=links.filter(l=>{
+    const h=l.getAttribute('href')||'';
+    if(!h||h.startsWith('mailto')||h.startsWith('tel')) return false;
+    if(h.startsWith('#')||h.startsWith('/')||h.startsWith('./')||h.startsWith('../')) return true;
+    if(!h.startsWith('http')) return true;
+    try{return sourceDomain&&new URL(h).hostname===sourceDomain;}catch{return false;}
+  });
+  info.linkCount=links.length;info.internalLinkCount=intLinks.length;info.externalLinks=extLinks.map(l=>l.getAttribute('href'));
+  if(!intLinks.length) checks.push({status:'warn',title:'缺少內部連結',detail:'內部連結有助傳遞 PageRank 和幫助爬蟲發現頁面。'});
+  else checks.push({status:'pass',title:`內部連結完整（${intLinks.length} 個）`,detail:`外部連結 ${extLinks.length} 個。`});
+
+  // 11. Text length
+  // 抓取階段與報告共用 detectJsSite 的同一個結果（文字量也用同一個算法：中文字＋英文單字）
+  const jsInfo=detectJsSite(html);
+  const wordCount=jsInfo.textLen;info.textLength=wordCount;info.bodyText=bodyText;
+  info.jsSite=jsInfo;
+  if(jsInfo.is){
+    const fwTxt=jsInfo.frameworks.length?`，並偵測到 ${jsInfo.frameworks.join('、')}`:'';
+    checks.push({status:'warn',title:`頁面文字量偏少（${wordCount} 字），疑似 JavaScript 渲染網站`,detail:`靜態抓到的文字太少${fwTxt}，內容可能由 JavaScript 產生，本報告結果可能不準確。`});
+    actions.push({priority:'medium',title:'確認網站內容是否由 JavaScript 產生',detail:'改用「上傳 HTML」檢測，或用 Google Search Console 的網址審查確認 Google 實際看到的內容。'});
+  }
+  else if(wordCount<200){checks.push({status:'warn',title:`頁面文字量偏少（${wordCount} 字）`,detail:'建議至少 300 字。'});actions.push({priority:'medium',title:'增加頁面文字',detail:'補充店家介紹、特色說明，目標 500 字以上。'});}
+  else checks.push({status:'pass',title:`頁面文字量充足（${wordCount} 字）`,detail:'有足夠內容供搜尋引擎分析。'});
+
+  // ─── IMAGES (深度分析) ───
+  const imgs=qa('img');
+  const noAlt=imgs.filter(i=>!i.getAttribute('alt')||i.getAttribute('alt').trim()==='');
+  const noLazy=imgs.filter(i=>i.getAttribute('loading')!=='lazy');
+  const noSrcset=imgs.filter(i=>!i.getAttribute('srcset'));
+  // Format check by src extension
+  const modernFmtCount=imgs.filter(i=>{const s=i.getAttribute('src')||'';return /\.(webp|avif)/i.test(s);}).length;
+  const legacyFmtCount=imgs.filter(i=>{const s=i.getAttribute('src')||'';return /\.(jpg|jpeg|png|gif)/i.test(s);}).length;
+  info.imgData={total:imgs.length,noAlt:noAlt.length,noLazy:noLazy.length,noSrcset:noSrcset.length,modern:modernFmtCount,legacy:legacyFmtCount};
+  // Still add to main checks
+  if(imgs.length>0&&noAlt.length>0){checks.push({status:'warn',title:`${noAlt.length} 張圖片缺少 alt`,detail:`共 ${imgs.length} 張，${noAlt.length} 張無 alt。`});actions.push({priority:'medium',title:'補充圖片 alt 屬性',detail:'加上描述性 alt text。'});}
+  else if(imgs.length>0) checks.push({status:'pass',title:`所有 ${imgs.length} 張圖片有 alt`,detail:'圖片 alt 完整。'});
+  else{checks.push({status:'warn',title:'頁面無圖片',detail:'建議加入真實照片提升停留時間與圖片搜尋流量。'});actions.push({priority:'medium',title:'加入真實照片',detail:'上傳餐點、環境照片並加 alt。'});}
+
+  // ─── CANONICAL & DUPLICATE CONTENT ───
+  const canonical=attr('link[rel="canonical"]','href');
+  const ogUrlAttr=ogUrl;
+  info.canonical=canonical;
+  const canonicalChecks=[];
+  if(!canonical){
+    canonicalChecks.push({ok:false,msg:'缺少 <link rel="canonical">，可能導致 www/non-www 或 http/https 重複內容被分開索引。'});
+    actions.push({priority:'medium',title:'加入 Canonical 標籤',detail:'<link rel="canonical" href="完整頁面URL"> 避免重複內容。'});
+  }else{
+    canonicalChecks.push({ok:true,msg:`Canonical 已設定：${canonical.slice(0,80)}`});
+    // Check consistency with og:url
+    if(ogUrlAttr&&canonical){
+      try{
+        const cHost=new URL(canonical).hostname.replace(/^www\./,'');
+        const oHost=new URL(ogUrlAttr).hostname.replace(/^www\./,'');
+        if(cHost!==oHost) canonicalChecks.push({ok:false,msg:`og:url 與 canonical 的 domain 不一致（${oHost} vs ${cHost}），可能造成混淆。`});
+        else canonicalChecks.push({ok:true,msg:'og:url 與 canonical domain 一致 ✓'});
+      }catch{}
+    }
+    // https check
+    if(canonical.startsWith('http://')&&!canonical.startsWith('https://'))
+      canonicalChecks.push({ok:false,msg:'Canonical 使用 http 而非 https，建議統一使用 https。'});
+    else if(canonical.startsWith('https://'))
+      canonicalChecks.push({ok:true,msg:'Canonical 使用 https ✓'});
+    // www check
+    if(sourceDomain){
+      const canHost=new URL(canonical).hostname;
+      if(canHost!==sourceDomain) canonicalChecks.push({ok:false,msg:`Canonical host（${canHost}）與頁面 host（${sourceDomain}）不一致，可能有 www 重導向問題。`});
+    }
+  }
+  info.canonicalChecks=canonicalChecks;
+
+  // ─── HREFLANG ───
+  const hreflangTags=qa('link[rel="alternate"][hreflang]');
+  const hreflangData=hreflangTags.map(l=>({lang:l.getAttribute('hreflang'),href:l.getAttribute('href')}));
+  info.hreflang=hreflangData;
+  const hreflangIssues=[];
+  if(hreflangData.length>0){
+    const hasXDefault=hreflangData.some(h=>h.lang==='x-default');
+    if(!hasXDefault) hreflangIssues.push('缺少 hreflang="x-default" 標籤，建議加入作為語言選擇頁的後備 URL。');
+    // Check for duplicate langs
+    const langs=hreflangData.map(h=>h.lang);
+    const dupes=langs.filter((l,i)=>langs.indexOf(l)!==i);
+    if(dupes.length) hreflangIssues.push(`重複的 hreflang 語言代碼：${[...new Set(dupes)].join(', ')}`);
+    // Check href validity
+    const invalidHref=hreflangData.filter(h=>!h.href||!h.href.startsWith('http'));
+    if(invalidHref.length) hreflangIssues.push(`${invalidHref.length} 個 hreflang 的 href 不是完整 URL（需含 https://）。`);
+    // Cross-reference: this page should appear in its own hreflang set
+    if(sourceDomain){
+      const selfRef=hreflangData.some(h=>{try{return new URL(h.href).hostname.replace(/^www\./,'')===sourceDomain.replace(/^www\./,'');}catch{return false;}});
+      if(!selfRef) hreflangIssues.push('此頁面未在自身的 hreflang 標籤中自我引用（需要交叉引用）。');
+    }
+  }
+  info.hreflangIssues=hreflangIssues;
+
+  // ─── STRUCTURED DATA VALIDATION ───
+  const schemas=qa('script[type="application/ld+json"]');
+  info.schemaCount=schemas.length;
+  const schemaResults=schemas.map((s,idx)=>{
+    let parsed,parseErr='';
+    try{parsed=JSON.parse(s.textContent);}catch(e){parseErr=e.message;}
+    if(parseErr) return{idx,type:'解析失敗',errors:[`JSON 語法錯誤：${parseErr}`],warnings:[],valid:false};
+    const type=parsed['@type']||'未知';
+    const errors=[],warnings=[];
+    if(!parsed['@context']) errors.push('缺少 @context（應為 "https://schema.org"）');
+    if(!parsed['@type']) errors.push('缺少 @type');
+    // Type-specific checks
+    if(type==='Organization'||type==='LocalBusiness'||type==='Restaurant'){
+      if(!parsed.name) errors.push('缺少 name');
+      if(!parsed.url) warnings.push('建議加入 url');
+      if(!parsed.telephone) warnings.push('建議加入 telephone（本地商家）');
+      if(!parsed.address) warnings.push('建議加入 address（本地商家）');
+    }
+    if(type==='Product'){
+      if(!parsed.name) errors.push('缺少 name');
+      if(!parsed.offers) warnings.push('建議加入 offers（含 price）');
+    }
+    if(type==='Article'||type==='BlogPosting'||type==='NewsArticle'){
+      if(!parsed.headline) errors.push('缺少 headline');
+      if(!parsed.author) warnings.push('建議加入 author');
+      if(!parsed.datePublished) warnings.push('建議加入 datePublished');
+    }
+    if(type==='FAQPage'){
+      if(!parsed.mainEntity||!Array.isArray(parsed.mainEntity)) errors.push('缺少 mainEntity 陣列（FAQ 問答）');
+      else if(parsed.mainEntity.length===0) errors.push('mainEntity 陣列為空');
+    }
+    if(type==='BreadcrumbList'){
+      if(!parsed.itemListElement||!Array.isArray(parsed.itemListElement)) errors.push('缺少 itemListElement');
+    }
+    if(type==='WebSite'){
+      if(!parsed.url) errors.push('缺少 url');
+    }
+    return{idx,type,errors,warnings,valid:errors.length===0};
+  });
+  info.schemaResults=schemaResults;
+  if(!schemas.length){
+    checks.push({status:'warn',title:'缺少 Schema.org 結構化資料',detail:'加入 JSON-LD 可讓 Google 顯示豐富摘要。'});
+    actions.push({priority:'medium',title:'加入 Schema.org 結構化資料',detail:'建議加入 Restaurant/Organization、FAQPage、BreadcrumbList。'});
+  }else{
+    const invalid=schemaResults.filter(r=>!r.valid).length;
+    if(invalid>0){checks.push({status:'warn',title:`結構化資料有 ${invalid} 筆驗證失敗`,detail:'必填欄位缺失，Google 豐富摘要可能無法正確顯示。'});actions.push({priority:'medium',title:'修復結構化資料',detail:'補充缺失的必填欄位，可用 Google Rich Results Test 驗證。'});}
+    else checks.push({status:'pass',title:`結構化資料已設定（${schemas.length} 筆，驗證通過）`,detail:schemaResults.map(r=>r.type).join('、')});
+  }
+
+  // ─── v19：補強檢查（Twitter Card、Favicon、圖片寬高、meta refresh、重複標籤）───
+  // Twitter Card（twCard 已在上方的社群預覽區讀取）
+  if(twCard) checks.push({status:'pass',title:`Twitter Card 已設定（${twCard}）`,detail:'在 X（Twitter）分享時會顯示完整的預覽卡片。'});
+  else{checks.push({status:'warn',title:'缺少 Twitter Card',detail:(ogTitle||ogImg)?'X（Twitter）會退回使用 Open Graph，但可能只顯示小卡片。':'在 X（Twitter）分享時不會有預覽卡片。'});actions.push({priority:'low',title:'加入 Twitter Card',detail:'在 <head> 加上 <meta name="twitter:card" content="summary_large_image">，分享時會顯示大張預覽圖。'});}
+
+  // Favicon
+  const favicon=qa('link[rel]').some(l=>/(^|\s)(icon|shortcut icon|apple-touch-icon)(\s|$)/i.test(l.getAttribute('rel')||''));
+  if(favicon) checks.push({status:'pass',title:'Favicon 網站圖示已設定',detail:'Google 手機版搜尋結果與瀏覽器分頁會顯示你的網站圖示。'});
+  else{checks.push({status:'warn',title:'缺少 Favicon 網站圖示',detail:'Google 手機版搜尋結果會在網址旁顯示網站圖示，沒有設定時會顯示預設圖示，降低辨識度。'});actions.push({priority:'medium',title:'加入 Favicon',detail:'準備 48×48 以上的正方形圖示，在 <head> 加上 <link rel="icon" href="/favicon.png">。'});}
+
+  // 圖片寬高（避免版面跳動 CLS）
+  const realImgs=imgs.filter(i=>{const w=parseInt(i.getAttribute('width'),10),h=parseInt(i.getAttribute('height'),10);return !((w&&w<=2)||(h&&h<=2));});
+  const noDims=realImgs.filter(i=>!(i.getAttribute('width')&&i.getAttribute('height'))&&!/aspect-ratio|(^|;)\s*height\s*:/i.test(i.getAttribute('style')||''));
+  if(!realImgs.length) checks.push({status:'pass',title:'沒有圖片造成版面跳動的風險',detail:'頁面沒有內容圖片。'});
+  else if(!noDims.length) checks.push({status:'pass',title:`所有 ${realImgs.length} 張圖片都有設定寬高`,detail:'圖片載入時不會造成版面跳動（CLS）。'});
+  else{checks.push({status:'warn',title:`${noDims.length} 張圖片沒有設定寬高`,detail:`共 ${realImgs.length} 張圖片，其中 ${noDims.length} 張缺少 width／height。圖片載入時版面會跳動，影響 Core Web Vitals 的 CLS 分數。`});actions.push({priority:'medium',title:'替圖片加上寬高',detail:'在 <img> 加上 width 與 height 屬性（填圖片原始尺寸即可，CSS 仍可縮放），瀏覽器就能預留空間、避免版面跳動。'});}
+
+  // meta refresh 跳轉
+  const metaRefresh=qa('meta[http-equiv]').find(m=>/^refresh$/i.test(m.getAttribute('http-equiv')||''));
+  if(!metaRefresh) checks.push({status:'pass',title:'沒有使用 meta refresh 跳轉',detail:'頁面不會用過時的方式自動跳轉。'});
+  else{const rc=(metaRefresh.getAttribute('content')||'');const toUrl=/url\s*=/i.test(rc);
+    checks.push({status:toUrl?'fail':'warn',title:toUrl?'使用 meta refresh 跳轉到其他網址':'頁面設定了 meta refresh 自動重新整理',detail:toUrl?`偵測到 <meta http-equiv="refresh" content="${rc.slice(0,60)}">。搜尋引擎可能把它當成低品質的跳轉，排名不一定會轉移到新網址。`:'自動重新整理會打斷閱讀，也可能被搜尋引擎視為不良體驗。'});
+    actions.push({priority:toUrl?'high':'low',title:toUrl?'改用 301 轉址取代 meta refresh':'移除 meta refresh',detail:toUrl?'在主機或 CDN 設定 301 永久轉址；若無法設定（例如 GitHub Pages），至少在新網址加上 canonical。':'移除 <meta http-equiv="refresh">，需要更新內容時改用 JavaScript 局部更新。'});}
+
+  // 重複的 Title／Meta Description 標籤
+  const titleCount=qa('head title').length, descCount=qa('meta[name="description"]').length;
+  if(titleCount<=1&&descCount<=1) checks.push({status:'pass',title:'Title 與 Description 標籤沒有重複',detail:'每個頁面各只有一組，搜尋引擎不會混淆。'});
+  else{checks.push({status:'warn',title:`有重複的${titleCount>1?` ${titleCount} 個 <title>`:''}${titleCount>1&&descCount>1?' 與':''}${descCount>1?` ${descCount} 個 Meta Description`:''}`,detail:'同一頁有多個 Title 或 Description 時，搜尋引擎只會採用其中一個，不一定是你想要的那個。常見原因是佈景主題和 SEO 外掛重複輸出。'});actions.push({priority:'medium',title:'移除重複的 Title／Description',detail:'檢查佈景主題與 SEO 外掛，只保留一組 <title> 與 <meta name="description">。'});}
+
+  // ─── READABILITY ───
+  const rawBodyText=bodyText.trim();
+  // Sentences: split by 。！？. ! ?
+  const sentences=rawBodyText.split(/[。！？.!?]+/).filter(s=>s.trim().length>3);
+  const avgSentLen=sentences.length?Math.round(rawBodyText.length/sentences.length):0;
+  // Paragraphs: count <p> tags with text
+  const paras=qa('p').filter(p=>p.textContent.trim().length>20);
+  const avgParaLen=paras.length?Math.round(paras.reduce((a,p)=>a+p.textContent.length,0)/paras.length):0;
+  // Chinese readability: simple Flesch equivalent
+  // Score based on avg sentence length (ideal: 20-40 chars)
+  let readScore=100;
+  if(avgSentLen>60) readScore-=30;
+  else if(avgSentLen>40) readScore-=15;
+  if(avgParaLen>200) readScore-=20;
+  else if(avgParaLen>150) readScore-=10;
+  readScore=Math.max(0,Math.min(100,readScore));
+  const readLabel=readScore>=80?'易讀':readScore>=60?'尚可':'難讀';
+  info.readability={sentences:sentences.length,avgSentLen,paras:paras.length,avgParaLen,score:readScore,label:readLabel};
+
+  // ─── KEYWORD ANALYSIS ───
+  const kwResults=kwList.map(kw=>{
+    const kwL=kw.toLowerCase();
+    const inTitle=title.toLowerCase().includes(kwL);
+    const inDesc=desc.toLowerCase().includes(kwL);
+    const inH1=h1s.some(h=>h.textContent.toLowerCase().includes(kwL));
+    const inH2=h2s.some(h=>h.textContent.toLowerCase().includes(kwL));
+    const bodyCount=(bodyText.toLowerCase().split(kwL).length-1);
+    const score=(inTitle?30:0)+(inDesc?20:0)+(inH1?25:0)+(inH2?10:0)+(Math.min(bodyCount,5)*3);
+    const cnLen=kw.split('').filter(c=>/[\u4e00-\u9fff]/.test(c)).length;
+    const difficulty=cnLen<=2||kw.includes('推薦')||kw.includes('美食')||kw.includes('排行')?'hard':cnLen>=5?'easy':'medium';
+    return{keyword:kw,inTitle,inDesc,inH1,inH2,bodyCount,optScore:Math.min(score,100),difficulty};
+  });
+
+  // ─── KEYWORD COVERAGE SCORE ───
+  // 計算關鍵字覆蓋率，納入最終分數（佔 25%）
+  let kwCoverageScore = 0;
+  let kwCoverageLabel = '';
+  if(kwResults.length > 0){
+    // 每個關鍵字：有在 Title 得 40 分、有在 H1 得 35 分、有在 Desc 得 25 分
+    const kwAvg = kwResults.reduce((sum, k) => {
+      const s = (k.inTitle?40:0) + (k.inH1?35:0) + (k.inDesc?25:0);
+      return sum + Math.min(s, 100);
+    }, 0) / kwResults.length;
+    kwCoverageScore = Math.round(kwAvg);
+
+    // 加入 checks 讓關鍵字覆蓋也顯示在技術清單裡
+    const kwInTitle = kwResults.filter(k=>k.inTitle).length;
+    const kwInH1   = kwResults.filter(k=>k.inH1).length;
+    const kwInDesc = kwResults.filter(k=>k.inDesc).length;
+    const n = kwResults.length;
+
+    if(kwInTitle === n)      checks.push({status:'pass', title:`所有 ${n} 個關鍵字出現在 Title`, detail:'關鍵字 Title 覆蓋率 100%'});
+    else if(kwInTitle > 0)   checks.push({status:'warn', title:`${kwInTitle}/${n} 個關鍵字出現在 Title`, detail:`${n-kwInTitle} 個關鍵字未出現在 Title，建議補入最重要的 1–2 個。`});
+    else                     checks.push({status:'fail', title:'關鍵字完全未出現在 Title', detail:'所有目標關鍵字都不在 Title，嚴重影響排名。'});
+
+    if(kwInH1 === n)         checks.push({status:'pass', title:`所有 ${n} 個關鍵字出現在 H1`, detail:'關鍵字 H1 覆蓋率 100%'});
+    else if(kwInH1 > 0)      checks.push({status:'warn', title:`${kwInH1}/${n} 個關鍵字出現在 H1`, detail:`建議將核心關鍵字納入 H1 標題。`});
+    else                     checks.push({status:'fail', title:'關鍵字完全未出現在 H1', detail:'H1 是 SEO 最重要的標題，請加入主要關鍵字。'});
+
+    if(kwInDesc === n)       checks.push({status:'pass', title:`所有 ${n} 個關鍵字出現在 Meta Description`, detail:'關鍵字 Desc 覆蓋率 100%'});
+    else if(kwInDesc > 0)    checks.push({status:'warn', title:`${kwInDesc}/${n} 個關鍵字出現在 Meta Description`, detail:'未覆蓋的關鍵字建議補入 Description，有助提升 SERP 點擊率。'});
+    else                     checks.push({status:'warn', title:'關鍵字未出現在 Meta Description', detail:'Description 含有關鍵字會在搜尋結果中被加粗，提升點擊率。'});
+
+    // 加入行動建議
+    if(kwInTitle < n) actions.push({priority:'high', title:`補強關鍵字 Title 覆蓋（${n-kwInTitle} 個缺失）`, detail:'將未覆蓋的關鍵字精簡後放入 <title>，維持 60 字以內。'});
+    if(kwInH1 < n)    actions.push({priority:'high', title:`補強關鍵字 H1 覆蓋（${n-kwInH1} 個缺失）`, detail:'H1 應包含最重要的 1–2 個目標關鍵字。'});
+  }
+
+  // ─── SCORE ───
+  const pass=checks.filter(c=>c.status==='pass').length;
+  const warn=checks.filter(c=>c.status==='warn').length;
+  const fail=checks.filter(c=>c.status==='fail').length;
+  const total=checks.length;
+
+  // 技術 SEO 分（75%）+ 關鍵字覆蓋分（25%）
+  const techScore = Math.round((pass*10+warn*5)/(total*10)*100);
+  const score = kwResults.length > 0
+    ? Math.max(10, Math.min(Math.round(techScore * 0.75 + kwCoverageScore * 0.25), 98))
+    : Math.max(10, Math.min(techScore, 98));
+
+  const scoreTitle=score>=90?'優秀':score>=80?'良好':score>=60?'普通，有不少可改善':'需要優先處理';
+
+  // 關鍵字 pill
+  const kwPillStatus = kwResults.length === 0 ? 'warn'
+    : kwCoverageScore >= 80 ? 'pass'
+    : kwCoverageScore >= 40 ? 'warn' : 'fail';
+
+  const metrics=[
+    {label:'Title',  status:title?(title.length<=70?'pass':'warn'):'fail'},
+    {label:'Meta',   status:!desc?'fail':(desc.length>=80&&desc.length<=160)?'pass':(desc.length<50)?'fail':'warn'},
+    {label:'H1',     status:h1s.length===1?'pass':h1s.length===0?'fail':'warn'},
+    {label:'Schema', status:schemas.length>0?(schemaResults.every(r=>r.valid)?'pass':'warn'):'warn'},
+    {label:'RWD',    status:viewport?'pass':'fail'},
+    {label:'OG',     status:(ogTitle&&ogDesc&&ogImg)?'pass':'warn'},
+    {label:'Canonical', status:canonical?'pass':'warn'},
+    {label:'關鍵字', status:kwPillStatus},
+  ];
+
+  const kwNote = kwResults.length > 0
+    ? `關鍵字覆蓋率 ${kwCoverageScore} 分（佔總分 25%）。`
+    : '尚未輸入關鍵字，分數僅反映技術 SEO。';
+  const summary=`共檢查 ${total} 項，${pass} 項通過、${warn} 項警告、${fail} 項需修復。${kwNote}`;
+  info.fileName=sourceLabel||'未命名';
+  info.kwCoverageScore=kwCoverageScore;
+
+  return{score,scoreTitle,summary,metrics,checks,kwResults,actions,info,pass,warn,fail,schemaResults};
+}
+
+// ═══════════════════════════════════════════════════════
+//  CANCEL & RUN ANALYSIS
+// ═══════════════════════════════════════════════════════
+async function cancelAnalysis(){
+  if(abortController) abortController.abort();
+  abortController=null;
+  document.getElementById('progress').style.display='none';
+  document.getElementById('analyzeBtn').disabled=false;
+  document.getElementById('cancelBtn').style.display='none';
+  document.getElementById('progBar').style.width='0%';
+}
+
+async function runAnalysis(){
+  let content='',sourceLabel='',sourceDomain='';
+  resetResults();
+  if(tabState.t1.mode==='url'){
+    {
+      // 網址和上次抓取的不同時，要重新抓取，不能拿上一個網站的內容來分析
+      let v=document.getElementById('t1Url').value.trim();
+      if(v&&!/^https?:\/\//i.test(v)) v='https://'+v;
+      if(v&&(!tabState.t1.html||tabState.t1.label!==v)) await fetchUrl('t1');
+    }
+    if(!tabState.t1.html){showErr('請先輸入網址並抓取，或切換到「上傳檔案」。');return;}
+    content=tabState.t1.html;sourceLabel=tabState.t1.label;
+    try{sourceDomain=new URL(tabState.t1.label).hostname;}catch{}
+  }else{
+    if(selectedIdx<0||!uploadedFiles[selectedIdx]){showErr('請先上傳 HTML 檔案！');return;}
+    content=uploadedFiles[selectedIdx].content;sourceLabel=uploadedFiles[selectedIdx].name;
+  }
+  const compHtml=tabState.t3.html;
+  hideErr();
+  const bizName=document.getElementById('bizName').value.trim();
+  const bizType=document.getElementById('bizType').value.trim();
+  document.getElementById('analyzeBtn').disabled=true;
+  document.getElementById('cancelBtn').style.display='block';
+  document.getElementById('results').style.display='none';
+  const prog=document.getElementById('progress'),bar=document.getElementById('progBar'),lbl=document.getElementById('progLabel');
+  prog.style.display='block';bar.style.width='0%';
+  // Progress steps (integrated directly — no wrapper needed)
+  if(!prog.querySelector('.prog-steps')){
+    const stepLabels=['解析 HTML','Meta 標籤','圖片分析','結構化資料','可讀性','關鍵字','生成報告'];
+    prog.insertAdjacentHTML('beforeend','<div class="prog-steps">'+stepLabels.map((s,i)=>`<span class="prog-step" id="pstep${i}">${s}</span>`).join('')+'</div>');
+    let si2=0;
+    const stepIv=setInterval(()=>{
+      if(si2>0) document.getElementById('pstep'+(si2-1))?.classList.replace('active','done');
+      document.getElementById('pstep'+si2)?.classList.add('active');
+      si2++;if(si2>=stepLabels.length)clearInterval(stepIv);
+    },140);
+  }
+  const steps=['解析 HTML 結構...','檢查 Meta 標籤...','分析圖片最佳化...','驗證結構化資料...','分析 Hreflang...','評估可讀性...','計算關鍵字密度...','生成完整報告...'];
+  let pct=0,si=0;
+  abortController=new AbortController();
+  const signal=abortController.signal;
+  const iv=setInterval(()=>{pct=Math.min(pct+11,90);bar.style.width=pct+'%';if(si<steps.length)lbl.textContent=steps[si++];if(pct>=90)clearInterval(iv);},120);
+  let cancelled=false;
+  try{await new Promise((res,rej)=>{const t=setTimeout(res,1000);signal.addEventListener('abort',()=>{clearTimeout(t);rej(new Error('cancelled'));});});}
+  catch{clearInterval(iv);cancelled=true;}
+  if(cancelled)return;
+  clearInterval(iv);bar.style.width='100%';
+  document.getElementById('cancelBtn').style.display='none';
+  const report=analyzeHTML(content,keywords,bizName,bizType,sourceLabel,sourceDomain);
+  report._rawHtml = content;
+  currentReport=report;
+  if(compHtml){let cd='';try{cd=new URL(tabState.t3.label).hostname;}catch{}report._compReport=analyzeHTML(compHtml,keywords,'','',tabState.t3.label,cd);}
+  history.push({score:report.score,name:bizName||sourceLabel||'未命名',date:new Date().toLocaleDateString('zh-TW',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),pass:report.pass,warn:report.warn,fail:report.fail,report});
+  if(history.length>50)history.shift();
+  tmpStore.setItem('seo_hist_v8',JSON.stringify(history));
+  updateHistCount();
+  setTimeout(()=>{
+    prog.style.display='none';
+    document.getElementById('analyzeBtn').disabled=false;
+    renderResults(report);
+
+    // ── v7: fire new async features if URL mode ──
+    if(tabState.t1.mode==='url' && tabState.t1.label) {
+      const pageUrl = tabState.t1.label;
+      checkRedirectChain(pageUrl);
+      fetchHttpHeaders(pageUrl);
+      checkRobotsAndSitemap(pageUrl);
+      if(sourceDomain) startCrawl(pageUrl, sourceDomain);
+    } else {
+      // File mode — hide new sections
+      ['robotsSection','headersSection','redirectSection','crawlSection'].forEach(id=>{
+        document.getElementById(id).style.display='none';
+      });
+    }
+  },250);
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER RESULTS
+// ═══════════════════════════════════════════════════════
+function renderResults(r){
+  document.getElementById('results').style.display='block';
+  // Score ring
+  const ring=document.getElementById('scoreRing');
+  ring.style.stroke=scoreColor(r.score);
+  setTimeout(()=>{ring.style.strokeDashoffset=289-(r.score/100)*289;},80);
+  // Count-up
+  const el=document.getElementById('scoreNum');const lbl=document.createElement('div');lbl.className='score-lbl';lbl.textContent='/100';let n=0;
+  const iv=setInterval(()=>{n=Math.min(n+Math.ceil(r.score/25),r.score);el.textContent=n;el.appendChild(lbl);if(n>=r.score)clearInterval(iv);},28);
+  document.getElementById('scoreTitle').textContent=r.scoreTitle;
+  document.getElementById('scoreSummary').textContent=r.summary;
+  document.getElementById('metricPills').innerHTML=r.metrics.map(m=>{
+    const c=m.status==='pass'?'mp-pass':m.status==='warn'?'mp-warn':'mp-fail';
+    return`<span class="mpill ${c}">${m.status==='pass'?'✓':m.status==='warn'?'!':'✗'} ${m.label}</span>`;
+  }).join('');
+
+  // 分數組成說明
+  const kwScore = r.info?.kwCoverageScore;
+  const techScore = r.kwResults?.length > 0
+    ? Math.round(r.score / 0.75 - (kwScore * 0.25) / 0.75)
+    : r.score;
+  const scoreBreakdown = document.getElementById('scoreBreakdown');
+  if(scoreBreakdown){
+    if(r.kwResults?.length > 0){
+      scoreBreakdown.innerHTML=`
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:7px 13px">
+            <span style="color:var(--text3)">技術 SEO</span>
+            <strong style="color:var(--text);margin-left:6px">${r.pass}✓ ${r.warn}! ${r.fail}✗</strong>
+            <span style="color:var(--text3);font-size:11px;margin-left:4px">（佔 75%）</span>
+          </div>
+          <div style="background:var(--bg3);border:1px solid ${kwScore>=80?'rgba(16,185,129,0.3)':kwScore>=40?'rgba(245,158,11,0.3)':'rgba(239,68,68,0.3)'};border-radius:8px;padding:7px 13px">
+            <span style="color:var(--text3)">關鍵字覆蓋</span>
+            <strong style="color:${kwScore>=80?'#10b981':kwScore>=40?'#f59e0b':'#ef4444'};margin-left:6px">${kwScore} 分</strong>
+            <span style="color:var(--text3);font-size:11px;margin-left:4px">（佔 25%）</span>
+          </div>
+        </div>`;
+    } else {
+      scoreBreakdown.innerHTML=`<p style="font-size:12px;color:var(--text3);margin-top:8px">⚠ 尚未輸入關鍵字，分數僅反映技術 SEO。請到「🔑 關鍵字」頁籤加入目標關鍵字以取得完整分數。</p>`;
+    }
+  }
+
+  // ── 歷史趨勢圖 ──
+  const trendData=history.slice(-20);
+  if(trendData.length<2){
+    document.getElementById('trendBody').innerHTML='<div class="trend-empty">⚡ 至少需要 2 次分析紀錄才能顯示趨勢圖。繼續分析更多頁面！</div>';
+  }else{
+    const scores=trendData.map(h=>h.score);
+    const labels=trendData.map(h=>h.name.slice(0,14));
+    const min=Math.min(...scores)-10,max=Math.max(...scores)+10;
+    const W=800,H=140,padL=36,padR=12,padT=12,padB=28;
+    const cW=W-padL-padR,cH=H-padT-padB;
+    const xStep=cW/(scores.length-1);
+    const yScale=s=>padT+cH-(s-min)/(max-min||1)*cH;
+    const pts=scores.map((s,i)=>[padL+i*xStep,yScale(s)]);
+    const pathD='M'+pts.map(p=>p.join(',')).join(' L');
+    const areaD=pathD+` L${pts[pts.length-1][0]},${padT+cH} L${pts[0][0]},${padT+cH} Z`;
+    const svgLabels=pts.map((p,i)=>(i===0||i===pts.length-1||scores.length<=8)?
+      `<text x="${p[0]}" y="${H-6}" text-anchor="middle" font-size="9" fill="rgba(144,144,168,0.7)">${labels[i]}</text>`:''
+    ).join('');
+    const dots=pts.map((p,i)=>
+      `<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${scoreColor(scores[i])}" stroke="var(--bg2)" stroke-width="2"/>`+
+      `<title>${labels[i]}: ${scores[i]}分</title>`
+    ).join('');
+    document.getElementById('trendBody').innerHTML=`
+      <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:${H}px;overflow:visible">
+        <defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5FA396" stop-opacity="0.25"/><stop offset="100%" stop-color="#5FA396" stop-opacity="0"/></linearGradient></defs>
+        <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+cH}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="${padL}" y1="${padT+cH}" x2="${W-padR}" y2="${padT+cH}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        ${[0,25,50,75,100].filter(v=>v>=min&&v<=max).map(v=>{
+          const y=yScale(v);
+          return`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(255,255,255,0.04)" stroke-dasharray="3 4"/>
+                 <text x="${padL-4}" y="${y+4}" text-anchor="end" font-size="9" fill="rgba(144,144,168,0.6)">${v}</text>`;
+        }).join('')}
+        <path d="${areaD}" fill="url(#tg)"/>
+        <path d="${pathD}" fill="none" stroke="#5FA396" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        ${dots}
+        ${svgLabels}
+      </svg>
+      <p style="font-size:11px;color:var(--text3);margin-top:6px">最近 ${trendData.length} 次分析 · 最高 ${Math.max(...scores)} 分 · 最低 ${Math.min(...scores)} 分</p>`;
+  }
+
+  // ── 社群分享預覽 ──
+  const info=r.info;
+  const og=info.og||{};const tw=info.tw||{};
+  const domain=info.fileName.startsWith('http')?new URL(info.fileName).hostname:info.fileName;
+  const fbTitle=escHtml(og.title||info.title||'（未設定 og:title）');
+  const fbDesc=escHtml(og.desc||info.description||'（未設定 og:description）');
+  const fbDomain=escHtml(domain);
+  const twTitleStr=escHtml(tw.title||og.title||info.title||'（未設定）');
+  const twDescStr=escHtml(tw.desc||og.desc||info.description||'（未設定）');
+  const imgPlaceholder=`<span style="opacity:0.3;font-size:32px">${og.img?'🖼':'📷'}</span>`;
+  const imgNote=og.img?`<p style="font-size:11px;color:var(--text3);margin-top:8px">⚠ 圖片預覽需實際 URL 才能載入，此處顯示佔位符。og:image = ${escHtml(og.img.slice(0,60))}${og.img.length>60?'…':''}</p>`:'<p style="font-size:11px;color:#f87171;margin-top:8px">✗ 缺少 og:image，分享時將無預覽圖</p>';
+  document.getElementById('ogPreview').innerHTML=`
+    <div class="og-cards">
+      <div>
+        <div class="og-card-label">Facebook / LINE 分享外觀</div>
+        <div class="og-card fb-card">
+          <div class="fb-img">${imgPlaceholder}</div>
+          <div class="fb-body">
+            <div class="fb-domain">${fbDomain}</div>
+            <div class="fb-title">${fbTitle}</div>
+            <div class="fb-desc">${fbDesc}</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="og-card-label">X (Twitter) 分享外觀</div>
+        <div class="og-card tw-card">
+          <div class="tw-img">${imgPlaceholder}</div>
+          <div class="tw-body">
+            <div class="tw-domain">${fbDomain}</div>
+            <div class="tw-title">${twTitleStr}</div>
+            <div class="tw-desc">${twDescStr}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${imgNote}
+    <div style="margin-top:12px;display:grid;gap:6px;font-size:12px">
+      `+[
+        {label:'og:title',val:og.title,req:true},
+        {label:'og:description',val:og.desc,req:true},
+        {label:'og:image',val:og.img,req:true},
+        {label:'og:url',val:og.url,req:false},
+        {label:'og:type',val:og.type,req:false},
+        {label:'twitter:card',val:tw.card,req:false},
+      ].map(function(item){
+        var ok = !!item.val;
+        var valHtml = item.val
+          ? escHtml(item.val.slice(0,80))
+          : '<span style="color:var(--text3)">未設定'+(item.req?' (必填)':'')+'</span>';
+        return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">'
+          +'<span style="color:'+(ok?'#34d399':'#f87171')+'">'+(ok?'✓':'✗')+'</span>'
+          +'<code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 5px;border-radius:4px;font-size:11px">'+item.label+'</code>'
+          +'<span style="color:var(--text2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1">'+valHtml+'</span>'
+          +'</div>';
+      }).join('')+`
+    </div>`;
+
+  // ── 技術 SEO ──
+  const filteredChecks = r.checks.filter(c => !shouldIgnore(c.title));
+  const ignoredCount = r.checks.length - filteredChecks.length;
+  document.getElementById('checkSummary').textContent=`${r.pass}✓ ${r.warn}! ${r.fail}✗${ignoredCount>0?' (已忽略'+ignoredCount+'項)':''}`;
+  document.getElementById('checkList').innerHTML='<div class="check-list">'+filteredChecks.map(c=>{
+    const bc=c.status==='pass'?'cb-pass':c.status==='warn'?'cb-warn':'cb-fail';
+    return`<div class="ci"><div class="cb ${bc}">${c.status==='pass'?'✓':c.status==='warn'?'!':'✗'}</div><div class="cc"><strong>${escHtml(c.title)}</strong><span>${escHtml(c.detail)}</span></div></div>`;
+  }).join('')+'</div>';
+
+  // ── 圖片深度分析 ──
+  const imgD=info.imgData||{total:0,noAlt:0,noLazy:0,noSrcset:0,modern:0,legacy:0};
+  document.getElementById('imgSummary').textContent=imgD.total?`共 ${imgD.total} 張`:'';
+  if(!imgD.total){
+    document.getElementById('imgAnalysis').innerHTML='<p style="color:var(--text2);font-size:13px">頁面沒有偵測到圖片。</p>';
+  }else{
+    const rows=[
+      {label:'圖片總數',val:imgD.total,note:'',ok:true},
+      {label:'缺少 alt 屬性',val:imgD.noAlt,note:'影響無障礙與圖片 SEO',ok:imgD.noAlt===0,pct:imgD.total?Math.round(imgD.noAlt/imgD.total*100):0},
+      {label:'未設定 lazy loading',val:imgD.noLazy,note:'loading="lazy" 可加速初始載入',ok:imgD.noLazy===0,pct:imgD.total?Math.round(imgD.noLazy/imgD.total*100):0},
+      {label:'缺少 srcset（響應式）',val:imgD.noSrcset,note:'srcset 提供高解析度裝置最佳圖片',ok:imgD.noSrcset===0,pct:imgD.total?Math.round(imgD.noSrcset/imgD.total*100):0},
+      {label:'現代格式（WebP/AVIF）',val:imgD.modern,note:'較 JPG/PNG 節省 30-50% 體積',ok:imgD.modern>0,pct:imgD.total?Math.round(imgD.modern/imgD.total*100):0},
+      {label:'傳統格式（JPG/PNG/GIF）',val:imgD.legacy,note:'建議轉換為 WebP 或 AVIF',ok:imgD.legacy===0,pct:imgD.total?Math.round(imgD.legacy/imgD.total*100):0},
+    ];
+    var imgRows = rows.map(function(row){
+      var barCell = row.pct !== undefined
+        ? '<div class="bar-wrap"><div class="bar-bg"><div class="bar-fg" style="width:'+row.pct+'%;background:'+(row.ok?'var(--green)':'var(--red)')+'"></div></div>'+row.pct+'%</div>'
+        : '—';
+      var statusCell = '<span class="dt '+(row.ok?'dt-ok':'dt-bad')+'">'+(row.ok?'✓ 良好':'⚠ 需改善')+'</span>';
+      return '<tr><td>'+row.label+'<div style="font-size:11px;color:var(--text3)">'+row.note+'</div></td>'
+        +'<td style="font-weight:600;color:var(--text)">'+row.val+'</td>'
+        +'<td>'+barCell+'</td>'
+        +'<td>'+statusCell+'</td></tr>';
+    }).join('');
+    var imgHints = '';
+    if(imgD.noLazy>0) imgHints += '<div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#fbbf24">💡 建議在 &lt;img&gt; 標籤加上 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">loading=&quot;lazy&quot;</code> 屬性改善頁面初始載入速度。</div>';
+    if(imgD.noSrcset>0) imgHints += '<div style="background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.15);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--text3);margin-top:8px">💡 建議加入 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">srcset</code> 提供不同解析度版本，提升行動裝置體驗。</div>';
+    document.getElementById('imgAnalysis').innerHTML =
+      '<table class="gen-table" style="margin-bottom:12px"><thead><tr><th>項目</th><th>數量</th><th>佔比</th><th>狀態</th></tr></thead><tbody>'
+      + imgRows + '</tbody></table>' + imgHints;
+  }
+
+  // ── Canonical & 重複內容 ──
+  const cks=info.canonicalChecks||[];
+  var cksHtml = cks.map(function(ck){
+    return '<div class="ci"><div class="cb '+(ck.ok?'cb-pass':'cb-warn')+'">'+(ck.ok?'✓':'!')+'</div><div class="cc"><span>'+escHtml(ck.msg)+'</span></div></div>';
+  }).join('');
+  var canonHint = !info.canonical
+    ? '<div style="margin-top:12px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#fbbf24">💡 建議加入範例：<br><code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:2px 6px;border-radius:3px;font-size:11px">&lt;link rel=&quot;canonical&quot; href=&quot;https://your-domain.com/page/&quot;&gt;</code></div>'
+    : '';
+  document.getElementById('canonicalResult').innerHTML =
+    '<div class="check-list">' + cksHtml + '</div>'
+    + canonHint
+    + '<div style="margin-top:12px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;color:var(--text3)">ℹ️ <strong style="color:var(--text2)">常見重複內容問題</strong><br>www 與 non-www 版本、http 與 https 版本、trailing slash（/）差異、URL 大小寫差異，都可能被搜尋引擎視為不同頁面。Canonical 標籤可指定權威版本。</div>';
+
+  // ── Hreflang ──
+  const hl=info.hreflang||[];
+  const hlIssues=info.hreflangIssues||[];
+  if(!hl.length){
+    document.getElementById('hreflangResult').innerHTML='<p style="color:var(--text2);font-size:13px">此頁面沒有設定 Hreflang 多語言標籤。若網站有多語言版本，建議加入以避免重複內容並提升各語系排名。</p>';
+  }else{
+    var hlRows = hl.map(function(h){
+      var valid = h.href && h.href.startsWith('http');
+      return '<tr><td><span class="dt dt-info">'+escHtml(h.lang)+'</span></td>'
+        +'<td style="font-size:11px;color:var(--text2);word-break:break-all">'+escHtml(h.href||'（空）')+'</td>'
+        +'<td><span class="dt '+(valid?'dt-ok':'dt-bad')+'">'+(valid?'✓':'✗')+'</span></td></tr>';
+    }).join('');
+    var hlIssuesHtml = hlIssues.length
+      ? '<div class="check-list">'+hlIssues.map(function(issue){ return '<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>'+escHtml(issue)+'</span></div></div>'; }).join('')+'</div>'
+      : '<div class="ci"><div class="cb cb-pass">✓</div><div class="cc"><span>Hreflang 設定看起來完整，已包含 x-default 且無重複語言代碼。</span></div></div>';
+    document.getElementById('hreflangResult').innerHTML =
+      '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">偵測到 '+hl.length+' 個 hreflang 標籤：</p>'
+      +'<table class="gen-table" style="margin-bottom:12px"><thead><tr><th>hreflang</th><th>href</th><th>狀態</th></tr></thead><tbody>'+hlRows+'</tbody></table>'
+      + hlIssuesHtml;
+  }
+
+  // ── 結構化資料驗證 ──
+  const sr=r.schemaResults||info.schemaResults||[];
+  if(!sr.length){
+    document.getElementById('schemaResult').innerHTML='<p style="color:var(--text2);font-size:13px">未發現 JSON-LD 結構化資料。</p>';
+  }else{
+    document.getElementById('schemaResult').innerHTML = sr.map(function(s,i){
+      var errHtml = s.errors.length
+        ? '<div style="margin-bottom:8px">'+s.errors.map(function(e){ return '<div style="font-size:12px;color:#f87171;display:flex;gap:6px;margin-bottom:4px"><span>✗</span><span>'+escHtml(e)+'</span></div>'; }).join('')+'</div>'
+        : '';
+      var warnHtml = s.warnings.length
+        ? '<div>'+s.warnings.map(function(w){ return '<div style="font-size:12px;color:#fbbf24;display:flex;gap:6px;margin-bottom:4px"><span>⚠</span><span>'+escHtml(w)+'</span></div>'; }).join('')+'</div>'
+        : '';
+      var okHtml = (!s.errors.length && !s.warnings.length) ? '<div style="font-size:12px;color:#34d399">所有必填欄位已設定 ✓</div>' : '';
+      return '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:10px">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+        +'<span class="dt '+(s.valid?'dt-ok':'dt-bad')+'">'+(s.valid?'✓ 驗證通過':'✗ 驗證失敗')+'</span>'
+        +'<strong style="font-size:13px">'+escHtml(s.type)+'</strong>'
+        +'<span style="font-size:11px;color:var(--text3)">（第 '+(i+1)+' 筆）</span>'
+        +'</div>'+errHtml+warnHtml+okHtml+'</div>';
+    }).join('');
+  }
+
+  // ── 可讀性評分 ──
+  const rd=info.readability||{};
+  const rdColor=rd.score>=80?'#10b981':rd.score>=60?'#f59e0b':'#ef4444';
+  document.getElementById('readabilityResult').innerHTML=`
+    <div class="read-grid">
+      <div class="read-card">
+        <div class="read-label">可讀性評分</div>
+        <div class="read-val" style="color:${rdColor}">${rd.score||0}</div>
+        <div class="read-sub">${rd.label||'—'}</div>
+      </div>
+      <div class="read-card">
+        <div class="read-label">平均句子長度</div>
+        <div class="read-val" style="color:${(rd.avgSentLen||0)<=40?'#10b981':(rd.avgSentLen||0)<=60?'#f59e0b':'#ef4444'}">${rd.avgSentLen||0} 字</div>
+        <div class="read-sub">建議 20–40 字</div>
+      </div>
+      <div class="read-card">
+        <div class="read-label">段落數（&lt;p&gt;）</div>
+        <div class="read-val" style="color:var(--accent2)">${rd.paras||0}</div>
+        <div class="read-sub">句子總數 ${rd.sentences||0}</div>
+      </div>
+      <div class="read-card">
+        <div class="read-label">平均段落長度</div>
+        <div class="read-val" style="color:${(rd.avgParaLen||0)<=150?'#10b981':(rd.avgParaLen||0)<=200?'#f59e0b':'#ef4444'}">${rd.avgParaLen||0} 字</div>
+        <div class="read-sub">建議 50–150 字</div>
+      </div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text3);line-height:1.7">
+      <strong style="color:var(--text2)">可讀性說明：</strong><br>
+      • <strong>句子過長</strong>（>40字）：讀者容易失去焦點，建議拆分為較短的句子<br>
+      • <strong>段落過長</strong>（>150字）：行動裝置閱讀困難，建議每段 3–5 句<br>
+      • 此評分基於中文文本結構分析，僅供參考
+    </div>`;
+
+  // ── 關鍵字分析 ──
+  const kws=r.kwResults;
+  document.getElementById('kwResult').innerHTML=kws.length?`
+    <table class="gen-table">
+      <thead><tr><th>關鍵字</th><th>Title</th><th>Desc</th><th>H1</th><th>內文次數</th><th>優化分數</th><th>搜尋意圖</th></tr></thead>
+      <tbody>${kws.map(k=>{
+        const chk=v=>v?'<span style="color:#34d399">✓</span>':'<span style="color:#f87171">✗</span>';
+        // 意圖判斷
+        const kwL=k.keyword.toLowerCase();
+        const isTrans=['買','購','訂','預約','費用','價格','優惠','推薦','附近','外送'].some(w=>kwL.includes(w));
+        const isInfo=['怎麼','如何','是什麼','介紹','教學','比較','原因'].some(w=>kwL.includes(w));
+        const intentCls=isTrans?'dt-warn':isInfo?'dt-info':'dt-ok';
+        const intentLbl=isTrans?'🛒 商業型':isInfo?'📖 資訊型':'🧭 導航型';
+        return`<tr>
+          <td><strong>${escHtml(k.keyword)}</strong></td>
+          <td style="text-align:center">${chk(k.inTitle)}</td>
+          <td style="text-align:center">${chk(k.inDesc)}</td>
+          <td style="text-align:center">${chk(k.inH1)}</td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fg" style="width:${Math.min(k.bodyCount*10,100)}%"></div></div>${k.bodyCount}</div></td>
+          <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fg" style="width:${k.optScore}%"></div></div>${k.optScore}</div></td>
+          <td><span class="dt ${intentCls}">${intentLbl}</span></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+    <p style="font-size:11px;color:var(--text3);margin-top:10px">優化分數：Title(30)+Description(20)+H1(25)+H2(10)+內文(最多15）&nbsp;·&nbsp; 點擊下方「🔬 頁面關鍵字優化健診」查看詳細建議與長尾詞</p>`
+  :'<p style="color:var(--text2);font-size:13px;padding:4px 0">請在「🔑 關鍵字」頁籤加入目標關鍵字以取得詳細分析。</p>';
+
+  // ── 關鍵字排名追蹤 (v9) ──
+  renderRankSection(r.kwResults && r.kwResults.length ? r.kwResults.map(k=>k.keyword) : keywords, r);
+  renderSerpSection(r);
+
+  // ── v12: 內容深度分析 ──
+  renderContentAnalysis(r);
+
+  // ── v18: 所有新功能 ──
+  renderV18Sections(r);
+
+  // ── 破損連結 ──
+  const extUrls=(info.externalLinks||[]).slice(0,30);// limit to 30
+  const blEl=document.getElementById('brokenLinksResult');
+  if(!extUrls.length){
+    blEl.innerHTML='<p style="color:var(--text2);font-size:13px">頁面沒有偵測到外部連結。</p>';
+  }else{
+    var linkRowsHtml = extUrls.map(function(url, i){
+      var display = url.length > 70 ? url.slice(0,67)+'…' : url;
+      return '<div class="link-row" id="lr'+i+'">'
+        +'<div class="link-url"><a href="'+escHtml(url)+'" target="_blank" rel="noopener" style="color:var(--accent2);text-decoration:none">'+escHtml(display)+'</a></div>'
+        +'<span class="link-badge lb-skip" id="ls'+i+'">待驗證</span></div>';
+    }).join('');
+    var totalExt = (info.externalLinks||[]).length;
+    blEl.innerHTML =
+      '<p style="font-size:13px;color:var(--text2);margin-bottom:12px">共偵測到 '+totalExt+' 個外部連結'+(totalExt>30?' (顯示前 30 個)':'')+' ，點擊按鈕發送 HEAD request 驗證狀態碼：</p>'
+      +'<button class="link-check-btn" id="checkLinksBtn" onclick="checkBrokenLinks()"><span id="checkLinksBtnIcon">🔍</span> 開始驗證連結（可能需要 10–60 秒）</button>'
+      +'<div id="linkResults">'+linkRowsHtml+'</div>';
+  }
+
+  // ── 競爭對手 ──
+  const compReport=r._compReport;
+  const compSec=document.getElementById('compResult');
+  if(compReport){
+    compSec.style.display='block';
+    const diff=r.score-compReport.score;
+    const items=[
+      {label:'總分',mine:r.score,comp:compReport.score},
+      {label:'Title',mine:r.metrics.find(m=>m.label==='Title')?.status==='pass'?100:50,comp:compReport.metrics.find(m=>m.label==='Title')?.status==='pass'?100:50},
+      {label:'Meta Desc',mine:r.metrics.find(m=>m.label==='Meta')?.status==='pass'?100:50,comp:compReport.metrics.find(m=>m.label==='Meta')?.status==='pass'?100:50},
+      {label:'H1',mine:r.metrics.find(m=>m.label==='H1')?.status==='pass'?100:0,comp:compReport.metrics.find(m=>m.label==='H1')?.status==='pass'?100:0},
+      {label:'Schema',mine:r.metrics.find(m=>m.label==='Schema')?.status==='pass'?100:0,comp:compReport.metrics.find(m=>m.label==='Schema')?.status==='pass'?100:0},
+      {label:'OG Tags',mine:r.metrics.find(m=>m.label==='OG')?.status==='pass'?100:0,comp:compReport.metrics.find(m=>m.label==='OG')?.status==='pass'?100:0},
+      {label:'Canonical',mine:r.info.canonical?100:0,comp:compReport.info.canonical?100:0},
+      {label:'可讀性',mine:r.info.readability?.score||0,comp:compReport.info.readability?.score||0},
+    ];
+    document.getElementById('compContent').innerHTML=
+      `<div style="margin-bottom:12px;padding:12px 14px;background:var(--bg3);border-radius:var(--radius-sm);border:1px solid var(--border);font-size:13px">
+        <span style="color:${diff>=0?'#10b981':'#ef4444'};font-weight:500">${diff>=0?'✓ 你的網站比競爭對手高 ':'⚠ 你的網站比競爭對手低 '}${Math.abs(diff)} 分</span>
+        <span style="color:var(--text3);font-size:11px;margin-left:12px">對手：${escHtml(compReport.info.fileName.slice(0,40))}</span>
+      </div>`+
+      `<table class="gen-table"><thead><tr><th>項目</th><th style="text-align:center;color:var(--accent2)">你的網站</th><th style="text-align:center;color:var(--orange)">競爭對手</th></tr></thead><tbody>`+
+      items.map(function(it){
+        var w = it.mine >= it.comp;
+        return '<tr><td>'+escHtml(it.label)+'</td>'
+          +'<td style="text-align:center;color:'+(w?'#10b981':'#f87171')+';font-weight:500">'+it.mine+'</td>'
+          +'<td style="text-align:center;color:'+(!w?'#10b981':'#f87171')+'">'+it.comp+'</td></tr>';
+      }).join('') + '</tbody></table>';
+  }else{compSec.style.display='none';}
+
+  // ── 行動方案 ──
+  document.getElementById('actionResult').innerHTML = r.actions.length
+    ? '<div class="action-list">'+r.actions.map(function(a){
+        var pc = a.priority==='high'?'pt-h':a.priority==='medium'?'pt-m':'pt-l';
+        var pl = a.priority==='high'?'高':a.priority==='medium'?'中':'低';
+        return '<div class="ai"><span class="pt '+pc+'">'+pl+'</span><div class="ac"><strong>'+escHtml(a.title)+'</strong><span>'+escHtml(a.detail)+'</span></div></div>';
+      }).join('')+'</div>'
+    : '<p style="color:#34d399;font-size:13px">🎉 沒有緊急行動項目，SEO 狀況良好！</p>';
+
+  // ── 頁面摘要 ──
+  const isUrl=/^https?:\/\//i.test(info.fileName);
+  const fileNameDisplay=isUrl?`<a href="${escHtml(info.fileName)}" target="_blank" rel="noopener" style="color:var(--accent2);word-break:break-all">${escHtml(info.fileName)}</a>`:escHtml(info.fileName);
+  document.getElementById('rawInfo').innerHTML=`
+    <div style="display:grid;gap:8px;font-size:13px">
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">${isUrl?'🌐':'📄'}</div><div class="cc"><strong>${isUrl?'分析網址':'分析檔案'}</strong><span>${fileNameDisplay}</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">T</div><div class="cc"><strong>Title</strong><span>${escHtml(info.title||'（未設定）')}</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">D</div><div class="cc"><strong>Description</strong><span>${escHtml(info.description||'（未設定）')}</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">H</div><div class="cc"><strong>H1 標題</strong><span>${escHtml(info.h1Text||'（未設定）')}</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🔗</div><div class="cc"><strong>連結數量</strong><span>總計 ${info.linkCount} 個，內部 ${info.internalLinkCount} 個，外部 ${(info.externalLinks||[]).length} 個</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🖼</div><div class="cc"><strong>圖片</strong><span>${info.imgData?.total||0} 張（${info.imgData?.noAlt||0} 張缺少 alt，${info.imgData?.noLazy||0} 張無 lazy，${info.imgData?.modern||0} 張現代格式）</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">📝</div><div class="cc"><strong>頁面文字量</strong><span>約 ${info.textLength} 字，${info.readability?.sentences||0} 個句子</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🗂</div><div class="cc"><strong>Schema.org</strong><span>${info.schemaCount} 筆（${(info.schemaResults||[]).filter(s=>s.valid).length} 筆通過驗證）</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🌍</div><div class="cc"><strong>Hreflang</strong><span>${info.hreflang?.length||0} 個語言標籤</span></div></div>
+    </div>`;
+
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ═══════════════════════════════════════════════════════
+//  BROKEN LINKS CHECKER
+// ═══════════════════════════════════════════════════════
+async function checkBrokenLinks(){
+  const info=currentReport?.info;
+  if(!info) return;
+  const urls=(info.externalLinks||[]).slice(0,30);
+  const btn=document.getElementById('checkLinksBtn');
+  const icon=document.getElementById('checkLinksBtnIcon');
+  btn.disabled=true;
+  icon.innerHTML='<span class="spin">⟳</span>';
+  btn.innerHTML='<span class="spin">⟳</span> 驗證中...';
+
+  const PROXY='https://api.allorigins.win/get?url=';
+  // Use allorigins to do a lightweight fetch (HEAD not always supported via proxy, use GET with small chunk)
+  const results=await Promise.allSettled(urls.map(async(url,i)=>{
+    document.getElementById(`ls${i}`).className='link-badge lb-chk';
+    document.getElementById(`ls${i}`).textContent='驗證中…';
+    try{
+      // Try HEAD first via a CORS proxy check
+      const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const resp=await fetchWithTimeout(proxyUrl, 8000);
+      const data=await resp.json();
+      const status=data.status?.http_code||200;
+      const badge=document.getElementById(`ls${i}`);
+      if(status>=400){badge.className='link-badge lb-err';badge.textContent=`✗ ${status}`;}
+      else if(status>=300){badge.className='link-badge lb-warn';badge.textContent=`→ ${status}`;}
+      else{badge.className='link-badge lb-ok';badge.textContent=`✓ ${status}`;}
+    }catch(e){
+      const badge=document.getElementById(`ls${i}`);
+      badge.className='link-badge lb-warn';badge.textContent='逾時/封鎖';
+    }
+  }));
+
+  btn.disabled=false;
+  btn.innerHTML='<span>✓</span> 驗證完成';
+}
+
+// ═══════════════════════════════════════════════════════
+//  v7: REDIRECT CHAIN TRACKER
+// ═══════════════════════════════════════════════════════
+async function checkRedirectChain(url) {
+  const el = document.getElementById('redirectResult');
+  const sec = document.getElementById('redirectSection');
+  if (!url || !/^https?:\/\//i.test(url)) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  el.innerHTML = '<p style="color:var(--text2);font-size:13px"><span class="spin">⟳</span> 追蹤重新導向鏈...</p>';
+
+  // We simulate by trying allorigins which returns http_code
+  const PROXY = u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`;
+  const chain = [];
+  let current = url;
+  let maxHops = 8;
+
+  try {
+    for (let i = 0; i < maxHops; i++) {
+      const resp = await fetchWithTimeout(PROXY(current), 10000);
+      if (!resp.ok) { chain.push({ url: current, code: resp.status, final: true }); break; }
+      const data = await resp.json();
+      const httpCode = data.status?.http_code || 200;
+      chain.push({ url: current, code: httpCode, final: false });
+      // allorigins follows redirects itself, so if code is 200 we've reached final
+      // We can't truly follow hop-by-hop in browser—show best-effort result
+      chain[chain.length-1].final = true;
+      break;
+    }
+  } catch(e) {
+    chain.push({ url: current, code: 'ERR', err: e.message, final: true });
+  }
+
+  if (!chain.length) { el.innerHTML = '<p style="color:var(--text2);font-size:13px">無法追蹤。</p>'; return; }
+
+  const finalCode = chain[chain.length-1].code;
+  const hasIssue = finalCode >= 400 || finalCode === 'ERR';
+
+  // Try to detect if there's a redirect by comparing input URL with canonical
+  const inputHost = (() => { try { return new URL(url).hostname; } catch { return ''; } })();
+  const wwwVariant = inputHost.startsWith('www.') ? inputHost.slice(4) : 'www.' + inputHost;
+  const protocolNote = url.startsWith('http://') ? '⚠ 使用 http，可能會被導向至 https 版本' : null;
+  const wwwNote = null; // can't detect without actual HEAD request
+
+  let html = `<div style="margin-bottom:12px;font-size:13px;color:var(--text2)">
+    透過 Proxy 追蹤（瀏覽器 CORS 限制，Proxy 會自動跟隨跳轉，顯示最終狀態碼）
+  </div>`;
+
+  html += '<div class="redir-chain">';
+  html += `<div class="redir-step">
+    <span style="color:var(--text3);font-size:11px;flex-shrink:0">起點</span>
+    <span style="flex:1;word-break:break-all;font-size:12px;color:var(--text)">${escHtml(url)}</span>
+  </div>`;
+  html += `<div style="padding-left:16px;color:var(--text3);font-size:12px">↓</div>`;
+
+  const codeClass = finalCode === 200 ? 'redir-code-200' : (finalCode === 301 ? 'redir-code-301' : (finalCode === 302 ? 'redir-code-302' : 'redir-code-err'));
+  const finalLabel = finalCode === 200 ? '✓ 正常' : finalCode === 301 ? '永久轉向' : finalCode === 302 ? '臨時轉向' : finalCode === 'ERR' ? '連線失敗' : `狀態碼 ${finalCode}`;
+  html += `<div class="redir-step">
+    <span style="color:var(--text3);font-size:11px;flex-shrink:0">最終</span>
+    <span class="redir-code ${codeClass}">${finalCode}</span>
+    <span style="flex:1;color:var(--text2);font-size:12px">${finalLabel}</span>
+  </div>`;
+  html += '</div>';
+
+  // Extra checks
+  const issues = [];
+  if (protocolNote) issues.push({ warn: true, msg: protocolNote });
+  if (finalCode >= 400) issues.push({ warn: false, msg: `最終狀態碼 ${finalCode}，頁面可能無法訪問` });
+  if (url.includes('//www.') === false && !url.includes('http://www.') && inputHost && !inputHost.startsWith('www.'))
+    issues.push({ warn: true, msg: `你輸入的是 non-www 版本（${inputHost}），若伺服器將 www 設為主版本，可能存在 301 跳轉。建議在 canonical 中明確指定。` });
+
+  if (issues.length) {
+    html += '<div class="check-list" style="margin-top:12px">' + issues.map(i =>
+      `<div class="ci"><div class="cb ${i.warn?'cb-warn':'cb-fail'}">${i.warn?'!':'✗'}</div><div class="cc"><span>${escHtml(i.msg)}</span></div></div>`
+    ).join('') + '</div>';
+  } else {
+    html += `<div class="ci" style="margin-top:12px"><div class="cb cb-pass">✓</div><div class="cc"><span>未偵測到明顯的重新導向問題。</span></div></div>`;
+  }
+
+  html += `<div style="margin-top:12px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text3)">
+    ℹ️ <strong style="color:var(--text2)">瀏覽器限制說明</strong>：因 CORS 政策，瀏覽器無法直接追蹤逐跳 HTTP 標頭。此結果由本站的抓取服務取得，已自動跟隨跳轉。如需完整逐跳鏈，請使用 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">curl -I -L URL</code> 或 Redirect Checker 工具。
+  </div>`;
+
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  v7: HTTP HEADERS ANALYSIS
+// ═══════════════════════════════════════════════════════
+async function fetchHttpHeaders(url) {
+  const el = document.getElementById('headersResult');
+  const sec = document.getElementById('headersSection');
+  if (!url || !/^https?:\/\//i.test(url)) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  el.innerHTML = '<p style="color:var(--text2);font-size:13px"><span class="spin">⟳</span> 取得 HTTP 標頭...</p>';
+
+  try {
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const resp = await fetchWithTimeout(proxyUrl, 12000);
+    const data = await resp.json();
+
+    const httpCode = data.status?.http_code || '—';
+    const contentType = data.status?.content_type || '—';
+
+    // Parse headers from allorigins (limited)
+    const knownHeaders = [
+      { key: 'HTTP 狀態碼', val: String(httpCode), seo: httpCode === 200 ? 'pass' : httpCode === 301 ? 'warn' : 'fail', note: httpCode === 200 ? '正常' : httpCode === 301 ? '永久導向，注意 canonical' : '需注意' },
+      { key: 'Content-Type', val: contentType, seo: contentType.includes('text/html') ? 'pass' : 'warn', note: contentType.includes('text/html') ? '正確' : '非 HTML 頁面' },
+      { key: 'URL 協定', val: url.startsWith('https') ? 'HTTPS' : 'HTTP', seo: url.startsWith('https') ? 'pass' : 'fail', note: url.startsWith('https') ? '✓ 安全連線' : '✗ 應升級為 HTTPS' },
+    ];
+
+    // Derive from HTML content
+    if (data.contents) {
+      const tmpDoc = new DOMParser().parseFromString(data.contents, 'text/html');
+      const metaRobots = tmpDoc.querySelector('meta[name="robots"]')?.getAttribute('content') || '（未設定）';
+      const xRobotsLike = '（需伺服器端確認，Proxy 無法取得）';
+      knownHeaders.push(
+        { key: 'meta robots', val: metaRobots, seo: metaRobots.toLowerCase().includes('noindex') ? 'fail' : 'pass', note: metaRobots.toLowerCase().includes('noindex') ? '⚠ 頁面被設定為 noindex！' : metaRobots === '（未設定）' ? '預設允許索引' : '允許索引' },
+        { key: 'X-Robots-Tag', val: xRobotsLike, seo: 'info', note: 'HTTP header，需伺服器端檢查' },
+        { key: 'Cache-Control', val: '（需伺服器端確認）', seo: 'info', note: '影響 CDN 快取與重新爬取週期' },
+        { key: 'Last-Modified', val: '（需伺服器端確認）', seo: 'info', note: '幫助 Googlebot 判斷內容是否更新' },
+      );
+
+      const charsetMeta = tmpDoc.querySelector('meta[charset]')?.getAttribute('charset') || tmpDoc.querySelector('meta[http-equiv="Content-Type"]')?.getAttribute('content') || '（未偵測到）';
+      knownHeaders.push({ key: 'Charset', val: charsetMeta, seo: /utf-?8/i.test(charsetMeta) ? 'pass' : 'warn', note: /utf-?8/i.test(charsetMeta) ? '✓ UTF-8' : '建議使用 UTF-8' });
+    }
+
+    const statusColor = { pass: '#34d399', warn: '#fbbf24', fail: '#f87171', info: 'var(--text3)' };
+    const statusIcon = { pass: '✓', warn: '!', fail: '✗', info: 'ℹ' };
+
+    let html = '<table class="hdr-table"><tbody>';
+    html += knownHeaders.map(h =>
+      `<tr>
+        <td class="hdr-key" style="color:var(--accent2)">${escHtml(h.key)}</td>
+        <td class="hdr-val">${escHtml(h.val)}</td>
+        <td style="white-space:nowrap;color:${statusColor[h.seo]};font-size:11px">${statusIcon[h.seo]} ${escHtml(h.note)}</td>
+      </tr>`
+    ).join('');
+    html += '</tbody></table>';
+
+    html += `<div style="margin-top:12px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text3)">
+      ℹ️ <strong style="color:var(--text2)">注意</strong>：瀏覽器 CORS 限制使得部分 HTTP response headers（如 X-Robots-Tag、Cache-Control、Server）無法透過 Proxy 取得完整數值。
+      帶 <span style="color:var(--text3)">ℹ</span> 符號的項目需透過伺服器直接確認，或使用 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">curl -I URL</code> 查看。
+    </div>`;
+
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = `<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>無法取得 HTTP 標頭（${escHtml(e.message)}）。請確認網址可公開存取。</span></div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  v7: ROBOTS.TXT & SITEMAP
+// ═══════════════════════════════════════════════════════
+async function checkRobotsAndSitemap(url) {
+  const el = document.getElementById('robotsResult');
+  const sec = document.getElementById('robotsSection');
+  const sumEl = document.getElementById('robotsSummary');
+  if (!url || !/^https?:\/\//i.test(url)) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  el.innerHTML = '<p style="color:var(--text2);font-size:13px"><span class="spin">⟳</span> 讀取 robots.txt 與 Sitemap...</p>';
+
+  let baseUrl = '';
+  try { const u = new URL(url); baseUrl = u.protocol + '//' + u.host; } catch { el.innerHTML = '<p style="color:#f87171">網址解析失敗</p>'; return; }
+
+  const PROXY = u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`;
+
+  let robotsText = null, robotsCode = null;
+  let sitemapText = null, sitemapCode = null;
+  let sitemapUrl = baseUrl + '/sitemap.xml';
+
+  // Fetch robots.txt
+  try {
+    const r = await fetchWithTimeout(PROXY(baseUrl + '/robots.txt'), 10000);
+    const d = await r.json();
+    robotsCode = d.status?.http_code || 200;
+    robotsText = d.contents || '';
+  } catch(e) { robotsCode = 'ERR'; }
+
+  // Parse sitemap URL from robots.txt
+  if (robotsText) {
+    const sm = robotsText.match(/^Sitemap:\s*(.+)$/im);
+    if (sm) sitemapUrl = sm[1].trim();
+  }
+
+  // Fetch sitemap
+  try {
+    const r2 = await fetchWithTimeout(PROXY(sitemapUrl), 10000);
+    const d2 = await r2.json();
+    sitemapCode = d2.status?.http_code || 200;
+    sitemapText = d2.contents || '';
+  } catch(e) { sitemapCode = 'ERR'; }
+
+  let html = '';
+  const checks = [];
+
+  // ── robots.txt ──
+  html += '<div class="robots-section">';
+  html += '<div style="font-weight:500;color:var(--text);margin-bottom:8px;font-size:13px">🤖 robots.txt <span style="font-size:11px;color:var(--text3)">(' + escHtml(baseUrl + '/robots.txt') + ')</span></div>';
+
+  if (robotsCode === 'ERR' || robotsCode >= 400) {
+    checks.push({ ok: false, msg: `robots.txt 無法存取（狀態碼: ${robotsCode}）。若網站不存在 robots.txt，預設允許所有爬蟲。` });
+  } else {
+    checks.push({ ok: true, msg: `robots.txt 存在（狀態碼: ${robotsCode}）` });
+
+    // Parse rules
+    const lines = (robotsText || '').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+    const disallowAll = lines.some(l => /^Disallow:\s*\/\s*$/.test(l));
+    const disallowRules = lines.filter(l => /^Disallow:/i.test(l));
+    const allowRules = lines.filter(l => /^Allow:/i.test(l));
+    const crawlDelay = lines.find(l => /^Crawl-delay:/i.test(l));
+    const sitemapLine = lines.find(l => /^Sitemap:/i.test(l));
+
+    if (disallowAll) checks.push({ ok: false, msg: '⚠ 偵測到 Disallow: / — 封鎖所有爬蟲爬取整個網站！請確認是否為故意設定。' });
+    if (disallowRules.length > 0 && !disallowAll) checks.push({ ok: true, msg: `${disallowRules.length} 條 Disallow 規則（部分路徑被封鎖）` });
+    if (crawlDelay) checks.push({ ok: true, msg: `設有 ${crawlDelay}，可能降低 Googlebot 爬取速度` });
+    if (sitemapLine) checks.push({ ok: true, msg: `robots.txt 中宣告了 Sitemap：${escHtml(sitemapLine.replace(/^Sitemap:\s*/i,'').slice(0,80))}` });
+    else checks.push({ ok: false, msg: 'robots.txt 沒有宣告 Sitemap URL，建議加入 Sitemap: https://your-domain.com/sitemap.xml' });
+
+    // Check if current URL is blocked
+    const urlPath = (() => { try { return new URL(url).pathname; } catch { return '/'; } })();
+    const isBlocked = disallowRules.some(rule => {
+      const p = rule.replace(/^Disallow:\s*/i, '').trim();
+      return p && urlPath.startsWith(p);
+    });
+    if (isBlocked) checks.push({ ok: false, msg: `⚠ 目前分析的頁面路徑（${urlPath}）符合某條 Disallow 規則，Googlebot 可能無法爬取此頁！` });
+    else if (!disallowAll) checks.push({ ok: true, msg: `目前分析的頁面路徑（${urlPath}）未被 Disallow 規則封鎖` });
+
+    html += '<div class="robots-raw">' + escHtml((robotsText||'').slice(0, 2000)) + '</div>';
+  }
+  html += '</div>';
+
+  // ── Sitemap ──
+  html += '<div class="robots-section" style="margin-top:16px">';
+  html += '<div style="font-weight:500;color:var(--text);margin-bottom:8px;font-size:13px">🗺 Sitemap <span style="font-size:11px;color:var(--text3)">(' + escHtml(sitemapUrl) + ')</span></div>';
+
+  if (sitemapCode === 'ERR' || sitemapCode >= 400) {
+    checks.push({ ok: false, msg: `Sitemap 無法存取（${sitemapUrl}，狀態碼: ${sitemapCode}）。建議建立 XML Sitemap 並提交至 Google Search Console。` });
+  } else {
+    const urlMatches = (sitemapText || '').match(/<loc>([^<]+)<\/loc>/gi) || [];
+    const sitemapUrls = urlMatches.map(m => m.replace(/<\/?loc>/gi, '').trim());
+    crawlSitemapUrls = sitemapUrls; // share with crawl for cross-reference
+    const isSitemapIndex = /<sitemapindex/i.test(sitemapText || '');
+
+    checks.push({ ok: true, msg: `Sitemap 存在（狀態碼: ${sitemapCode}）` });
+    if (isSitemapIndex) checks.push({ ok: true, msg: `這是 Sitemap Index 檔案，包含 ${sitemapUrls.length} 個子 Sitemap` });
+    else checks.push({ ok: true, msg: `XML Sitemap 共收錄 ${sitemapUrls.length} 個 URL` });
+
+    // Check if current URL is in sitemap
+    const inSitemap = sitemapUrls.some(u => u === url || u === url.replace(/\/$/, '') || (u + '/') === url);
+    if (!isSitemapIndex) {
+      if (inSitemap) checks.push({ ok: true, msg: '目前分析的頁面已包含在 Sitemap 中 ✓' });
+      else checks.push({ ok: false, msg: '目前分析的頁面未出現在 Sitemap 中，建議加入以確保被索引。' });
+    }
+
+    if (sitemapUrls.length > 0) {
+      html += `<div style="font-size:12px;color:var(--text3);margin-bottom:6px">收錄 URL（前 20 筆）：</div>
+        <div class="sitemap-list">` +
+        sitemapUrls.slice(0, 20).map(u => `<div class="sitemap-url">${escHtml(u)}</div>`).join('') +
+        (sitemapUrls.length > 20 ? `<div class="sitemap-url" style="color:var(--text3)">…還有 ${sitemapUrls.length - 20} 個</div>` : '') +
+        '</div>';
+    }
+  }
+  html += '</div>';
+
+  // Checks summary
+  const passCount = checks.filter(c => c.ok).length;
+  sumEl.textContent = `${passCount}✓ ${checks.length - passCount}!`;
+  html = '<div class="check-list" style="margin-bottom:16px">' +
+    checks.map(c => `<div class="ci"><div class="cb ${c.ok?'cb-pass':'cb-warn'}">${c.ok?'✓':'!'}</div><div class="cc"><span>${c.msg}</span></div></div>`).join('') +
+    '</div>' + html;
+
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  v8: MULTI-PAGE CRAWL (enhanced)
+//  新增：孤兒頁面、重複Title/Desc、圖片404、頁面深度、
+//        Sitemap交叉比對、noindex偵測
+// ═══════════════════════════════════════════════════════
+let crawlResults = [];
+let crawlSitemapUrls = []; // populated by checkRobotsAndSitemap
+
+// ── JS 框架偵測 ──
+function detectJsFramework(rawHtml, tmpDoc) {
+  // Check meta generators
+  const generator = (tmpDoc.querySelector('meta[name="generator"]')?.getAttribute('content') || '').toLowerCase();
+  if (generator.includes('next')) return 'Next.js';
+  if (generator.includes('nuxt')) return 'Nuxt.js';
+  if (generator.includes('gatsby')) return 'Gatsby';
+
+  // Check script src patterns
+  const scripts = [...tmpDoc.querySelectorAll('script[src]')].map(s => s.getAttribute('src') || '');
+  const scriptInline = [...tmpDoc.querySelectorAll('script:not([src])')].map(s => s.textContent || '').join(' ');
+
+  if (scripts.some(s => s.includes('/_next/') || s.includes('__next'))) return 'Next.js';
+  if (scripts.some(s => s.includes('/_nuxt/') || s.includes('__nuxt'))) return 'Nuxt.js';
+  if (scripts.some(s => s.includes('gatsby'))) return 'Gatsby';
+  if (scripts.some(s => s.includes('react')) || rawHtml.includes('data-reactroot') || rawHtml.includes('data-reactid')) return 'React';
+  if (rawHtml.includes('data-v-') || scriptInline.includes('vue')) return 'Vue.js';
+  if (rawHtml.includes('ng-version') || rawHtml.includes('ng-app') || scripts.some(s => s.includes('angular'))) return 'Angular';
+
+  // Empty body with scripts → likely SPA
+  const bodyTextLen = (tmpDoc.body?.textContent || '').trim().length;
+  const scriptCount = tmpDoc.querySelectorAll('script').length;
+  if (bodyTextLen < 200 && scriptCount > 3) return 'SPA（未知框架）';
+
+  return null;
+}
+
+async function startCrawl(startUrl, sourceDomain) {
+  const el = document.getElementById('crawlResult');
+  const sec = document.getElementById('crawlSection');
+  const sumEl = document.getElementById('crawlSummary');
+  if (!startUrl || !/^https?:\/\//i.test(startUrl)) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  crawlResults = [];
+
+  const MAX_PAGES = 10;
+  const PROXY = u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`;
+
+  el.innerHTML = `<p class="crawl-prog" id="crawlProgLabel">🕸 正在爬取頁面... (0/${MAX_PAGES})</p>
+    <button class="crawl-btn" id="stopCrawlBtn" onclick="stopCrawl()">⏹ 停止爬取</button>
+    <div id="crawlList" class="crawl-grid"></div>`;
+
+  // depth map: url -> depth
+  const visited = new Set();
+  const depthMap = { [startUrl]: 0 };
+  const queue = [startUrl];
+  visited.add(startUrl);
+  window._crawlStopped = false;
+
+  while (queue.length > 0 && crawlResults.length < MAX_PAGES) {
+    if (window._crawlStopped) break;
+    const url = queue.shift();
+    const depth = depthMap[url] || 0;
+    const progEl = document.getElementById('crawlProgLabel');
+    if(progEl) progEl.textContent = `🕸 正在爬取... (${crawlResults.length + 1}/${MAX_PAGES}) 深度${depth} — ${url.slice(0, 55)}`;
+
+    try {
+      const resp = await fetchWithTimeout(PROXY(url), 12000);
+      const data = await resp.json();
+      const html = data.contents || '';
+      const httpCode = data.status?.http_code || 200;
+
+      if (!html || html.length < 100) {
+        crawlResults.push({ url, title:'（無內容）', desc:'', score:0, code:httpCode, depth, issues:['頁面內容為空或 JS 渲染'], inLinks:[], outLinks:[], noindex:false, imgs:[] });
+        continue;
+      }
+
+      const tmpDoc = new DOMParser().parseFromString(html, 'text/html');
+      const title = tmpDoc.querySelector('title')?.textContent?.trim() || '';
+      const desc  = tmpDoc.querySelector('meta[name="description"]')?.getAttribute('content') || '';
+      const h1Nodes = [...tmpDoc.querySelectorAll('h1')];
+      const h1Count = h1Nodes.length;
+      const h1Texts = h1Nodes.map(h => h.textContent.trim()).filter(Boolean);
+      const canonical = tmpDoc.querySelector('link[rel="canonical"]')?.getAttribute('href') || '';
+      const viewport = tmpDoc.querySelector('meta[name="viewport"]');
+      const bodyText = (tmpDoc.body?.textContent || '').toLowerCase();
+      const bodyLen = bodyText.trim().length;
+
+      // noindex detection
+      const robotsMeta = (tmpDoc.querySelector('meta[name="robots"]')?.getAttribute('content') || '').toLowerCase();
+      const noindex = robotsMeta.includes('noindex');
+
+      // ── JS 框架偵測 ──
+      const jsFramework = detectJsFramework(html, tmpDoc);
+
+      // image src list (for 404 check)
+      const imgSrcs = [...tmpDoc.querySelectorAll('img[src]')]
+        .map(i => { try { return new URL(i.getAttribute('src'), url).href; } catch { return null; } })
+        .filter(Boolean).slice(0, 8); // limit per page
+
+      // internal links extracted
+      const internalLinks = [];
+      if (crawlResults.length < MAX_PAGES) {
+        const links = [...tmpDoc.querySelectorAll('a[href]')];
+        for (const a of links) {
+          let href = a.getAttribute('href') || '';
+          if (!href || href.startsWith('#') || href.startsWith('mailto') || href.startsWith('tel')) continue;
+          try {
+            const abs = new URL(href, url).href.split('#')[0];
+            if (new URL(abs).hostname === sourceDomain && abs.startsWith('http')) {
+              internalLinks.push(abs);
+              if (!visited.has(abs) && queue.length + crawlResults.length < MAX_PAGES * 3) {
+                visited.add(abs);
+                depthMap[abs] = depth + 1;
+                queue.push(abs);
+              }
+            }
+          } catch {}
+        }
+      }
+
+      // quick score
+      let quickScore = 0;
+      if (title && title.length >= 10 && title.length <= 70) quickScore += 25; else if(title) quickScore += 10;
+      if (desc  && desc.length  >= 80 && desc.length  <= 160) quickScore += 25; else if(desc)  quickScore += 10;
+      if (h1Count === 1) quickScore += 20;
+      if (canonical)     quickScore += 15;
+      if (viewport)      quickScore += 15;
+
+      const quickIssues = [];
+      if (!title)         quickIssues.push('缺 Title');
+      if (!desc)          quickIssues.push('缺 Desc');
+      if (h1Count === 0)  quickIssues.push('缺 H1');
+      if (h1Count > 1)    quickIssues.push('多個 H1');
+      if (!canonical)     quickIssues.push('缺 Canonical');
+      if (!viewport)      quickIssues.push('缺 Viewport');
+      if (noindex)        quickIssues.push('⚠ noindex');
+      if (depth > 3)      quickIssues.push(`深度 ${depth}（過深）`);
+      if (jsFramework)    quickIssues.push(`⚡ JS框架:${jsFramework}`);
+
+      crawlResults.push({ url, title, desc, score: quickScore, code: httpCode, depth, issues: quickIssues, inLinks: internalLinks, outLinks: [], noindex, imgs: imgSrcs, bodyLen, h1Texts, bodyText, jsFramework });
+    } catch(e) {
+      crawlResults.push({ url, title:'（連線失敗）', desc:'', score:0, code:'ERR', depth, issues:[e.message.slice(0,40)], inLinks:[], outLinks:[], noindex:false, imgs:[] });
+    }
+
+    renderCrawlList();
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  // ── post-crawl analysis ──
+  const progEl2 = document.getElementById('crawlProgLabel');
+  if(progEl2) progEl2.textContent = `🔍 爬取完成，分析結果中...`;
+  await new Promise(r => setTimeout(r, 100));
+
+  // 1. 建立 inbound link 計數 map
+  const inboundCount = {};
+  crawlResults.forEach(page => {
+    page.inLinks.forEach(link => {
+      const norm = link.replace(/\/$/, '');
+      inboundCount[norm] = (inboundCount[norm] || 0) + 1;
+    });
+  });
+
+  // 2. 孤兒頁面 (inbound = 0, 不含起始頁)
+  const orphans = crawlResults.filter((p, i) => {
+    if (i === 0) return false; // start page is never orphan
+    const norm = p.url.replace(/\/$/, '');
+    return !inboundCount[norm];
+  });
+
+  // 3. 重複 Title / Description
+  const titleMap = {}, descMap = {};
+  crawlResults.forEach(p => {
+    if (p.title && p.title !== '（無 Title）' && p.title !== '（連線失敗）') {
+      if (!titleMap[p.title]) titleMap[p.title] = [];
+      titleMap[p.title].push(p.url);
+    }
+    if (p.desc) {
+      if (!descMap[p.desc]) descMap[p.desc] = [];
+      descMap[p.desc].push(p.url);
+    }
+  });
+  const dupTitles = Object.entries(titleMap).filter(([,urls]) => urls.length > 1);
+  const dupDescs  = Object.entries(descMap).filter(([,urls]) => urls.length > 1);
+
+  // 4. noindex 頁面
+  const noindexPages = crawlResults.filter(p => p.noindex);
+
+  // 5. 深度 > 3 頁面
+  const deepPages = crawlResults.filter(p => p.depth > 3);
+
+  // 6. Sitemap 交叉比對
+  const crawledUrls = new Set(crawlResults.map(p => p.url.replace(/\/$/, '')));
+  const sitemapSet  = new Set(crawlSitemapUrls.map(u => u.replace(/\/$/, '')));
+  const inSitemapNotCrawled = [...sitemapSet].filter(u => !crawledUrls.has(u)).slice(0, 15);
+  const crawledNotInSitemap = [...crawledUrls].filter(u => !sitemapSet.has(u)).slice(0, 15);
+
+  // 7. 圖片 404 check (sample up to 12 unique imgs across all pages)
+  const allImgs = [...new Set(crawlResults.flatMap(p => p.imgs))].slice(0, 12);
+  const imgResults = [];
+  for (const imgUrl of allImgs) {
+    if (window._crawlStopped) break;
+    try {
+      const r = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(imgUrl)}`, 8000);
+      const d = await r.json();
+      imgResults.push({ url: imgUrl, code: d.status?.http_code || 200 });
+    } catch { imgResults.push({ url: imgUrl, code: 'ERR' }); }
+  }
+  const brokenImgs = imgResults.filter(i => i.code === 'ERR' || i.code >= 400);
+
+  // 8. 重複 H1 偵測
+  const h1Map = {};
+  crawlResults.forEach(p => {
+    (p.h1Texts || []).forEach(h1 => {
+      if (!h1Map[h1]) h1Map[h1] = [];
+      h1Map[h1].push(p.url);
+    });
+  });
+  const dupH1s = Object.entries(h1Map).filter(([, urls]) => urls.length > 1);
+
+  // 9. JS 框架偵測彙整
+  const jsPagesDetected = crawlResults.filter(p => p.jsFramework).map(p => ({ url: p.url, framework: p.jsFramework }));
+
+  // 10. 關鍵字地圖（取使用者設定的關鍵字 vs 每頁 bodyText）
+  const kwList = typeof keywords !== 'undefined' ? keywords : [];
+  const keywordMap = buildKeywordMap(kwList);
+
+  sumEl.textContent = `已爬取 ${crawlResults.length} 頁`;
+  const stopBtn = document.getElementById('stopCrawlBtn');
+  if (stopBtn) stopBtn.style.display = 'none';
+
+  renderCrawlList(inboundCount, orphans, dupTitles, dupDescs, noindexPages, deepPages, inSitemapNotCrawled, crawledNotInSitemap, brokenImgs, imgResults, dupH1s, jsPagesDetected, keywordMap);
+}
+
+function stopCrawl() { window._crawlStopped = true; }
+
+function buildKeywordMap(kwList) {
+  if (!kwList || !kwList.length) return null;
+  // For each keyword, find pages that contain it in title/h1/body
+  const map = kwList.map(kw => {
+    const kwL = kw.toLowerCase();
+    const pages = crawlResults.map(p => {
+      const inTitle  = (p.title || '').toLowerCase().includes(kwL);
+      const inH1     = (p.h1Texts || []).some(h => h.toLowerCase().includes(kwL));
+      const inBody   = (p.bodyText || '').includes(kwL);
+      const bodyCount = ((p.bodyText || '').match(new RegExp(kwL.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g')) || []).length;
+      if (!inTitle && !inH1 && !inBody) return null;
+      return { url: p.url, title: p.title, inTitle, inH1, bodyCount };
+    }).filter(Boolean);
+    return { kw, pages };
+  });
+
+  // Cannibalization: keywords with 2+ pages competing (has title or H1 on multiple pages)
+  map.forEach(entry => {
+    const competing = entry.pages.filter(p => p.inTitle || p.inH1);
+    entry.cannibalized = competing.length > 1 ? competing : [];
+  });
+
+  return map;
+}
+
+function renderCrawlList(inboundCount, orphans, dupTitles, dupDescs, noindexPages, deepPages, inSitemapNotCrawled, crawledNotInSitemap, brokenImgs, imgResults, dupH1s, jsPagesDetected, keywordMap) {
+  const listEl = document.getElementById('crawlList');
+  if (!listEl || !crawlResults.length) return;
+
+  const avg = Math.round(crawlResults.reduce((a, r) => a + r.score, 0) / crawlResults.length);
+
+  // If called during crawl (no analysis args), show simple list
+  if (!inboundCount) {
+    listEl.innerHTML = `<div style="font-size:12px;color:var(--text2);margin-bottom:8px">已爬取 ${crawlResults.length} 頁，分析中...</div>` +
+      crawlResults.map(r => {
+        const sc = scoreColor(r.score);
+        const issueStr = r.issues.length ? r.issues.join('・') : '✓ 基本項目通過';
+        return `<div class="crawl-item">
+          <span class="crawl-score" style="color:${sc}">${r.score}</span>
+          <div style="flex:1;min-width:0">
+            <div class="crawl-title">${escHtml(r.title||r.url)}</div>
+            <div class="crawl-url">${escHtml(r.url.length>80?r.url.slice(0,77)+'…':r.url)}</div>
+            <div style="font-size:11px;color:${r.issues.length?'#fbbf24':'#34d399'};margin-top:2px">${escHtml(issueStr)}</div>
+          </div>
+          <span class="crawl-status" style="background:${r.code===200?'rgba(16,185,129,0.12)':'rgba(245,158,11,0.12)'};color:${r.code===200?'#34d399':'#fbbf24'}">${r.code}</span>
+        </div>`;
+      }).join('');
+    return;
+  }
+
+  // Full post-crawl render
+  let html = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:16px">
+    ${[
+      { label:'爬取頁數', val: crawlResults.length, color:'var(--accent2)' },
+      { label:'平均分數', val: avg, color: scoreColor(avg) },
+      { label:'孤兒頁面', val: orphans?.length||0, color: (orphans?.length||0)>0?'#f59e0b':'#34d399' },
+      { label:'重複 Title', val: dupTitles?.length||0, color: (dupTitles?.length||0)>0?'#ef4444':'#34d399' },
+      { label:'重複 H1', val: dupH1s?.length||0, color: (dupH1s?.length||0)>0?'#f97316':'#34d399' },
+      { label:'關鍵字互搶', val: keywordMap ? keywordMap.filter(e => e.cannibalized?.length > 1).length : '—', color: keywordMap && keywordMap.some(e => e.cannibalized?.length > 1)?'#ef4444':'#34d399' },
+      { label:'noindex 頁', val: noindexPages?.length||0, color: (noindexPages?.length||0)>0?'#f97316':'#34d399' },
+      { label:'圖片 404', val: brokenImgs?.length||0, color: (brokenImgs?.length||0)>0?'#ef4444':'#34d399' },
+    ].map(s => `<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center">
+      <div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:20px;font-weight:700;color:${s.color}">${s.val}</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:2px">${s.label}</div>
+    </div>`).join('')}
+  </div>`;
+
+  // ── 頁面清單 ──
+  html += `<div style="font-weight:500;font-size:13px;color:var(--text);margin-bottom:8px">📋 頁面清單</div>`;
+  html += crawlResults.map(r => {
+    const sc = scoreColor(r.score);
+    const ib = inboundCount?.[r.url.replace(/\/$/, '')] || 0;
+    const issueStr = r.issues.length ? r.issues.join('・') : '✓ 基本項目通過';
+    const isOrphan = orphans?.some(o => o.url === r.url);
+    return `<div class="crawl-item" onclick="window.open('${escHtml(r.url)}','_blank')">
+      <span class="crawl-score" style="color:${sc}">${r.score}</span>
+      <div style="flex:1;min-width:0">
+        <div class="crawl-title">${escHtml(r.title||'（無 Title）')}</div>
+        <div class="crawl-url">${escHtml(r.url.length>75?r.url.slice(0,72)+'…':r.url)}</div>
+        <div style="font-size:11px;color:${r.issues.length?'#fbbf24':'#34d399'};margin-top:2px">${escHtml(issueStr)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <span class="crawl-status" style="background:${r.code===200?'rgba(16,185,129,0.12)':'rgba(245,158,11,0.12)'};color:${r.code===200?'#34d399':'#fbbf24'}">${r.code}</span>
+        <span style="font-size:10px;color:var(--text3)">深度${r.depth} · ${ib}個連入${isOrphan?' 🔴孤兒':''}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── 孤兒頁面 ──
+  if (orphans?.length) {
+    html += `<div style="margin-top:16px"><div style="font-weight:500;font-size:13px;color:#f59e0b;margin-bottom:8px">🔴 孤兒頁面（${orphans.length} 個）— 沒有任何內部連結指向</div>` +
+      orphans.map(p => `<div style="padding:7px 12px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:6px;font-size:12px;color:var(--text2);margin-bottom:5px;word-break:break-all">${escHtml(p.url)}</div>`).join('') +
+      `<div style="font-size:11px;color:var(--text3);margin-top:6px">建議：在其他頁面加入指向這些頁面的內部連結，或將其加入 Sitemap。</div></div>`;
+  }
+
+  // ── 重複 Title ──
+  if (dupTitles?.length) {
+    html += `<div style="margin-top:16px"><div style="font-weight:500;font-size:13px;color:#ef4444;margin-bottom:8px">🔁 重複 Title（${dupTitles.length} 組）</div>` +
+      dupTitles.map(([t, urls]) => `<div style="padding:8px 12px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:6px;font-size:12px;margin-bottom:6px">
+        <div style="color:#f87171;margin-bottom:4px">「${escHtml(t.slice(0,60))}${t.length>60?'…':''}」</div>
+        ${urls.map(u => `<div style="color:var(--text3);padding-left:12px">• ${escHtml(u)}</div>`).join('')}
+      </div>`).join('') + '</div>';
+  }
+
+  // ── 重複 Desc ──
+  if (dupDescs?.length) {
+    html += `<div style="margin-top:12px"><div style="font-weight:500;font-size:13px;color:#f97316;margin-bottom:8px">🔁 重複 Meta Description（${dupDescs.length} 組）</div>` +
+      dupDescs.map(([d, urls]) => `<div style="padding:8px 12px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:6px;font-size:12px;margin-bottom:6px">
+        <div style="color:#fb923c;margin-bottom:4px">「${escHtml(d.slice(0,60))}${d.length>60?'…':''}」</div>
+        ${urls.map(u => `<div style="color:var(--text3);padding-left:12px">• ${escHtml(u)}</div>`).join('')}
+      </div>`).join('') + '</div>';
+  }
+
+  // ── noindex 頁面 ──
+  if (noindexPages?.length) {
+    html += `<div style="margin-top:16px"><div style="font-weight:500;font-size:13px;color:#f97316;margin-bottom:8px">🚫 noindex 頁面（${noindexPages.length} 個）— Google 不會索引</div>` +
+      noindexPages.map(p => `<div style="padding:7px 12px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:6px;font-size:12px;color:var(--text2);margin-bottom:5px;word-break:break-all">
+        ${escHtml(p.url)} <span style="color:#fb923c;font-size:11px">noindex</span>
+      </div>`).join('') +
+      `<div style="font-size:11px;color:var(--text3);margin-top:6px">⚠ noindex 頁面也不應出現在 Sitemap 中。</div></div>`;
+  }
+
+  // ── 深度 > 3 ──
+  if (deepPages?.length) {
+    html += `<div style="margin-top:16px"><div style="font-weight:500;font-size:13px;color:var(--text2);margin-bottom:8px">📐 頁面深度過深（${deepPages.length} 個，深度 > 3）</div>` +
+      deepPages.map(p => `<div style="padding:7px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text2);margin-bottom:5px;display:flex;justify-content:space-between">
+        <span style="word-break:break-all;flex:1">${escHtml(p.url)}</span>
+        <span style="color:#f59e0b;margin-left:10px;flex-shrink:0">深度 ${p.depth}</span>
+      </div>`).join('') +
+      `<div style="font-size:11px;color:var(--text3);margin-top:6px">Google 爬取深度 > 3 的頁面頻率較低，建議透過內部連結縮短路徑。</div></div>`;
+  }
+
+  // ── Sitemap 交叉比對 ──
+  if (crawlSitemapUrls.length > 0) {
+    html += `<div style="margin-top:16px"><div style="font-weight:500;font-size:13px;color:var(--text);margin-bottom:8px">🗺 Sitemap vs 實際爬取交叉比對</div>`;
+    if (crawledNotInSitemap?.length) {
+      html += `<div style="font-size:12px;color:#fbbf24;margin-bottom:6px">⚠ 爬取到但 Sitemap 未收錄（${crawledNotInSitemap.length} 個）：</div>` +
+        crawledNotInSitemap.map(u => `<div style="padding:5px 10px;background:rgba(245,158,11,0.07);border-radius:5px;font-size:11px;color:var(--text3);margin-bottom:3px;word-break:break-all">${escHtml(u)}</div>`).join('');
+    }
+    if (inSitemapNotCrawled?.length) {
+      html += `<div style="font-size:12px;color:#f87171;margin-top:8px;margin-bottom:6px">✗ Sitemap 中宣告但爬取時未發現（${inSitemapNotCrawled.length} 個）：</div>` +
+        inSitemapNotCrawled.map(u => `<div style="padding:5px 10px;background:rgba(239,68,68,0.07);border-radius:5px;font-size:11px;color:var(--text3);margin-bottom:3px;word-break:break-all">${escHtml(u)}</div>`).join('');
+    }
+    if (!crawledNotInSitemap?.length && !inSitemapNotCrawled?.length) {
+      html += `<div class="ci"><div class="cb cb-pass">✓</div><div class="cc"><span>爬取到的所有頁面均已收錄於 Sitemap 中。</span></div></div>`;
+    }
+    html += '</div>';
+  }
+
+  // ── 圖片 404 ──
+  if (imgResults?.length) {
+    html += `<div style="margin-top:16px"><div style="font-weight:500;font-size:13px;color:var(--text);margin-bottom:8px">🖼 圖片可連性抽查（${imgResults.length} 張）</div>`;
+    if (!brokenImgs?.length) {
+      html += `<div class="ci"><div class="cb cb-pass">✓</div><div class="cc"><span>抽查的 ${imgResults.length} 張圖片全部可正常存取。</span></div></div>`;
+    } else {
+      html += `<div style="font-size:12px;color:#f87171;margin-bottom:6px">✗ 發現 ${brokenImgs.length} 張無法存取的圖片：</div>` +
+        brokenImgs.map(i => `<div style="padding:7px 12px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:6px;font-size:11px;margin-bottom:5px;display:flex;justify-content:space-between;gap:8px">
+          <span style="word-break:break-all;color:var(--text2)">${escHtml(i.url.length>80?i.url.slice(0,77)+'…':i.url)}</span>
+          <span style="color:#f87171;flex-shrink:0">${i.code}</span>
+        </div>`).join('');
+    }
+    html += '</div>';
+  }
+
+  // ── JS 框架偵測彙整 ──
+  if (jsPagesDetected?.length) {
+    const frameworks = [...new Set(jsPagesDetected.map(p => p.framework))].join('、');
+    html += `<div style="margin-top:16px">
+      <div style="font-weight:500;font-size:13px;color:#fbbf24;margin-bottom:8px">⚡ 偵測到 JS 框架（${jsPagesDetected.length} 頁）— 靜態爬取結果可能不完整</div>
+      <div style="padding:12px 14px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius-sm);font-size:12px;margin-bottom:8px">
+        <div style="color:#fbbf24;font-weight:500;margin-bottom:6px">⚠ 偵測到框架：${escHtml(frameworks)}</div>
+        <div style="color:var(--text2);line-height:1.7">
+          這些頁面使用 JavaScript 框架渲染，靜態 HTML 抓取只能拿到空殼（shell），SEO 關鍵內容（Title、H1、內文）可能尚未渲染，<strong style="color:#fbbf24">分析結果不可靠</strong>。<br>
+          <span style="color:#34d399">✅ 建議解法：</span><br>
+          1. 在目標頁面按 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 5px;border-radius:3px">Ctrl+S</code>（Mac: Cmd+S）另存完整渲染後的 HTML，再上傳分析<br>
+          2. 或使用 <strong>Puppeteer / Playwright</strong> 等 headless 瀏覽器爬取，另存後再上傳<br>
+          3. 或至 <strong>Google Search Console → 網址審查</strong>，取得 Google 實際渲染後的版本
+        </div>
+      </div>
+      ${jsPagesDetected.map(p => `<div style="padding:6px 12px;background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-radius:5px;font-size:11px;color:var(--text3);margin-bottom:3px;display:flex;justify-content:space-between;gap:8px">
+        <span style="word-break:break-all">${escHtml(p.url)}</span>
+        <span style="color:#fbbf24;flex-shrink:0">⚡ ${escHtml(p.framework)}</span>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  // ── 重複 H1 ──
+  if (dupH1s?.length) {
+    html += `<div style="margin-top:16px">
+      <div style="font-weight:500;font-size:13px;color:#f97316;margin-bottom:8px">🔁 跨頁重複 H1（${dupH1s.length} 組）— 可能導致主題混淆</div>
+      ${dupH1s.map(([h1, urls]) => `<div style="padding:8px 12px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:6px;font-size:12px;margin-bottom:6px">
+        <div style="color:#fb923c;margin-bottom:4px">H1：「${escHtml(h1.length > 60 ? h1.slice(0, 57) + '…' : h1)}」出現在 ${urls.length} 個頁面</div>
+        ${urls.map(u => `<div style="color:var(--text3);padding-left:12px;word-break:break-all">• ${escHtml(u)}</div>`).join('')}
+      </div>`).join('')}
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">每頁 H1 應唯一且精確描述該頁主題，重複 H1 會讓 Google 難以區分頁面，影響排名分配。</div>
+    </div>`;
+  }
+
+  // ── 關鍵字地圖 ──
+  if (keywordMap?.length) {
+    const cannibalizedKws = keywordMap.filter(e => e.cannibalized?.length > 1);
+    html += `<div style="margin-top:20px">
+      <div style="font-weight:500;font-size:13px;color:var(--text);margin-bottom:4px">🗺 關鍵字地圖</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px">每個關鍵字對應哪些頁面，以及是否有互搶排名（Keyword Cannibalization）的問題</div>`;
+
+    if (cannibalizedKws.length) {
+      html += `<div style="padding:10px 14px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius-sm);margin-bottom:12px;font-size:12px">
+        <div style="color:#f87171;font-weight:500;margin-bottom:4px">⚠ 發現 ${cannibalizedKws.length} 個關鍵字互搶（Keyword Cannibalization）</div>
+        <div style="color:var(--text2)">多個頁面同時在 Title/H1 中使用相同關鍵字，Google 可能不知道該排哪一頁，導致兩頁都排不好。建議：選定一個「主力頁面」保留，其他頁面改用更具體的長尾詞，並加上 canonical 指向主力頁面。</div>
+      </div>`;
+    }
+
+    keywordMap.forEach(entry => {
+      const isCann = entry.cannibalized?.length > 1;
+      const borderColor = isCann ? 'rgba(239,68,68,0.3)' : 'var(--border)';
+      const bgColor = isCann ? 'rgba(239,68,68,0.04)' : 'var(--bg3)';
+      html += `<div style="background:${bgColor};border:1px solid ${borderColor};border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <span style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:700;font-size:14px;color:var(--text)">${escHtml(entry.kw)}</span>
+          ${isCann ? `<span style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:11px;padding:2px 9px;border-radius:12px;font-weight:500">⚠ 互搶</span>` : ''}
+          <span style="font-size:11px;color:var(--text3)">${entry.pages.length} 個頁面含此關鍵字</span>
+        </div>`;
+
+      if (!entry.pages.length) {
+        html += `<div style="font-size:12px;color:var(--text3)">✗ 爬取的頁面中均未出現此關鍵字，建議在主力頁面的 Title、H1、內文中加入。</div>`;
+      } else {
+        html += `<div style="display:flex;flex-direction:column;gap:5px">`;
+        entry.pages.forEach(p => {
+          const indicators = [];
+          if (p.inTitle) indicators.push(`<span style="background:rgba(16,185,129,0.15);color:#34d399;padding:1px 7px;border-radius:8px;font-size:10px">Title ✓</span>`);
+          if (p.inH1)    indicators.push(`<span style="background:rgba(6,182,212,0.15);color:#22d3ee;padding:1px 7px;border-radius:8px;font-size:10px">H1 ✓</span>`);
+          if (p.bodyCount > 0) indicators.push(`<span style="background:rgba(95,163,150,0.12);color:var(--accent2);padding:1px 7px;border-radius:8px;font-size:10px">內文×${p.bodyCount}</span>`);
+          const isCannidalPage = isCann && entry.cannibalized.some(c => c.url === p.url);
+          html += `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 8px;background:var(--bg2);border:1px solid ${isCannidalPage ? 'rgba(239,68,68,0.2)' : 'var(--border)'};border-radius:6px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:500;color:${isCannidalPage ? '#f87171' : 'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(p.title || p.url)}</div>
+              <div style="font-size:10px;color:var(--text3);word-break:break-all">${escHtml(p.url.length > 65 ? p.url.slice(0, 62) + '…' : p.url)}</div>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0">${indicators.join('')}</div>
+          </div>`;
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  listEl.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+//  v9: KEYWORD RANKING DIFFICULTY ASSESSMENT
+// ═══════════════════════════════════════════════════════
+
+/*
+  評估維度（不需要 API，純本地分析）：
+  1. 關鍵字長度     → 長尾詞競爭較低
+  2. 字詞數量       → 多字詞 = 長尾 = 低競爭
+  3. 頁面優化程度   → 關鍵字出現在 Title/H1/Desc/內文
+  4. 品牌詞判斷     → 包含商家名稱 → 極容易排名
+  5. 地區詞判斷     → 含地名 → 降低競爭
+  6. 意圖分析       → 交易型 > 資訊型 > 導航型
+  7. 競爭指標模擬   → 依字數/類型綜合估算
+*/
+
+function assessKeywordDifficulty(kw, report) {
+  const info    = report.info || {};
+  const bodyText= (info.bodyText || '').toLowerCase();
+  const title   = (info.title || '').toLowerCase();
+  const desc    = (info.description || '').toLowerCase();
+  const h1      = (info.h1Text || '').toLowerCase();
+  const bizName = (document.getElementById('bizName').value || '').toLowerCase();
+  const kwLower = kw.toLowerCase();
+  const isCJK   = /[\u4e00-\u9fff]/.test(kw);
+
+  // ── 基本屬性 ──
+  const charLen   = kw.length;
+  const wordCount = isCJK ? Math.ceil(charLen / 2) : kw.trim().split(/\s+/).length;
+  const isBrand   = !!(bizName && kwLower.includes(bizName.slice(0, 4)));
+
+  const geoWords  = ['台北','台中','台南','高雄','新北','桃園','新竹','基隆','嘉義','屏東','花蓮','宜蘭','台東','彰化','南投','雲林','苗栗','澎湖','金門','馬祖','大雅','西屯','北屯','南屯','烏日','豐原','潭子','大里','太平','霧峰','沙鹿','梧棲','清水','大甲','東區','西區','北區','南區','中區'];
+  const hasGeo    = geoWords.some(g => kw.includes(g));
+
+  const transWords= ['買','購','訂','預約','報名','費用','價格','優惠','折扣','推薦','哪裡','附近','外送','到府','服務'];
+  const infoWords = ['怎麼','如何','是什麼','介紹','說明','方法','教學','原因','為什麼','比較'];
+  const intent    = transWords.some(w => kwLower.includes(w)) ? 'transactional'
+                  : infoWords.some(w => kwLower.includes(w))  ? 'informational'
+                  : 'navigational';
+
+  // ── on-page 分析 ──
+  const inTitle   = title.includes(kwLower);
+  const inH1      = h1.includes(kwLower);
+  const inDesc    = desc.includes(kwLower);
+  const bodyCount = (bodyText.match(new RegExp(kwLower.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g')) || []).length;
+  const optScore  = (inTitle?30:0) + (inH1?25:0) + (inDesc?20:0) + Math.min(bodyCount*5, 25);
+
+  // ── 頁面優化分（潛力） ──
+  let potential = optScore;
+  if (isBrand) potential = Math.min(potential + 30, 100);
+  if (hasGeo)  potential = Math.min(potential + 15, 100);
+  potential = Math.max(0, Math.min(100, Math.round(potential)));
+
+  // ── on-page 改善建議 ──
+  const tips = [];
+  if (!inTitle)      tips.push({ type:'fail', text:`將「${kw}」加入 Title Tag（最重要的排名因素）` });
+  if (!inH1)         tips.push({ type:'fail', text:`在 H1 標題中自然包含「${kw}」` });
+  if (!inDesc)       tips.push({ type:'warn', text:`在 Meta Description 中提及「${kw}」以提升點擊率` });
+  if (bodyCount < 3) tips.push({ type:'warn', text:`內文「${kw}」只出現 ${bodyCount} 次，建議自然增加至 3–5 次` });
+  if (!hasGeo && isCJK) tips.push({ type:'info', text:`加入地區詞（如台中、大雅）可縮小競爭範圍` });
+  if (charLen <= 4)  tips.push({ type:'info', text:`「${kw}」字數少、競爭者多，建議延伸成下方長尾詞組合` });
+
+  return { kw, charLen, wordCount, isBrand, hasGeo, intent, inTitle, inH1, inDesc, bodyCount, optScore, potential, tips };
+}
+
+function renderRankSection(kwList, report) {
+  const sec = document.getElementById('rankSection');
+  const el = document.getElementById('rankResult');
+  const badge = document.getElementById('rankSummaryBadge');
+
+  if (!kwList || !kwList.length || !report) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+
+  const assessments = kwList.map(kw => assessKeywordDifficulty(kw, report));
+
+  const easy = assessments.filter(a => a.potential >= 70).length;
+  const medium = assessments.filter(a => a.potential >= 45 && a.potential < 70).length;
+  const hard = assessments.filter(a => a.potential < 45).length;
+  badge.textContent = `${easy} 個優化良好 · ${medium} 個可加強 · ${hard} 個需補強`;
+
+  const intentLabel = { transactional: '商業型', informational: '資訊型', navigational: '導航型' };
+  const intentColor = { transactional: '#f59e0b', informational: '#06b6d4', navigational: '#a78bfa' };
+
+  // ── 說明卡（誠實定位）──
+  let html = `
+    <div style="background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.18);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--text3);margin-bottom:18px;line-height:1.7">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <span style="font-size:16px;flex-shrink:0">🔬</span>
+        <div>
+          <strong style="color:var(--text);display:block;margin-bottom:4px">這個功能在分析什麼？</strong>
+          這裡分析的是「<strong style="color:#a78bfa">你的頁面對這個關鍵字優化得好不好</strong>」——也就是頁面健診，<em>不是</em>真正的競爭難度。
+          真正的關鍵字難度需要查詢競爭對手的反向連結數與域名權威（需 Ahrefs / Semrush 等資料庫）。
+          <span style="color:#34d399;display:block;margin-top:4px">✓ 這裡的「頁面優化分」越高，代表你的頁面對此關鍵字的 on-page SEO 越完整。</span>
+        </div>
+      </div>
+    </div>`;
+
+  // ── 總覽橫條圖 ──
+  html += `<canvas id="rankRadar" height="${Math.max(60, assessments.length * 52)}" style="max-width:100%;display:block;margin-bottom:22px"></canvas>`;
+
+  const bar = (pct, color) =>
+    `<div style="flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden">
+      <div style="height:5px;width:${pct}%;background:${color};border-radius:3px;transition:width 0.6s ease"></div>
+    </div>`;
+
+  const tipRow = (t) => {
+    const icon = t.type === 'fail' ? '✗' : t.type === 'warn' ? '⚠' : 'ℹ';
+    const c = t.type === 'fail' ? '#f87171' : t.type === 'warn' ? '#fbbf24' : 'var(--accent2)';
+    return `<div style="display:flex;gap:7px;align-items:flex-start;font-size:12px;margin-bottom:5px">
+      <span style="color:${c};flex-shrink:0;margin-top:1px">${icon}</span>
+      <span style="color:var(--text2)">${escHtml(t.text)}</span>
+    </div>`;
+  };
+
+  // ── 逐一關鍵字卡片 ──
+  assessments.forEach(a => {
+    const potColor = a.potential >= 70 ? '#10b981' : a.potential >= 45 ? '#f59e0b' : '#ef4444';
+    const potLabel = a.potential >= 70 ? '優化良好' : a.potential >= 45 ? '可加強' : '需補強';
+
+    // ── 長尾詞建議 ──
+    const longtails = generateLongtails(a.kw, a.hasGeo, a.isBrand, a.intent);
+
+    html += `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:14px">
+
+      <!-- 頂部 -->
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+        <div>
+          <div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px">${escHtml(a.kw)}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">
+            <span style="background:rgba(95,163,150,0.12);border:1px solid rgba(95,163,150,0.2);color:var(--accent2);padding:2px 9px;border-radius:12px;font-size:11px">${a.charLen} 字</span>
+            ${a.isBrand ? '<span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:2px 9px;border-radius:12px;font-size:11px">🏷 品牌詞</span>' : ''}
+            ${a.hasGeo  ? '<span style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);color:#22d3ee;padding:2px 9px;border-radius:12px;font-size:11px">📍 地區詞</span>' : ''}
+            <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:${intentColor[a.intent]};padding:2px 9px;border-radius:12px;font-size:11px">${intentLabel[a.intent]}</span>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:800;font-size:26px;color:${potColor};line-height:1">${a.potential}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">頁面優化分 <span style="color:${potColor}">${potLabel}</span></div>
+        </div>
+      </div>
+
+      <!-- 優化分細項 -->
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px">
+          <span>頁面優化完整度</span><span style="color:${potColor};font-weight:600">${a.potential}/100</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">${bar(a.potential, potColor)}</div>
+      </div>
+
+      <!-- 4 大 on-page 狀態 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px">
+        ${[
+          {label:'Title',    ok:a.inTitle,  score:30, tip:'最重要排名因素'},
+          {label:'H1',       ok:a.inH1,     score:25, tip:'標題相關性'},
+          {label:'Meta Desc',ok:a.inDesc,   score:20, tip:'影響點擊率'},
+          {label:`內文 ×${a.bodyCount}`, ok:a.bodyCount>=3, score:25, tip:'內容相關性'},
+        ].map(m=>`<div style="background:var(--bg2);border:1px solid ${m.ok?'rgba(16,185,129,0.3)':'rgba(239,68,68,0.2)'};border-radius:8px;padding:8px 10px;text-align:center">
+          <div style="font-size:16px;margin-bottom:3px">${m.ok?'✅':'❌'}</div>
+          <div style="font-size:11px;font-weight:600;color:${m.ok?'#34d399':'#f87171'}">${m.label}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">${m.ok?`+${m.score}分`:'0分'}</div>
+        </div>`).join('')}
+      </div>
+
+      <!-- On-page 建議 -->
+      ${a.tips.length
+        ? `<div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:14px">${a.tips.map(tipRow).join('')}</div>`
+        : `<div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:14px;font-size:12px;color:#34d399;display:flex;gap:6px;align-items:center"><span>🎉</span><span>此關鍵字的 on-page SEO 優化良好！</span></div>`
+      }
+
+      <!-- 長尾詞建議 -->
+      <div style="background:rgba(95,163,150,0.05);border:1px solid rgba(95,163,150,0.15);border-radius:8px;padding:12px 14px">
+        <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          🌿 <span>長尾詞延伸建議</span>
+          <span style="font-size:11px;font-weight:400;color:var(--text3)">（字數多 → 競爭低 → 更容易排上首頁）</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${longtails.map(lt=>`
+            <span style="display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--text2)">
+              <span style="color:${lt.level==='low'?'#34d399':lt.level==='mid'?'#fbbf24':'#f87171'};font-size:10px">●</span>
+              ${escHtml(lt.word)}
+              <span style="font-size:10px;color:var(--text3)">${lt.label}</span>
+            </span>`).join('')}
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text3)">
+          <span style="color:#34d399">●</span> 低競爭 &nbsp;
+          <span style="color:#fbbf24">●</span> 中競爭 &nbsp;
+          <span style="color:#f87171">●</span> 較高競爭
+        </div>
+      </div>
+
+    </div>`;
+  });
+
+  el.innerHTML = html;
+  setTimeout(() => drawRankRadar(assessments), 60);
+}
+
+// ── 長尾詞產生器 ──
+function generateLongtails(kw, hasGeo, isBrand, intent) {
+  const isCJK = /[\u4e00-\u9fff]/.test(kw);
+  const results = [];
+
+  // 地區詞庫
+  const geoSuffixes = ['台中', '台北', '高雄', '新北', '桃園', '台南'];
+  const localGeo = ['附近', '哪裡有', '推薦'];
+
+  // 意圖修飾詞
+  const transWords = ['費用', '價格', '多少錢', '優惠', '評價', '推薦', '預約', '怎麼選'];
+  const infoWords  = ['是什麼', '怎麼做', '介紹', '說明', '教學', '比較'];
+  const navWords   = ['官網', '電話', '地址', '營業時間'];
+
+  // 品質修飾詞
+  const qualWords  = ['最好', '好吃', '好用', '高品質', 'CP值', '專業'];
+
+  // ① 加地區（若還沒有）
+  if (!hasGeo && isCJK) {
+    geoSuffixes.slice(0,3).forEach(g => {
+      results.push({ word: g + kw, level: 'low', label: '地區詞' });
+    });
+    localGeo.forEach(l => {
+      results.push({ word: kw + l, level: 'low', label: '在地意圖' });
+    });
+  }
+
+  // ② 意圖延伸
+  const intentWords = intent === 'transactional' ? transWords : intent === 'informational' ? infoWords : navWords;
+  intentWords.slice(0,4).forEach(w => {
+    const combined = isCJK ? kw + w : kw + ' ' + w;
+    results.push({ word: combined, level: combined.length >= 8 ? 'low' : 'mid', label: '意圖詞' });
+  });
+
+  // ③ 品質修飾
+  if (!isBrand) {
+    qualWords.slice(0,3).forEach(q => {
+      results.push({ word: kw + q, level: 'mid', label: '品質詞' });
+    });
+  }
+
+  // ④ 疑問詞（資訊型）
+  if (intent !== 'transactional') {
+    ['如何選擇', '有哪些', '比較推薦'].forEach(q => {
+      results.push({ word: kw + q, level: 'low', label: '問答型' });
+    });
+  }
+
+  // 去重 + 移除原詞 + 限制 12 個
+  const seen = new Set([kw]);
+  return results.filter(r => { if (seen.has(r.word)) return false; seen.add(r.word); return true; }).slice(0, 12);
+}
+
+function drawRankRadar(assessments) {
+  const canvas = document.getElementById('rankRadar');
+  if (!canvas || !assessments.length) return;
+
+  const W = canvas.offsetWidth || 600;
+  const H = 200;
+  canvas.width = W * (window.devicePixelRatio || 1);
+  canvas.height = H * (window.devicePixelRatio || 1);
+  const ctx = canvas.getContext('2d');
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+  const colors = ['#5FA396','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#8b5cf6','#f97316','#84cc16','#14b8a6'];
+  const BAR_H = 20, GAP = 10, PAD_L = 120, PAD_R = 20, PAD_TOP = 16;
+
+  ctx.clearRect(0, 0, W, H);
+  const barW = W - PAD_L - PAD_R;
+
+  assessments.forEach((a, i) => {
+    const y = PAD_TOP + i * (BAR_H + GAP);
+    const color = colors[i % colors.length];
+
+    // Label
+    ctx.fillStyle = 'rgba(240,240,248,0.75)';
+    ctx.font = `11px 'Noto Sans TC', sans-serif`;
+    ctx.textAlign = 'right';
+    const label = a.kw.length > 8 ? a.kw.slice(0, 7) + '…' : a.kw;
+    ctx.fillText(label, PAD_L - 8, y + BAR_H * 0.72);
+
+    // BG bar
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    ctx.beginPath();
+    ctx.roundRect(PAD_L, y, barW, BAR_H, 4);
+    ctx.fill();
+
+    // Optimization score bar (main)
+    const potW = (a.potential / 100) * barW;
+    const potColor = a.potential >= 70 ? '#10b981' : a.potential >= 45 ? '#f59e0b' : '#ef4444';
+    ctx.fillStyle = potColor + 'cc';
+    ctx.beginPath();
+    ctx.roundRect(PAD_L, y, potW, BAR_H, 4);
+    ctx.fill();
+
+    // Score label
+    ctx.fillStyle = potColor;
+    ctx.font = `bold 10px 'Plus Jakarta Sans', sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText(`${a.potential}分`, PAD_L + potW + 5, y + BAR_H * 0.72);
+  });
+
+  // Legend
+  const legY = PAD_TOP + assessments.length * (BAR_H + GAP) + 4;
+  if (legY < H) {
+    ctx.fillStyle = 'rgba(90,90,110,0.7)';
+    ctx.font = `10px 'Noto Sans TC', sans-serif`;
+    ctx.textAlign = 'left';
+    ctx.fillText('深色條 = 頁面優化分（越長越好）　淺色底 = 優化缺口', PAD_L, legY + 10);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  v10: SERP 競爭分析引擎
+// ═══════════════════════════════════════════════════════
+
+// 大站黑名單（台灣常見權威網域）
+const BIG_SITES = [
+  'wikipedia.org','wikimedia.org',
+  'youtube.com','facebook.com','instagram.com','twitter.com','linkedin.com',
+  'udn.com','ltn.com.tw','chinatimes.com','setn.com','tvbs.com.tw','ettoday.net','storm.mg',
+  '104.com.tw','1111.com.tw','518.com.tw',
+  'businessweekly.com.tw','cw.com.tw','cheers.com.tw','wealth.com.tw',
+  'ptt.cc','mobile01.com','dcard.tw',
+  'gov.tw','edu.tw','moe.edu.tw',
+  'amazon.com','shopee.tw','momo.com.tw','pchome.com.tw',
+  'healthline.com','webmd.com','mayoclinic.org',
+  'tripadvisor.com.tw','booking.com','agoda.com',
+];
+
+let serpData = null; // 解析後的 SERP 資料
+
+// ── Dropzone 初始化 ──
+document.addEventListener('DOMContentLoaded', () => {
+  const dz = document.getElementById('serpDropZone');
+  const fi = document.getElementById('serpFileInput');
+  if (!dz || !fi) return;
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); if (e.dataTransfer.files[0]) handleSerpFile(e.dataTransfer.files[0]); });
+  fi.addEventListener('change', e => { if (e.target.files[0]) handleSerpFile(e.target.files[0]); e.target.value = ''; });
+});
+
+function handleSerpFile(file) {
+  if (!file || !/\.html?$/i.test(file.name)) { showErr('請選擇 .html 格式的 Google 搜尋結果頁！'); return; }
+  const r = new FileReader();
+  r.onload = e => parseSerpHtml(e.target.result, file.name);
+  r.readAsText(file);
+}
+
+function clearSerpSource() {
+  serpData = null;
+  document.getElementById('serpFileWrap').style.display = 'none';
+  document.getElementById('serpPreview').innerHTML = '';
+  document.getElementById('serpFileInput').value = '';
+  document.getElementById('serpSection').style.display = 'none';
+}
+
+function parseSerpHtml(html, filename) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const kw  = document.getElementById('serpKeyword').value.trim();
+  const results = [];
+
+  // ── Google SERP 解析策略（容錯多種格式）──
+  // Google 存檔的 HTML 結構因版本而異，用多種選擇器嘗試
+  const selectors = [
+    // 標準桌面版
+    { container: 'div.g',           title: 'h3',                          link: 'a[href]',           desc: 'div.VwiC3b, div[data-snc], span.st' },
+    // 另一種常見格式
+    { container: 'div[data-hveid]', title: 'h3',                          link: 'a[href]',           desc: 'div.VwiC3b, div.s, span.st' },
+    // 精簡版 / 行動版
+    { container: 'div.xpd',        title: 'h3, div.BNeawe.vvjwJb',       link: 'a[href]',           desc: 'div.BNeawe.s3v9rd' },
+    // 備用：直接找所有 h3 + 往上找父層
+    { container: null,              title: null,                           link: null,                desc: null },
+  ];
+
+  let found = false;
+  for (const sel of selectors) {
+    if (!sel.container) break;
+    const containers = [...doc.querySelectorAll(sel.container)];
+    if (containers.length < 3) continue;
+
+    for (const el of containers) {
+      const titleEl = el.querySelector(sel.title);
+      const linkEl  = el.querySelector(sel.link);
+      const descEl  = el.querySelector(sel.desc);
+      if (!titleEl || !linkEl) continue;
+
+      const href = linkEl.getAttribute('href') || '';
+      if (!href.startsWith('http') && !href.startsWith('/url')) continue;
+
+      // 解出真實 URL（Google 有時包 /url?q=...）
+      let url = href;
+      if (href.includes('/url?')) {
+        try { url = new URL('https://google.com' + href).searchParams.get('q') || href; } catch {}
+      }
+      if (!url.startsWith('http')) continue;
+
+      let domain = '';
+      try { domain = new URL(url).hostname.replace(/^www\./, ''); } catch { continue; }
+
+      const title = titleEl.textContent.trim();
+      const desc  = descEl ? descEl.textContent.trim() : '';
+      if (!title || results.find(r => r.domain === domain)) continue;
+
+      results.push({ url, domain, title, desc });
+      if (results.length >= 10) break;
+    }
+    if (results.length >= 3) { found = true; break; }
+  }
+
+  // 備用：掃所有 h3，取有合理連結的
+  if (!found || results.length < 3) {
+    const h3s = [...doc.querySelectorAll('h3')];
+    for (const h3 of h3s) {
+      const a = h3.closest('a') || h3.querySelector('a') || h3.parentElement?.querySelector('a');
+      if (!a) continue;
+      let url = a.getAttribute('href') || '';
+      if (url.includes('/url?')) {
+        try { url = new URL('https://google.com' + url).searchParams.get('q') || url; } catch {}
+      }
+      if (!url.startsWith('http')) continue;
+      let domain = '';
+      try { domain = new URL(url).hostname.replace(/^www\./, ''); } catch { continue; }
+      const title = h3.textContent.trim();
+      if (!title || results.find(r => r.domain === domain)) continue;
+      // 找相鄰描述文字
+      let desc = '';
+      let sib = h3.parentElement?.parentElement?.querySelector('[data-snc], .VwiC3b, .st');
+      if (sib) desc = sib.textContent.trim();
+      results.push({ url, domain, title, desc });
+      if (results.length >= 10) break;
+    }
+  }
+
+  if (results.length < 2) {
+    showErr('無法解析搜尋結果頁。請確認是 Google 搜尋結果頁，且有存完整 HTML（Ctrl+S）。');
+    return;
+  }
+
+  serpData = { kw, filename, results };
+  showSerpPreview(serpData);
+}
+
+function showSerpPreview(data) {
+  const wrap = document.getElementById('serpFileWrap');
+  const prev = document.getElementById('serpPreview');
+  document.getElementById('serpFileName').textContent = `✓ ${data.filename}（解析到 ${data.results.length} 筆結果）`;
+  wrap.style.display = 'block';
+
+  const bigCount = data.results.filter(r => BIG_SITES.some(b => r.domain.includes(b))).length;
+  const smallCount = data.results.length - bigCount;
+  const diffLabel = bigCount >= 6 ? '🔴 高競爭' : bigCount >= 3 ? '🟡 中等競爭' : '🟢 低競爭';
+
+  prev.innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text2)">
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px">
+        <span>📊 解析到 <strong style="color:var(--text)">${data.results.length}</strong> 個結果</span>
+        <span>🏢 大站 <strong style="color:#f87171">${bigCount}</strong> 個</span>
+        <span>🏪 小站 <strong style="color:#34d399">${smallCount}</strong> 個</span>
+        <span>${diffLabel}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text3)">分析結果將在「開始 SEO 分析」後顯示於報告中</div>
+    </div>`;
+}
+
+// ── 核心分析函式（從 renderResults 呼叫）──
+function renderSerpSection(myReport) {
+  const sec = document.getElementById('serpSection');
+  if (!serpData || !serpData.results.length) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+
+  const { kw, results } = serpData;
+  const myInfo  = myReport?.info || {};
+  const myTitle = myInfo.title || '';
+  const myDesc  = myInfo.description || '';
+  const myDomain= (() => { try { return new URL(myInfo.fileName||'').hostname.replace(/^www\./,''); } catch { return '你的網站'; } })();
+  const myBodyText = (myInfo.bodyText || '').toLowerCase();
+
+  // ── 逐一分析每個結果 ──
+  const analyzed = results.map((r, idx) => {
+    const isBig   = BIG_SITES.some(b => r.domain.includes(b));
+    const titleLen = r.title.length;
+    const descLen  = r.desc.length;
+    const kwLower  = kw.toLowerCase();
+    const titleHasKw = r.title.toLowerCase().includes(kwLower);
+    const descHasKw  = r.desc.toLowerCase().includes(kwLower);
+    // 關鍵字密度（title）
+    const titleKwDensity = kwLower ? (r.title.toLowerCase().split(kwLower).length - 1) : 0;
+    return { ...r, rank: idx + 1, isBig, titleLen, descLen, titleHasKw, descHasKw, titleKwDensity };
+  });
+
+  // ── 統計數據 ──
+  const bigCount    = analyzed.filter(r => r.isBig).length;
+  const smallCount  = analyzed.length - bigCount;
+  const avgTitleLen = Math.round(analyzed.reduce((s, r) => s + r.titleLen, 0) / analyzed.length);
+  const avgDescLen  = Math.round(analyzed.reduce((s, r) => s + r.descLen, 0) / analyzed.length);
+  const kwInTitle   = analyzed.filter(r => r.titleHasKw).length;
+  const kwInDesc    = analyzed.filter(r => r.descHasKw).length;
+  const diffScore   = bigCount >= 6 ? 'high' : bigCount >= 3 ? 'mid' : 'low';
+  const diffLabel   = { high:'🔴 高競爭', mid:'🟡 中等競爭', low:'🟢 低競爭' }[diffScore];
+  const diffColor   = { high:'#ef4444', mid:'#f59e0b', low:'#10b981' }[diffScore];
+  const diffDesc    = { high:`前10名有 ${bigCount} 個大型權威網站，短期內進入首頁難度較高，建議聚焦長尾詞。`, mid:`前10名有 ${bigCount} 個大站、${smallCount} 個小站，有機會切入，需要較完整的 on-page 優化。`, low:`前10名多為小型網站，這個關鍵字是可切入的機會！優化好頁面就有機會。` }[diffScore];
+
+  // ── 我的頁面 vs 平均比較 ──
+  const myTitleLen = myTitle.length;
+  const myDescLen  = myDesc.length;
+  const myTitleHasKw = kw ? myTitle.toLowerCase().includes(kw.toLowerCase()) : false;
+  const myDescHasKw  = kw ? myDesc.toLowerCase().includes(kw.toLowerCase()) : false;
+
+  const badge = document.getElementById('serpSummaryBadge');
+  badge.textContent = `${diffLabel} · ${analyzed.length} 個結果`;
+
+  // ── 渲染 ──
+  let html = '';
+
+  // 1. 難度總覽卡
+  html += `
+    <div style="background:var(--bg3);border:2px solid ${diffColor}33;border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:18px;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex-shrink:0;text-align:center;min-width:80px">
+        <div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:32px;font-weight:800;color:${diffColor};line-height:1">${bigCount}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px">大站佔前10</div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:15px;font-weight:600;color:${diffColor};margin-bottom:6px">${diffLabel}</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6">${diffDesc}</div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;padding:2px 10px;border-radius:12px;font-size:11px">🏢 大站 ${bigCount} 個</span>
+          <span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#34d399;padding:2px 10px;border-radius:12px;font-size:11px">🏪 小站 ${smallCount} 個</span>
+          <span style="background:rgba(95,163,150,0.1);border:1px solid rgba(95,163,150,0.2);color:var(--accent2);padding:2px 10px;border-radius:12px;font-size:11px">Title 含關鍵字 ${kwInTitle}/${analyzed.length}</span>
+        </div>
+      </div>
+    </div>`;
+
+  // 2. 我的頁面 vs 前10平均比較表
+  const cmpRow = (label, mine, avg, good, unit='') => {
+    const mineStr = mine === null ? '（未設定）' : mine + unit;
+    const avgStr  = avg + unit;
+    const ok = good(mine, avg);
+    const mineColor = mine === null ? '#f87171' : ok ? '#34d399' : '#fbbf24';
+    return `<tr>
+      <td style="color:var(--text2);font-size:13px;padding:9px 12px">${label}</td>
+      <td style="text-align:center;font-weight:600;color:${mineColor};padding:9px 12px">${mineStr}</td>
+      <td style="text-align:center;color:var(--text3);padding:9px 12px">${avgStr}</td>
+      <td style="text-align:center;padding:9px 12px"><span style="font-size:12px">${mine===null?'❌':ok?'✅':'⚠️'}</span></td>
+    </tr>`;
+  };
+
+  if (kw) {
+    html += `
+      <div style="margin-bottom:18px">
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">📊 你的頁面 vs 前10名平均</div>
+        <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;min-width:400px">
+          <thead><tr style="border-bottom:1px solid var(--border)">
+            <th style="text-align:left;padding:8px 12px;color:var(--text3);font-weight:400;font-size:11px;text-transform:uppercase">指標</th>
+            <th style="text-align:center;padding:8px 12px;color:var(--accent2);font-weight:500;font-size:11px">你的頁面</th>
+            <th style="text-align:center;padding:8px 12px;color:var(--text3);font-weight:400;font-size:11px">前10名平均</th>
+            <th style="text-align:center;padding:8px 12px;color:var(--text3);font-weight:400;font-size:11px">狀態</th>
+          </tr></thead>
+          <tbody>
+            ${cmpRow('Title 長度', myTitleLen||null, avgTitleLen, (m,a)=>m>=30&&m<=65, ' 字')}
+            ${cmpRow('Description 長度', myDescLen||null, avgDescLen, (m,a)=>m>=80&&m<=160, ' 字')}
+            ${cmpRow('Title 含關鍵字', myTitleHasKw?'✓ 有':'✗ 無', `${kwInTitle}/${analyzed.length} 個有`, (m)=>m===true)}
+            ${cmpRow('Description 含關鍵字', myDescHasKw?'✓ 有':'✗ 無', `${kwInDesc}/${analyzed.length} 個有`, (m)=>m===true)}
+          </tbody>
+        </table>
+        </div>
+      </div>`;
+  }
+
+  // 3. 前10名列表
+  html += `<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">🏆 前10名競爭者詳情</div>`;
+  html += `<div style="display:flex;flex-direction:column;gap:8px">`;
+
+  analyzed.forEach(r => {
+    const rankColor = r.rank <= 3 ? '#f59e0b' : r.rank <= 7 ? 'var(--text2)' : 'var(--text3)';
+    const siteType  = r.isBig
+      ? '<span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;padding:1px 7px;border-radius:8px;font-size:10px;flex-shrink:0">大站</span>'
+      : '<span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#34d399;padding:1px 7px;border-radius:8px;font-size:10px;flex-shrink:0">小站</span>';
+    const kwMark = kw
+      ? (r.titleHasKw ? '<span style="color:#34d399;font-size:10px">✓ Title含KW</span>' : '<span style="color:#f87171;font-size:10px">✗ Title無KW</span>')
+      : '';
+
+    html += `
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:800;font-size:18px;color:${rankColor};flex-shrink:0;width:24px;text-align:center;margin-top:2px">${r.rank}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+              ${siteType}
+              <span style="font-size:11px;color:var(--text3)">${escHtml(r.domain)}</span>
+              ${kwMark}
+            </div>
+            <div style="font-size:13px;font-weight:500;color:var(--accent2);margin-bottom:4px;line-height:1.4">${escHtml(r.title)}</div>
+            ${r.desc ? `<div style="font-size:12px;color:var(--text3);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escHtml(r.desc)}</div>` : ''}
+            <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap">
+              <span style="font-size:10px;color:var(--text3)">Title: ${r.titleLen} 字</span>
+              ${r.descLen ? `<span style="font-size:10px;color:var(--text3)">Desc: ${r.descLen} 字</span>` : ''}
+              <a href="${escHtml(r.url)}" target="_blank" rel="noopener" style="font-size:10px;color:var(--accent2);text-decoration:none;opacity:0.7">↗ 查看頁面</a>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  html += `</div>`;
+
+  // 4. 建議卡
+  const suggestions = [];
+  if (!myTitleHasKw && kw) suggestions.push({ t:'fail', m:`你的 Title 沒有包含關鍵字「${kw}」，而前10名有 ${kwInTitle} 個有，這是最優先要修的` });
+  if (!myDescHasKw && kw)  suggestions.push({ t:'warn', m:`Description 沒有包含「${kw}」，前10名有 ${kwInDesc} 個有，影響 SERP 點擊率` });
+  if (myTitleLen < 30)      suggestions.push({ t:'warn', m:`你的 Title 只有 ${myTitleLen} 字，前10名平均 ${avgTitleLen} 字，可以寫得更完整` });
+  if (myTitleLen > 65)      suggestions.push({ t:'warn', m:`你的 Title ${myTitleLen} 字超過建議上限，Google 可能截斷顯示，前10名平均 ${avgTitleLen} 字` });
+  if (diffScore === 'low')  suggestions.push({ t:'info', m:`這個關鍵字前10名多為小站，是可切入的機會，完整優化 on-page 後有機會進入首頁` });
+  if (diffScore === 'high') suggestions.push({ t:'info', m:`競爭很強，建議改攻「${kw}推薦」「${kw}費用」「台中${kw}」等長尾詞，難度低很多` });
+
+  if (suggestions.length) {
+    html += `<div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">💡 根據 SERP 分析的建議</div>`;
+    suggestions.forEach(s => {
+      const icon  = s.t==='fail'?'✗':s.t==='warn'?'⚠':'ℹ';
+      const color = s.t==='fail'?'#f87171':s.t==='warn'?'#fbbf24':'var(--accent2)';
+      html += `<div style="display:flex;gap:8px;align-items:flex-start;padding:10px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px">
+        <span style="color:${color};flex-shrink:0">${icon}</span>
+        <span style="color:var(--text2)">${escHtml(s.m)}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  document.getElementById('serpResult').innerHTML = html;
+}
+
+function showErr(m){const e=document.getElementById('errorBox');e.textContent='⚠ '+m;e.style.display='block';}
+function hideErr(){document.getElementById('errorBox').style.display='none';}
+
+function resetAll(){
+  document.getElementById('results').style.display='none';
+  uploadedFiles=[];selectedIdx=-1;renderFileList();
+  clearKwSource();clearCompSource();clearSerpSource();
+  keywords=[];renderKwTags();
+  ['t1','t2','t3'].forEach(t=>clearUrl(t));
+  abortController=null;
+  window._crawlStopped=true;
+  crawlResults=[];
+  crawlSitemapUrls=[];
+  ['robotsSection','headersSection','redirectSection','crawlSection','rankSection','psiSection','compResult','serpSection','anchorSection','freshnessSection','eeatSection','mobileHtmlSection','radarSection'].forEach(id=>{
+    document.getElementById(id).style.display='none';
+  });
+  document.getElementById('cancelBtn').style.display='none';
+  document.getElementById('analyzeBtn').disabled=false;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function exportJSON(){
+  if(!currentReport) return;
+  const blob=new Blob([JSON.stringify(currentReport,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`SEO報告_v15_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'-')}.json`;
+  a.click();
+  showToast('📥 JSON 報告已下載');
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  v13: WHITE-LABEL / BRAND SETTINGS
+// ═══════════════════════════════════════════════════════
+let brandSettings = JSON.parse(tmpStore.getItem('seo_brand_v13') || '{"name":"SEO Analyzer","color":"#5FA396","contact":""}');
+
+function toggleWLPanel(){document.getElementById('wlPanel').classList.toggle('open');}
+
+function applyBrand(){
+  const name = document.getElementById('wlName')?.value || 'SEO Analyzer';
+  const color = document.getElementById('wlColor')?.value || '#5FA396';
+  const contact = document.getElementById('wlContact')?.value || '';
+  brandSettings = {name, color, contact};
+  tmpStore.setItem('seo_brand_v13', JSON.stringify(brandSettings));
+  document.getElementById('brandLogoText').textContent = name;
+  const footerBrand = document.getElementById('footerBrandText');
+  if(footerBrand) footerBrand.textContent = name;
+  document.getElementById('wlColorHex').value = color;
+  // Apply accent color
+  document.documentElement.style.setProperty('--accent', color);
+  // Compute lighter variant
+  document.documentElement.style.setProperty('--accent2', lightenColor(color, 30));
+}
+
+function syncColorFromHex(){
+  const hex = document.getElementById('wlColorHex').value;
+  if(/^#[0-9a-fA-F]{6}$/.test(hex)){
+    document.getElementById('wlColor').value = hex;
+    applyBrand();
+  }
+}
+
+function lightenColor(hex, amount){
+  const num = parseInt(hex.replace('#',''), 16);
+  const r = Math.min(255, (num >> 16) + amount);
+  const g = Math.min(255, ((num >> 8) & 0xff) + amount);
+  const b = Math.min(255, (num & 0xff) + amount);
+  return '#' + ((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);
+}
+
+// Init brand on load
+(function initBrand(){
+  if(brandSettings.name){
+    const ni = document.getElementById('wlName');
+    const ci = document.getElementById('wlColor');
+    const co = document.getElementById('wlContact');
+    if(ni) ni.value = brandSettings.name;
+    if(ci) ci.value = brandSettings.color || '#5FA396';
+    if(co) co.value = brandSettings.contact || '';
+    document.getElementById('brandLogoText').textContent = brandSettings.name;
+    if(brandSettings.color){
+      document.documentElement.style.setProperty('--accent', brandSettings.color);
+      document.documentElement.style.setProperty('--accent2', lightenColor(brandSettings.color, 30));
+    }
+  }
+})();
+
+
+// ═══════════════════════════════════════════════════════
+//  v13: INDUSTRY SELECTOR + EXTENDED LSI DATABASE
+// ═══════════════════════════════════════════════════════
+let selectedIndustry = null;
+
+const INDUSTRY_LSI = {
+  restaurant: {
+    must:['菜單','地址','電話','營業時間','訂位'],
+    good:['停車','外帶','外送','評價','環境','招牌','特色','套餐','包廂','寵物友善'],
+    lsi:['美食','推薦','台中','口味','份量','價格','食材','主廚','料理','古早味','隱藏版']
+  },
+  cafe: {
+    must:['咖啡','營業時間','地址'],
+    good:['甜點','蛋糕','Wi-Fi','插座','包廂','外帶','手沖','拿鐵','不限時','拍照'],
+    lsi:['下午茶','好拍','約會','工作','讀書','氣氛','質感','選豆','單品','冷萃']
+  },
+  hotel: {
+    must:['房型','價格','地址','交通'],
+    good:['早餐','停車','寵物','免費取消','訂房','設施','游泳池','健身房','SPA'],
+    lsi:['民宿','住宿','旅館','check-in','入住','退房','景觀','景色','家庭房','雙人房']
+  },
+  travel: {
+    must:['景點','交通','門票','開放時間'],
+    good:['停車','導覽','設施','親子','無障礙','附近','住宿','美食','季節','天氣'],
+    lsi:['旅遊','觀光','打卡','IG','拍照','自然','文化','歷史','生態','體驗']
+  },
+  medical: {
+    must:['診療項目','掛號','地址','電話','看診時間'],
+    good:['健保','費用','醫師','設備','急診','初診','複診','線上掛號','停車'],
+    lsi:['診所','醫院','醫療','治療','症狀','健康','專科','門診','醫師資歷','評價']
+  },
+  beauty: {
+    must:['服務項目','價格','預約','地址'],
+    good:['設計師','作品集','評價','停車','送禮','包月','首次優惠','線上預約'],
+    lsi:['美甲','美睫','美髮','造型','指甲','眉形','膚質','護膚','保養','美容']
+  },
+  fitness: {
+    must:['課程','費用','地址','體驗課'],
+    good:['教練','時段','停車','設備','淋浴','個人課','團體課','月費','年費'],
+    lsi:['健身','運動','瑜珈','重訓','有氧','塑身','減脂','增肌','燃脂','體態']
+  },
+  realestate: {
+    must:['坪數','格局','租金/售價','地址','交通'],
+    good:['停車','公設','屋齡','裝潢','社區','管委會','近捷運','生活機能','附近'],
+    lsi:['房屋','租屋','買房','買屋','套房','公寓','華廈','大樓','透天','物件']
+  },
+  legal: {
+    must:['服務項目','聯絡','費用','資歷'],
+    good:['免費諮詢','經驗','案例','專業','快速','保密','線上諮詢','地址'],
+    lsi:['律師','會計師','法律','稅務','訴訟','合約','申報','顧問','事務所','代辦']
+  },
+  education: {
+    must:['課程','費用','師資','地址'],
+    good:['試聽','小班','時段','評價','成績','考試','線上','實體','寒暑假'],
+    lsi:['補習','教學','學習','升學','考試','英文','數學','作文','家教','輔導']
+  },
+  ecommerce: {
+    must:['商品','價格','購買','運費','退換貨'],
+    good:['優惠','折扣','免運','評價','規格','庫存','到貨','信用卡','分期'],
+    lsi:['購物','訂購','網購','下單','付款','出貨','正品','保固','客服','包裝']
+  },
+  tech: {
+    must:['功能','費用','服務'],
+    good:['試用','免費版','教學','API','整合','客服','安全','雲端','更新'],
+    lsi:['軟體','系統','平台','應用程式','工具','自動化','數位','解決方案','效率','資料']
+  },
+  decoration: {
+    must:['服務項目','報價','作品','聯絡'],
+    good:['免費丈量','材料','風格','時程','保固','驗屋','合約','設計圖'],
+    lsi:['裝潢','裝修','室內設計','翻修','油漆','木工','泥作','水電','風格','空間']
+  },
+  pet: {
+    must:['服務項目','費用','地址','預約'],
+    good:['品種','接種','美容','住宿','寄宿','溜狗','訓練','獸醫','評價'],
+    lsi:['寵物','狗','貓','鳥','兔','飼料','照護','健康','玩具','用品']
+  },
+  wedding: {
+    must:['服務項目','費用','作品','聯絡'],
+    good:['包套','婚紗','自助婚紗','儀式','宴客','場地','造型','試拍','timeline'],
+    lsi:['婚禮','結婚','婚攝','婚紗','新秘','花藝','主持','蜜月','記憶','幸福']
+  },
+  auto: {
+    must:['服務項目','費用','地址','電話'],
+    good:['預約','到府','保固','原廠','零件','快速','保養','維修','評價'],
+    lsi:['汽車','機車','車輛','檢驗','噴漆','輪胎','鈑金','電瓶','冷媒','引擎']
+  },
+  hvac: {
+    must:['服務項目','費用','電話','到府'],
+    good:['免費估價','保固','快速到府','清洗','安裝','拆裝','品牌','能源效率'],
+    lsi:['冷氣','空調','除溼機','暖氣','維修','清洗','安裝','家電','節能','變頻']
+  },
+  finance: {
+    must:['服務項目','費用','聯絡','資格'],
+    good:['免費諮詢','試算','比較','保障','收益','風險','規劃','投資'],
+    lsi:['保險','理財','金融','貸款','信貸','儲蓄','退休','年金','基金','股票']
+  },
+};
+
+function selectIndustry(btn, key){
+  document.querySelectorAll('.ind-btn').forEach(b=>b.classList.remove('active'));
+  if(selectedIndustry === key){
+    selectedIndustry = null;
+    document.getElementById('selectedIndustryBadge').style.display='none';
+    return;
+  }
+  btn.classList.add('active');
+  selectedIndustry = key;
+  const badge = document.getElementById('selectedIndustryBadge');
+  badge.textContent = '✓ ' + btn.textContent.trim();
+  badge.style.display = 'inline-block';
+}
+
+// Override LSI_DATABASE lookup to also use industry data
+// We wrap by checking selectedIndustry inside the patched version
+const _origFindLSIKeywords = findLSIKeywords;
+window._findLSIKeywords = function(kwList, bodyText, tfidfEntries){
+  const results = _origFindLSIKeywords(kwList, bodyText, tfidfEntries);
+  if(!selectedIndustry || !INDUSTRY_LSI[selectedIndustry]) return results;
+  const indData = INDUSTRY_LSI[selectedIndustry];
+  const bodyLower = bodyText.toLowerCase();
+  results.forEach(r => {
+    const extra = [...indData.lsi].filter(w => !r.words.some(ew=>ew.word===w));
+    extra.forEach(w => r.words.push({word:w, present: bodyLower.includes(w.toLowerCase())}));
+  });
+  return results;
+};
+
+const _origAnalyzeContentGap = analyzeContentGap;
+window._analyzeContentGap = function(kwList, bodyText){
+  const results = _origAnalyzeContentGap(kwList, bodyText);
+  if(!selectedIndustry || !INDUSTRY_LSI[selectedIndustry]) return results;
+  const indData = INDUSTRY_LSI[selectedIndustry];
+  const bodyLower = bodyText.toLowerCase();
+  results.forEach(g => {
+    indData.must.forEach(w=>{
+      if(!g.mustPresent.includes(w)&&!g.mustMissing.includes(w)){
+        if(bodyLower.includes(w)) g.mustPresent.push(w);
+        else g.mustMissing.push(w);
+      }
+    });
+    indData.good.forEach(w=>{
+      if(!g.goodPresent.includes(w)&&!g.goodMissing.includes(w)){
+        if(bodyLower.includes(w)) g.goodPresent.push(w);
+        else g.goodMissing.push(w);
+      }
+    });
+    g.coverageScore = indData.must.length
+      ? Math.round((g.mustPresent.length/indData.must.length)*60+(g.goodPresent.length/Math.max(indData.good.length,1))*40)
+      : Math.round((g.goodPresent.length/Math.max(indData.good.length,1))*100);
+  });
+  return results;
+};
+
+
+// ═══════════════════════════════════════════════════════
+//  v13: PAGESPEED INSIGHTS INTEGRATION
+// ═══════════════════════════════════════════════════════
+async function fetchPageSpeed(url){
+  const sec = document.getElementById('psiSection');
+  const el = document.getElementById('psiResult');
+  const badge = document.getElementById('psiSummaryBadge');
+  if(!url || !/^https?:\/\//i.test(url)){sec.style.display='none';return;}
+  sec.style.display='block';
+  el.innerHTML='<p style="padding:16px;color:var(--text2);font-size:13px"><span class="spin">⟳</span> 正在向 Google PageSpeed Insights 請求資料（約 10–30 秒）...</p>';
+
+  const apiKey = document.getElementById('psiApiKey')?.value?.trim() || '';
+  const base = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=mobile${apiKey?'&key='+apiKey:''}`;
+
+  let mobileData=null, desktopData=null;
+  try{
+    const [mr,dr] = await Promise.all([
+      fetch(base+'&strategy=mobile').then(r=>r.json()),
+      fetch(base.replace('mobile','desktop')+'&strategy=desktop').then(r=>r.json())
+    ]);
+    mobileData=mr; desktopData=dr;
+  }catch(e){
+    el.innerHTML=`<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>PageSpeed API 無法存取（${escHtml(e.message)}）。此功能需要網際網路連線且網址必須可公開存取。</span></div></div>`;
+    return;
+  }
+
+  if(mobileData.error){
+    el.innerHTML=`<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>PageSpeed 錯誤：${escHtml(mobileData.error.message||'請確認網址可公開存取')}。</span></div></div>`;
+    return;
+  }
+
+  function cat(score){return score>=0.9?'good':score>=0.5?'needs':'poor';}
+  function label(score){return score>=0.9?'良好':score>=0.5?'待改善':'較差';}
+  function pct(score){return score!=null?Math.round(score*100):'—';}
+
+  function renderDevice(data, device){
+    const cats = data.lighthouseResult?.categories || {};
+    const audits = data.lighthouseResult?.audits || {};
+    const perf = cats.performance?.score;
+    const seo  = cats.seo?.score;
+    const acc  = cats.accessibility?.score;
+    const bp   = cats['best-practices']?.score;
+
+    const lcp = audits['largest-contentful-paint']?.displayValue || '—';
+    const fid = audits['total-blocking-time']?.displayValue || '—';
+    const cls = audits['cumulative-layout-shift']?.displayValue || '—';
+    const fcp = audits['first-contentful-paint']?.displayValue || '—';
+    const si  = audits['speed-index']?.displayValue || '—';
+    const ttfb= audits['server-response-time']?.displayValue || '—';
+
+    const perfScore = pct(perf);
+    const perfCat   = cat(perf);
+
+    return `
+      <div style="margin-bottom:20px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">${device==='mobile'?'📱 行動裝置':'🖥 桌面'}</div>
+        <div class="psi-grid">
+          <div class="psi-card">
+            <div class="psi-score psi-${perfCat}">${perfScore}</div>
+            <div class="psi-label">效能分數</div>
+          </div>
+          <div class="psi-card">
+            <div class="psi-score psi-${cat(seo)}">${pct(seo)}</div>
+            <div class="psi-label">SEO 分數</div>
+          </div>
+          <div class="psi-card">
+            <div class="psi-score psi-${cat(acc)}">${pct(acc)}</div>
+            <div class="psi-label">無障礙</div>
+          </div>
+          <div class="psi-card">
+            <div class="psi-score psi-${cat(bp)}">${pct(bp)}</div>
+            <div class="psi-label">最佳實踐</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">
+          ${[
+            {k:'LCP（最大內容繪製）',v:lcp,ok:audits['largest-contentful-paint']?.score>=0.5},
+            {k:'TBT（總封鎖時間）',v:fid,ok:audits['total-blocking-time']?.score>=0.5},
+            {k:'CLS（版面偏移）',v:cls,ok:audits['cumulative-layout-shift']?.score>=0.5},
+            {k:'FCP（首次內容繪製）',v:fcp,ok:audits['first-contentful-paint']?.score>=0.5},
+            {k:'Speed Index',v:si,ok:audits['speed-index']?.score>=0.5},
+            {k:'TTFB（伺服器回應）',v:ttfb,ok:audits['server-response-time']?.score>=0.5},
+          ].map(m=>`<div style="background:var(--bg3);border:1px solid ${m.ok?'rgba(16,185,129,0.25)':'rgba(239,68,68,0.2)'};border-radius:8px;padding:10px 12px">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:3px">${m.k}</div>
+            <div style="font-size:15px;font-weight:700;font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;color:${m.ok?'#10b981':'#f87171'}">${m.v}</div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  const mScore = pct(mobileData.lighthouseResult?.categories?.performance?.score);
+  const dScore = pct(desktopData.lighthouseResult?.categories?.performance?.score);
+  badge.textContent = `行動 ${mScore} 桌面 ${dScore}`;
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap" id="psiInner">
+      <div>${renderDevice(mobileData,'mobile')}</div>
+      <div>${renderDevice(desktopData,'desktop')}</div>
+    </div>
+    <div style="padding:10px 14px;background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.18);border-radius:var(--radius-sm);font-size:11px;color:var(--text3);margin-top:4px">
+      ℹ️ 資料來源：Google PageSpeed Insights API（即時分析，每次結果可能略有差異）。
+      <a href="https://pagespeed.web.dev/" target="_blank" style="color:var(--accent2)">在 PageSpeed 網站查看完整報告 ↗</a>
+    </div>`;
+}
+
+
+// ═══════════════════════════════════════════════════════
+//  v13: PDF REPORT EXPORT
+// ═══════════════════════════════════════════════════════
+// PDF 用的兩個套件（約 560KB）只在按「下載 PDF」時才載入，平常打開工具不用下載
+function loadScriptOnce(src){
+  return new Promise((ok,no)=>{
+    if(document.querySelector('script[data-src="'+src+'"]')) return ok();
+    const el=document.createElement('script'); el.src=src; el.async=true; el.dataset.src=src;
+    el.onload=()=>ok(); el.onerror=()=>{ el.remove(); no(new Error('無法載入 '+src.split('/').pop())); };
+    document.head.appendChild(el);
+  });
+}
+async function loadPdfLibs(){
+  const jobs=[];
+  if(!window.jspdf) jobs.push(loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'));
+  if(!window.html2canvas) jobs.push(loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'));
+  await Promise.all(jobs);
+}
+async function exportPDF(){
+  if(!currentReport){alert('請先完成 SEO 分析');return;}
+  const overlay = document.getElementById('pdfOverlay');
+  const progFg  = document.getElementById('pdfProgFg');
+  const progLbl = document.getElementById('pdfProgLabel');
+
+  overlay.classList.add('show');
+  function setProg(pct, lbl){
+    progFg.style.width = pct+'%';
+    progLbl.textContent = lbl;
+  }
+
+  try {
+    setProg(10,'載入 jsPDF 中...');
+    await loadPdfLibs();
+    const { jsPDF } = window.jspdf;
+    const r = currentReport;
+    const brand = (typeof brandSettings !== 'undefined' && brandSettings?.name) ? brandSettings.name : 'SEO Analyzer';
+
+    // ── Build a styled HTML snapshot for html2canvas ──
+    setProg(20,'建立報告畫面...');
+
+    const W = 794; // A4 px at 96dpi
+    const accentColor = '#5FA396';
+
+    // Score colour
+    const sc = r.score >= 80 ? '#10b981' : r.score >= 60 ? '#f59e0b' : '#ef4444';
+
+    // Metrics pills HTML
+    const metricsHtml = (r.metrics || []).map(m => `
+      <div style="display:inline-flex;align-items:center;gap:6px;background:#14120F;border:1px solid #201D18;border-radius:20px;padding:5px 12px;margin:3px;font-size:12px;">
+        <span>${m.icon||''}</span>
+        <span style="color:#aaa">${m.label}</span>
+        <span style="color:#fff;font-weight:600">${m.val}</span>
+      </div>`).join('');
+
+    // Check items HTML (max 20)
+    const checkItems = (r.checks || []).slice(0,20).map(c => {
+      const col = c.status==='pass'?'#10b981':c.status==='warn'?'#f59e0b':'#ef4444';
+      const icon = c.status==='pass'?'✓':c.status==='warn'?'!':'✗';
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 10px;border-bottom:1px solid #1A1815;">
+        <div style="width:18px;height:18px;border-radius:50%;background:${col}22;color:${col};font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">${icon}</div>
+        <div>
+          <div style="font-size:12px;color:#ddd;font-weight:500">${escHtml(c.title||'')}</div>
+          ${c.detail?`<div style="font-size:11px;color:#888;margin-top:2px">${escHtml(c.detail||'')}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+
+    // Action items HTML
+    const actionItems = (r.actions || []).slice(0,6).map(a => {
+      const col = a.priority==='high'?'#ef4444':'#f59e0b';
+      const lbl = a.priority==='high'?'高優先':'中優先';
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-bottom:1px solid #1A1815;">
+        <span style="font-size:10px;font-weight:700;background:${col}22;color:${col};padding:2px 7px;border-radius:4px;flex-shrink:0;margin-top:2px;white-space:nowrap">${lbl}</span>
+        <div>
+          <div style="font-size:12px;color:#ddd">${escHtml(a.title||'')}</div>
+          ${a.detail?`<div style="font-size:11px;color:#888;margin-top:2px">${escHtml(a.detail||'')}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+
+    // KW results
+    const kwHtml = (r.kwResults || []).slice(0,8).map(k => {
+      const col = k.optScore>=80?'#10b981':k.optScore>=50?'#f59e0b':'#ef4444';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #1A1815;font-size:12px;">
+        <span style="flex:1;color:#ddd">${escHtml(k.keyword)}</span>
+        <span style="color:${col};font-weight:600;min-width:36px;text-align:right">${k.optScore}分</span>
+      </div>`;
+    }).join('');
+
+    // Schema results
+    const schemaHtml = (r.schemaResults || []).slice(0,4).map(s => {
+      const col = s.valid?'#10b981':'#ef4444';
+      const icon = s.valid?'✓':'✗';
+      return `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid #1A1815;font-size:12px;">
+        <span style="color:${col};font-weight:700">${icon}</span>
+        <span style="color:#ddd">${escHtml(s.type||'')}</span>
+        ${s.errors&&s.errors.length?`<span style="color:#f87171;font-size:11px;margin-left:auto">${s.errors.length} 錯誤</span>`:''}
+      </div>`;
+    }).join('');
+
+    const dateStr = new Date().toLocaleDateString('zh-TW');
+    const src = r.info?.fileName || r.info?.url || '—';
+
+    const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:#0B0A09; color:#DDD8CE; font-family:'Noto Sans TC',sans-serif; width:${W}px; }
+  .page { padding:32px; }
+  h2 { font-size:14px; font-weight:700; color:#fff; margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid #1A1815; display:flex; align-items:center; gap:8px; }
+  .card { background:#14120F; border:1px solid #1A1815; border-radius:10px; margin-bottom:16px; overflow:hidden; }
+  .card-body { padding:12px 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid #1A1815;">
+    <div>
+      <div style="font-size:20px;font-weight:700;color:#fff;letter-spacing:-0.5px">${escHtml(brand)}</div>
+      <div style="font-size:11px;color:#666;margin-top:2px">SEO 分析報告 v15 Pro · ${dateStr}</div>
+    </div>
+    <div style="font-size:11px;color:#555;max-width:300px;text-align:right;word-break:break-all">${escHtml(src)}</div>
+  </div>
+
+  <!-- Score hero -->
+  <div class="card" style="background:linear-gradient(135deg,rgba(95,163,150,0.12),#14120F);border-color:rgba(95,163,150,0.25);">
+    <div style="padding:20px;display:flex;align-items:center;gap:24px;">
+      <div style="width:80px;height:80px;border-radius:50%;border:4px solid ${sc};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <div>
+          <div style="font-size:28px;font-weight:700;color:${sc};text-align:center;line-height:1">${r.score}</div>
+          <div style="font-size:10px;color:#666;text-align:center">/100</div>
+        </div>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">${escHtml(r.scoreTitle||'')}</div>
+        <div style="font-size:12px;color:#aaa;line-height:1.6;margin-bottom:10px">${escHtml(r.summary||'')}</div>
+        <div style="display:flex;gap:10px;">
+          <span style="background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);padding:3px 10px;border-radius:12px;font-size:11px">✓ ${r.pass} 通過</span>
+          <span style="background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);padding:3px 10px;border-radius:12px;font-size:11px">⚠ ${r.warn} 警告</span>
+          <span style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.25);padding:3px 10px;border-radius:12px;font-size:11px">✗ ${r.fail} 需修復</span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:10px 20px 16px;border-top:1px solid rgba(95,163,150,0.15);">${metricsHtml}</div>
+  </div>
+
+  <!-- Two columns: checks + actions -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="card">
+      <div style="padding:12px 14px 0"><h2>📋 檢查結果</h2></div>
+      <div class="card-body">${checkItems}</div>
+    </div>
+    <div class="card">
+      <div style="padding:12px 14px 0"><h2>⚡ 優先行動</h2></div>
+      <div class="card-body">${actionItems}</div>
+    </div>
+  </div>
+
+  <!-- KW + Schema -->
+  ${r.kwResults&&r.kwResults.length?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+    <div class="card">
+      <div style="padding:12px 14px 0"><h2>🔑 關鍵字分析</h2></div>
+      <div class="card-body">${kwHtml}</div>
+    </div>
+    <div class="card">
+      <div style="padding:12px 14px 0"><h2>🗂 Schema 結構化資料</h2></div>
+      <div class="card-body">${schemaHtml||'<div style="padding:16px;color:#555;font-size:12px">無 Schema 資料</div>'}</div>
+    </div>
+  </div>`:''}
+
+  <!-- Footer -->
+  <div style="text-align:center;padding-top:16px;border-top:1px solid #1A1815;font-size:11px;color:#555;">
+    ${escHtml(brand)} · SEO Analyzer v15 Pro · ${dateStr} · YC AXIOM 免費 SEO 檢測
+  </div>
+
+</div>
+</body>
+</html>`;
+
+    // ── Render with html2canvas ──
+    setProg(35,'載入字體中...');
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:794px;height:1px;border:none;';
+    document.body.appendChild(iframe);
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(htmlContent);
+    iframe.contentDocument.close();
+
+    // Wait for fonts + layout
+    await new Promise(r => setTimeout(r, 1800));
+    setProg(55,'渲染頁面...');
+
+    const iDoc = iframe.contentDocument.documentElement;
+    const pageH = iframe.contentDocument.body.scrollHeight;
+    iframe.style.height = pageH + 'px';
+
+    await new Promise(r => setTimeout(r, 300));
+    setProg(65,'截圖中...');
+
+    const canvas = await html2canvas(iframe.contentDocument.body, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#0B0A09',
+      width: W,
+      height: pageH,
+      windowWidth: W,
+      windowHeight: pageH,
+      logging: false,
+    });
+
+    document.body.removeChild(iframe);
+    setProg(80,'產生 PDF...');
+
+    const doc = new jsPDF({ orientation:'p', unit:'px', format:'a4', hotfixes:['px_scaling'] });
+    const pdfW = doc.internal.pageSize.getWidth();
+    const pdfH = doc.internal.pageSize.getHeight();
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    const imgW = pdfW;
+    const imgH = (canvas.height / canvas.width) * imgW;
+
+    let posY = 0;
+    let remaining = imgH;
+
+    while(remaining > 0) {
+      const sliceH = Math.min(pdfH, remaining);
+      const srcY = posY / imgH * canvas.height;
+      const srcSliceH = sliceH / imgH * canvas.height;
+
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = srcSliceH;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.drawImage(canvas, 0, srcY, canvas.width, srcSliceH, 0, 0, canvas.width, srcSliceH);
+
+      if(posY > 0) doc.addPage();
+      doc.addImage(sliceCanvas.toDataURL('image/jpeg',0.92), 'JPEG', 0, 0, pdfW, sliceH);
+
+      posY += sliceH;
+      remaining -= sliceH;
+    }
+
+    setProg(95,'儲存檔案...');
+    const fileName = `SEO報告_${(r.info?.fileName||r.info?.url||'report').replace(/[^a-z0-9\u4e00-\u9fff]/gi,'_').slice(0,40)}_${dateStr.replace(/\//g,'-')}.pdf`;
+    doc.save(fileName);
+
+    setProg(100,'完成 ✓');
+    setTimeout(()=>overlay.classList.remove('show'), 800);
+    showToast('📄 PDF 報告已下載（中文正常顯示）');
+
+  } catch(e) {
+    overlay.classList.remove('show');
+    console.error('exportPDF error:', e);
+    alert('PDF 產生失敗：'+e.message+'\n\n請確認 jsPDF 與 html2canvas CDN 已載入（需要網際網路連線）。');
+  }
+}
+
+
+
+
+// ═══════════════════════════════════════════════════════
+//  v13: HOOK PageSpeed into resetAll too
+// ═══════════════════════════════════════════════════════
+// PageSpeed is triggered after renderResults via a patched version of runAnalysis below.
+// We patch at the bottom using a wrapper approach safe for same-script context.
+document.addEventListener('DOMContentLoaded', function(){
+  // Patch: after analysis button click, also fire PageSpeed
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  if(analyzeBtn){
+    const origClick = analyzeBtn.getAttribute('onclick');
+    analyzeBtn.onclick = async function(){
+      // Call original runAnalysis (defined above)
+      await runAnalysis();
+      const url = document.getElementById('t1Url')?.value?.trim();
+      if(url && /^https?:\/\//i.test(url) && tabState.t1.mode==='url'){
+        setTimeout(()=>fetchPageSpeed(url), 600);
+      }
+    };
+  }
+});
+
+function copyText(){
+  if(!currentReport) return;
+  const r=currentReport;
+  const rd=r.info.readability||{};
+  const img=r.info.imgData||{};
+  const txt=`SEO 分析報告 v15 Pro
+分數：${r.score}/100（${r.scoreTitle}）
+${r.summary}
+
+📊 可讀性：${rd.score}分（${rd.label}）· 平均句長 ${rd.avgSentLen}字
+🖼 圖片：共 ${img.total}張 · 缺 alt ${img.noAlt}張 · 無 lazy ${img.noLazy}張 · 現代格式 ${img.modern}張
+🗂 Schema：${r.info.schemaCount}筆（${(r.schemaResults||[]).filter(s=>s.valid).length}筆驗證通過）
+🌍 Hreflang：${(r.info.hreflang||[]).length}個語言標籤
+
+✓ 通過：
+${r.checks.filter(c=>c.status==='pass').map(c=>'  · '+c.title).join('\n')||'  無'}
+
+⚠ 警告：
+${r.checks.filter(c=>c.status==='warn').map(c=>'  · '+c.title).join('\n')||'  無'}
+
+✗ 失敗：
+${r.checks.filter(c=>c.status==='fail').map(c=>'  · '+c.title).join('\n')||'  無'}
+
+⚡ 行動方案：
+`+( r.actions.map(function(a,i){ return (i+1)+'. ['+(a.priority==='high'?'高':'中')+'] '+a.title; }).join('\n')||'  無需緊急行動')+`
+
+品牌：${brandSettings.name||'SEO Analyzer'}  ${brandSettings.contact||''}
+⚠ 注意：Core Web Vitals 請參考 PageSpeed Insights 分析結果。`;
+  navigator.clipboard.writeText(txt).then(()=>{});
+}
+
+// ═══════════════════════════════════════════════════════
+//  v14: UI ENHANCEMENTS
+// ═══════════════════════════════════════════════════════
+
+// ── Toast notification ──
+function showToast(msg, duration=2500) {
+  const t = document.getElementById('toast');
+  if(!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ── Scroll-to-top visibility ──
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTopBtn');
+  if(btn) btn.classList.toggle('visible', window.scrollY > 400);
+});
+
+// ── Enhanced copyText with toast ──
+const _origCopyText = copyText;
+window.copyText = function() {
+  _origCopyText();
+  // Override the alert with toast
+};
+
+// ── Override navigator.clipboard to show toast ──
+const _origClipboardWrite = navigator.clipboard.writeText.bind(navigator.clipboard);
+navigator.clipboard.writeText = function(text) {
+  return _origClipboardWrite(text).then(() => {
+    showToast('✓ 已複製到剪貼簿');
+  });
+};
+
+// ── Add keyword density to keyword table ──
+function getKeywordDensity(kw, bodyText) {
+  if(!bodyText || bodyText.length === 0) return 0;
+  const kwL = kw.toLowerCase();
+  const count = (bodyText.toLowerCase().split(kwL).length - 1);
+  return ((count * kw.length) / bodyText.length * 100).toFixed(2);
+}
+
+// ── Enhanced renderResults: add quick-win banner and score bars ──
+const _origRenderResults = renderResults;
+window.renderResults = function(r) {
+  _origRenderResults(r);
+
+  // 實際檢查項目數（動態）與低分行動呼籲
+  try {
+    const totalChecks = (r.pass||0) + (r.warn||0) + (r.fail||0);
+    // 「40+ 項」是全部分析區塊的規則數；totalChecks 只是評分清單的項目數（另外顯示在檢查摘要），不覆蓋標題
+    const cta = document.getElementById('seoCta');
+    const js = r.info && r.info.jsSite && r.info.jsSite.is;
+    const jw=document.getElementById('jsWarn'), jsg=document.getElementById('jsSuggest');
+    if (jw) jw.classList.toggle('show', !!js);
+    if (jsg) jsg.style.display = js ? 'block' : 'none';
+    // JavaScript 網站的分數可能不準，不顯示「找 YC 幫你修」，改建議上傳 HTML／Search Console
+    if (cta) cta.classList.toggle('show', Number(r.score) < 80 && !js);
+  } catch(e) {}
+  
+  // Add score breakdown bars
+  addScoreBreakdownBars(r);
+  
+  // Add quick win banner before first rsec
+  addQuickWinBanner(r);
+  
+  // Add fade-up to result sections
+  document.querySelectorAll('#results .rsec').forEach((el, i) => {
+    el.style.animationDelay = (i * 0.04) + 's';
+    el.classList.add('fade-up');
+  });
+  
+  // Scroll to results
+  setTimeout(() => {
+    document.getElementById('results')?.scrollIntoView({behavior:'smooth', block:'start'});
+  }, 300);
+};
+
+function addScoreBreakdownBars(r) {
+  const el = document.getElementById('scoreBreakdown');
+  if(!el) return;
+  const techPct = Math.round((r.pass / (r.pass + r.warn + r.fail || 1)) * 100);
+  const kwPct = r.info?.kwCoverageScore ?? 0;
+  const readPct = r.info?.readability?.score ?? 0;
+  const imgPct = r.info?.imgData?.total > 0
+    ? Math.round((1 - r.info.imgData.noAlt / r.info.imgData.total) * 100)
+    : 100;
+  const barsHtml = `
+    <div class="score-breakdown-bars">
+      <div class="sbb-row">
+        <span class="sbb-label">技術 SEO</span>
+        <div class="sbb-track"><div class="sbb-fill" style="width:${techPct}%;background:${techPct>=80?'#10b981':techPct>=50?'#f59e0b':'#ef4444'}"></div></div>
+        <span class="sbb-val">${techPct}%</span>
+      </div>
+      ${r.kwResults?.length > 0 ? `<div class="sbb-row">
+        <span class="sbb-label">關鍵字</span>
+        <div class="sbb-track"><div class="sbb-fill" style="width:${kwPct}%;background:${kwPct>=80?'#10b981':kwPct>=40?'#f59e0b':'#ef4444'}"></div></div>
+        <span class="sbb-val">${kwPct}%</span>
+      </div>` : ''}
+      <div class="sbb-row">
+        <span class="sbb-label">可讀性</span>
+        <div class="sbb-track"><div class="sbb-fill" style="width:${readPct}%;background:${readPct>=80?'#10b981':readPct>=60?'#f59e0b':'#ef4444'}"></div></div>
+        <span class="sbb-val">${readPct}%</span>
+      </div>
+      <div class="sbb-row">
+        <span class="sbb-label">圖片 alt</span>
+        <div class="sbb-track"><div class="sbb-fill" style="width:${imgPct}%;background:${imgPct>=90?'#10b981':imgPct>=60?'#f59e0b':'#ef4444'}"></div></div>
+        <span class="sbb-val">${imgPct}%</span>
+      </div>
+    </div>`;
+  el.insertAdjacentHTML('beforeend', barsHtml);
+}
+
+function addQuickWinBanner(r) {
+  const results = document.getElementById('results');
+  if(!results) return;
+  
+  // Remove any existing banner
+  document.getElementById('quickWinBanner')?.remove();
+  
+  const highActions = r.actions.filter(a => a.priority === 'high').slice(0, 3);
+  const medActions  = r.actions.filter(a => a.priority !== 'high').slice(0, 2);
+  const showActions = [...highActions, ...medActions].slice(0, 4);
+  
+  if(!showActions.length) return;
+  
+  const banner = document.createElement('div');
+  banner.id = 'quickWinBanner';
+  banner.className = 'quick-win-banner fade-up';
+  banner.innerHTML = `
+    <div class="qwb-title">⚡ 立即行動：優先修復項目</div>
+    <div class="qwb-items">
+      ${showActions.map(a => `
+        <div class="qwb-item">
+          <span class="qwb-priority ${a.priority!=='high'?'med':''}">${a.priority==='high'?'高':'中'}</span>
+          <div>
+            <div style="font-weight:500;color:var(--text);margin-bottom:2px">${escHtml(a.title)}</div>
+            ${a.detail ? `<div style="color:var(--text3);font-size:11px">${escHtml(a.detail)}</div>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+  
+  // Insert after score-hero
+  const scoreHero = results.querySelector('.score-hero');
+  if(scoreHero) scoreHero.insertAdjacentElement('afterend', banner);
+}
+
+// ── Section status dots ──
+function addSectionStatusDots() {
+  const checkSumEl = document.getElementById('checkSummary');
+  if(checkSumEl && window.currentReport) {
+    const r = window.currentReport;
+    const dot = r.fail > 0 ? 'rsd-fail' : r.warn > 0 ? 'rsd-warn' : 'rsd-pass';
+    updateSectionDot('checkList', dot);
+  }
+}
+
+// ── Keyboard shortcut: Ctrl+Enter fires analysis ──
+document.addEventListener('keydown', function(e) {
+  if(e.key === 'Enter' && e.ctrlKey) {
+    document.getElementById('analyzeBtn')?.click();
+  }
+});
+
+// ── bizName / bizType 暫存（只存在本次分頁，關閉即清除）──
+['bizName','bizType'].forEach(id => {
+  const el = document.getElementById(id);
+  if(!el) return;
+  const saved = tmpStore.getItem('seo_biz_'+id);
+  if(saved) el.value = saved;
+  el.addEventListener('input', () => tmpStore.setItem('seo_biz_'+id, el.value));
+});
+
+// ── Highlight active tab with badge counts (if any issues) ──
+function updateTabBadges(r) {
+  if(!r) return;
+  const failCount = r.fail;
+  const warnCount = r.warn;
+  // Could add visual badges to tabs here
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: IGNORE RULES
+// ═══════════════════════════════════════════════════════
+let ignoreRules = JSON.parse(tmpStore.getItem('seo_ignore_v18') || '{}');
+
+function saveIgnoreRules() {
+  const ids = ['ig_og','ig_twitter','ig_hreflang','ig_schema','ig_lazy','ig_srcset','ig_preload','ig_canonical'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) ignoreRules[id] = el.checked;
+  });
+  tmpStore.setItem('seo_ignore_v18', JSON.stringify(ignoreRules));
+  const count = Object.values(ignoreRules).filter(Boolean).length;
+  const el = document.getElementById('ignoreCount');
+  if(el) el.textContent = count;
+}
+
+function loadIgnoreRules() {
+  const ids = ['ig_og','ig_twitter','ig_hreflang','ig_schema','ig_lazy','ig_srcset','ig_preload','ig_canonical'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(el && ignoreRules[id]) el.checked = true;
+  });
+  const count = Object.values(ignoreRules).filter(Boolean).length;
+  const el = document.getElementById('ignoreCount');
+  if(el) el.textContent = count;
+}
+loadIgnoreRules();
+
+function shouldIgnore(checkTitle) {
+  if(!checkTitle) return false;
+  const t = checkTitle.toLowerCase();
+  if(ignoreRules.ig_og && (t.includes('open graph') || t.includes('og:'))) return true;
+  if(ignoreRules.ig_twitter && (t.includes('twitter') || t.includes('tw:'))) return true;
+  if(ignoreRules.ig_hreflang && t.includes('hreflang')) return true;
+  if(ignoreRules.ig_schema && (t.includes('schema') || t.includes('結構化資料'))) return true;
+  if(ignoreRules.ig_lazy && t.includes('lazy')) return true;
+  if(ignoreRules.ig_srcset && t.includes('srcset')) return true;
+  if(ignoreRules.ig_preload && (t.includes('preload') || t.includes('preconnect'))) return true;
+  if(ignoreRules.ig_canonical && t.includes('canonical')) return true;
+  return false;
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: KEYWORD DENSITY ANALYSIS
+// ═══════════════════════════════════════════════════════
+function analyzeKeywordDensity(bodyText, kwList) {
+  if(!bodyText || !kwList.length) return [];
+  const totalLen = bodyText.length;
+  return kwList.map(kw => {
+    const kwL = kw.toLowerCase();
+    const matches = (bodyText.toLowerCase().match(new RegExp(kwL.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g')) || []).length;
+    const density = totalLen > 0 ? (matches * kw.length / totalLen * 100) : 0;
+    const status = density > 5 ? 'danger' : density > 3 ? 'warn' : density > 0.5 ? 'ok' : 'low';
+    return { kw, matches, density: density.toFixed(2), status };
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: ANCHOR TEXT ANALYSIS
+// ═══════════════════════════════════════════════════════
+function analyzeAnchorText(doc, kwList, sourceDomain) {
+  const links = [...doc.querySelectorAll('a[href]')];
+  const genericAnchors = ['點此','了解更多','查看更多','click here','read more','here','more','詳情','詳細','按此','點擊','前往'];
+  const result = { total: links.length, generic: [], keyword: [], navigation: [], external: [], issues: [] };
+
+  links.forEach(a => {
+    const href = a.getAttribute('href') || '';
+    const text = a.textContent.trim();
+    if(!text || href.startsWith('#') || href.startsWith('mailto') || href.startsWith('tel')) return;
+
+    const isExternal = href.startsWith('http') && sourceDomain && (() => { try { return new URL(href).hostname !== sourceDomain; } catch { return false; } })();
+    const isGeneric = genericAnchors.some(g => text.toLowerCase().includes(g.toLowerCase()));
+    const hasKw = kwList.some(kw => text.toLowerCase().includes(kw.toLowerCase()));
+
+    if(isGeneric) result.generic.push({ text, href });
+    else if(hasKw) result.keyword.push({ text, href });
+    else if(!isExternal && text.length < 8) result.navigation.push({ text, href });
+    else if(isExternal) result.external.push({ text, href });
+  });
+
+  if(result.generic.length > 3) result.issues.push({ type:'warn', msg:`有 ${result.generic.length} 個通用錨點文字（「點此」「了解更多」等），這類錨點對 SEO 無益，建議改為描述性文字。` });
+  if(result.keyword.length === 0 && kwList.length > 0) result.issues.push({ type:'info', msg:`內部連結錨點中沒有包含你的目標關鍵字，建議至少有 1–2 個錨點文字含有關鍵字。` });
+  if(result.keyword.length > 0) result.issues.push({ type:'pass', msg:`✓ 有 ${result.keyword.length} 個錨點文字包含目標關鍵字。` });
+
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: CONTENT FRESHNESS DETECTION
+// ═══════════════════════════════════════════════════════
+function detectContentFreshness(doc, html) {
+  const sources = [];
+  // 1. JSON-LD datePublished/dateModified
+  [...doc.querySelectorAll('script[type="application/ld+json"]')].forEach(s => {
+    try {
+      const j = JSON.parse(s.textContent);
+      if(j.datePublished) sources.push({ type:'JSON-LD datePublished', date: j.datePublished });
+      if(j.dateModified) sources.push({ type:'JSON-LD dateModified', date: j.dateModified });
+      if(j.dateCreated) sources.push({ type:'JSON-LD dateCreated', date: j.dateCreated });
+    } catch {}
+  });
+  // 2. meta article:published_time
+  const apt = doc.querySelector('meta[property="article:published_time"]')?.getAttribute('content');
+  const amt = doc.querySelector('meta[property="article:modified_time"]')?.getAttribute('content');
+  if(apt) sources.push({ type:'article:published_time', date: apt });
+  if(amt) sources.push({ type:'article:modified_time', date: amt });
+  // 3. <time> tags
+  [...doc.querySelectorAll('time[datetime]')].slice(0,3).forEach(t => {
+    sources.push({ type:`<time> 標籤`, date: t.getAttribute('datetime') });
+  });
+  // 4. meta name="last-modified"
+  const lm = doc.querySelector('meta[name="last-modified"]')?.getAttribute('content') || doc.querySelector('meta[http-equiv="last-modified"]')?.getAttribute('content');
+  if(lm) sources.push({ type:'meta last-modified', date: lm });
+
+  const parsed = sources.map(s => {
+    const d = new Date(s.date);
+    return { ...s, valid: !isNaN(d.getTime()), dateObj: isNaN(d.getTime()) ? null : d };
+  }).filter(s => s.valid);
+
+  const newest = parsed.length ? parsed.reduce((a,b) => a.dateObj > b.dateObj ? a : b) : null;
+  let status = 'none', ageText = '', ageMonths = 0;
+  if(newest) {
+    ageMonths = Math.round((Date.now() - newest.dateObj.getTime()) / (1000*60*60*24*30));
+    ageText = ageMonths < 1 ? '本月更新' : ageMonths < 12 ? `${ageMonths} 個月前` : `${Math.round(ageMonths/12)} 年前`;
+    status = ageMonths <= 6 ? 'ok' : ageMonths <= 18 ? 'warn' : 'old';
+  }
+
+  return { sources: parsed, newest, status, ageText, ageMonths };
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: E-E-A-T SIGNALS
+// ═══════════════════════════════════════════════════════
+function analyzeEEAT(doc, html) {
+  const signals = [];
+
+  // Experience / Expertise
+  const hasAuthor = !!doc.querySelector('[rel="author"], [itemprop="author"], .author, #author') ||
+    [...doc.querySelectorAll('script[type="application/ld+json"]')].some(s => { try { return !!JSON.parse(s.textContent).author; } catch { return false; } });
+  signals.push({ cat:'👤 作者資訊', ok: hasAuthor, msg: hasAuthor ? '偵測到作者標記' : '未偵測到作者，建議加入 rel="author" 或 itemprop="author"' });
+
+  const hasDate = !!doc.querySelector('time[datetime], [itemprop="datePublished"], meta[property="article:published_time"]');
+  signals.push({ cat:'📅 發布日期', ok: hasDate, msg: hasDate ? '偵測到發布/更新日期' : '未偵測到日期，建議加入 <time datetime="..."> 或 article:published_time' });
+
+  // Authoritativeness
+  const hasAbout = [...doc.querySelectorAll('a')].some(a => {
+    const h = (a.getAttribute('href')||'').toLowerCase();
+    const t = (a.textContent||'').toLowerCase();
+    return h.includes('/about') || h.includes('/company') || t.includes('關於') || t.includes('about us');
+  });
+  signals.push({ cat:'🏢 關於頁面', ok: hasAbout, msg: hasAbout ? '偵測到「關於我們」連結' : '未偵測到 About 頁面連結，建議加入有助建立品牌可信度' });
+
+  const hasContact = [...doc.querySelectorAll('a')].some(a => {
+    const h = (a.getAttribute('href')||'').toLowerCase();
+    const t = (a.textContent||'').toLowerCase();
+    return h.includes('/contact') || h.startsWith('mailto:') || h.startsWith('tel:') || t.includes('聯絡') || t.includes('contact');
+  });
+  signals.push({ cat:'📞 聯絡資訊', ok: hasContact, msg: hasContact ? '偵測到聯絡方式（電話/Email/聯絡頁）' : '未偵測到聯絡資訊，強烈建議加入電話或聯絡頁連結' });
+
+  // Trustworthiness
+  const hasPrivacy = [...doc.querySelectorAll('a')].some(a => {
+    const h = (a.getAttribute('href')||'').toLowerCase();
+    const t = (a.textContent||'').toLowerCase();
+    return h.includes('privacy') || h.includes('policy') || t.includes('隱私') || t.includes('privacy');
+  });
+  signals.push({ cat:'🔒 隱私政策', ok: hasPrivacy, msg: hasPrivacy ? '偵測到隱私政策連結' : '未偵測到隱私政策，對 YMYL 頁面尤其重要' });
+
+  const hasReview = !!doc.querySelector('[itemprop="review"], [itemprop="ratingValue"], .review, .rating') ||
+    [...doc.querySelectorAll('script[type="application/ld+json"]')].some(s => { try { const j = JSON.parse(s.textContent); return !!(j.aggregateRating || j.review); } catch { return false; } });
+  signals.push({ cat:'⭐ 評價/評分', ok: hasReview, msg: hasReview ? '偵測到評價或評分結構化資料' : '未偵測到評價，建議加入 AggregateRating 或客戶評價' });
+
+  const https = html.includes('https://') ? !!html.match(/https?:\/\//) : false;
+  const isHttps = typeof info !== 'undefined' ? (info.fileName||'').startsWith('https') : (doc.querySelector('link[rel="canonical"]')?.href||'').startsWith('https');
+  signals.push({ cat:'🔐 HTTPS 安全連線', ok: true, msg: '工具無法直接驗證 HTTPS，請確認網站使用 https://' });
+
+  const score = signals.filter(s => s.ok).length;
+  return { signals, score, total: signals.length };
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: MOBILE FRIENDLINESS + HTML SIZE ANALYSIS
+// ═══════════════════════════════════════════════════════
+function analyzeMobileAndHtml(doc, html, info) {
+  const issues = [], passes = [];
+  const htmlSize = new Blob([html]).size;
+  const htmlSizeKB = Math.round(htmlSize / 1024);
+
+  // Mobile
+  const viewport = doc.querySelector('meta[name="viewport"]')?.getAttribute('content') || '';
+  const hasViewport = !!viewport;
+  const hasWidth = viewport.includes('width=device-width');
+  const hasScale = viewport.includes('initial-scale=1');
+  hasViewport && hasWidth ? passes.push('Viewport 設定正確') : issues.push({ type: hasViewport ? 'warn' : 'fail', msg: hasViewport ? 'Viewport 存在但缺少 width=device-width 或 initial-scale=1' : '缺少 Viewport Meta，行動裝置無法正常顯示' });
+
+  // Font size check (inline styles with small font-size)
+  const smallFonts = [...doc.querySelectorAll('[style]')].filter(el => {
+    const fs = el.style.fontSize;
+    if(!fs) return false;
+    const px = parseFloat(fs);
+    return !isNaN(px) && px < 12;
+  }).length;
+  if(smallFonts > 0) issues.push({ type:'warn', msg:`偵測到 ${smallFonts} 個元素使用小於 12px 的字體，行動裝置難以閱讀` });
+  else passes.push('未偵測到過小字體');
+
+  // Tap target size (inline very small buttons/links)
+  const tinyLinks = [...doc.querySelectorAll('a[style], button[style]')].filter(el => {
+    const h = parseFloat(el.style.height);
+    const w = parseFloat(el.style.width);
+    return (!isNaN(h) && h < 40) || (!isNaN(w) && w < 40);
+  }).length;
+  if(tinyLinks > 0) issues.push({ type:'warn', msg:`偵測到 ${tinyLinks} 個過小的觸控目標（<40px），建議點擊區域至少 44×44px` });
+
+  // Fixed-width containers (potential mobile overflow)
+  const fixedContainers = [...doc.querySelectorAll('[style]')].filter(el => {
+    const w = el.style.width;
+    if(!w) return false;
+    const px = parseFloat(w);
+    return !isNaN(px) && px > 768;
+  }).length;
+  if(fixedContainers > 0) issues.push({ type:'warn', msg:`偵測到 ${fixedContainers} 個元素使用固定寬度超過 768px，可能導致行動裝置水平捲軸` });
+
+  // HTML size
+  let htmlSizeStatus = 'ok';
+  if(htmlSizeKB > 500) { htmlSizeStatus = 'bad'; issues.push({ type:'warn', msg:`HTML 原始碼體積 ${htmlSizeKB} KB，超過 500KB 建議值，可能拖慢 TTFB` }); }
+  else if(htmlSizeKB > 200) { htmlSizeStatus = 'warn'; issues.push({ type:'info', msg:`HTML 原始碼體積 ${htmlSizeKB} KB，偏大，留意是否有大量行內 CSS/JS 可外部化` }); }
+  else passes.push(`HTML 體積正常（${htmlSizeKB} KB）`);
+
+  // Inline base64 images
+  const base64Imgs = (html.match(/src=["']data:image/g) || []).length;
+  if(base64Imgs > 0) issues.push({ type:'warn', msg:`偵測到 ${base64Imgs} 個 Base64 行內圖片，建議改為外部圖片 URL 以利快取` });
+  else passes.push('無 Base64 行內圖片');
+
+  // Blocking scripts in <head>
+  const headScripts = [...(doc.head?.querySelectorAll('script:not([async]):not([defer]):not([type="application/ld+json"])') || [])].length;
+  if(headScripts > 2) issues.push({ type:'warn', msg:`<head> 中有 ${headScripts} 個非 async/defer 的 <script>，可能阻塞首次渲染` });
+  else passes.push('Head 內阻塞 Script 數量正常');
+
+  // DOM element count
+  const domCount = doc.querySelectorAll('*').length;
+  if(domCount > 1500) issues.push({ type:'warn', msg:`DOM 元素數量 ${domCount} 個，超過 1500 建議值，可能影響渲染效能` });
+  else passes.push(`DOM 元素數量正常（${domCount} 個）`);
+
+  const mobileScore = Math.max(0, 100 - issues.filter(i=>i.type!=='info').length * 18);
+  return { issues, passes, htmlSizeKB, htmlSizeStatus, domCount, headScripts, base64Imgs, mobileScore };
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: RENDER ALL NEW SECTIONS
+// ═══════════════════════════════════════════════════════
+function renderV18Sections(r) {
+  const info = r.info || {};
+  const rawHtml = r._rawHtml || '';
+
+  let doc;
+  try { doc = new DOMParser().parseFromString(rawHtml, 'text/html'); }
+  catch(e) { return; }
+
+  const kwList = r.kwResults?.map(k=>k.keyword) || keywords;
+  const bodyText = info.bodyText || '';
+  const sourceDomain = info.fileName?.startsWith('http') ? (() => { try { return new URL(info.fileName).hostname; } catch { return ''; } })() : '';
+
+  // ── Keyword Density ──
+  if(kwList.length && bodyText) {
+    const densityData = analyzeKeywordDensity(bodyText, kwList);
+    let dHtml = `<div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6">關鍵字密度在 <span style="color:#34d399">0.5%–3%</span> 之間最理想。超過 5% 可能被 Google 判定為 Keyword Stuffing。</div>`;
+    dHtml += `<table class="gen-table"><thead><tr><th>關鍵字</th><th>出現次數</th><th>密度</th><th>狀態</th></tr></thead><tbody>`;
+    densityData.forEach(d => {
+      const color = d.status==='danger'?'#f87171':d.status==='warn'?'#fbbf24':d.status==='ok'?'#34d399':'var(--text3)';
+      const label = d.status==='danger'?'⚠ 過高（Spam風險）':d.status==='warn'?'⚠ 偏高':d.status==='ok'?'✓ 正常':'偏低';
+      const barWidth = Math.min(parseFloat(d.density)*15, 100);
+      dHtml += `<tr>
+        <td><strong>${escHtml(d.kw)}</strong></td>
+        <td>${d.matches}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="perf-meter" style="width:80px;flex-shrink:0"><div class="perf-fill perf-${d.status==='ok'?'ok':d.status==='warn'||d.status==='danger'?'bad':'warn'}" style="width:${barWidth}%"></div></div>
+            <span style="color:${color};font-weight:500">${d.density}%</span>
+          </div>
+        </td>
+        <td><span style="color:${color};font-size:12px">${label}</span></td>
+      </tr>`;
+    });
+    dHtml += `</tbody></table>`;
+    // Append density to kwResult section
+    const kwEl = document.getElementById('kwResult');
+    if(kwEl && kwEl.innerHTML && !kwEl.innerHTML.includes('密度分析')) {
+      kwEl.innerHTML += `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">🔢 關鍵字密度分析</div>${dHtml}</div>`;
+    }
+  }
+
+  // ── Anchor Text Analysis ──
+  const anchorSec = document.getElementById('anchorSection');
+  const anchorEl = document.getElementById('anchorResult');
+  if(anchorSec && anchorEl && bodyText) {
+    const anchor = analyzeAnchorText(doc, kwList, sourceDomain);
+    anchorSec.style.display = 'block';
+    document.getElementById('anchorSummary').textContent = `${anchor.total} 個連結 · ${anchor.generic.length} 個通用錨點`;
+    let aHtml = '';
+    if(anchor.issues.length) {
+      aHtml += `<div class="check-list" style="margin-bottom:14px">${anchor.issues.map(i=>{
+        const cls = i.type==='pass'?'cb-pass':i.type==='warn'?'cb-warn':'cb-info';
+        const icon = i.type==='pass'?'✓':i.type==='warn'?'!':'ℹ';
+        return `<div class="ci"><div class="cb ${cls}">${icon}</div><div class="cc"><span>${escHtml(i.msg)}</span></div></div>`;
+      }).join('')}</div>`;
+    }
+    const cats = [
+      { key:'keyword', label:'🔑 含關鍵字錨點', cls:'at-kw', items: anchor.keyword },
+      { key:'generic', label:'⚠ 通用錨點（建議改寫）', cls:'at-generic', items: anchor.generic },
+      { key:'navigation', label:'🧭 導航錨點', cls:'at-nav', items: anchor.navigation },
+    ];
+    cats.forEach(cat => {
+      if(!cat.items.length) return;
+      aHtml += `<div style="font-size:12px;color:var(--text2);margin-bottom:8px;margin-top:10px;font-weight:500">${cat.label} (${cat.items.length})</div>`;
+      cat.items.slice(0, 8).forEach(item => {
+        aHtml += `<div class="anchor-row">
+          <span class="anchor-type ${cat.cls}">${cat.label.split(' ')[0]}</span>
+          <span style="font-weight:500;color:var(--text);flex:1">${escHtml(item.text.slice(0,40))}</span>
+          <span style="font-size:11px;color:var(--text3);word-break:break-all;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml((item.href||'').slice(0,50))}</span>
+        </div>`;
+      });
+      if(cat.items.length > 8) aHtml += `<div style="font-size:11px;color:var(--text3);padding:4px 12px">…還有 ${cat.items.length-8} 個</div>`;
+    });
+    anchorEl.innerHTML = aHtml || '<p style="color:var(--text2);font-size:13px">未偵測到有效的連結錨點文字。</p>';
+  }
+
+  // ── Content Freshness ──
+  const freshSec = document.getElementById('freshnessSection');
+  const freshEl = document.getElementById('freshnessResult');
+  if(freshSec && freshEl) {
+    const fresh = detectContentFreshness(doc, rawHtml);
+    freshSec.style.display = 'block';
+    const statusMap = { ok:'fresh-ok', warn:'fresh-warn', old:'fresh-old', none:'fresh-none' };
+    const labelMap = { ok:'✓ 內容新鮮', warn:'⚠ 超過半年未更新', old:'⚠ 超過 1.5 年未更新', none:'未偵測到日期資訊' };
+    document.getElementById('freshnessSummary').textContent = fresh.newest ? fresh.ageText : '未偵測到日期';
+    let fHtml = `<div style="margin-bottom:16px"><span class="fresh-badge ${statusMap[fresh.status]}">${labelMap[fresh.status]}${fresh.ageText?' · '+fresh.ageText:''}</span></div>`;
+    if(fresh.sources.length) {
+      fHtml += `<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">偵測到的日期來源：</div>`;
+      fHtml += `<div class="check-list">${fresh.sources.map(s => `<div class="ci"><div class="cb cb-info">📅</div><div class="cc"><strong>${escHtml(s.type)}</strong><span>${escHtml(s.date)}</span></div></div>`).join('')}</div>`;
+    } else {
+      fHtml += `<div class="check-list"><div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>未找到任何日期資訊（article:published_time、datePublished JSON-LD、&lt;time&gt; 標籤均未設定）<br>建議加入：<code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">&lt;meta property="article:modified_time" content="2025-01-15"&gt;</code></span></div></div></div>`;
+    }
+    if(fresh.status === 'old' || fresh.status === 'warn') {
+      fHtml += `<div style="margin-top:12px;padding:10px 14px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);line-height:1.7">💡 Google 在競爭性關鍵字上偏好新鮮內容。建議每 6–12 個月更新一次頁面，並更新日期標記。即使是小幅更新也能讓 Google 重新爬取。</div>`;
+    }
+    freshEl.innerHTML = fHtml;
+  }
+
+  // ── E-E-A-T ──
+  const eeatSec = document.getElementById('eeatSection');
+  const eeatEl = document.getElementById('eeatResult');
+  if(eeatSec && eeatEl) {
+    const eeat = analyzeEEAT(doc, rawHtml);
+    eeatSec.style.display = 'block';
+    document.getElementById('eeatSummary').textContent = `${eeat.score}/${eeat.total} 項通過`;
+    let eHtml = `<div style="font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6">E-E-A-T（經驗、專業性、權威性、可信度）是 Google 評估頁面品質的核心框架，對 YMYL（健康、財務、法律）類頁面尤其重要。</div>`;
+    eHtml += `<div class="eeat-grid">`;
+    eeat.signals.forEach(s => {
+      const color = s.ok ? '#10b981' : '#f59e0b';
+      eHtml += `<div class="eeat-card">
+        <div class="eeat-icon">${s.cat.split(' ')[0]}</div>
+        <div class="eeat-label">${s.cat.replace(/^[^\s]+ /,'')}</div>
+        <div class="eeat-status" style="color:${color}">${s.ok?'✓ 已設定':'✗ 未偵測'}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5">${escHtml(s.msg)}</div>
+      </div>`;
+    });
+    eHtml += `</div>`;
+    eeatEl.innerHTML = eHtml;
+  }
+
+  // ── Mobile Friendliness + HTML Size ──
+  const mhSec = document.getElementById('mobileHtmlSection');
+  const mhEl = document.getElementById('mobileHtmlResult');
+  if(mhSec && mhEl) {
+    const mh = analyzeMobileAndHtml(doc, rawHtml, info);
+    mhSec.style.display = 'block';
+    const scoreColor = mh.mobileScore>=80?'#10b981':mh.mobileScore>=60?'#f59e0b':'#ef4444';
+    document.getElementById('mobileHtmlSummary').textContent = `行動友善度 ${mh.mobileScore}/100 · HTML ${mh.htmlSizeKB}KB`;
+    let mHtml = `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+      <div style="text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 20px;flex-shrink:0">
+        <div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:32px;font-weight:800;color:${scoreColor}">${mh.mobileScore}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">行動友善分數</div>
+      </div>
+      <div style="flex:1;min-width:200px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          ${[
+            {label:'HTML 體積', val:mh.htmlSizeKB+'KB', ok:mh.htmlSizeKB<200},
+            {label:'DOM 元素數', val:mh.domCount, ok:mh.domCount<1500},
+            {label:'Head 阻塞 Script', val:mh.headScripts+'個', ok:mh.headScripts<=2},
+            {label:'Base64 圖片', val:mh.base64Imgs+'個', ok:mh.base64Imgs===0},
+          ].map(m=>`<div style="background:var(--bg3);border:1px solid ${m.ok?'rgba(16,185,129,0.25)':'rgba(245,158,11,0.25)'};border-radius:8px;padding:10px 12px">
+            <div style="font-size:11px;color:var(--text3)">${m.label}</div>
+            <div style="font-size:16px;font-weight:600;color:${m.ok?'#10b981':'#f59e0b'};font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif">${m.val}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+    if(mh.issues.length) {
+      mHtml += `<div class="check-list">`;
+      mh.issues.forEach(i => {
+        const cls = i.type==='fail'?'cb-fail':i.type==='warn'?'cb-warn':'cb-info';
+        const icon = i.type==='fail'?'✗':i.type==='warn'?'!':'ℹ';
+        mHtml += `<div class="ci"><div class="cb ${cls}">${icon}</div><div class="cc"><span>${escHtml(i.msg)}</span></div></div>`;
+      });
+      mHtml += `</div>`;
+    }
+    if(mh.passes.length) {
+      mHtml += `<div class="check-list" style="margin-top:8px">${mh.passes.map(p=>`<div class="ci"><div class="cb cb-pass">✓</div><div class="cc"><span style="color:var(--text2)">${escHtml(p)}</span></div></div>`).join('')}</div>`;
+    }
+    mhEl.innerHTML = mHtml;
+  }
+
+  // ── SERP Live Editor ──
+  const serpLiveEl = document.getElementById('serpLiveResult');
+  if(serpLiveEl) {
+    const currentTitle = info.title || '';
+    const currentDesc = info.description || '';
+    const currentUrl = info.fileName?.startsWith('http') ? info.fileName : 'https://example.com/page/';
+    serpLiveEl.innerHTML = `
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px">在下方直接編輯 Title 和 Description，即時預覽 Google 搜尋外觀。字數條在適當範圍內顯示綠色。</div>
+      <div style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px">Google 搜尋預覽：</div>
+      <div class="serp-live-wrap" id="serpLivePreview">
+        <div class="serp-live-url" id="slUrl">${escHtml(currentUrl.slice(0,70))}</div>
+        <div class="serp-live-title" id="slTitle">${escHtml(currentTitle || '（未設定 Title）')}</div>
+        <div class="serp-live-desc" id="slDesc">${escHtml(currentDesc || '（未設定 Meta Description）')}</div>
+      </div>
+      <div class="serp-edit-row" style="margin-top:14px">
+        <div>
+          <div class="serp-edit-label">Title <span id="slTitleCount" class="serp-char-count serp-ok"></span></div>
+          <input type="text" id="slTitleInput" value="${escHtml(currentTitle)}" placeholder="輸入 Title..." oninput="updateSerpPreview()" maxlength="100" style="font-size:13px">
+        </div>
+        <div>
+          <div class="serp-edit-label">Meta Description <span id="slDescCount" class="serp-char-count serp-ok"></span></div>
+          <textarea id="slDescInput" placeholder="輸入 Meta Description..." oninput="updateSerpPreview()" maxlength="300" style="font-size:13px;min-height:70px;resize:vertical">${escHtml(currentDesc)}</textarea>
+        </div>
+      </div>`;
+    updateSerpPreview();
+  }
+
+  // ── Radar Chart (if competitor exists) ──
+  const radarSec = document.getElementById('radarSection');
+  const radarEl = document.getElementById('radarResult');
+  if(radarSec && radarEl && r._compReport) {
+    radarSec.style.display = 'block';
+    renderRadarChart(r, r._compReport);
+  }
+}
+
+function updateSerpPreview() {
+  const titleEl = document.getElementById('slTitleInput');
+  const descEl = document.getElementById('slDescInput');
+  const previewTitle = document.getElementById('slTitle');
+  const previewDesc = document.getElementById('slDesc');
+  const titleCount = document.getElementById('slTitleCount');
+  const descCount = document.getElementById('slDescCount');
+  if(!titleEl || !descEl) return;
+  const tLen = titleEl.value.length;
+  const dLen = descEl.value.length;
+  if(previewTitle) previewTitle.textContent = titleEl.value || '（未設定 Title）';
+  if(previewDesc) previewDesc.textContent = descEl.value || '（未設定 Meta Description）';
+  if(titleCount) {
+    const cls = tLen >= 30 && tLen <= 65 ? 'serp-ok' : tLen < 30 ? 'serp-warn' : 'serp-bad';
+    titleCount.className = `serp-char-count ${cls}`;
+    titleCount.textContent = `${tLen} 字 ${tLen>=30&&tLen<=65?'✓ 適中':tLen<30?'↑ 太短':tLen<=70?'⚠ 偏長':'✗ 過長'}`;
+  }
+  if(descCount) {
+    const cls = dLen >= 80 && dLen <= 155 ? 'serp-ok' : dLen < 80 ? 'serp-warn' : 'serp-bad';
+    descCount.className = `serp-char-count ${cls}`;
+    descCount.textContent = `${dLen} 字 ${dLen>=80&&dLen<=155?'✓ 適中':dLen<80?'↑ 太短':dLen<=165?'⚠ 偏長':'✗ 過長'}`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: RADAR CHART (SVG, no external lib)
+// ═══════════════════════════════════════════════════════
+function renderRadarChart(r, comp) {
+  const el = document.getElementById('radarResult');
+  if(!el) return;
+  const axes = [
+    { label:'Title', mine: r.metrics.find(m=>m.label==='Title')?.status==='pass'?100:r.metrics.find(m=>m.label==='Title')?.status==='warn'?50:0, comp: comp.metrics.find(m=>m.label==='Title')?.status==='pass'?100:50 },
+    { label:'Meta Desc', mine: r.metrics.find(m=>m.label==='Meta')?.status==='pass'?100:50, comp: comp.metrics.find(m=>m.label==='Meta')?.status==='pass'?100:50 },
+    { label:'H1', mine: r.metrics.find(m=>m.label==='H1')?.status==='pass'?100:0, comp: comp.metrics.find(m=>m.label==='H1')?.status==='pass'?100:0 },
+    { label:'Schema', mine: r.metrics.find(m=>m.label==='Schema')?.status==='pass'?100:r.metrics.find(m=>m.label==='Schema')?.status==='warn'?50:0, comp: comp.metrics.find(m=>m.label==='Schema')?.status==='pass'?100:50 },
+    { label:'OG Tags', mine: r.metrics.find(m=>m.label==='OG')?.status==='pass'?100:50, comp: comp.metrics.find(m=>m.label==='OG')?.status==='pass'?100:50 },
+    { label:'Canonical', mine: r.info.canonical?100:0, comp: comp.info.canonical?100:0 },
+    { label:'可讀性', mine: r.info.readability?.score||0, comp: comp.info.readability?.score||0 },
+    { label:'總分', mine: Math.min(r.score, 100), comp: Math.min(comp.score, 100) },
+  ];
+  const N = axes.length;
+  const CX = 200, CY = 200, R = 150;
+  function pt(i, val) {
+    const angle = (i / N) * 2 * Math.PI - Math.PI / 2;
+    const r2 = (val / 100) * R;
+    return [CX + r2 * Math.cos(angle), CY + r2 * Math.sin(angle)];
+  }
+  function labelPt(i) {
+    const angle = (i / N) * 2 * Math.PI - Math.PI / 2;
+    const r2 = R + 26;
+    return [CX + r2 * Math.cos(angle), CY + r2 * Math.sin(angle)];
+  }
+  // Grid circles
+  let gridSvg = '';
+  [20,40,60,80,100].forEach(v => {
+    const pts = axes.map((_,i) => pt(i,v)).map(p=>p.join(',')).join(' ');
+    gridSvg += `<polygon points="${pts}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+  });
+  // Axis lines
+  let axisSvg = axes.map((_,i) => {
+    const [x,y] = pt(i, 100);
+    return `<line x1="${CX}" y1="${CY}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
+  }).join('');
+  // Mine polygon
+  const minePts = axes.map((_,i) => pt(i, axes[i].mine)).map(p=>p.join(',')).join(' ');
+  const compPts = axes.map((_,i) => pt(i, axes[i].comp)).map(p=>p.join(',')).join(' ');
+  // Labels
+  let labelSvg = axes.map((ax, i) => {
+    const [x, y] = labelPt(i);
+    const anchor = x < CX - 5 ? 'end' : x > CX + 5 ? 'start' : 'middle';
+    return `<text x="${x}" y="${y+4}" text-anchor="${anchor}" font-size="11" fill="rgba(144,144,168,0.8)" font-family="Noto Sans TC,sans-serif">${ax.label}</text>`;
+  }).join('');
+  // Score labels on polygon vertices
+  let scoreSvg = axes.map((ax, i) => {
+    const [mx, my] = pt(i, ax.mine);
+    return `<circle cx="${mx}" cy="${my}" r="4" fill="#5FA396"/><text x="${mx}" y="${my-7}" text-anchor="middle" font-size="9" fill="#a78bfa">${ax.mine}</text>`;
+  }).join('');
+  const svg = `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;height:auto">
+    ${gridSvg}${axisSvg}
+    <polygon points="${compPts}" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="${minePts}" fill="rgba(95,163,150,0.18)" stroke="#5FA396" stroke-width="2.5" stroke-linejoin="round"/>
+    ${scoreSvg}
+    ${labelSvg}
+  </svg>`;
+  el.innerHTML = `
+    <div class="radar-wrap">
+      <div style="flex:1;min-width:260px">${svg}</div>
+      <div class="radar-legend">
+        <div class="radar-legend-item"><span style="width:14px;height:4px;background:#5FA396;border-radius:2px;display:inline-block"></span><span style="color:var(--text2)">你的網站</span></div>
+        <div class="radar-legend-item"><span style="width:14px;height:4px;background:#f97316;border-radius:2px;display:inline-block"></span><span style="color:var(--text2)">競爭對手</span></div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text3);line-height:1.6">
+          雷達圖同時顯示 8 個維度，<br>面積越大代表整體 SEO<br>健康度越好。
+        </div>
+        ${axes.map(ax => {
+          const diff = ax.mine - ax.comp;
+          const color = diff > 0 ? '#34d399' : diff < 0 ? '#f87171' : 'var(--text3)';
+          return `<div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--text2)">${ax.label}<span style="color:${color};font-weight:500">${diff>0?'+':''}${diff}</span></div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: CSV EXPORT
+// ═══════════════════════════════════════════════════════
+function exportCSV() {
+  if(!currentReport) return;
+  const r = currentReport;
+  const rows = [
+    ['SEO 報告', `"${(r.info.fileName||'').replace(/"/g,'""')}"`],
+    ['分析日期', new Date().toLocaleDateString('zh-TW')],
+    ['總分', r.score],
+    ['通過項目', r.pass],
+    ['警告項目', r.warn],
+    ['需修復項目', r.fail],
+    [''],
+    ['─── 技術 SEO 檢查項目 ───', '', ''],
+    ['項目', '狀態', '說明'],
+    ...r.checks.map(c => [
+      `"${c.title.replace(/"/g,'""')}"`,
+      c.status==='pass'?'通過':c.status==='warn'?'警告':'需修復',
+      `"${(c.detail||'').replace(/"/g,'""')}"`
+    ]),
+    [''],
+    ['─── 關鍵字分析 ───', '', '', '', '', ''],
+    ['關鍵字', '在Title', '在Meta', '在H1', '內文次數', '優化分數'],
+    ...(r.kwResults||[]).map(k=>[
+      `"${k.keyword}"`, k.inTitle?'✓':'✗', k.inDesc?'✓':'✗', k.inH1?'✓':'✗', k.bodyCount, k.optScore
+    ]),
+    [''],
+    ['─── 優先行動方案 ───', '', ''],
+    ['優先級', '行動項目', '說明'],
+    ...(r.actions||[]).map(a=>[
+      a.priority==='high'?'高':a.priority==='medium'?'中':'低',
+      `"${a.title.replace(/"/g,'""')}"`,
+      `"${(a.detail||'').replace(/"/g,'""')}"`
+    ])
+  ];
+  const csv = '\uFEFF' + rows.map(r=>Array.isArray(r)?r.join(','):'').join('\n');
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `SEO報告_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'-')}.csv`;
+  a.click();
+  showToast('📊 CSV 報告已下載（可用 Excel 開啟）');
+}
+
+// ═══════════════════════════════════════════════════════
+//  v18: SHARE REPORT VIA URL HASH
+// ═══════════════════════════════════════════════════════
+function shareReport() {
+  if(!currentReport) return;
+  try {
+    const r = currentReport;
+    const mini = {
+      score: r.score,
+      title: r.scoreTitle,
+      pass: r.pass, warn: r.warn, fail: r.fail,
+      file: (r.info.fileName||'').slice(0,80),
+      date: new Date().toLocaleDateString('zh-TW'),
+      top3: (r.actions||[]).filter(a=>a.priority==='high').slice(0,3).map(a=>({t:a.title,d:(a.detail||'').slice(0,100)})),
+      metrics: r.metrics,
+      kw: (r.kwResults||[]).slice(0,5).map(k=>({k:k.keyword,s:k.optScore}))
+    };
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(mini))));
+    const shareUrl = window.location.href.split('#')[0] + '#seo-report=' + encoded;
+    // Copy to clipboard
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('🔗 報告連結已複製到剪貼簿！（連結包含分析摘要）');
+    }).catch(() => {
+      prompt('複製此分享連結：', shareUrl);
+    });
+  } catch(e) {
+    showToast('⚠ 分享失敗：' + e.message);
+  }
+}
+
+// Check for shared report in URL on load
+(function checkSharedReport() {
+  const hash = window.location.hash;
+  if(!hash.includes('seo-report=')) return;
+  try {
+    const encoded = hash.split('seo-report=')[1];
+    const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+    // Show a banner with the shared report summary
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:14px;padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--text2);';
+    banner.innerHTML = `<div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:15px;font-weight:700;color:#34d399;margin-bottom:8px">📊 共享報告摘要</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px">
+        <span>🌐 ${escHtml(data.file)}</span>
+        <span>📅 ${data.date}</span>
+        <span style="color:${data.score>=80?'#10b981':data.score>=60?'#f59e0b':'#f87171'};font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:700;font-size:16px">分數：${data.score}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3)">${data.pass}✓ 通過 · ${data.warn}⚠ 警告 · ${data.fail}✗ 需修復</div>
+      ${data.top3.length?`<div style="margin-top:8px;font-size:12px;color:var(--text3)">優先行動：${data.top3.map(a=>`<span style="background:rgba(239,68,68,0.1);color:#f87171;padding:2px 8px;border-radius:8px;margin-right:4px">${escHtml(a.t)}</span>`).join('')}</div>`:''}
+      <button onclick="this.closest('div').remove();window.location.hash=''" style="margin-top:10px;background:none;border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:5px 12px;border-radius:8px;cursor:pointer;font-size:12px">關閉摘要</button>`;
+    const main = document.querySelector('.main');
+    if(main) main.insertBefore(banner, main.firstChild);
+  } catch(e) { /* silently ignore malformed hash */ }
+})();

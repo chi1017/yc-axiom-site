@@ -1,0 +1,13 @@
+{
+  "name": "yc-axiom-site",
+  "private": true,
+  "type": "module",
+  "description": "YC AXIOM 官網：靜態網站。npm run build 產生壓縮後的 assets/dist、builder/dist（網站實際載入的是 dist 版本）",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "check": "node tools/build.mjs --check"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0"
+  }
+}

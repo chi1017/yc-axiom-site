@@ -23,7 +23,8 @@
     if (!YC.enabled) { if (!YC.ready) setTimeout(function () { emit('INIT'); }, 0); return null; }   // 未啟用：仍通知頁面「已就緒」，讓會員專區／管理後台顯示未開放，而不是一直載入中
     if (YC.client) return YC.client;
     YC.client = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, {
-      auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true }
+      // 嵌在 iframe 裡的工具不處理登入回傳（Google 登入一律回到外層頁面），也避免和外層重複兌換同一個登入碼
+      auth: { flowType: 'pkce', detectSessionInUrl: window.parent === window, persistSession: true, autoRefreshToken: true }
     });
     YC.client.auth.onAuthStateChange(function (ev, session) {
       YC.session = session || null;
