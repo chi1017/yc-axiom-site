@@ -1669,3 +1669,26 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
 .pr-col li::before { content: ''; position: absolute; left: 2px; top: 0.72em; width: 6px; height: 1px; background: currentColor; }
 .pr-col--hi li::before { content: '+'; width: auto; height: auto; background: none; top: 0; left: 0; color: var(--accent); }
 @media (max-width: 640px) { .pr-cols { grid-template-columns: 1fr; } .pr-card { padding: 16px; } }
+
+/* ── 定價：精簡版（共同包含一行列出、方案比較放進分頁、價格區間可展開） ── */
+.pc-incl { margin-top: 36px; border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; }
+.pc-incl-h { margin: 0 0 8px; font-size: 14px; font-weight: 700; color: var(--accent); }
+.pc-base--compact { display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.pc-base--compact li { border: 0; padding: 0; background: none; display: block; }
+.pc-base--compact strong { font-size: 14.5px; font-weight: 600; color: var(--text); }
+.pr-details { margin: 6px 0 14px; border: 1px solid var(--border); border-radius: 10px; }
+.pr-details > summary { cursor: pointer; list-style: none; padding: 14px 18px; font-weight: 700; color: var(--accent); font-size: 15px; }
+.pr-details > summary::-webkit-details-marker { display: none; }
+.pr-details > summary::after { content: '＋'; float: right; }
+.pr-details[open] > summary::after { content: '－'; }
+.pr-details > .pc-hint, .pr-details > .pr-grid { margin-left: 18px; margin-right: 18px; }
+.pr-details > .pr-grid { margin-bottom: 18px; }
+@media (max-width: 640px) {
+  .pc-incl { padding: 12px 14px; }
+  .pc-base--compact { gap: 4px 16px; }
+  .pr-details > .pc-hint, .pr-details > .pr-grid { margin-left: 12px; margin-right: 12px; }
+}
+@media (max-width: 900px) {
+  .pricing-tabs { display: grid; grid-template-columns: 1fr 1fr; flex-direction: row; margin-bottom: 28px; }
+  .pricing-tab { padding: 12px 8px; font-size: 14px; }
+}

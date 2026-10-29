@@ -280,7 +280,7 @@
     /* ── Pricing Tabs ── */
     function switchTab(id) {
         document.querySelectorAll('.pricing-tab').forEach((t, i) => {
-            t.classList.toggle('active', ['list','buyout','monthly'][i] === id);
+            t.classList.toggle('active', (t.getAttribute('data-tab') || ['list','buyout','monthly'][i]) === id);
         });
         document.querySelectorAll('.pricing-panel').forEach(p => p.classList.remove('active'));
         document.getElementById('tab-' + id).classList.add('active');

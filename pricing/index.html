@@ -63,7 +63,7 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="../assets/dist/site.min.css?v=b08ef9737a">
+<link rel="stylesheet" href="../assets/dist/site.min.css?v=73cf60d391">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -314,37 +314,32 @@
         <p class="sp-lede reveal">公開網頁設計價格：形象網站價格、電商與 SEO 的參考區間如下，架設網站費用與網站製作報價會依頁數與功能調整。客製網站是一次性買斷、無強制月費，所有方案都可客製化組合；想用月租方式先上線，可以看<a href="../rental/">網站租用</a>（每月 NT$599 起，使用我們設計的版型、內容自己填）。</p>
 
 
-        <h2 class="sp-h2 reveal">每個客製網站都包含</h2>
-        <ul class="pc-base reveal">
-            <li><strong>依品牌從頭設計</strong><span>不套版，視覺與架構依你的品牌與客群規劃。</span></li>
-            <li><strong>電腦、平板、手機都好看</strong><span>RWD 響應式設計，上線前做跨裝置測試驗收。</span></li>
-            <li><strong>原始碼與設計稿完整交給你</strong><span>驗收後移交原始碼、Figma 設計稿與主機控制權。</span></li>
-            <li><strong>不綁約、無強制月費</strong><span>一次買斷；之後要不要找我們維護，你自己決定。</span></li>
-            <li><strong>上線後 30 天免費保固</strong><span>含 Bug 修正與基礎圖文微調。</span></li>
-            <li><strong>分兩期付款</strong><span>簽約付 50%，驗收無誤上線前付 50%。</span></li>
-        </ul>
+        <div class="pc-incl reveal"><p class="pc-incl-h">每個客製網站都包含</p><ul class="pc-base pc-base--compact reveal"><li title="不套版，視覺與架構依你的品牌與客群規劃。"><strong>依品牌從頭設計</strong></li><li title="RWD 響應式設計，上線前做跨裝置測試驗收。"><strong>電腦、平板、手機都好看</strong></li><li title="驗收後移交原始碼、Figma 設計稿與主機控制權。"><strong>原始碼與設計稿完整交給你</strong></li><li title="一次買斷；之後要不要找我們維護，你自己決定。"><strong>不綁約、無強制月費</strong></li><li title="含 Bug 修正與基礎圖文微調。"><strong>上線後 30 天免費保固</strong></li><li title="簽約付 50%，驗收無誤上線前付 50%。"><strong>分兩期付款</strong></li></ul></div>
+        <div class="pricing-tabs reveal" style="margin-top: 40px;">
+            <button class="pricing-tab active magnetic" data-tab="compare" onclick="switchTab('compare')">方案比較</button>
+            <button class="pricing-tab magnetic" data-tab="list" onclick="switchTab('list')">服務項目總覽</button>
+            <button class="pricing-tab magnetic" data-tab="buyout" onclick="switchTab('buyout')">一次性買斷專案</button>
+            <button class="pricing-tab magnetic" data-tab="monthly" onclick="switchTab('monthly')">長期合作月費制</button>
+        </div>
 
-        <h2 class="sp-h2 reveal">各方案差在哪裡</h2>
-        <p class="pc-hint reveal">價格依頁數與功能調整，以下為參考區間。手機可以左右滑動看完整表格。</p>
-        <div class="pc-wrap reveal" role="region" aria-label="方案比較表" tabindex="0">
+        <!-- Tab 0: 方案比較 -->
+        <div id="tab-compare" class="pricing-panel active">
+            <p class="pc-hint">價格依頁數與功能調整，以下為參考區間。手機可以左右滑動看完整表格。</p>
+            <div class="pc-wrap reveal" role="region" aria-label="方案比較表" tabindex="0">
             <table class="pc-table">
                 <thead><tr><th scope="col">項目</th><th scope="col">單頁形象網站<small>買斷方案 A</small></th><th scope="col" class="pc-hot">品牌多頁網站<small>買斷方案 B</small></th><th scope="col">電商與系統網站<small>買斷方案 C</small></th><th scope="col">網站租用<small>月租</small></th></tr></thead>
                 <tbody><tr><th scope="row">價格</th><td>NT$15,000–28,000<small>一次買斷</small></td><td>NT$32,000–60,000<small>一次買斷</small></td><td>NT$60,000–150,000<small>一次買斷</small></td><td>NT$599／月起<small>多頁版 NT$899／月</small></td></tr><tr><th scope="row">適合</th><td>先有一個好看的品牌門面</td><td>服務項目多、需要完整介紹</td><td>要在網站上直接賣東西</td><td>預算有限、想先上線的小店</td></tr><tr><th scope="row">頁數</th><td>1 頁</td><td>4–8 頁</td><td>依商品與功能規劃</td><td>一頁版或多頁版（頁面自選）</td></tr><tr><th scope="row">設計方式</th><td>依品牌從頭客製</td><td>依品牌從頭客製</td><td>依品牌從頭客製</td><td>從 45 種行業版型挑選，配色字體可換</td></tr><tr><th scope="row">UI/UX 流程設計（Figma）</th><td>單頁設計稿<small>只有一頁，不需要多頁流程規劃</small></td><td>完整多頁流程</td><td>含購物與結帳流程</td><td>不需要<small>版型已設計好，直接套用</small></td></tr><tr><th scope="row">微互動與動態效果</th><td><span class="pc-y">包含</span></td><td><span class="pc-y">包含</span></td><td><span class="pc-y">包含</span></td><td>版型內建</td></tr><tr><th scope="row">SEO</th><td>基礎 SEO</td><td>全站 SEO 語意架構</td><td>全站 SEO 語意架構</td><td>版型內建結構化資料與 llms.txt</td></tr><tr><th scope="row">諮詢表單</th><td><span class="pc-y">包含</span></td><td><span class="pc-y">包含</span></td><td><span class="pc-y">包含</span></td><td>LINE、電話、地圖連結</td></tr><tr><th scope="row">購物車、結帳、金物流</th><td>不含<small>形象網站以介紹為主，要線上賣可選方案 C</small></td><td>不含<small>形象網站以介紹為主，要線上賣可選方案 C</small></td><td>規劃與串接</td><td>線上購買<small>最多 24 項商品，綠界收款；運費需含在售價</small></td></tr><tr><th scope="row">線上預約</th><td>可加購<small>嵌入既有的預約服務</small></td><td>可加購<small>嵌入預約服務或做預約表單</small></td><td>依需求規劃</td><td>進階功能<small>預約行事曆，每月加 NT$400</small></td></tr><tr><th scope="row">轉化追蹤埋點（GA4／Pixel）</th><td>可加購<small>NT$4,000 起</small></td><td>可加購<small>NT$4,000 起</small></td><td><span class="pc-y">包含</span></td><td>可填 GA4<small>Pixel 等其他追蹤碼需進階功能</small></td></tr><tr><th scope="row">內容由誰填</th><td>我們製作</td><td>我們製作</td><td>我們製作</td><td>你自己用編輯器填</td></tr><tr><th scope="row">原始碼與設計稿</th><td>完整移交</td><td>完整移交</td><td>完整移交</td><td>不移交（租用期間使用）</td></tr><tr><th scope="row">製作時程</th><td>約 2–3 週</td><td>約 3–5 週</td><td>約 6–8 週</td><td>填完送出，確認收款後開通</td></tr><tr><th scope="row">上線後</th><td>30 天免費保固</td><td>30 天免費保固</td><td>30 天免費保固</td><td>租用期間持續維護、每月網站體檢</td></tr></tbody>
             </table>
         </div>
-        <p class="pc-hint reveal">SEO 進階經營、數據埋點、文案、維護等可以單獨加購，價格見下方「服務項目總覽」。網站租用的細節請看<a href="../rental/">網站租用</a>與<a href="../rental/templates/">版型展示</a>。</p>
-
-        <h2 class="sp-h2 reveal">價格區間怎麼算</h2>
-        <p class="pc-hint reveal">同一個方案，價格會依頁面多寡、文案與素材誰準備、視覺動態的複雜度和功能來調整。下面是起價和接近上限時的差別，實際報價會在諮詢後依需求提供。</p>
-        <div class="pr-grid"><div class="pr-card reveal"><p class="pr-tag">買斷方案 A</p><h3 class="pr-name">單頁形象網站</h3><div class="pr-cols"><div class="pr-col"><p class="pr-amt">NT$15,000<small>起價包含</small></p><ul><li>約 6 個區塊：品牌介紹、服務、照片、常見問題、聯絡</li><li>文字與照片由你提供，我們排版設計</li><li>基本進場動態效果</li><li>諮詢表單、基礎 SEO</li></ul></div><div class="pr-col pr-col--hi"><p class="pr-amt">NT$28,000<small>接近上限時通常多了</small></p><ul><li>10 個以上區塊，或故事型長頁面</li><li>協助整理文案、挑選與修圖</li><li>客製圖示、插圖或進階捲動動畫</li><li>中英雙語，或嵌入預約、地圖等外部服務</li></ul></div></div></div><div class="pr-card reveal"><p class="pr-tag">買斷方案 B</p><h3 class="pr-name">品牌多頁網站</h3><div class="pr-cols"><div class="pr-col"><p class="pr-amt">NT$32,000<small>起價包含</small></p><ul><li>4 頁（例如首頁、關於、服務、聯絡）</li><li>文字與照片由你提供</li><li>Figma 介面設計與標準互動效果</li><li>全站 SEO 語意架構、諮詢表單</li></ul></div><div class="pr-col pr-col--hi"><p class="pr-amt">NT$60,000<small>接近上限時通常多了</small></p><ul><li>最多 8 頁，含作品集、案例或文章列表等</li><li>協助整理各頁文案與架構</li><li>客製插圖、進階動態效果</li><li>中英雙語，或預約、表單分流等功能</li></ul></div></div></div><div class="pr-card reveal"><p class="pr-tag">買斷方案 C</p><h3 class="pr-name">電商與系統網站</h3><div class="pr-cols"><div class="pr-col"><p class="pr-amt">NT$60,000<small>起價包含</small></p><ul><li>商品數量與規格單純</li><li>串接一種金流與一種物流</li><li>標準購物車與結帳流程</li><li>轉化追蹤埋點（GA4／Pixel）</li></ul></div><div class="pr-col pr-col--hi"><p class="pr-amt">NT$150,000<small>接近上限時通常多了</small></p><ul><li>商品多、尺寸顏色等規格複雜</li><li>多種金流與物流、優惠碼</li><li>會員、訂單查詢等功能</li><li>與你現有的系統或後台串接</li></ul></div></div></div></div>
-        <div class="pricing-tabs reveal" style="margin-top: 64px;">
-            <button class="pricing-tab active magnetic" onclick="switchTab('list')">服務項目總覽</button>
-            <button class="pricing-tab magnetic" onclick="switchTab('buyout')">一次性買斷專案</button>
-            <button class="pricing-tab magnetic" onclick="switchTab('monthly')">長期合作月費制</button>
+            <details class="pr-details">
+                <summary>價格區間怎麼算？看起價與接近上限的差別</summary>
+                <p class="pc-hint">同一個方案，價格會依頁面多寡、文案與素材誰準備、視覺動態的複雜度和功能來調整。下面是起價和接近上限時的差別，實際報價會在諮詢後依需求提供。</p>
+                <div class="pr-grid"><div class="pr-card"><p class="pr-tag">買斷方案 A</p><h3 class="pr-name">單頁形象網站</h3><div class="pr-cols"><div class="pr-col"><p class="pr-amt">NT$15,000<small>起價包含</small></p><ul><li>約 6 個區塊：品牌介紹、服務、照片、常見問題、聯絡</li><li>文字與照片由你提供，我們排版設計</li><li>基本進場動態效果</li><li>諮詢表單、基礎 SEO</li></ul></div><div class="pr-col pr-col--hi"><p class="pr-amt">NT$28,000<small>接近上限時通常多了</small></p><ul><li>10 個以上區塊，或故事型長頁面</li><li>協助整理文案、挑選與修圖</li><li>客製圖示、插圖或進階捲動動畫</li><li>中英雙語，或嵌入預約、地圖等外部服務</li></ul></div></div></div><div class="pr-card"><p class="pr-tag">買斷方案 B</p><h3 class="pr-name">品牌多頁網站</h3><div class="pr-cols"><div class="pr-col"><p class="pr-amt">NT$32,000<small>起價包含</small></p><ul><li>4 頁（例如首頁、關於、服務、聯絡）</li><li>文字與照片由你提供</li><li>Figma 介面設計與標準互動效果</li><li>全站 SEO 語意架構、諮詢表單</li></ul></div><div class="pr-col pr-col--hi"><p class="pr-amt">NT$60,000<small>接近上限時通常多了</small></p><ul><li>最多 8 頁，含作品集、案例或文章列表等</li><li>協助整理各頁文案與架構</li><li>客製插圖、進階動態效果</li><li>中英雙語，或預約、表單分流等功能</li></ul></div></div></div><div class="pr-card"><p class="pr-tag">買斷方案 C</p><h3 class="pr-name">電商與系統網站</h3><div class="pr-cols"><div class="pr-col"><p class="pr-amt">NT$60,000<small>起價包含</small></p><ul><li>商品數量與規格單純</li><li>串接一種金流與一種物流</li><li>標準購物車與結帳流程</li><li>轉化追蹤埋點（GA4／Pixel）</li></ul></div><div class="pr-col pr-col--hi"><p class="pr-amt">NT$150,000<small>接近上限時通常多了</small></p><ul><li>商品多、尺寸顏色等規格複雜</li><li>多種金流與物流、優惠碼</li><li>會員、訂單查詢等功能</li><li>與你現有的系統或後台串接</li></ul></div></div></div></div>
+            </details>
+            <p class="pc-hint">SEO 進階經營、數據埋點、文案、維護等可以單獨加購，價格見下方「服務項目總覽」。網站租用的細節請看<a href="../rental/">網站租用</a>與<a href="../rental/templates/">版型展示</a>。</p>
         </div>
-
         <!-- Tab 1: 服務項目總覽 -->
-        <div id="tab-list" class="pricing-panel active">
+        <div id="tab-list" class="pricing-panel">
             <div class="price-list">
 
                 <div class="price-item reveal tilt-card">
@@ -727,6 +722,6 @@
         </div>
     </div>
 </footer>
-<script src="../assets/dist/site.min.js?v=52c0390bcc" defer></script>
+<script src="../assets/dist/site.min.js?v=f909c759f8" defer></script>
 </body>
 </html>
