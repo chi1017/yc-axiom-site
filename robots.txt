@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://chi1017.github.io/yc-axiom-site/sitemap.xml
+Sitemap: https://yc-axiom.pages.dev/sitemap.xml

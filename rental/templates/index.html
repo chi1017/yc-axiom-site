@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        page: function () {
+            var path = location.pathname;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.href, page_path: path, page_title: document.title });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: (a.classList.contains('line-float') || a.closest('.social-float')) ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>網站租用版型展示｜45 種行業範例網站 - YC AXIOM</title>
+<meta name="description" content="YC AXIOM 網站租用的版型展示：餐飲、美業、運動與健康、教育、零售、生活服務、住宿、專業服務等 45 種行業，每個行業一個可以點進去看的範例網站。範例店家皆為虛構。">
+<meta name="author" content="YC AXIOM">
+<link rel="icon" type="image/png" href="https://yc-axiom.pages.dev/favicon-32.png">
+<link rel="apple-touch-icon" href="https://yc-axiom.pages.dev/apple-touch-icon.png">
+<link rel="manifest" href="https://yc-axiom.pages.dev/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="YC AXIOM">
+<link rel="canonical" href="https://yc-axiom.pages.dev/rental/templates/">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="網站租用版型展示｜45 種行業範例網站 - YC AXIOM">
+<meta property="og:description" content="YC AXIOM 網站租用的版型展示：餐飲、美業、運動與健康、教育、零售、生活服務、住宿、專業服務等 45 種行業，每個行業一個可以點進去看的範例網站。範例店家皆為虛構。">
+<meta property="og:image" content="https://yc-axiom.pages.dev/og-image.png">
+<meta property="og:url" content="https://yc-axiom.pages.dev/rental/templates/">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="YC AXIOM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="網站租用版型展示｜45 種行業範例網站 - YC AXIOM">
+<meta name="twitter:description" content="YC AXIOM 網站租用的版型展示：餐飲、美業、運動與健康、教育、零售、生活服務、住宿、專業服務等 45 種行業，每個行業一個可以點進去看的範例網站。範例店家皆為虛構。">
+<meta name="twitter:image" content="https://yc-axiom.pages.dev/og-image.png">
+<meta name="theme-color" content="#5FA396">
+<script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../../assets/dist/site.min.css?v=a85df5148e">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://yc-axiom.pages.dev/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "網站租用",
+      "item": "https://yc-axiom.pages.dev/rental/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "版型展示",
+      "item": "https://yc-axiom.pages.dev/rental/templates/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "網站租用版型展示",
+  "description": "YC AXIOM 網站租用的版型展示：餐飲、美業、運動與健康、教育、零售、生活服務、住宿、專業服務等 45 種行業，每個行業一個可以點進去看的範例網站。範例店家皆為虛構。",
+  "url": "https://yc-axiom.pages.dev/rental/templates/",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "YC AXIOM",
+    "url": "https://yc-axiom.pages.dev/"
+  },
+  "mainEntity": {
+    "@type": "ItemList",
+    "numberOfItems": 45,
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "咖啡店版型範例",
+        "url": "https://yc-templates.pages.dev/cafe/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "烘焙坊版型範例",
+        "url": "https://yc-templates.pages.dev/bakery/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "飲料店版型範例",
+        "url": "https://yc-templates.pages.dev/drink/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": "甜點店版型範例",
+        "url": "https://yc-templates.pages.dev/dessert/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 5,
+        "name": "餐廳版型範例",
+        "url": "https://yc-templates.pages.dev/restaurant/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 6,
+        "name": "早午餐店版型範例",
+        "url": "https://yc-templates.pages.dev/brunch/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 7,
+        "name": "酒吧版型範例",
+        "url": "https://yc-templates.pages.dev/bar/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 8,
+        "name": "茶館版型範例",
+        "url": "https://yc-templates.pages.dev/tea/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 9,
+        "name": "美髮沙龍版型範例",
+        "url": "https://yc-templates.pages.dev/salon/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 10,
+        "name": "美容美體版型範例",
+        "url": "https://yc-templates.pages.dev/beauty/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 11,
+        "name": "美甲美睫版型範例",
+        "url": "https://yc-templates.pages.dev/nail/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 12,
+        "name": "按摩 SPA版型範例",
+        "url": "https://yc-templates.pages.dev/spa/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 13,
+        "name": "寵物美容版型範例",
+        "url": "https://yc-templates.pages.dev/pet/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 14,
+        "name": "健身房版型範例",
+        "url": "https://yc-templates.pages.dev/gym/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 15,
+        "name": "瑜珈教室版型範例",
+        "url": "https://yc-templates.pages.dev/yoga/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 16,
+        "name": "診所版型範例",
+        "url": "https://yc-templates.pages.dev/medical/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 17,
+        "name": "牙醫診所版型範例",
+        "url": "https://yc-templates.pages.dev/dental/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 18,
+        "name": "中醫診所版型範例",
+        "url": "https://yc-templates.pages.dev/tcm/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 19,
+        "name": "物理治療所版型範例",
+        "url": "https://yc-templates.pages.dev/physio/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 20,
+        "name": "動物醫院版型範例",
+        "url": "https://yc-templates.pages.dev/vet/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 21,
+        "name": "補習班版型範例",
+        "url": "https://yc-templates.pages.dev/edu/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 22,
+        "name": "才藝教室版型範例",
+        "url": "https://yc-templates.pages.dev/arts/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 23,
+        "name": "音樂教室版型範例",
+        "url": "https://yc-templates.pages.dev/music/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 24,
+        "name": "幼兒園版型範例",
+        "url": "https://yc-templates.pages.dev/kindergarten/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 25,
+        "name": "托嬰中心版型範例",
+        "url": "https://yc-templates.pages.dev/daycare/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 26,
+        "name": "服飾店版型範例",
+        "url": "https://yc-templates.pages.dev/fashion/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 27,
+        "name": "家具店版型範例",
+        "url": "https://yc-templates.pages.dev/furniture/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 28,
+        "name": "花店版型範例",
+        "url": "https://yc-templates.pages.dev/florist/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 29,
+        "name": "書店版型範例",
+        "url": "https://yc-templates.pages.dev/bookstore/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 30,
+        "name": "眼鏡行版型範例",
+        "url": "https://yc-templates.pages.dev/eyewear/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 31,
+        "name": "選物店版型範例",
+        "url": "https://yc-templates.pages.dev/gift/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 32,
+        "name": "雜貨店版型範例",
+        "url": "https://yc-templates.pages.dev/grocery/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 33,
+        "name": "汽車美容版型範例",
+        "url": "https://yc-templates.pages.dev/car-detailing/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 34,
+        "name": "汽車維修版型範例",
+        "url": "https://yc-templates.pages.dev/auto-repair/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 35,
+        "name": "機車行版型範例",
+        "url": "https://yc-templates.pages.dev/motorcycle/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 36,
+        "name": "洗衣店版型範例",
+        "url": "https://yc-templates.pages.dev/laundry/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 37,
+        "name": "居家清潔版型範例",
+        "url": "https://yc-templates.pages.dev/cleaning/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 38,
+        "name": "攝影工作室版型範例",
+        "url": "https://yc-templates.pages.dev/photo/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 39,
+        "name": "室內設計版型範例",
+        "url": "https://yc-templates.pages.dev/interior/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 40,
+        "name": "裝修工程版型範例",
+        "url": "https://yc-templates.pages.dev/renovation/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 41,
+        "name": "民宿版型範例",
+        "url": "https://yc-templates.pages.dev/lodging/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 42,
+        "name": "法律事務所版型範例",
+        "url": "https://yc-templates.pages.dev/law/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 43,
+        "name": "會計記帳版型範例",
+        "url": "https://yc-templates.pages.dev/accounting/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 44,
+        "name": "房屋仲介版型範例",
+        "url": "https://yc-templates.pages.dev/realestate/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 45,
+        "name": "其他店家版型範例",
+        "url": "https://yc-templates.pages.dev/other/"
+      }
+    ]
+  }
+}
+</script>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="YC 網站設計，讓你的品牌自帶光芒與實力。頁面載入中">
+    <div class="loader-mark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="ringGrad-load" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient>
+                <linearGradient id="yGrad-load" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="50"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient>
+                <filter id="glow-load" filterUnits="userSpaceOnUse" x="-8" y="-8" width="80" height="80"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path class="loader-draw loader-ring" pathLength="1" d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-load)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y1" pathLength="1" d="M18,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y2" pathLength="1" d="M46,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+        </svg>
+    </div>
+    <span class="loader-flare" aria-hidden="true"></span>
+    <div class="loader-text" aria-hidden="true">
+        <div class="loader-name">YC AXIOM</div>
+        <p class="loader-slogan"><span class="ls-line"><span class="lc" style="--i:0">Y</span><span class="lc" style="--i:1">C</span><span class="lc" style="--i:2">&nbsp;</span><span class="lc" style="--i:3">網</span><span class="lc" style="--i:4">站</span><span class="lc" style="--i:5">設</span><span class="lc" style="--i:6">計</span><span class="lc" style="--i:7">，</span></span><span class="ls-line"><span class="lc" style="--i:8">讓</span><span class="lc" style="--i:9">你</span><span class="lc" style="--i:10">的</span><span class="lc" style="--i:11">品</span><span class="lc" style="--i:12">牌</span><span class="lc" style="--i:13">自</span><span class="lc" style="--i:14">帶</span><span class="lc hl" style="--i:15">光</span><span class="lc hl" style="--i:16">芒</span><span class="lc" style="--i:17">與</span><span class="lc hl" style="--i:18">實</span><span class="lc hl" style="--i:19">力</span><span class="lc" style="--i:20">。</span></span></p>
+    </div>
+</div>
+<script>
+(function () {
+    var root = document.documentElement, loader = document.getElementById('page-loader');
+    if (!loader) return;
+    try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
+    root.classList.add('is-loading');
+    var start = Date.now(), MIN = 3200, MAX = 6500, closed = false;
+    function close() {
+        if (closed) return; closed = true;
+        loader.classList.add('is-done');
+        root.classList.remove('is-loading');
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 1300);
+    }
+    function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+    loader.addEventListener('click', close); /* 點一下就能略過 */
+})();
+</script>
+
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor Elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-follower"></div>
+
+
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-inner">
+        <a href="../../" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
+            <div class="nav-logo-img">
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+            </div>
+            <div class="nav-logo-text">
+                <div class="nav-logo-name">YC AXIOM</div>
+                <div class="nav-logo-sub">[品牌與工程]</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="../../services/" class="nav-link">服務項目</a></li>
+            <li><a href="../../rental/" class="nav-link active">網站租用</a></li>
+            <li><a href="../../works/" class="nav-link">作品集</a></li>
+            <li><a href="../../pricing/" class="nav-link">定價</a></li>
+            <li><a href="../../articles/" class="nav-link">文章</a></li>
+            <li class="nav-dd"><a href="../../seo/" class="nav-link" aria-haspopup="true">免費工具</a><ul class="nav-sub"><li><a href="../../seo/">SEO 檢測</a></li><li><a href="../../geo/">GEO 檢測<small>AI 可見度</small></a></li></ul></li>
+            <li><a href="../../about/" class="nav-link">關於</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="../../contact/" class="nav-cta magnetic">免費諮詢</a>
+
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" aria-label="網站選單">
+    <button class="mobile-close" onclick="toggleMobileMenu()" aria-label="關閉選單">✕</button>
+    <a class="mobile-nav-btn" href="../../services/">服務項目</a>
+    <a class="mobile-nav-btn" href="../../rental/">網站租用</a>
+    <a class="mobile-nav-btn" href="../../works/">作品集</a>
+    <a class="mobile-nav-btn" href="../../pricing/">定價</a>
+    <a class="mobile-nav-btn" href="../../articles/">文章</a>
+    <a class="mobile-nav-btn" href="../../seo/">SEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../geo/">GEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../about/">關於</a>
+    <a class="mobile-nav-btn mobile-cta" href="../../contact/">免費諮詢</a>
+</div>
+
+
+<main>
+<section id="page-rental-templates" class="page showing active">
+    <div class="container section-pad">
+        <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../../">首頁</a><span aria-hidden="true">›</span><a href="../">網站租用</a><span aria-hidden="true">›</span><span aria-current="page">版型展示</span></div>
+        <p class="section-eyebrow reveal">Templates / 版型展示</p>
+        <h1 class="section-title reveal">網站租用版型展示</h1>
+        <p class="sp-lede reveal">網站租用提供 45 種行業版型，每個行業都放了一個範例網站，點進去就能看實際的樣子，電腦和手機都能看。租用後，店名、照片、價目、營業時間與常見問題換成你自己的內容；配色、字體與首頁版面也都能在編輯器裡更換。</p>
+        <p class="tpl-note reveal">範例網站裡的店家、地址、電話與內容都是虛構的，照片來自 Unsplash。</p>
+        <div class="tpl-chips reveal" role="group" aria-label="依行業分類篩選"><button type="button" class="tpl-chip is-on" data-g="" aria-pressed="true">全部 <small>45</small></button><button type="button" class="tpl-chip" data-g="餐飲" aria-pressed="false">餐飲 <small>8</small></button><button type="button" class="tpl-chip" data-g="美業" aria-pressed="false">美業 <small>5</small></button><button type="button" class="tpl-chip" data-g="運動與健康" aria-pressed="false">運動與健康 <small>7</small></button><button type="button" class="tpl-chip" data-g="教育" aria-pressed="false">教育 <small>5</small></button><button type="button" class="tpl-chip" data-g="零售" aria-pressed="false">零售 <small>7</small></button><button type="button" class="tpl-chip" data-g="生活服務" aria-pressed="false">生活服務 <small>8</small></button><button type="button" class="tpl-chip" data-g="住宿" aria-pressed="false">住宿 <small>1</small></button><button type="button" class="tpl-chip" data-g="專業服務" aria-pressed="false">專業服務 <small>3</small></button><button type="button" class="tpl-chip" data-g="其他" aria-pressed="false">其他 <small>1</small></button></div>
+        <div class="tpl-grid" id="tplGrid"><a class="tpl-card" href="https://yc-templates.pages.dev/cafe/" target="_blank" rel="noopener" data-g="餐飲"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/cafe/thumb.webp" alt="咖啡店版型範例：午後日光咖啡" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">餐飲 · 首頁雜誌版面</span><strong class="tpl-name">咖啡店</strong><span class="tpl-shop">午後日光咖啡｜手沖單品與自烤甜點，慢慢來的下午</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/bakery/" target="_blank" rel="noopener" data-g="餐飲"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/bakery/thumb.webp" alt="烘焙坊版型範例：麥香烘焙坊" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">餐飲 · 首頁標準版面</span><strong class="tpl-name">烘焙坊</strong><span class="tpl-shop">麥香烘焙坊｜每天早上七點，第一爐麵包出爐</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/drink/" target="_blank" rel="noopener" data-g="餐飲"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/drink/thumb.webp" alt="飲料店版型範例：青山茶飲" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">餐飲 · 首頁方格拼貼版面</span><strong class="tpl-name">飲料店</strong><span class="tpl-shop">青山茶飲｜現泡原葉茶，甜度冰塊都能調</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/dessert/" target="_blank" rel="noopener" data-g="餐飲"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/dessert/thumb.webp" alt="甜點店版型範例：小雪甜點工作室" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">餐飲 · 首頁置中大字版面</span><strong class="tpl-name">甜點店</strong><span class="tpl-shop">小雪甜點工作室｜依季節水果做的手工甜點</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/restaurant/" target="_blank" rel="noopener" data-g="餐飲"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/restaurant/thumb.webp" alt="餐廳版型範例：山海小館" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">餐飲 · 首頁標準版面</span><strong class="tpl-name">餐廳</strong><span class="tpl-shop">山海小館｜在地食材做的家常台菜</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/brunch/" target="_blank" rel="noopener" data-g="餐飲"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/brunch/thumb.webp" alt="早午餐店版型範例：晨光早午餐" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">餐飲 · 首頁方格拼貼版面</span><strong class="tpl-name">早午餐店</strong><span class="tpl-shop">晨光早午餐｜睡飽了再來，早午餐吃到下午三點</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/bar/" target="_blank" rel="noopener" data-g="餐飲"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/bar/thumb.webp" alt="酒吧版型範例：夜燈酒館" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">餐飲 · 首頁置中大字版面</span><strong class="tpl-name">酒吧</strong><span class="tpl-shop">夜燈酒館｜一杯好酒，和一個安靜的夜晚</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/tea/" target="_blank" rel="noopener" data-g="餐飲"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/tea/thumb.webp" alt="茶館版型範例：靜心茶館" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">餐飲 · 首頁左側選單版面</span><strong class="tpl-name">茶館</strong><span class="tpl-shop">靜心茶館｜一壺好茶，坐一個下午</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/salon/" target="_blank" rel="noopener" data-g="美業"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/salon/thumb.webp" alt="美髮沙龍版型範例：青禾髮藝" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">美業 · 首頁雜誌版面</span><strong class="tpl-name">美髮沙龍</strong><span class="tpl-shop">青禾髮藝｜剪一個自己在家也好整理的髮型</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/beauty/" target="_blank" rel="noopener" data-g="美業"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/beauty/thumb.webp" alt="美容美體版型範例：純淨美學" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">美業 · 首頁置中大字版面</span><strong class="tpl-name">美容美體</strong><span class="tpl-shop">純淨美學｜安靜放鬆的臉部與身體保養</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/nail/" target="_blank" rel="noopener" data-g="美業"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/nail/thumb.webp" alt="美甲美睫版型範例：指尖小日子" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">美業 · 首頁方格拼貼版面</span><strong class="tpl-name">美甲美睫</strong><span class="tpl-shop">指尖小日子｜乾淨細緻的手足凝膠與美睫</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/spa/" target="_blank" rel="noopener" data-g="美業"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/spa/thumb.webp" alt="按摩 SPA版型範例：舒活按摩會館" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">美業 · 首頁標準版面</span><strong class="tpl-name">按摩 SPA</strong><span class="tpl-shop">舒活按摩會館｜專業手技，鬆開一整週的疲勞</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/pet/" target="_blank" rel="noopener" data-g="美業"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/pet/thumb.webp" alt="寵物美容版型範例：毛孩洗香香" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">美業 · 首頁方格拼貼版面</span><strong class="tpl-name">寵物美容</strong><span class="tpl-shop">毛孩洗香香｜不趕時間的寵物美容</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/gym/" target="_blank" rel="noopener" data-g="運動與健康"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/gym/thumb.webp" alt="健身房版型範例：核心健身" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">運動與健康 · 首頁置中大字版面</span><strong class="tpl-name">健身房</strong><span class="tpl-shop">核心健身｜一對一教練課，從正確動作開始</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/yoga/" target="_blank" rel="noopener" data-g="運動與健康"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/yoga/thumb.webp" alt="瑜珈教室版型範例：呼吸瑜珈" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">運動與健康 · 首頁雜誌版面</span><strong class="tpl-name">瑜珈教室</strong><span class="tpl-shop">呼吸瑜珈｜小班制，每個動作都有人看著你</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/medical/" target="_blank" rel="noopener" data-g="運動與健康"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/medical/thumb.webp" alt="診所版型範例：安心家醫診所" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">運動與健康 · 首頁標準版面</span><strong class="tpl-name">診所</strong><span class="tpl-shop">安心家醫診所｜看得仔細，說得清楚的家庭醫師</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/dental/" target="_blank" rel="noopener" data-g="運動與健康"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/dental/thumb.webp" alt="牙醫診所版型範例：微笑牙醫診所" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">運動與健康 · 首頁置中大字版面</span><strong class="tpl-name">牙醫診所</strong><span class="tpl-shop">微笑牙醫診所｜不怕看牙，從一次舒服的洗牙開始</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/tcm/" target="_blank" rel="noopener" data-g="運動與健康"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/tcm/thumb.webp" alt="中醫診所版型範例：仁和中醫診所" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">運動與健康 · 首頁左側選單版面</span><strong class="tpl-name">中醫診所</strong><span class="tpl-shop">仁和中醫診所｜針灸、推拿與體質調理</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/physio/" target="_blank" rel="noopener" data-g="運動與健康"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/physio/thumb.webp" alt="物理治療所版型範例：動能物理治療所" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">運動與健康 · 首頁雜誌版面</span><strong class="tpl-name">物理治療所</strong><span class="tpl-shop">動能物理治療所｜找出痠痛的原因，不只是止痛</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/vet/" target="_blank" rel="noopener" data-g="運動與健康"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/vet/thumb.webp" alt="動物醫院版型範例：溫暖動物醫院" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">運動與健康 · 首頁標準版面</span><strong class="tpl-name">動物醫院</strong><span class="tpl-shop">溫暖動物醫院｜把毛孩當家人照顧的動物醫院</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/edu/" target="_blank" rel="noopener" data-g="教育"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/edu/thumb.webp" alt="補習班版型範例：明日數理補習班" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">教育 · 首頁標準版面</span><strong class="tpl-name">補習班</strong><span class="tpl-shop">明日數理補習班｜國高中數理小班教學</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/arts/" target="_blank" rel="noopener" data-g="教育"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/arts/thumb.webp" alt="才藝教室版型範例：彩虹才藝教室" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">教育 · 首頁方格拼貼版面</span><strong class="tpl-name">才藝教室</strong><span class="tpl-shop">彩虹才藝教室｜畫畫、黏土與手作，讓孩子玩出創意</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/music/" target="_blank" rel="noopener" data-g="教育"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/music/thumb.webp" alt="音樂教室版型範例：音符音樂教室" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">教育 · 首頁雜誌版面</span><strong class="tpl-name">音樂教室</strong><span class="tpl-shop">音符音樂教室｜鋼琴、小提琴與吉他個別課</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/kindergarten/" target="_blank" rel="noopener" data-g="教育"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/kindergarten/thumb.webp" alt="幼兒園版型範例：小樹苗幼兒園" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">教育 · 首頁標準版面</span><strong class="tpl-name">幼兒園</strong><span class="tpl-shop">小樹苗幼兒園｜在遊戲裡學習，在自然裡長大</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/daycare/" target="_blank" rel="noopener" data-g="教育"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/daycare/thumb.webp" alt="托嬰中心版型範例：暖心托嬰中心" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">教育 · 首頁置中大字版面</span><strong class="tpl-name">托嬰中心</strong><span class="tpl-shop">暖心托嬰中心｜0 到 2 歲寶寶的第二個家</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/fashion/" target="_blank" rel="noopener" data-g="零售"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/fashion/thumb.webp" alt="服飾店版型範例：日常衣著" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">零售 · 首頁雜誌版面</span><strong class="tpl-name">服飾店</strong><span class="tpl-shop">日常衣著｜簡單好搭、穿得久的衣服</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/furniture/" target="_blank" rel="noopener" data-g="零售"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/furniture/thumb.webp" alt="家具店版型範例：木作生活家具" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">零售 · 首頁雜誌版面</span><strong class="tpl-name">家具店</strong><span class="tpl-shop">木作生活家具｜實木家具，陪你住很多年</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/florist/" target="_blank" rel="noopener" data-g="零售"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/florist/thumb.webp" alt="花店版型範例：花小日花藝" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">零售 · 首頁方格拼貼版面</span><strong class="tpl-name">花店</strong><span class="tpl-shop">花小日花藝｜每天進貨的新鮮花材</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/bookstore/" target="_blank" rel="noopener" data-g="零售"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/bookstore/thumb.webp" alt="書店版型範例：轉角書屋" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">零售 · 首頁左側選單版面</span><strong class="tpl-name">書店</strong><span class="tpl-shop">轉角書屋｜獨立書店，也是社區的客廳</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/eyewear/" target="_blank" rel="noopener" data-g="零售"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/eyewear/thumb.webp" alt="眼鏡行版型範例：明視眼鏡" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">零售 · 首頁標準版面</span><strong class="tpl-name">眼鏡行</strong><span class="tpl-shop">明視眼鏡｜驗光仔細，鏡框挑得到你適合的</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/gift/" target="_blank" rel="noopener" data-g="零售"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/gift/thumb.webp" alt="選物店版型範例：好日子選物" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">零售 · 首頁方格拼貼版面</span><strong class="tpl-name">選物店</strong><span class="tpl-shop">好日子選物｜台灣設計小物與送禮選物</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/grocery/" target="_blank" rel="noopener" data-g="零售"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/grocery/thumb.webp" alt="雜貨店版型範例：巷口好物雜貨" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">零售 · 首頁標準版面</span><strong class="tpl-name">雜貨店</strong><span class="tpl-shop">巷口好物雜貨｜在地小農的米、蔬果與乾貨</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/car-detailing/" target="_blank" rel="noopener" data-g="生活服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/car-detailing/thumb.webp" alt="汽車美容版型範例：亮晶晶汽車美容" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">生活服務 · 首頁置中大字版面</span><strong class="tpl-name">汽車美容</strong><span class="tpl-shop">亮晶晶汽車美容｜細緻手工洗車與鍍膜</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/auto-repair/" target="_blank" rel="noopener" data-g="生活服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/auto-repair/thumb.webp" alt="汽車維修版型範例：信安汽車保修" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">生活服務 · 首頁標準版面</span><strong class="tpl-name">汽車維修</strong><span class="tpl-shop">信安汽車保修｜修車前先說明，費用透明</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/motorcycle/" target="_blank" rel="noopener" data-g="生活服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/motorcycle/thumb.webp" alt="機車行版型範例：順風機車行" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">生活服務 · 首頁方格拼貼版面</span><strong class="tpl-name">機車行</strong><span class="tpl-shop">順風機車行｜機車保養、維修與新車販售</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/laundry/" target="_blank" rel="noopener" data-g="生活服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/laundry/thumb.webp" alt="洗衣店版型範例：潔淨洗衣坊" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">生活服務 · 首頁置中大字版面</span><strong class="tpl-name">洗衣店</strong><span class="tpl-shop">潔淨洗衣坊｜專業水洗、乾洗與包包清潔</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/cleaning/" target="_blank" rel="noopener" data-g="生活服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/cleaning/thumb.webp" alt="居家清潔版型範例：安居居家清潔" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">生活服務 · 首頁標準版面</span><strong class="tpl-name">居家清潔</strong><span class="tpl-shop">安居居家清潔｜固定清潔人員，讓家每週都乾淨</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/photo/" target="_blank" rel="noopener" data-g="生活服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/photo/thumb.webp" alt="攝影工作室版型範例：光影寫真工作室" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">生活服務 · 首頁雜誌版面</span><strong class="tpl-name">攝影工作室</strong><span class="tpl-shop">光影寫真工作室｜自然的寫真、全家福與商業攝影</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/interior/" target="_blank" rel="noopener" data-g="生活服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/interior/thumb.webp" alt="室內設計版型範例：居光室內設計" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">生活服務 · 首頁雜誌版面</span><strong class="tpl-name">室內設計</strong><span class="tpl-shop">居光室內設計｜依生活習慣規劃的住宅設計</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/renovation/" target="_blank" rel="noopener" data-g="生活服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/renovation/thumb.webp" alt="裝修工程版型範例：穩固修繕工程" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">生活服務 · 首頁標準版面</span><strong class="tpl-name">裝修工程</strong><span class="tpl-shop">穩固修繕工程｜漏水、壁癌、水電，一通電話處理</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/lodging/" target="_blank" rel="noopener" data-g="住宿"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/lodging/thumb.webp" alt="民宿版型範例：山嵐民宿" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">住宿 · 首頁雜誌版面</span><strong class="tpl-name">民宿</strong><span class="tpl-shop">山嵐民宿｜醒來就看得到山的房間</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/law/" target="_blank" rel="noopener" data-g="專業服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/law/thumb.webp" alt="法律事務所版型範例：正衡法律事務所" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">專業服務 · 首頁左側選單版面</span><strong class="tpl-name">法律事務所</strong><span class="tpl-shop">正衡法律事務所｜把法律問題說清楚，陪你做決定</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/accounting/" target="_blank" rel="noopener" data-g="專業服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/accounting/thumb.webp" alt="會計記帳版型範例：誠信記帳士事務所" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">專業服務 · 首頁標準版面</span><strong class="tpl-name">會計記帳</strong><span class="tpl-shop">誠信記帳士事務所｜公司設立、記帳與報稅一次處理</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/realestate/" target="_blank" rel="noopener" data-g="專業服務"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/realestate/thumb.webp" alt="房屋仲介版型範例：安家房屋" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">專業服務 · 首頁置中大字版面</span><strong class="tpl-name">房屋仲介</strong><span class="tpl-shop">安家房屋｜在地買賣與租賃，用心幫你找家</span><span class="tpl-go">看範例網站 →</span></span></a><a class="tpl-card" href="https://yc-templates.pages.dev/other/" target="_blank" rel="noopener" data-g="其他"><span class="tpl-thumb"><img src="https://yc-templates.pages.dev/other/thumb.webp" alt="其他店家版型範例：巷子裡的小店" width="640" height="427" loading="lazy" decoding="async"></span><span class="tpl-body"><span class="tpl-tag">其他 · 首頁標準版面</span><strong class="tpl-name">其他店家</strong><span class="tpl-shop">巷子裡的小店｜用心經營的社區小店</span><span class="tpl-go">看範例網站 →</span></span></a></div>
+        <div class="cta-banner reveal" style="margin-top:64px;">
+            <p>Website Rental / 網站租用</p>
+            <h3>找到喜歡的版型了嗎？<br><span>登入後選行業、填內容，就能發佈自己的網站。</span></h3>
+            <div class="sp-actions" style="justify-content:center;"><a href="../../builder/" class="btn-primary magnetic">登入並建立我的網站</a><a href="../" class="btn-secondary magnetic">看租用方案與流程</a></div>
+        </div>
+        <div class="sp-related reveal"><h2 class="sp-h2 sp-h2--sm">相關連結</h2><ul><li><a href="../">網站租用方案與常見問題 →</a></li><li><a href="../../articles/shop-website-vs-instagram/">小店需要官網嗎？跟只有 IG 差在哪 →</a></li><li><a href="../../geo/">免費 GEO 檢測 →</a></li><li><a href="../../seo/">免費 SEO 檢測 →</a></li></ul></div>
+    </div>
+</section>
+</main>
+<script>
+(function () {
+    var grid = document.getElementById('tplGrid'); if (!grid) return;
+    var chips = document.querySelectorAll('.tpl-chip');
+    Array.prototype.forEach.call(chips, function (c) {
+        c.addEventListener('click', function () {
+            var g = c.getAttribute('data-g');
+            Array.prototype.forEach.call(chips, function (o) { var on = o === c; o.classList.toggle('is-on', on); o.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+            Array.prototype.forEach.call(grid.children, function (a) { a.hidden = !!g && a.getAttribute('data-g') !== g; });
+        });
+    });
+})();
+</script>
+
+
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
+<div class="social-float" role="group" aria-label="社群與聯絡">
+    <a class="sf sf-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）" data-tip="LINE 諮詢"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg></a>
+    <a class="sf sf-threads" href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Threads（@ycaxiom）" data-tip="Threads"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M16.8 11.2c-.3-3.4-2.3-5.1-5.2-5.1-2.9 0-5 2-5 5.9 0 3.9 2.1 6.1 5.2 6.1 2.7 0 4.3-1.5 4.3-3.4 0-1.9-1.6-3-3.7-3-1.8 0-2.7.9-2.7 1.9 0 1 .8 1.7 2 1.7 1.7 0 3-1 3-3.8"/></svg></a>
+    <a class="sf sf-ig" href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Instagram（@ycaxiom）" data-tip="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="3.9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.1" fill="currentColor"/></svg></a>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-nav">
+            <a href="../../">首頁</a>
+            <a href="../../about/">關於</a>
+            <a href="../../services/">服務項目</a>
+            <a href="../../works/">作品集</a>
+            <a href="../../articles/">文章</a>
+            <a href="../../seo/">SEO 工具</a>
+            <a href="../../pricing/">定價</a>
+            <a href="../../rental/">網站租用</a>
+            <a href="../../contact/">聯絡</a>
+        </div>
+        <div class="footer-services" aria-label="服務與地區"><a href="../../services/brand-website/">品牌形象網站</a><a href="../../services/ecommerce-website/">品牌電商網站</a><a href="../../services/seo-performance/">SEO 與效能調校</a><a href="../../services/geo-optimization/">GEO／AI 搜尋優化</a><a href="../../services/custom-system/">全客製多頁與系統</a><a href="../../services/data-cleaning/">商業資料清洗與整理</a><a href="../../services/market-intelligence/">市場情報與競品分析</a><a href="../../taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程<a class="footer-privacy" href="../../privacy/">隱私權政策</a></div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            現正接案中 · 台灣在地服務 · 服務時間：週一至週五 09:00–18:00
+        </div>
+    </div>
+</footer>
+<script src="../../assets/dist/site.min.js?v=52c0390bcc" defer></script>
+</body>
+</html>
