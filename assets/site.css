@@ -1624,3 +1624,31 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
   .tpl-shop { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .tpl-card, .tpl-card:hover { transition: none; transform: none; } }
+
+/* ── 定價：每個方案都包含＋方案比較表 ── */
+.pc-base { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 0; padding: 0; }
+.pc-base li { border: 1px solid var(--border); border-radius: 10px; padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 6px; background: rgba(245, 240, 230, 0.02); }
+.pc-base strong { font-size: 16px; color: var(--text-bright); }
+.pc-base strong::before { content: '✓'; color: var(--accent); margin-right: 8px; }
+.pc-base span { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+.pc-hint { font-size: 14px; color: var(--text-dim); margin: 0 0 14px; }
+.pc-hint a { color: var(--accent); }
+.pc-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; }
+.pc-table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 14.5px; line-height: 1.6; }
+.pc-table th, .pc-table td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+.pc-table tbody tr:last-child th, .pc-table tbody tr:last-child td { border-bottom: 0; }
+.pc-table thead th { font-size: 15px; font-weight: 700; color: var(--text-bright); background: rgba(245, 240, 230, 0.04); }
+.pc-table thead th small, .pc-table td small { display: block; font-size: 12px; font-weight: 500; color: var(--text-dim); }
+.pc-table thead th.pc-hot { color: var(--accent); }
+.pc-table tbody th { font-weight: 600; color: var(--text); width: 170px; }
+.pc-table td { color: var(--text-dim); }
+.pc-table th:first-child { position: sticky; left: 0; z-index: 1; background: #0c0f0f; }
+[data-theme="light"] .pc-table th:first-child { background: #E6EAE8; }
+.pc-y { color: var(--accent); font-weight: 600; }
+@media (max-width: 900px) { .pc-base { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) {
+  .pc-base { grid-template-columns: 1fr; }
+  .pc-table { font-size: 13.5px; min-width: 640px; }
+  .pc-table tbody th { width: 112px; }
+  .pc-table th, .pc-table td { padding: 10px 10px; }
+}
