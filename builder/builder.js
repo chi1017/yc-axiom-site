@@ -293,6 +293,9 @@ function renderPreview(now) {
       r = L.buildSite({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
         siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path),
         ...previewFont() });
+      if (updateSubsetFont(r.html)) r = L.buildSite({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
+        siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path),
+        ...previewFont() });
     } catch (e) { console.error(e); return; }
     if (S.page === 'home') paintSeoHints(r);
     S.pageList = r.pages || [];
@@ -348,10 +351,39 @@ async function openFullPreview() {
   const url = new URL('preview/?' + q, location.href).href;
   if (w) w.location.href = url; else location.href = url;
 }
+// 預覽用的標題字型子集：只下載標題實際用到的字（Edge Function font-subset），取代 1–3MB 的完整字型檔。
+// 標題出現新的字時才換一次網址（字只增不減，避免一直重新下載）；字太多或服務不可用時改用完整字型。
+const SUBSET_MAX = 400;
+function headingChars(html) {
+  const out = new Set(), re = /<(h[1-3])\b[^>]*>([\s\S]*?)<\/\1>|<a class="brand"[^>]*>([\s\S]*?)<\/a>/g;
+  let m;
+  while ((m = re.exec(html))) {
+    const t = (m[2] || m[3] || '').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    for (const ch of t) if (ch.trim()) out.add(ch);
+  }
+  return out;
+}
+function updateSubsetFont(html) {
+  const st = S.content.style;
+  if (st.font === 'custom' || S.subsetOff) return false;
+  const key = FONT_FILE[st.font] ? st.font : 'serif';
+  if (!S.subsetFont || S.subsetFont.key !== key) S.subsetFont = { key, chars: new Set(), url: '' };
+  const f = S.subsetFont; let grew = false;
+  for (const ch of headingChars(html)) if (!f.chars.has(ch)) { f.chars.add(ch); grew = true; }
+  if (!grew && f.url) return false;
+  if (f.chars.size > SUBSET_MAX) { S.subsetOff = true; f.url = ''; return true; }
+  if (!f.chars.size) return false;
+  f.url = YC_CONFIG.supabaseUrl.replace(/\/$/, '') + '/functions/v1/font-subset?f=' + key + '&t=' + encodeURIComponent([...f.chars].sort().join(''));
+  return true;
+}
 // 預覽用的標題字型：內建字型直接讀字型檔；上傳的字型從私有空間下載後用暫存網址（不會公開）
 function previewFont() {
   const st = S.content.style;
-  if (st.font !== 'custom') return { previewFontUrl: tplBase() + 'templates/base/fonts/' + (FONT_FILE[st.font] || FONT_FILE.serif) };
+  if (st.font !== 'custom') {
+    const key = FONT_FILE[st.font] ? st.font : 'serif';
+    if (S.subsetOff) return { previewFontUrl: tplBase() + 'templates/base/fonts/' + FONT_FILE[key] };
+    return { previewFontUrl: S.subsetFont && S.subsetFont.key === key ? S.subsetFont.url : '', previewFontFormat: '' };
+  }
   const cf = st.customFont;
   if (cf && S.fontBlob && S.fontBlob.path === cf.path) return { previewFontUrl: S.fontBlob.url, previewFontFormat: '' };
   if (cf) loadFontBlob();
