@@ -12,6 +12,9 @@ const CHECK = process.argv.includes('--check');
 
 // 每一項：原始檔 → 輸出檔；bundle＝把 import 的檔案一起打包
 const TARGETS = [
+  // 全站共用：site.css 先刪掉網站裡完全沒用到的規則，再壓縮；site.js 只壓縮空白與語法（頁面 onclick 會直接呼叫裡面的函式）
+  { in: 'assets/site.css', out: 'assets/dist/site.min.css', type: 'site-css' },
+  { in: 'assets/site.js', out: 'assets/dist/site.min.js', type: 'script' },
   { in: 'assets/seo-tool.js', out: 'assets/dist/seo-tool.min.js', type: 'script' },
   { in: 'assets/seo-tool.css', out: 'assets/dist/seo-tool.min.css', type: 'css' },
   // 編輯器：builder.js 與它 import 的 preview-fx.js 打包成一個檔（共用版型模組另外從 yc-axiom-sites 的 templates/dist 載入）
@@ -23,10 +26,30 @@ const TARGETS = [
 async function make(t) {
   const common = { entryPoints: [join(ROOT, t.in)], write: false, logLevel: 'silent', charset: 'utf8', legalComments: 'none', target: ['es2019', 'safari13'] };
   let r;
+  if (t.type === 'site-css') return minCss(await purgeSiteCss(readFileSync(join(ROOT, t.in), 'utf8')));
   if (t.type === 'css') r = await build({ ...common, loader: { '.css': 'css' }, minify: true });
   // 一般腳本：頂層的函式名稱會被 HTML 的 onclick 直接呼叫，所以只壓縮空白與語法，不改名字
   else if (t.type === 'script') r = await build({ ...common, minifyWhitespace: true, minifySyntax: true, minifyIdentifiers: false });
   else r = await build({ ...common, target: ['es2020'], bundle: true, format: 'esm', minify: true, external: t.external || [] });
+  return r.outputFiles[0].text;
+}
+
+// 刪掉 site.css 裡網站完全沒用到的選擇器：掃描所有頁面（不含 demo 與編輯器）與 assets 裡的程式
+// 動態加上的狀態 class（open、active、visible…）、data-theme、aria-* 一律保留
+async function purgeSiteCss(css) {
+  const { PurgeCSS } = await import('purgecss');
+  const files = execSync('git ls-files "*.html" "assets/*.js"', { cwd: ROOT }).toString().trim().split('\n')
+    .filter((f) => f && !/^demo\/|^builder\/|vendor\/|assets\/dist\//.test(f));
+  const res = await new PurgeCSS().purge({
+    content: files.map((f) => ({ raw: readFileSync(join(ROOT, f), 'utf8'), extension: f.endsWith('.js') ? 'js' : 'html' })),
+    css: [{ raw: css }],
+    defaultExtractor: (c) => c.match(/[A-Za-z0-9_-]+/g) || [],
+    safelist: { standard: [/^(open|active|visible|in|show|showing|loaded|scrolled|revealed|is-|has-|js-)/], greedy: [/data-theme/, /aria-/], keyframes: [/.*/], variables: [/.*/] },
+  });
+  return res[0].css;
+}
+async function minCss(css) {
+  const r = await build({ stdin: { contents: css, loader: 'css' }, write: false, minify: true, logLevel: 'silent', charset: 'utf8', legalComments: 'none', target: ['safari13', 'chrome90'] });
   return r.outputFiles[0].text;
 }
 

@@ -8,6 +8,7 @@
     "check": "node tools/build.mjs --check"
   },
   "devDependencies": {
-    "esbuild": "0.24.0"
+    "esbuild": "0.24.0",
+    "purgecss": "6.0.0"
   }
 }

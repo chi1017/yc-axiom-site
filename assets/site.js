@@ -485,8 +485,8 @@
     'use strict';
     var navRight = document.querySelector('nav .nav-right');
     if (!navRight || document.getElementById('yc-nav-member')) return;
-    var me = document.querySelector('script[src*="assets/site.js"]');
-    var root = me ? new URL('../', me.src).href : location.origin + '/';
+    var me = document.querySelector('script[src*="assets/site.js"], script[src*="assets/dist/site.min.js"]');
+    var root = me ? new URL(me.src.indexOf('/assets/dist/') > -1 ? '../../' : '../', me.src).href : location.origin + '/';
     var CFG = window.YC_CONFIG || {};
     var ref = 'gatgcuntwqibpxhjviqw';
     try { if (CFG.supabaseUrl) ref = new URL(CFG.supabaseUrl).hostname.split('.')[0]; } catch (e) {}
@@ -613,8 +613,8 @@
     'use strict';
     if (/\/admin\//.test(location.pathname) || document.getElementById('yc-tabbar')) return;
     var mm = document.getElementById('mobile-menu');
-    var me = document.querySelector('script[src*="assets/site.js"]');
-    var root = me ? new URL('../', me.src).href : location.origin + '/';
+    var me = document.querySelector('script[src*="assets/site.js"], script[src*="assets/dist/site.min.js"]');
+    var root = me ? new URL(me.src.indexOf('/assets/dist/') > -1 ? '../../' : '../', me.src).href : location.origin + '/';
     var rel = location.href.indexOf(root) === 0 ? location.href.slice(root.length).split(/[?#]/)[0] : '';
     var cur = (rel === '' || rel === 'index.html') ? 'home' : /^services\//.test(rel) ? 'services' : /^rental\//.test(rel) ? 'rental' : '';
     var lineA = document.querySelector('a.line-float');
