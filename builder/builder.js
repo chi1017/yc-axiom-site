@@ -1,6 +1,6 @@
 /* YC AXIOM 網站編輯器：左邊填內容、右邊即時預覽。
    預覽用的版型函式與「正式建置」是同一份程式（yc-axiom-sites 的 templates/shared/*），所以所見即所得。 */
-import { startReveal, wireNav, morphFrame, settleReveal, wireEditPills, flashSection, sectionKey } from './preview-fx.js?v=2026-10-28c';
+import { startReveal, wireNav, morphFrame, settleReveal, wireEditPills, flashSection, sectionKey } from './preview-fx.js';
 const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
@@ -67,14 +67,20 @@ function colorWarningsLocal(pal) {
 // ── 載入共用版型模組 ──
 async function loadLib() {
   const base = tplBase();
-  const [site, content, valid, slug, pal, hours, pages, ind] = await Promise.all([
-    import(base + 'templates/shared/site.js'), import(base + 'templates/shared/content.js'), import(base + 'templates/shared/validate.js'),
-    import(base + 'templates/shared/slug.js'), import(base + 'templates/shared/palettes.js'), import(base + 'templates/shared/hours.js'),
-    import(base + 'templates/shared/pages.js'), import(base + 'templates/shared/industries.js')
-  ]);
-  // 進階方案的共用程式（程式碼審核用的雜湊）；舊快取沒有這個檔時不影響其他功能
-  let code = {};
-  try { code = await import(base + 'templates/shared/code.js'); } catch (e) { code = {}; }
+  let site, content, valid, slug, pal, hours, pages, ind, code = {};
+  try {
+    // 一個打包好的檔案（templates/dist/builder-lib.js）就包含全部共用模組，只要下載一次
+    const L = await import(base + 'templates/dist/builder-lib.js');
+    ({ site, content, valid, slug, pal, hours, pages, ind } = L); code = L.code || {};
+  } catch (e) {
+    // 備援：打包檔讀不到時，改成一個一個載入原始模組（舊做法）
+    [site, content, valid, slug, pal, hours, pages, ind] = await Promise.all([
+      import(base + 'templates/shared/site.js'), import(base + 'templates/shared/content.js'), import(base + 'templates/shared/validate.js'),
+      import(base + 'templates/shared/slug.js'), import(base + 'templates/shared/palettes.js'), import(base + 'templates/shared/hours.js'),
+      import(base + 'templates/shared/pages.js'), import(base + 'templates/shared/industries.js')
+    ]);
+    try { code = await import(base + 'templates/shared/code.js'); } catch (e2) { code = {}; }
+  }
   S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, derivePalette: pal.derivePalette, paletteFrom4: pal.paletteFrom4, colorWarnings: pal.colorWarnings || colorWarningsLocal(pal), luminance: pal.luminance, hours,
     pagesFor: pages.pagesFor, normalizeLayout: pages.normalizeLayout, normalizePages: pages.normalizePages, defaultPages: pages.defaultPages, pagesFromSections: pages.pagesFromSections, LAYOUT_LABELS: pages.LAYOUT_LABELS,
     INDUSTRIES: ind.INDUSTRIES, INDUSTRY_GROUPS: ind.INDUSTRY_GROUPS, getIndustry: ind.getIndustry,

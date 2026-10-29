@@ -14,6 +14,10 @@ const CHECK = process.argv.includes('--check');
 const TARGETS = [
   { in: 'assets/seo-tool.js', out: 'assets/dist/seo-tool.min.js', type: 'script' },
   { in: 'assets/seo-tool.css', out: 'assets/dist/seo-tool.min.css', type: 'css' },
+  // 編輯器：builder.js 與它 import 的 preview-fx.js 打包成一個檔（共用版型模組另外從 yc-axiom-sites 的 templates/dist 載入）
+  { in: 'builder/builder.js', out: 'builder/dist/builder.min.js', type: 'bundle' },
+  { in: 'builder/preview/preview.js', out: 'builder/dist/preview.min.js', type: 'bundle' },
+  { in: 'builder/builder.css', out: 'builder/dist/builder.min.css', type: 'css' },
 ];
 
 async function make(t) {
@@ -22,7 +26,7 @@ async function make(t) {
   if (t.type === 'css') r = await build({ ...common, loader: { '.css': 'css' }, minify: true });
   // 一般腳本：頂層的函式名稱會被 HTML 的 onclick 直接呼叫，所以只壓縮空白與語法，不改名字
   else if (t.type === 'script') r = await build({ ...common, minifyWhitespace: true, minifySyntax: true, minifyIdentifiers: false });
-  else r = await build({ ...common, bundle: true, format: 'esm', minify: true, external: t.external || [] });
+  else r = await build({ ...common, target: ['es2020'], bundle: true, format: 'esm', minify: true, external: t.external || [] });
   return r.outputFiles[0].text;
 }
 
