@@ -1710,3 +1710,4 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
   .pc-table tbody th, .pc-table thead th:first-child { width: 32%; }
   .pc-table th:first-child { position: static; }
 }
+@media (max-width: 900px) { .pricing-tabs { grid-template-columns: repeat(3, 1fr); } .pricing-tab { padding: 12px 4px; font-size: 13.5px; } }
