@@ -1,0 +1,41 @@
+# YC AXIOM
+
+> YC AXIOM 是台中的網頁設計與前端工程團隊，替店家與品牌做客製網站（原始碼完整交付、不綁約），也提供月租的網站租用（使用我們設計的版型，內容自己填，我們負責上線與維護）。另提供免費的 SEO 與 GEO（AI 搜尋可見度）檢測工具。
+
+- 服務地區：台中為主，全台灣皆可線上合作
+- 聯絡：LINE @788cblaq、Email ycaxiom@gmail.com、Instagram @ycaxiom
+- 服務時間：週一至週五 09:00–18:00
+
+## 主要服務
+
+- [品牌形象網站](https://yc-axiom.pages.dev/services/brand-website/)：依品牌需求從頭設計的客製網站，驗收後交付原始碼
+- [全客製多頁與系統](https://yc-axiom.pages.dev/services/custom-system/)：多頁網站、會員、預約等客製功能
+- [搜尋優化 SEO＋GEO](https://yc-axiom.pages.dev/services/geo-optimization/)：讓網站更容易被 Google 與 AI 搜尋找到並正確引用
+- [服務項目總覽](https://yc-axiom.pages.dev/services/)
+- [定價](https://yc-axiom.pages.dev/pricing/)：客製網站一次買斷、無強制月費
+
+## 網站租用
+
+- [網站租用](https://yc-axiom.pages.dev/rental/)：45 種行業版型，電腦或手機都能編輯；一頁版每月 NT$599 起、多頁版每月 NT$899 起；我們負責發佈、主機與維護，每月自動做 SEO 與 AI 可見度檢測。版型與程式不移交原始碼。
+- [版型展示](https://yc-axiom.pages.dev/rental/templates/)：每個行業一個範例網站（範例店家為虛構）
+- [網站租用條款](https://yc-axiom.pages.dev/terms/rental/)
+
+## 免費工具
+
+- [SEO 檢測](https://yc-axiom.pages.dev/seo/)：輸入網址，檢查網站在 Google 搜尋的基本體質
+- [GEO 檢測](https://yc-axiom.pages.dev/geo/)：檢查 AI 搜尋（ChatGPT、Gemini 等）是否讀得懂你的網站
+
+## 作品與文章
+
+- [作品集](https://yc-axiom.pages.dev/works/)
+- [小店需要官網嗎？跟只有 IG 差在哪](https://yc-axiom.pages.dev/articles/shop-website-vs-instagram/)
+- [客人用 ChatGPT 找店，你的店會被推薦嗎](https://yc-axiom.pages.dev/articles/chatgpt-recommend-your-shop/)
+- [Weebly 搬家完整指南](https://yc-axiom.pages.dev/articles/imassage-weebly-to-wordpress/)
+- [攝影工作室官網規劃](https://yc-axiom.pages.dev/articles/xiaofang-brand-website/)
+
+## 其他
+
+- [關於我們](https://yc-axiom.pages.dev/about/)
+- [台中網頁設計](https://yc-axiom.pages.dev/taichung-web-design/)
+- [聯絡我們](https://yc-axiom.pages.dev/contact/)
+- [隱私權政策](https://yc-axiom.pages.dev/privacy/)

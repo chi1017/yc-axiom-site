@@ -1594,3 +1594,33 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
 .rh-other { margin-top: 14px; font-size: 14.5px; color: var(--text-dim); line-height: 1.9; }
 .rh-other a { color: var(--text); text-decoration: underline; text-decoration-color: rgba(95, 163, 150, .5); text-underline-offset: 3px; }
 .rh-other a:hover { color: var(--accent); }
+
+/* ── 網站租用：版型展示 ── */
+.tpl-note { margin-top: 12px; font-size: 13.5px; color: var(--text-dim); }
+.tpl-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 22px; }
+.tpl-chip { font: inherit; font-family: var(--f-ui); font-size: 14px; font-weight: 600; color: var(--text); background: transparent; border: 1px solid var(--border); border-radius: 999px; padding: 8px 16px; min-height: 40px; cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
+.tpl-chip small { font-size: 12px; font-weight: 500; color: var(--text-dim); margin-left: 2px; }
+.tpl-chip:hover { border-color: var(--accent); }
+.tpl-chip.is-on { background: var(--accent); border-color: var(--accent); color: #0b0a09; }
+.tpl-chip.is-on small { color: rgba(11, 10, 9, 0.7); }
+.tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+.tpl-card { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; color: var(--text); text-decoration: none; background: rgba(245, 240, 230, 0.02); transition: border-color .2s, transform .2s; }
+.tpl-card[hidden] { display: none; }
+.tpl-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.tpl-thumb { display: block; aspect-ratio: 3 / 2; background: rgba(245, 240, 230, 0.06); overflow: hidden; }
+.tpl-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.tpl-body { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 16px; }
+.tpl-tag { font-family: var(--f-ui); font-size: 12px; color: var(--accent); letter-spacing: 0.04em; }
+.tpl-name { font-size: 18px; font-weight: 700; color: var(--text-bright); }
+.tpl-shop { font-size: 13.5px; color: var(--text-dim); line-height: 1.6; }
+.tpl-go { margin-top: 6px; font-family: var(--f-ui); font-size: 13.5px; font-weight: 600; color: var(--accent); }
+@media (max-width: 640px) {
+  .tpl-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding: 0 16px 4px; }
+  .tpl-chips::-webkit-scrollbar { display: none; }
+  .tpl-chip { flex-shrink: 0; }
+  .tpl-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tpl-body { padding: 10px 12px 12px; }
+  .tpl-name { font-size: 16px; }
+  .tpl-shop { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .tpl-card, .tpl-card:hover { transition: none; transform: none; } }
