@@ -5,7 +5,7 @@ const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
 const SAVE_DELAY = 2000, RENDER_DELAY = 150;
-const TERMS_VERSION = '2026-10-v6';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
+const TERMS_VERSION = '2026-10-v7';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
 const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
 // 標題字型檔（預覽用完整的常用字版本；正式網站只放用到的字）
 const FONT_FILE = { serif: 'NotoSerifTC-Bold-common.woff2', sans: 'NotoSansTC-Bold-common.woff2', round: 'Huninn-common.woff2', kai: 'LXGWWenKaiTC-Bold-common.woff2' };
@@ -1501,7 +1501,7 @@ async function publish() {
       if (PM.hasPrice(P)) {
         const q = PM.quote(12, S.layout, S.site.tier);
         priceBox = box(h('div', { style: 'font-weight:700' }, '租用方案：' + P.name),
-          h('div', {}, P.listMonthly && S.site.tier !== 'pro' ? h('span', { style: PM.STRIKE_STYLE, text: PM.money(P.listMonthly) }) : null, ' ', h('b', { text: PM.money(q.monthly || P.monthly) + '／月' }), S.site.tier === 'pro' ? '（含進階功能）' : P.listMonthly ? '（特價）' : ''),
+          h('div', {}, h('b', { text: S.site.tier === 'pro' || !PM.earlyBird ? PM.money(q.monthly || P.monthly) + '／月' : PM.earlyBird(P.monthly) }), S.site.tier === 'pro' ? '（含進階功能）' : ''),
           h('div', { style: 'color:var(--muted,#9a8f80)', text: '一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + PM.money(q.amount) + '。' + (isMulti() ? '包含' + pages + '等頁面。' : sectionLabel('menu') + '、' + sectionLabel('interior') + '、常見問題、最新消息都包含，不另外加價。') }),
           pay);
       } else {
