@@ -10,6 +10,8 @@
   var state = { rows: [], q: '', status: 'all', score: 'all', geoScore: 'all', sort: 'last_desc', detail: null, loaded: false };
   var DISCLAIMER = '這些是提高被 AI 引用機會的因素，無法保證被 AI 推薦。';
 
+  // 分數評語：與 SEO／GEO 工具同一套區間（不用舊紀錄裡存的文字）
+  function scoreLabel(n) { return n == null ? '' : n >= 90 ? '優秀' : n >= 80 ? '良好' : n >= 60 ? '普通，有不少可改善' : '需要優先處理'; }
   function scCls(n) { return n >= 80 ? 'sc-good' : (n >= 60 ? 'sc-mid' : 'sc-bad'); }
   function p2(n) { return (n < 10 ? '0' : '') + n; }
   function fmtDT(s) { var d = new Date(s); return isNaN(d) ? '' : d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()); }
@@ -241,7 +243,7 @@
     }).join('');
     var acts = YC.issueList(rep, sType);
     box.innerHTML = '<h3 class="m-h3">檢測報告</h3>' +
-      '<div class="adm-rep-head"><div class="adm-rep-score ' + scCls(sc.score) + '">' + sc.score + '</div><div><b>' + (sType === 'geo' ? 'AI 可見度（GEO）・' + esc(rep.gradeLabel || '') : esc(rep.scoreTitle || '')) + '</b><div class="adm-sub">' + esc(fmtDT(sc.scanned_at)) + '</div><p class="adm-sum">' + esc(sType === 'geo' ? DISCLAIMER : (rep.summary || '')) + '</p></div></div>' +
+      '<div class="adm-rep-head"><div class="adm-rep-score ' + scCls(sc.score) + '">' + sc.score + '</div><div><b>' + (sType === 'geo' ? 'AI 可見度（GEO）・' : '') + esc(scoreLabel(sc.score)) + '</b><div class="adm-sub">' + esc(fmtDT(sc.scanned_at)) + '</div><p class="adm-sum">' + esc(sType === 'geo' ? DISCLAIMER : (rep.summary || '')) + '</p></div></div>' +
       (sType === 'geo' && (rep.categories || []).length ? '<div class="adm-metrics">' + rep.categories.map(function (c) { return '<span class="mp ' + (c.score == null ? '' : (c.score >= 80 ? 'pass' : (c.score >= 50 ? 'warn' : 'fail'))) + '">' + esc(c.id + '. ' + c.name) + ' ' + (c.countedMax ? Math.round(c.earned * 10) / 10 + '/' + c.countedMax : '—') + '</span>'; }).join('') + '</div>' : '') +
       ((rep.metrics || []).length ? '<div class="adm-metrics">' + rep.metrics.map(function (m) { return '<span class="mp ' + esc(m.status) + '">' + (m.status === 'pass' ? '✓' : (m.status === 'warn' ? '!' : '✗')) + ' ' + esc(m.label) + '</span>'; }).join('') + '</div>' : '') +
       (acts.length ? '<h4 class="adm-h4">改善建議（' + acts.length + '）</h4><ol class="adm-acts">' + acts.map(function (a) { return '<li><span class="lv ' + (a.level === 'high' ? '' : (a.level === 'low' ? 'l' : 'm')) + '">' + (a.level === 'high' ? '高' : (a.level === 'low' ? '低' : '中')) + '</span><span><b>' + esc(a.title) + '</b>' + (a.detail ? '<small>' + esc(a.detail) + '</small>' : '') + '</span></li>'; }).join('') + '</ol>' : '') +

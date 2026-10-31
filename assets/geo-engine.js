@@ -563,7 +563,7 @@
     var base = maxSum ? Math.round(earnedSum / maxSum * 100) : null;
     var llms = checkLlms(ctx);
     var score = base == null ? null : Math.min(100, base + llms.bonus);
-    var grade = score == null ? { key: 'na', label: '無法評分' } : (score >= 80 ? { key: 'good', label: '良好' } : (score >= 60 ? { key: 'fair', label: '普通' } : { key: 'poor', label: '需加強' }));
+    var grade = score == null ? { key: 'na', label: '無法評分' } : (score >= 90 ? { key: 'good', label: '優秀' } : score >= 80 ? { key: 'good', label: '良好' } : (score >= 60 ? { key: 'fair', label: '普通，有不少可改善' } : { key: 'poor', label: '需要優先處理' }));
 
     // 問題清單：依失分多寡，同分時 A、C、B、D、F、E
     var issues = items.filter(function (i) {

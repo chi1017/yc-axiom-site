@@ -5,23 +5,21 @@
 // 兩種版型（與 yc-axiom-sites 的 templates/shared/pages.js、資料庫 rental_sites.layout 對應）：
 //   single：一頁版（目前上線中的方案）
 //   multi ：多頁版。月費尚未定案，monthly 為 null 時代表「還沒開放、不顯示價格」，quote() 會回傳 null。
-//           定案後只要填 listMonthly 與 monthly；一頁升級多頁不另收費，月費自下一期改用多頁價。
+//           定案後只要填 monthly；一頁升級多頁不另收費，月費自下一期改用多頁價。
 //           selectable：編輯器是否讓客戶選多頁版（建立網站時與「升級成多頁版」按鈕）。設 false 就全部隱藏。
 export const PLANS = {
   single: {
     id: 'self',
     layout: 'single',
     name: '自架版',
-    listMonthly: 690,   // 原價（顯示時以紅色斜線劃掉）
-    monthly: 599,       // 目前特價，每月
+    monthly: 599,       // 早鳥價，每月
     yearPaidMonths: 10  // 一次付 12 個月，只收 10 個月
   },
   multi: {
     id: 'self-multi',
     layout: 'multi',
     name: '自架版（多頁）',
-    listMonthly: 1090,  // 原價
-    monthly: 899,       // 目前特價，每月（2026-10 定案）
+    monthly: 899,       // 早鳥價，每月（2026-10 定案）
     yearPaidMonths: 10,
     selectable: true    // 編輯器開放選擇
   }
@@ -46,9 +44,9 @@ export function hasPrice(plan) {
 
 export const money = (n) => 'NT$' + Number(n).toLocaleString('en-US');
 
-// 價格劃掉的樣式（紅色斜線）
-export const STRIKE_STYLE = 'text-decoration:none;display:inline-block;padding:0 .25em;color:#9a8f80;' +
-  'background:linear-gradient(to top right,transparent calc(50% - 1.5px),#e5484d calc(50% - 1.5px),#e5484d calc(50% + 1.5px),transparent calc(50% + 1.5px))';
+// 早鳥價：截止日期填在 EARLY_BIRD_UNTIL（例如 '2026-12-31'）；官網靜態頁面的「（至 [截止日期]）」要一起改。
+export const EARLY_BIRD_UNTIL = '[截止日期]';
+export const earlyBird = (monthly) => '早鳥價 ' + money(monthly) + '／月（至 ' + EARLY_BIRD_UNTIL + '）';
 
 // 依租用月數算應付金額：每滿 12 個月付 10 個月，其餘月份按月計算。
 // layout 省略時是一頁版；方案價格未定案時回傳 null。

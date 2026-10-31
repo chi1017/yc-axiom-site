@@ -287,6 +287,11 @@ function loadHist(i){document.getElementById('historyPanel').classList.remove('o
 function clearHistory(){if(!confirm('確定清除所有紀錄？'))return;history=[];tmpStore.setItem('seo_hist_v8','[]');updateHistCount();renderHistory();}
 function updateHistCount(){document.getElementById('histCount').textContent=history.length;}
 function scoreColor(s){return s>=80?'#10b981':s>=60?'#f59e0b':'#ef4444';}
+// 平台給的子網域（例如 xxx.pages.dev、xxx.github.io）沒有 www 版本，不做 www／non-www 提醒
+const PLATFORM_HOST_RE=/\.(pages\.dev|workers\.dev|github\.io|gitlab\.io|netlify\.app|vercel\.app|web\.app|firebaseapp\.com|onrender\.com|herokuapp\.com|fly\.dev|surge\.sh|glitch\.me|replit\.app|azurestaticapps\.net|wixsite\.com|weebly\.com|wordpress\.com|blogspot\.com|myshopify\.com|webflow\.io|framer\.website|framer\.app|carrd\.co|squarespace\.com|notion\.site)$/i;
+function isPlatformHost(h){return PLATFORM_HOST_RE.test(String(h||'').replace(/\.$/,''));}
+// 分數評語（SEO 與 GEO 工具共用同一套區間）：90 以上優秀、80–89 良好、60–79 普通、60 以下需要優先處理
+function seoScoreTitle(s){return s>=90?'優秀':s>=80?'良好':s>=60?'普通，有不少可改善':'需要優先處理';}
 
 // ═══════════════════════════════════════════════════════
 //  v12: CONTENT ANALYSIS ENGINE
@@ -946,7 +951,7 @@ function analyzeHTML(html, kwList, bizName, bizType, sourceLabel, sourceDomain) 
   info.canonical=canonical;
   const canonicalChecks=[];
   if(!canonical){
-    canonicalChecks.push({ok:false,msg:'缺少 <link rel="canonical">，可能導致 www/non-www 或 http/https 重複內容被分開索引。'});
+    canonicalChecks.push({ok:false,msg:'缺少 <link rel="canonical">，可能導致同一頁的不同網址版本（例如 http／https、www／non-www）被分開索引。'});
     actions.push({priority:'medium',title:'加入 Canonical 標籤',detail:'<link rel="canonical" href="完整頁面URL"> 避免重複內容。'});
   }else{
     canonicalChecks.push({ok:true,msg:`Canonical 已設定：${canonical.slice(0,80)}`});
@@ -967,7 +972,7 @@ function analyzeHTML(html, kwList, bizName, bizType, sourceLabel, sourceDomain) 
     // www check
     if(sourceDomain){
       const canHost=new URL(canonical).hostname;
-      if(canHost!==sourceDomain) canonicalChecks.push({ok:false,msg:`Canonical host（${canHost}）與頁面 host（${sourceDomain}）不一致，可能有 www 重導向問題。`});
+      if(canHost!==sourceDomain) canonicalChecks.push({ok:false,msg:isPlatformHost(sourceDomain)?`Canonical host（${canHost}）與頁面 host（${sourceDomain}）不一致，搜尋引擎可能把這兩個網址當成不同網站。`:`Canonical host（${canHost}）與頁面 host（${sourceDomain}）不一致，可能有 www 重導向問題。`});
     }
   }
   info.canonicalChecks=canonicalChecks;
@@ -1153,7 +1158,7 @@ function analyzeHTML(html, kwList, bizName, bizType, sourceLabel, sourceDomain) 
     ? Math.max(10, Math.min(Math.round(techScore * 0.75 + kwCoverageScore * 0.25), 98))
     : Math.max(10, Math.min(techScore, 98));
 
-  const scoreTitle=score>=90?'優秀':score>=80?'良好':score>=60?'普通，有不少可改善':'需要優先處理';
+  const scoreTitle=seoScoreTitle(score);
 
   // 關鍵字 pill
   const kwPillStatus = kwResults.length === 0 ? 'warn'
@@ -1282,7 +1287,7 @@ function renderResults(r){
   // Count-up
   const el=document.getElementById('scoreNum');const lbl=document.createElement('div');lbl.className='score-lbl';lbl.textContent='/100';let n=0;
   const iv=setInterval(()=>{n=Math.min(n+Math.ceil(r.score/25),r.score);el.textContent=n;el.appendChild(lbl);if(n>=r.score)clearInterval(iv);},28);
-  document.getElementById('scoreTitle').textContent=r.scoreTitle;
+  document.getElementById('scoreTitle').textContent=seoScoreTitle(r.score);
   document.getElementById('scoreSummary').textContent=r.summary;
   document.getElementById('metricPills').innerHTML=r.metrics.map(m=>{
     const c=m.status==='pass'?'mp-pass':m.status==='warn'?'mp-warn':'mp-fail';
@@ -1762,7 +1767,7 @@ async function checkRedirectChain(url) {
   const issues = [];
   if (protocolNote) issues.push({ warn: true, msg: protocolNote });
   if (finalCode >= 400) issues.push({ warn: false, msg: `最終狀態碼 ${finalCode}，頁面可能無法訪問` });
-  if (url.includes('//www.') === false && !url.includes('http://www.') && inputHost && !inputHost.startsWith('www.'))
+  if (url.includes('//www.') === false && !url.includes('http://www.') && inputHost && !inputHost.startsWith('www.') && !isPlatformHost(inputHost))
     issues.push({ warn: true, msg: `你輸入的是 non-www 版本（${inputHost}），若伺服器將 www 設為主版本，可能存在 301 跳轉。建議在 canonical 中明確指定。` });
 
   if (issues.length) {
@@ -3339,25 +3344,39 @@ async function fetchPageSpeed(url){
   sec.style.display='block';
   el.innerHTML='<p style="padding:16px;color:var(--text2);font-size:13px"><span class="spin">⟳</span> 正在向 Google PageSpeed Insights 請求資料（約 10–30 秒）...</p>';
 
+  // 預設走本站的 Edge Function（pagespeed，使用站方的 API 金鑰）；在設定裡自己填了金鑰才直接呼叫 Google
   const apiKey = document.getElementById('psiApiKey')?.value?.trim() || '';
-  const base = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=mobile${apiKey?'&key='+apiKey:''}`;
+  const own = (() => { const c = window.YC_CONFIG; return c && c.supabaseUrl ? String(c.supabaseUrl).replace(/\/$/, '') + '/functions/v1/pagespeed' : null; })();
+  const psiUrl = (strategy) => (apiKey || !own)
+    ? `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${strategy}${apiKey?'&key='+encodeURIComponent(apiKey):''}`
+    : `${own}?url=${encodeURIComponent(url)}&strategy=${strategy}`;
+  const PSI_MSG = {
+    quota: '今天的 PageSpeed 檢測次數已經用完，請明天再試。其他 SEO 檢測項目不受影響。',
+    unreachable: 'Google 無法讀取這個網址，請確認網址可以公開開啟（不需要登入、沒有擋搜尋引擎）。',
+    failed: 'PageSpeed 暫時無法分析，請稍後再試。其他 SEO 檢測項目不受影響。'
+  };
+  // 錯誤一律轉成好懂的說明，不顯示原始錯誤訊息
+  function psiError(err){
+    if(err && err.code && PSI_MSG[err.code]) return PSI_MSG[err.code];
+    if(err && typeof err.message === 'string' && err.code && !/^\d+$/.test(String(err.code)) && /[\u4e00-\u9fff]/.test(err.message)) return err.message;
+    const t = JSON.stringify(err||{}).toLowerCase();
+    if(/quota|rate limit|resource_exhausted|"code":429/.test(t)) return PSI_MSG.quota;
+    if(/failed_document_request|errored_document_request|dns|not_html|invalid url|"code":400/.test(t)) return PSI_MSG.unreachable;
+    return PSI_MSG.failed;
+  }
+  function psiFail(msg){ el.innerHTML=`<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>${escHtml(msg)}</span></div></div>`; if(badge) badge.textContent=''; }
+  const getJson = (u) => fetch(u).then(async r => { let j = null; try { j = await r.json(); } catch(e) { j = null; } if(!j) j = { error: { code: r.status === 429 ? 'quota' : 'failed' } }; else if(!r.ok && !j.error) j.error = { code: r.status === 429 ? 'quota' : 'failed' }; return j; });
 
   let mobileData=null, desktopData=null;
   try{
-    const [mr,dr] = await Promise.all([
-      fetch(base+'&strategy=mobile').then(r=>r.json()),
-      fetch(base.replace('mobile','desktop')+'&strategy=desktop').then(r=>r.json())
-    ]);
+    const [mr,dr] = await Promise.all([getJson(psiUrl('mobile')), getJson(psiUrl('desktop'))]);
     mobileData=mr; desktopData=dr;
   }catch(e){
-    el.innerHTML=`<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>PageSpeed API 無法存取（${escHtml(e.message)}）。此功能需要網際網路連線且網址必須可公開存取。</span></div></div>`;
+    psiFail(PSI_MSG.failed);
     return;
   }
 
-  if(mobileData.error){
-    el.innerHTML=`<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>PageSpeed 錯誤：${escHtml(mobileData.error.message||'請確認網址可公開存取')}。</span></div></div>`;
-    return;
-  }
+  if(mobileData.error){ psiFail(psiError(mobileData.error)); return; }
 
   function cat(score){return score>=0.9?'good':score>=0.5?'needs':'poor';}
   function label(score){return score>=0.9?'良好':score>=0.5?'待改善':'較差';}
@@ -3573,7 +3592,7 @@ async function exportPDF(){
         </div>
       </div>
       <div style="flex:1">
-        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">${escHtml(r.scoreTitle||'')}</div>
+        <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">${escHtml(seoScoreTitle(r.score))}</div>
         <div style="font-size:12px;color:#aaa;line-height:1.6;margin-bottom:10px">${escHtml(r.summary||'')}</div>
         <div style="display:flex;gap:10px;">
           <span style="background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.25);padding:3px 10px;border-radius:12px;font-size:11px">✓ ${r.pass} 通過</span>
@@ -3727,7 +3746,7 @@ function copyText(){
   const rd=r.info.readability||{};
   const img=r.info.imgData||{};
   const txt=`SEO 分析報告 v15 Pro
-分數：${r.score}/100（${r.scoreTitle}）
+分數：${r.score}/100（${seoScoreTitle(r.score)}）
 ${r.summary}
 
 📊 可讀性：${rd.score}分（${rd.label}）· 平均句長 ${rd.avgSentLen}字
@@ -4537,7 +4556,7 @@ function shareReport() {
     const r = currentReport;
     const mini = {
       score: r.score,
-      title: r.scoreTitle,
+      title: seoScoreTitle(r.score),
       pass: r.pass, warn: r.warn, fail: r.fail,
       file: (r.info.fileName||'').slice(0,80),
       date: new Date().toLocaleDateString('zh-TW'),

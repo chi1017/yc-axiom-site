@@ -37,7 +37,7 @@
   function reportHtml(list) {
     var cur = (list || [])[0], prev = (list || [])[1];
     if (!cur) return '';
-    var lab = function (n) { return n >= 80 ? '良好' : n >= 60 ? '普通' : '需加強'; };
+    var lab = function (n) { return n >= 90 ? '優秀' : n >= 80 ? '良好' : n >= 60 ? '普通，有不少可改善' : '需要優先處理'; };
     var diff = function (a, b) { if (!prev) return ''; var d = a - b; return d > 0 ? '<span style="color:#34d399">▲ ' + d + '</span>' : d < 0 ? '<span style="color:#f87171">▼ ' + (-d) + '</span>' : '<span style="color:#9a8f80">持平</span>'; };
     var m = String(cur.month || '').slice(0, 7).replace('-', ' 年 ') + ' 月';
     var issues = Array.isArray(cur.top_issues) ? cur.top_issues.slice(0, 3) : [];
@@ -316,7 +316,7 @@
         var yq = PM.hasPrice && PM.hasPrice(P) ? PM.quote(12, s.layout, s.tier) : null;
         var pro = s.tier === 'pro' && PM.PRO_ADDON;
         planHtml = yq
-          ? '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + (pro ? '＋' + esc(PM.PRO_ADDON.name) : '') + '　' + (P.listMonthly && !pro ? '<span style="' + PM.STRIKE_STYLE + '">' + esc(PM.money(P.listMonthly)) + '</span> ' : '') + '<b>' + esc(PM.money(yq.monthly || P.monthly)) + '／月</b>' +
+          ? '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + (pro ? '＋' + esc(PM.PRO_ADDON.name) : '') + '　' + '<b>' + (pro || !PM.earlyBird ? esc(PM.money(yq.monthly || P.monthly)) + '／月' : esc(PM.earlyBird(P.monthly))) + '</b>' +
             '<br><span style="font-size:13px;color:#9a8f80">一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + esc(PM.money(yq.amount)) + '</span></p>'
           : '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + '<br><span style="font-size:13px;color:#9a8f80">費用確認中，我們會與你聯絡確認。</span></p>';
       } catch (e2) { /* 略過 */ }
