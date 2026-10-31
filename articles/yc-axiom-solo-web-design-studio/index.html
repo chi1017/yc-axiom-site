@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth"><head>
+<meta charset="UTF-8">
+<script>if(location.hostname==="chi1017.github.io"){location.replace("https://yc-axiom.pages.dev"+location.pathname.replace(/^\/yc-axiom-site/,"")+location.search+location.hash)}</script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-NFG74RGJTE', { send_page_view: false });
+    window.ycTrack = {
+        last: null,
+        page: function () {
+            var path = location.pathname;
+            if (this.last === path) return;
+            this.last = path;
+            gtag('event', 'page_view', { page_location: location.href, page_path: path, page_title: document.title });
+        }
+    };
+    (function () {
+        function load() { var s = document.createElement('script'); s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=G-NFG74RGJTE'; document.head.appendChild(s); }
+        window.addEventListener('load', function () { setTimeout(load, 1500); });
+    })();
+    // Lead clicks: LINE, Google Form, Email
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var h = a.getAttribute('href') || '', m = '';
+        if (/line\.me/.test(h)) m = 'line';
+        else if (/forms\.gle|docs\.google\.com\/forms/.test(h)) m = 'google_form';
+        else if (/^mailto:/.test(h)) m = 'email';
+        if (!m) return;
+        var pg = document.querySelector('.page.active');
+        gtag('event', 'generate_lead', { method: m, link_location: (a.classList.contains('line-float') || a.closest('.social-float')) ? 'floating_button' : (pg ? pg.id : 'unknown') });
+    });
+    </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>一人網頁設計工作室是什麼？YC AXIOM 為什麼把原始碼交給客人 - YC AXIOM</title>
+<meta name="description" content="YC AXIOM 是台中的一人網頁設計工作室。這篇用白話說明什麼是原始碼、建站平台與套版網站，為什麼網站所有權要在店家手上，以及找一人工作室做網站的優點與限制。">
+<meta name="author" content="YC AXIOM">
+<link rel="icon" type="image/png" href="https://yc-axiom.pages.dev/favicon-32.png">
+<link rel="apple-touch-icon" href="https://yc-axiom.pages.dev/apple-touch-icon.png">
+<link rel="manifest" href="https://yc-axiom.pages.dev/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="YC AXIOM">
+<link rel="canonical" href="https://yc-axiom.pages.dev/articles/yc-axiom-solo-web-design-studio/">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="一人網頁設計工作室是什麼？YC AXIOM 為什麼把原始碼交給客人 - YC AXIOM">
+<meta property="og:description" content="YC AXIOM 是台中的一人網頁設計工作室。這篇用白話說明什麼是原始碼、建站平台與套版網站，為什麼網站所有權要在店家手上，以及找一人工作室做網站的優點與限制。">
+<meta property="og:image" content="https://yc-axiom.pages.dev/og-image.png">
+<meta property="og:url" content="https://yc-axiom.pages.dev/articles/yc-axiom-solo-web-design-studio/">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="YC AXIOM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="一人網頁設計工作室是什麼？YC AXIOM 為什麼把原始碼交給客人 - YC AXIOM">
+<meta name="twitter:description" content="YC AXIOM 是台中的一人網頁設計工作室。這篇用白話說明什麼是原始碼、建站平台與套版網站，為什麼網站所有權要在店家手上，以及找一人工作室做網站的優點與限制。">
+<meta name="twitter:image" content="https://yc-axiom.pages.dev/og-image.png">
+<meta name="theme-color" content="#5FA396">
+<script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
+<!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="../../assets/dist/site.min.css?v=133fd8dc43">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "首頁",
+      "item": "https://yc-axiom.pages.dev/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "文章",
+      "item": "https://yc-axiom.pages.dev/articles/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "一人網頁設計工作室",
+      "item": "https://yc-axiom.pages.dev/articles/yc-axiom-solo-web-design-studio/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "一人網頁設計工作室是什麼？YC AXIOM 為什麼把原始碼交給客人",
+  "description": "YC AXIOM 是台中的一人網頁設計工作室。這篇用白話說明什麼是原始碼、建站平台與套版網站，為什麼網站所有權要在店家手上，以及找一人工作室做網站的優點與限制。",
+  "author": {
+    "@type": "Person",
+    "name": "Alan",
+    "jobTitle": "YC AXIOM 創辦人兼前端工程師",
+    "url": "https://yc-axiom.pages.dev/about/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "YC AXIOM",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://yc-axiom.pages.dev/og-image.png"
+    }
+  },
+  "mainEntityOfPage": "https://yc-axiom.pages.dev/articles/yc-axiom-solo-web-design-studio/",
+  "image": "https://yc-axiom.pages.dev/og-image.png",
+  "url": "https://yc-axiom.pages.dev/articles/yc-axiom-solo-web-design-studio/",
+  "datePublished": "2026-10-31",
+  "dateModified": "2026-10-31"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "YC AXIOM",
+  "alternateName": "YC D.S.",
+  "image": "https://yc-axiom.pages.dev/og-image.png",
+  "@id": "https://yc-axiom.pages.dev/#organization",
+  "url": "https://yc-axiom.pages.dev/",
+  "email": "ycaxiom@gmail.com",
+  "priceRange": "$$$",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "TW",
+    "addressLocality": "台中市"
+  },
+  "areaServed": [
+    "台中市",
+    "台北市",
+    "新北市",
+    "台灣"
+  ],
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday"
+    ],
+    "opens": "09:00",
+    "closes": "18:00"
+  },
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer service",
+    "email": "ycaxiom@gmail.com",
+    "availableLanguage": "zh-TW"
+  },
+  "knowsAbout": [
+    "商業網頁設計",
+    "品牌形象網站",
+    "電商網站設計",
+    "RWD 網頁設計",
+    "SEO 優化",
+    "GEO／AI 搜尋優化",
+    "UI/UX 設計",
+    "網站健檢與搶救",
+    "舊站改版",
+    "線上預約系統整合"
+  ],
+  "sameAs": [
+    "https://www.instagram.com/ycaxiom/",
+    "https://www.threads.com/@ycaxiom"
+  ],
+  "description": "YC AXIOM 專注於商業品牌網頁設計與前端工程，為店家、餐飲、教育、觀光等各類型產業打造高質感品牌網站。"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "一人網頁設計工作室和網頁設計公司差在哪？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "一人工作室從溝通、設計到寫程式都是同一個人，需求不會在轉手中走樣；公司則有分工，能同時處理較多案子。小店家的官網通常一人工作室就能完整負責。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "網站原始碼交給我之後，我要自己維護嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "不一定。拿到原始碼代表你有選擇權：可以自己改、交給任何工程師，或加購我們的維護方案。原始碼在你手上，就不會被單一平台或廠商綁住。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "用建站平台做網站有什麼風險？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "網站放在平台上，月費要持續繳、功能受平台限制；平台改規定或停止服務時，網站可能要被迫搬家。Weebly 退出台灣就是一個例子。"
+      }
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div id="page-loader" role="status" aria-live="polite" aria-label="YC 網站設計，讓你的品牌自帶光芒與實力。頁面載入中">
+    <div class="loader-mark">
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="ringGrad-load" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient>
+                <linearGradient id="yGrad-load" gradientUnits="userSpaceOnUse" x1="0" y1="14" x2="0" y2="50"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient>
+                <filter id="glow-load" filterUnits="userSpaceOnUse" x="-8" y="-8" width="80" height="80"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <path class="loader-draw loader-ring" pathLength="1" d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-load)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y1" pathLength="1" d="M18,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y2" pathLength="1" d="M46,14 L32,30" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+            <path class="loader-draw loader-y3" pathLength="1" d="M32,30 L32,50" stroke="url(#yGrad-load)" stroke-width="4" stroke-linecap="round" filter="url(#glow-load)"/>
+        </svg>
+    </div>
+    <span class="loader-flare" aria-hidden="true"></span>
+    <div class="loader-text" aria-hidden="true">
+        <div class="loader-name">YC AXIOM</div>
+        <p class="loader-slogan"><span class="ls-line"><span class="lc" style="--i:0">Y</span><span class="lc" style="--i:1">C</span><span class="lc" style="--i:2">&nbsp;</span><span class="lc" style="--i:3">網</span><span class="lc" style="--i:4">站</span><span class="lc" style="--i:5">設</span><span class="lc" style="--i:6">計</span><span class="lc" style="--i:7">，</span></span><span class="ls-line"><span class="lc" style="--i:8">讓</span><span class="lc" style="--i:9">你</span><span class="lc" style="--i:10">的</span><span class="lc" style="--i:11">品</span><span class="lc" style="--i:12">牌</span><span class="lc" style="--i:13">自</span><span class="lc" style="--i:14">帶</span><span class="lc hl" style="--i:15">光</span><span class="lc hl" style="--i:16">芒</span><span class="lc" style="--i:17">與</span><span class="lc hl" style="--i:18">實</span><span class="lc hl" style="--i:19">力</span><span class="lc" style="--i:20">。</span></span></p>
+    </div>
+</div>
+<script>
+(function () {
+    var root = document.documentElement, loader = document.getElementById('page-loader');
+    if (!loader) return;
+    try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
+    root.classList.add('is-loading');
+    var start = Date.now(), MIN = 3200, MAX = 6500, closed = false;
+    function close() {
+        if (closed) return; closed = true;
+        loader.classList.add('is-done');
+        root.classList.remove('is-loading');
+        setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 1300);
+    }
+    function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
+    loader.addEventListener('click', close); /* 點一下就能略過 */
+})();
+</script>
+
+
+<!-- Scroll Progress Bar -->
+<div id="scroll-progress"></div>
+
+<!-- Custom Cursor Elements -->
+<div id="cursor-dot"></div>
+<div id="cursor-follower"></div>
+
+
+
+<!-- ── NAV ── -->
+<nav>
+    <div class="nav-inner">
+        <a href="../../" class="nav-logo magnetic" aria-label="YC AXIOM [品牌與工程] 首頁">
+            <div class="nav-logo-img">
+                <div class="logo-mark logo-mark--nav" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ringGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="45%" stop-color="#F5F2EA"/><stop offset="100%" stop-color="#C7C0AE"/></linearGradient><linearGradient id="yGrad-nav" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#8CD2C2"/><stop offset="48%" stop-color="#5FA396"/><stop offset="100%" stop-color="#3C7A6D"/></linearGradient><filter id="glow-nav" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="0.8" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M54.1,16.5 A27,27 0 1 0 54.1,47.5" stroke="url(#ringGrad-nav)" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round" filter="url(#glow-nav)"/><path d="M18,14 L32,30 M46,14 L32,30 M32,30 L32,50" stroke="url(#yGrad-nav)" stroke-width="4" stroke-linecap="round" filter="url(#glow-nav)"/></svg></div>
+            </div>
+            <div class="nav-logo-text">
+                <div class="nav-logo-name">YC AXIOM</div>
+                <div class="nav-logo-sub">[品牌與工程]</div>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li><a href="../../services/" class="nav-link">服務項目</a></li>
+            <li><a href="../../rental/" class="nav-link">網站租用</a></li>
+            <li><a href="../../works/" class="nav-link">作品集</a></li>
+            <li><a href="../../pricing/" class="nav-link">定價</a></li>
+            <li><a href="../../articles/" class="nav-link active" aria-current="page">文章</a></li>
+            <li class="nav-dd"><a href="../../seo/" class="nav-link" aria-haspopup="true">免費工具</a><ul class="nav-sub"><li><a href="../../seo/">SEO 檢測</a></li><li><a href="../../geo/">GEO 檢測<small>AI 可見度</small></a></li></ul></li>
+            <li><a href="../../about/" class="nav-link">關於</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <a href="../../contact/" class="nav-cta magnetic">免費諮詢</a>
+
+            <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="切換為淺色模式" title="切換為淺色模式">
+                <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+            </button>
+
+            <button class="hamburger" onclick="toggleMobileMenu()" aria-label="開啟選單">選單 ☰</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" aria-label="網站選單">
+    <button class="mobile-close" onclick="toggleMobileMenu()" aria-label="關閉選單">✕</button>
+    <a class="mobile-nav-btn" href="../../services/">服務項目</a>
+    <a class="mobile-nav-btn" href="../../rental/">網站租用</a>
+    <a class="mobile-nav-btn" href="../../works/">作品集</a>
+    <a class="mobile-nav-btn" href="../../pricing/">定價</a>
+    <a class="mobile-nav-btn" href="../../articles/" aria-current="page">文章</a>
+    <a class="mobile-nav-btn" href="../../seo/">SEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../geo/">GEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../about/">關於</a>
+    <a class="mobile-nav-btn mobile-cta" href="../../contact/">免費諮詢</a>
+</div>
+
+
+<main>
+<section id="page-article-yc-axiom-solo-web-design-studio" class="page showing active">
+    <div class="container section-pad">
+        <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../../">首頁</a><span aria-hidden="true">›</span><a href="../../articles/">文章</a><span aria-hidden="true">›</span><span aria-current="page">一人網頁設計工作室</span></div>
+        <p class="section-eyebrow reveal">Story / YC AXIOM 的故事 01</p>
+        <h1 class="section-title reveal">一人網頁設計工作室，<br>為什麼把原始碼交給客人.</h1>
+        <div class="article-meta reveal" style="margin-top:20px;">
+            <span>品牌故事</span>
+            <span>網頁設計工作室</span>
+            <span>閱讀時間約 5 分鐘</span>
+            <span>更新：2026/10/31</span>
+        </div>
+
+        <div class="article-body reveal">
+            <p>YC AXIOM 是我（Alan）一個人經營的網頁設計工作室，在台中，服務全台灣的店家。從跟店家聊需求、畫設計稿，到寫程式、讓網站上線，都是同一個人負責。到現在接案大約一年。這篇是 YC AXIOM 從 0 開始的第一篇，說明我為什麼用這樣的方式做網站。</p>
+
+            <h2>我看到的問題：很多店家的網站其實不屬於自己</h2>
+            <p>很多小店的網站是用「建站平台」做的，例如 Wix、Weebly 這類線上拖拉就能做網站的服務。建站平台很方便，但網站其實放在平台上：月費要一直繳，版面和功能只能用平台提供的，平台一改規定或停止服務，店家只能跟著走。</p>
+            <p>Weebly 退出台灣就是真實的例子。我的第一個真實案子 iMassage 專業按摩就遇到這件事，網站必須在平台停止服務前全部搬走。這讓我更確定：網站應該是店家自己的資產，不是租來的空間。</p>
+
+            <h2>先解釋三個名詞</h2>
+            <ul>
+                <li><strong>原始碼</strong>：組成網站的檔案，就像房子的設計圖和建材。拿到原始碼，網站就能搬到任何主機，也能交給任何工程師修改。</li>
+                <li><strong>套版網站</strong>：用現成版型改文字和照片做出來的網站。速度快、便宜，但版面跟很多人一樣，背後常常載入一堆用不到的程式，網頁變慢。</li>
+                <li><strong>SEO</strong>：搜尋引擎最佳化，讓 Google 更容易找到、讀懂你的網站，客人搜尋時你才會出現在前面。</li>
+            </ul>
+
+            <h2>YC AXIOM 做網站的三個原則</h2>
+            <ol>
+                <li><strong>原始碼完整交給你</strong>：客製網站驗收後，我把網站檔案和 Figma 設計稿（Figma 是畫網頁設計圖的工具）全部交出去，不綁約、沒有強制月費。之後你要自己維護或交給別人都可以。</li>
+                <li><strong>不用太重的套版軟體</strong>：網站用乾淨的程式從頭寫，打開速度快、結構清楚，Google 和 ChatGPT 這類 AI 也比較讀得懂。</li>
+                <li><strong>一個人從頭負責到尾</strong>：你不會遇到業務轉手，問題直接問做的人。</li>
+            </ol>
+
+            <h2>找一人網頁設計工作室，優點與限制</h2>
+            <p>優點是溝通不會失真：你說的需求，就是寫程式的人親耳聽到的，不用經過業務轉述。修改也直接，不用等層層傳話。</p>
+            <p>限制是同時能接的案子有限，所以每個案子開工前都會先講好時程：單頁形象網站約 2–3 週，多頁品牌網站約 3–5 週。付款分兩期，簽約付 50%、驗收後付 50%，上線後有 30 天免費保固。每個階段都會給你一個預覽網址，確認了才往下一步。</p>
+
+            <h2>下一篇</h2>
+            <p>我接的前兩個真實案子，一個是網站搬家、一個是從零做官網，各自教了我不同的事。下一篇〈<a href="../yc-axiom-first-two-website-cases/">網站搬家與從零做官網：前兩個真實案例學到的事</a>〉會完整說明。想先了解費用，可以看<a href="../../pricing/">定價</a>；想知道更多關於我，可以看<a href="../../about/">關於 YC AXIOM</a>。</p>
+
+            <h2>常見問題</h2>
+            <h3>一人網頁設計工作室和網頁設計公司差在哪？</h3>
+            <p>一人工作室從溝通、設計到寫程式都是同一個人，需求不會在轉手中走樣；公司則有分工，能同時處理較多案子。小店家的官網通常一人工作室就能完整負責。</p>
+            <h3>網站原始碼交給我之後，我要自己維護嗎？</h3>
+            <p>不一定。拿到原始碼代表你有選擇權：可以自己改、交給任何工程師，或加購我們的維護方案。原始碼在你手上，就不會被單一平台或廠商綁住。</p>
+            <h3>用建站平台做網站有什麼風險？</h3>
+            <p>網站放在平台上，月費要持續繳、功能受平台限制；平台改規定或停止服務時，網站可能要被迫搬家。Weebly 退出台灣就是一個例子。</p>
+
+        </div>
+
+        <div class="cta-banner reveal" style="margin-top:64px;">
+            <p>Free Consultation / 免費諮詢</p>
+            <h3>想要一個屬於自己的網站？<br><span>加 LINE 聊聊你的需求，免費諮詢。</span></h3>
+            <div class="sp-actions" style="justify-content:center;"><a href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" class="btn-primary magnetic">LINE 免費諮詢</a><a href="../../contact/" class="btn-secondary magnetic">聯絡我們</a></div>
+        </div>
+
+        <div class="sp-related reveal"><h2 class="sp-h2 sp-h2--sm">相關連結</h2><ul><li><a href="../../about/">關於 YC AXIOM →</a></li><li><a href="../../pricing/">定價與方案 →</a></li><li><a href="../yc-axiom-first-two-website-cases/">前兩個真實案例學到的事 →</a></li><li><a href="../yc-axiom-website-rental-and-free-seo-tools/">網站租用與免費檢測工具的由來 →</a></li><li><a href="../">更多文章 →</a></li></ul></div>
+    </div>
+</section>
+</main>
+
+
+
+<a class="line-float" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）"><svg class="line-ico" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg><span>LINE 諮詢</span></a>
+<div class="social-float" role="group" aria-label="社群與聯絡">
+    <a class="sf sf-line" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener" aria-label="用 LINE 聯絡 YC AXIOM（@788cblaq）" data-tip="LINE 諮詢"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2C6.48 2 2 5.74 2 10.34c0 4.12 3.56 7.57 8.37 8.22.33.07.77.22.88.5.1.25.07.65.03.9l-.14.85c-.04.25-.2.99.87.54 1.07-.45 5.77-3.4 7.87-5.82C21.3 13.9 22 12.2 22 10.34 22 5.74 17.52 2 12 2z"/></svg></a>
+    <a class="sf sf-threads" href="https://www.threads.com/@ycaxiom" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Threads（@ycaxiom）" data-tip="Threads"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" d="M16.8 11.2c-.3-3.4-2.3-5.1-5.2-5.1-2.9 0-5 2-5 5.9 0 3.9 2.1 6.1 5.2 6.1 2.7 0 4.3-1.5 4.3-3.4 0-1.9-1.6-3-3.7-3-1.8 0-2.7.9-2.7 1.9 0 1 .8 1.7 2 1.7 1.7 0 3-1 3-3.8"/></svg></a>
+    <a class="sf sf-ig" href="https://www.instagram.com/ycaxiom/" target="_blank" rel="noopener" aria-label="YC AXIOM 的 Instagram（@ycaxiom）" data-tip="Instagram"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="12" r="3.9" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.1" cy="6.9" r="1.1" fill="currentColor"/></svg></a>
+</div>
+
+
+
+<!-- ── FOOTER ── -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-nav">
+            <a href="../../">首頁</a>
+            <a href="../../about/">關於</a>
+            <a href="../../services/">服務項目</a>
+            <a href="../../works/">作品集</a>
+            <a href="../../articles/">文章</a>
+            <a href="../../seo/">SEO 工具</a>
+            <a href="../../pricing/">定價</a>
+            <a href="../../rental/">網站租用</a>
+            <a href="../../contact/">聯絡</a>
+        </div>
+        <div class="footer-services" aria-label="服務與地區"><a href="../../services/brand-website/">品牌形象網站</a><a href="../../services/ecommerce-website/">品牌電商網站</a><a href="../../services/seo-performance/">SEO 與效能調校</a><a href="../../services/geo-optimization/">GEO／AI 搜尋優化</a><a href="../../services/custom-system/">全客製多頁與系統</a><a href="../../services/data-cleaning/">商業資料清洗與整理</a><a href="../../services/market-intelligence/">市場情報與競品分析</a><a href="../../taichung-web-design/">台中網頁設計</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程<a class="footer-privacy" href="../../privacy/">隱私權政策</a></div>
+        <div class="footer-status">
+            <span class="status-dot"></span>
+            現正接案中 · 台灣在地服務 · 服務時間：週一至週五 09:00–18:00
+        </div>
+    </div>
+</footer>
+<script src="../../assets/dist/site.min.js?v=f909c759f8" defer></script>
+</body>
+</html>

@@ -1711,3 +1711,7 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
   .pc-table th:first-child { position: static; }
 }
 @media (max-width: 900px) { .pricing-tabs { grid-template-columns: repeat(3, 1fr); } .pricing-tab { padding: 12px 4px; font-size: 13.5px; } }
+
+/* 文章內的小標（h3）比段落標題（h2）小一級 */
+.article-body h2 + h3, .article-body h3 { font-family: var(--f-ui); font-size: 21px; font-weight: 700; line-height: 1.4; margin: 34px 0 12px; letter-spacing: 0.02em; }
+@media (max-width: 640px) { .article-body h3 { font-size: 18px; margin: 28px 0 10px; } }
