@@ -28,6 +28,9 @@
 ## 作品與文章
 
 - [作品集](https://yc-axiom.pages.dev/works/)
+- [一人網頁設計工作室是什麼？YC AXIOM 為什麼把原始碼交給客人](https://yc-axiom.pages.dev/articles/yc-axiom-solo-web-design-studio/)
+- [網站搬家與從零做官網：YC AXIOM 前兩個真實案例學到的事](https://yc-axiom.pages.dev/articles/yc-axiom-first-two-website-cases/)
+- [從客製網站到網站租用：小店月租官網與免費 SEO 檢測工具的由來](https://yc-axiom.pages.dev/articles/yc-axiom-website-rental-and-free-seo-tools/)
 - [小店需要官網嗎？跟只有 IG 差在哪](https://yc-axiom.pages.dev/articles/shop-website-vs-instagram/)
 - [客人用 ChatGPT 找店，你的店會被推薦嗎](https://yc-axiom.pages.dev/articles/chatgpt-recommend-your-shop/)
 - [Weebly 搬家完整指南](https://yc-axiom.pages.dev/articles/imassage-weebly-to-wordpress/)
