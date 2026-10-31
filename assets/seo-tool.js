@@ -3821,7 +3821,8 @@ window.renderResults = function(r) {
   // 實際檢查項目數（動態）與低分行動呼籲
   try {
     const totalChecks = (r.pass||0) + (r.warn||0) + (r.fail||0);
-    // 「40+ 項」是全部分析區塊的規則數；totalChecks 只是評分清單的項目數（另外顯示在檢查摘要），不覆蓋標題
+    // 頁面上的「N 項」顯示實際檢查的項目數
+    if (totalChecks > 0) document.querySelectorAll('.js-rule-count').forEach(function (el) { el.textContent = totalChecks + ' 項'; });
     const cta = document.getElementById('seoCta');
     const js = r.info && r.info.jsSite && r.info.jsSite.is;
     const jw=document.getElementById('jsWarn'), jsg=document.getElementById('jsSuggest');
