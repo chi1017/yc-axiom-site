@@ -44,8 +44,8 @@ export function hasPrice(plan) {
 
 export const money = (n) => 'NT$' + Number(n).toLocaleString('en-US');
 
-// 早鳥價：截止日期填在 EARLY_BIRD_UNTIL（例如 '2026-12-31'）；官網靜態頁面的「（至 [截止日期]）」要一起改。
-export const EARLY_BIRD_UNTIL = '[截止日期]';
+// 早鳥價：截止日期填在 EARLY_BIRD_UNTIL（例如 '2026-12-31'）；官網靜態頁面的「（至 2027/2/3）」要一起改。
+export const EARLY_BIRD_UNTIL = '2027/2/3';
 export const earlyBird = (monthly) => '早鳥價 ' + money(monthly) + '／月（至 ' + EARLY_BIRD_UNTIL + '）';
 
 // 依租用月數算應付金額：每滿 12 個月付 10 個月，其餘月份按月計算。
