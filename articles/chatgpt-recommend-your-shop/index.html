@@ -64,7 +64,7 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="../../assets/dist/site.min.css?v=e2de00bc5c">
+<link rel="stylesheet" href="../../assets/dist/site.min.css?v=b4d76b3ad3">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -94,6 +94,46 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "做了這些，多久會看到效果？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "沒有固定時間。搜尋引擎和 AI 重新讀取網頁需要時間，通常要以數週到數個月來看，所以建議做完後每個月用同樣的問題檢查一次。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "可以付費讓 ChatGPT 推薦我的店嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "AI 回答裡的推薦，目前沒有可以花錢保證的管道。即使平台推出廣告，也會另外標示，跟一般的推薦是兩回事。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "沒有官網，只有 Google 商家檔案和 IG，AI 找得到我嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "有機會，尤其是 Google 商家資料完整、評論多的店。但可讀到的資訊比較少，AI 對你的描述也比較容易不完整。有官網，就多了一個由你自己掌控、寫得最完整的資訊來源。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "GEO 跟 SEO 要分開做嗎？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "大部分工作是重疊的：清楚的文字內容、一致的店家資料、結構化資料，對兩者都有幫助。可以先把 SEO 的基本功做好，再針對 AI 補強常見問答和一句話介紹。"
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "Article",
   "headline": "客人用 ChatGPT 找店，你的店會被推薦嗎",
   "description": "越來越多人直接問 ChatGPT、Gemini「附近哪家店不錯」。整理 AI 推薦店家時會參考哪些資訊、小店可以怎麼讓 AI 讀懂自己，以及用免費 GEO 檢測先看看現況。",
@@ -113,7 +153,7 @@
   "image": "https://yc-axiom.pages.dev/og-image.png",
   "url": "https://yc-axiom.pages.dev/articles/chatgpt-recommend-your-shop/",
   "datePublished": "2026-10-29",
-  "dateModified": "2026-10-29"
+  "dateModified": "2026-11-03"
 }
 </script>
 <script type="application/ld+json">
@@ -238,7 +278,7 @@
             <li><a href="../../works/" class="nav-link">作品集</a></li>
             <li><a href="../../pricing/" class="nav-link">定價</a></li>
             <li><a href="../../articles/" class="nav-link active" aria-current="page">文章</a></li>
-            <li class="nav-dd"><a href="../../seo/" class="nav-link" aria-haspopup="true">免費工具</a><ul class="nav-sub"><li><a href="../../seo/">SEO 檢測</a></li><li><a href="../../geo/">GEO 檢測<small>AI 可見度</small></a></li></ul></li>
+            <li class="nav-dd"><a href="../../seo/" class="nav-link" aria-haspopup="true">免費工具</a><ul class="nav-sub"><li><a href="../../seo/">SEO 檢測</a></li><li><a href="../../geo/">GEO 檢測<small>AI 可見度</small></a></li><li><a href="../../tools/image-compress/">圖片壓縮</a></li><li><a href="../../tools/">全部工具<small>工具總覽</small></a></li></ul></li>
             <li><a href="../../about/" class="nav-link">關於</a></li>
         </ul>
 
@@ -265,6 +305,7 @@
     <a class="mobile-nav-btn" href="../../articles/" aria-current="page">文章</a>
     <a class="mobile-nav-btn" href="../../seo/">SEO 檢測</a>
     <a class="mobile-nav-btn" href="../../geo/">GEO 檢測</a>
+    <a class="mobile-nav-btn" href="../../tools/">全部免費工具</a>
     <a class="mobile-nav-btn" href="../../about/">關於</a>
     <a class="mobile-nav-btn mobile-cta" href="../../contact/">免費諮詢</a>
 </div>
@@ -279,35 +320,74 @@
         <div class="article-meta reveal" style="margin-top:20px;">
             <span>AI 搜尋 / GEO</span>
             <span>小店經營</span>
-            <span>閱讀時間約 5 分鐘</span>
-            <span>更新：2026/10/29</span>
+            <span>閱讀時間約 10 分鐘</span>
+            <span>更新：2026/11/03</span>
         </div>
 
         <div class="article-body reveal">
-            <p>以前客人找店，是打開 Google 搜尋或地圖；現在有越來越多人直接問 ChatGPT、Gemini 或 Perplexity：「台中有沒有適合帶小孩的早午餐？」AI 會直接給出幾家店名和理由。你的店會出現在答案裡嗎？這篇說明 AI 推薦店家的方式，以及小店可以先做的幾件事。</p>
+            <p>以前客人找店，是打開 Google 搜尋或地圖；現在有越來越多人直接問 ChatGPT、Gemini 或 Perplexity：「台中有沒有適合帶小孩的早午餐？」AI 會直接給出幾家店名和理由。你的店會出現在答案裡嗎？這篇說明 AI 推薦店家的方式，並整理成小店可以照著做的檢查步驟。</p>
+
+            <h2>客人問 AI 找店，有哪幾種情況</h2>
+            <ul>
+                <li><strong>問有連網搜尋的 AI：</strong>例如開啟搜尋功能的 ChatGPT、Perplexity。AI 會即時上網查資料，讀幾個網頁後整理成答案，通常會附上來源連結。</li>
+                <li><strong>在 Google 搜尋時看到 AI 摘要：</strong>Google 有時會在搜尋結果最上方放一段 AI 整理的回答，下面才是一般的搜尋結果。</li>
+                <li><strong>問沒有連網的 AI：</strong>AI 只能靠它先前學過的資料回答，比較新的店或資訊比較少的店，常常不會被提到。</li>
+            </ul>
+            <p>前兩種情況，AI 讀的就是網路上現在的公開資訊，這也是小店最能使力的地方。</p>
 
             <h2>AI 怎麼決定推薦哪幾家</h2>
-            <p>AI 工具回答「推薦哪家店」時，通常會綜合它能讀到的公開資訊：店家官網、地圖上的商家資料、評論與媒體文章等。具有連網搜尋功能的 AI，會即時查詢網頁再整理答案。換句話說，網路上關於你的資訊越清楚、越一致，AI 越容易正確理解並提到你；資訊太少或彼此矛盾，就容易被略過，甚至被寫錯。</p>
+            <p>AI 工具回答「推薦哪家店」時，通常會綜合它能讀到的公開資訊：店家官網、地圖上的商家資料、評論與媒體文章等。網路上關於你的資訊越清楚、越一致，AI 越容易正確理解並提到你；資訊太少或彼此矛盾，就容易被略過，甚至被寫錯。這類讓網站更容易被 AI 讀懂、引用的工作，業界常稱為 GEO（Generative Engine Optimization，生成式引擎優化），可以把它想成「給 AI 看的 SEO」。</p>
 
             <h2>AI 比較難讀懂的情況</h2>
             <ul>
                 <li>資訊只放在 IG 貼文或圖片裡，沒有文字版本。</li>
                 <li>網站內容大多靠圖片呈現，營業時間、價目做成一張圖。</li>
-                <li>店名、地址、電話在不同平台寫法不一樣。</li>
+                <li>店名、地址、電話在不同平台寫法不一樣，例如一處寫「台中市西區」，另一處寫「西區」又少了門牌。</li>
                 <li>網站沒有清楚說明「你是什麼店、在哪裡、適合誰」。</li>
+                <li>網站設定擋掉了搜尋引擎或 AI 的讀取程式，自己卻不知道。</li>
             </ul>
 
+            <h2>動手做：五個步驟檢查你的店</h2>
+            <ol>
+                <li><strong>用客人的口吻問 AI 一次：</strong>打開兩三個 AI 工具，問「台中西區有什麼適合下午茶的甜點店」這類客人會問的問題，換成你的地區和店的類型。記下你有沒有出現、AI 怎麼描述你、資訊有沒有錯。</li>
+                <li><strong>直接問 AI 你的店名：</strong>問「〇〇店是什麼樣的店？營業時間是？」。如果 AI 說不知道或說錯，代表網路上關於你的資訊不夠清楚。</li>
+                <li><strong>統一各平台的基本資料：</strong>把官網、Google 商家檔案、IG 簡介、LINE 官方帳號的店名、地址、電話、營業時間對一遍，改成完全相同的寫法。</li>
+                <li><strong>把重要資訊寫成文字放上官網：</strong>包括一句話介紹、價目、營業時間和常見問答（做法見下一段）。</li>
+                <li><strong>用免費工具檢查網站：</strong>用 <a href="../../geo/">GEO 檢測</a>看 AI 讀不讀得到你的網站，一個月後再用同樣的問題問 AI 一次，比較前後差異。</li>
+            </ol>
+
             <h2>讓 AI 讀懂你的店：四個基本功</h2>
-            <p><strong>一、重要資訊用文字寫在官網上。</strong>店名、地址、營業時間、價目、服務項目，用文字而不是圖片呈現。<strong>二、用一句話說清楚你是誰。</strong>例如「台中西區的親子友善早午餐店，週末提供兒童餐」，比「用心做好每一份餐點」更容易被理解與引用。<strong>三、常見問題寫成問答。</strong>客人常問的事（停車、預約、能不能帶寵物）整理成問答，正好對應 AI 被問到的問題。<strong>四、加上結構化資料。</strong>在網頁裡用 schema.org 標記店家類型、地址與營業時間，搜尋引擎與 AI 都比較容易正確讀取。</p>
+            <p><strong>一、重要資訊用文字寫在官網上。</strong>店名、地址、營業時間、價目、服務項目，用文字而不是圖片呈現。如果菜單一定要用設計好的圖片，就在圖片下方再放一份文字版。</p>
+            <p><strong>二、用一句話說清楚你是誰。</strong>公式是「地區＋店的類型＋特色＋適合誰」。例如「台中西區的親子友善早午餐店，週末提供兒童餐」，比「用心做好每一份餐點」更容易被理解與引用，因為後者沒有任何一個客人會拿來搜尋的詞。</p>
+            <p><strong>三、常見問題寫成問答。</strong>客人常問的事（停車、預約、能不能帶寵物、有沒有素食）整理成一問一答，正好對應客人問 AI 的方式。問題寫成客人會說的話，例如「可以帶狗進去嗎？」，回答第一句就直接給答案。</p>
+            <p><strong>四、加上結構化資料。</strong>結構化資料是寫在網頁程式碼裡、給機器看的標籤（業界常用 schema.org 這套格式），用來標明「這是一家甜點店、地址在哪、幾點營業」。客人看不到它，但搜尋引擎與 AI 能更準確地讀取。另外也可以放一個 llms.txt 檔案，用簡單的文字整理網站重點給 AI 參考；這是比較新的做法，目前不是每個 AI 都會讀，但成本很低。</p>
+
+            <h2>改寫前後對照：三個常見例子</h2>
+            <ul>
+                <li><strong>店家介紹：</strong>改寫前「堅持品質，給你最好的服務」；改寫後「台中北屯的韓式烤肉店，提供包廂與代烤服務，適合家庭聚餐與公司聚會」。後者包含地區、類型、特色和適合的客群，客人問 AI 時用的正是這些詞。</li>
+                <li><strong>營業時間：</strong>改寫前是一張設計好的營業時間圖；改寫後在圖片下方加一行文字「週二至週日 11:30–21:00，週一公休，國定假日照常營業」。</li>
+                <li><strong>常見問題：</strong>改寫前把「本店不提供停車」寫在 IG 留言回覆裡；改寫後在官網問答區寫「附近哪裡可以停車？」，回答「店門口沒有停車位，步行三分鐘有公有停車場」。</li>
+            </ul>
+            <p>這些改寫都不需要技術，只要站在客人的角度，把他們會問的問題、會用的詞寫出來。</p>
 
             <h2>也別忘了 Google 商家與評論</h2>
-            <p>官網之外，Google 商家檔案（地圖）的資料要完整，並與官網一致；真實的客人評論也是很多 AI 參考的來源。不需要刻意操作，只要資訊正確、持續更新，就是最穩的做法。</p>
+            <p>官網之外，Google 商家檔案的資料要完整，並與官網一致；真實的客人評論也是很多 AI 參考的來源。可以在結帳時或用 LINE 邀請滿意的客人留下評論，並認真回覆每一則。不要買評論或用好處換好評，這違反平台規則，被發現反而會傷害店家信用。</p>
 
             <h2>老實說：沒有人能保證 AI 一定推薦你</h2>
-            <p>各家 AI 的運作方式不同，也一直在變，任何人都無法保證「做了什麼就一定會被推薦」。能做的，是讓你的店在網路上有清楚、正確、容易讀取的資訊，提高被正確理解的機會。</p>
+            <p>各家 AI 的運作方式不同，也一直在變，任何人都無法保證「做了什麼就一定會被推薦」。如果有人跟你保證「付費就能讓 ChatGPT 推薦你」，要特別小心。能做的，是讓你的店在網路上有清楚、正確、容易讀取的資訊，提高被正確理解的機會；這些工作同時也會讓一般搜尋和真人客人更容易看懂你，不會白做。</p>
 
             <h2>先看看現況：免費 GEO 檢測</h2>
             <p>想知道 AI 讀不讀得懂你的網站，可以用我們的免費 <a href="../../geo/">GEO 檢測</a>，輸入網址就會列出 AI 可讀性的問題與建議；<a href="../../seo/">SEO 檢測</a>則檢查一般搜尋的基本體質。還沒有官網的店家，可以參考<a href="../../rental/">網站租用</a>：每個版型都已內建結構化資料、常見問題區塊與 llms.txt，內容自己填好就能上線。</p>
+
+            <h2>常見問題</h2>
+            <h3>做了這些，多久會看到效果？</h3>
+            <p>沒有固定時間。搜尋引擎和 AI 重新讀取網頁需要時間，通常要以數週到數個月來看，所以建議做完後每個月用同樣的問題檢查一次。</p>
+            <h3>可以付費讓 ChatGPT 推薦我的店嗎？</h3>
+            <p>AI 回答裡的推薦，目前沒有可以花錢保證的管道。即使平台推出廣告，也會另外標示，跟一般的推薦是兩回事。</p>
+            <h3>沒有官網，只有 Google 商家檔案和 IG，AI 找得到我嗎？</h3>
+            <p>有機會，尤其是 Google 商家資料完整、評論多的店。但可讀到的資訊比較少，AI 對你的描述也比較容易不完整。有官網，就多了一個由你自己掌控、寫得最完整的資訊來源。</p>
+            <h3>GEO 跟 SEO 要分開做嗎？</h3>
+            <p>大部分工作是重疊的：清楚的文字內容、一致的店家資料、結構化資料，對兩者都有幫助。可以先把 SEO 的基本功做好，再針對 AI 補強常見問答和一句話介紹。</p>
         </div>
 
         <div class="cta-banner reveal" style="margin-top:64px;">
@@ -342,6 +422,7 @@
             <a href="../../works/">作品集</a>
             <a href="../../articles/">文章</a>
             <a href="../../seo/">SEO 工具</a>
+            <a href="../../learn/">問題中心</a>
             <a href="../../pricing/">定價</a>
             <a href="../../rental/">網站租用</a>
             <a href="../../contact/">聯絡</a>
