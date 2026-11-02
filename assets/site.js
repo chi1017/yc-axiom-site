@@ -84,8 +84,8 @@
             const w = displayWidth();
             const h = displayHeight();
             ctx.clearRect(0, 0, w, h);
-            ctx.fillStyle = 'rgba(95, 163, 150, 0.6)';
-            ctx.strokeStyle = 'rgba(95, 163, 150, 0.08)';
+            ctx.fillStyle = 'rgba(181, 155, 106, 0.6)';
+            ctx.strokeStyle = 'rgba(181, 155, 106, 0.08)';
 
             particles.forEach((p, i) => {
                 p.x += p.vx; p.y += p.vy;
@@ -111,7 +111,7 @@
                 const mDist = Math.hypot(p.x - mouseX, p.y - mouseY);
                 if (mDist < 100) {
                     ctx.beginPath();
-                    ctx.strokeStyle = 'rgba(95, 163, 150, 0.25)';
+                    ctx.strokeStyle = 'rgba(181, 155, 106, 0.25)';
                     ctx.moveTo(p.x, p.y);
                     ctx.lineTo(mouseX, mouseY);
                     ctx.stroke();
@@ -235,11 +235,11 @@
             el.addEventListener('mouseenter', () => {
                 cursorFollower.style.transform = 'translate(-50%, -50%) scale(1.4)';
                 cursorFollower.style.borderColor = 'var(--accent)';
-                cursorFollower.style.backgroundColor = 'rgba(95, 163, 150, 0.05)';
+                cursorFollower.style.backgroundColor = 'rgba(181, 155, 106, 0.05)';
             });
             el.addEventListener('mouseleave', () => {
                 cursorFollower.style.transform = 'translate(-50%, -50%) scale(1)';
-                cursorFollower.style.borderColor = 'rgba(95, 163, 150, 0.4)';
+                cursorFollower.style.borderColor = 'rgba(181, 155, 106, 0.4)';
                 cursorFollower.style.backgroundColor = 'transparent';
             });
         });
@@ -394,7 +394,7 @@
             btn.setAttribute('aria-label', label);
             btn.setAttribute('title', label);
         }
-        if (meta) meta.setAttribute('content', light ? '#F6F3EC' : '#5FA396');
+        if (meta) meta.setAttribute('content', light ? '#F6F3EC' : '#B59B6A');
     }
     window.toggleTheme = function () {
         var next = current() === 'light' ? 'dark' : 'light';
