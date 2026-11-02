@@ -1,5 +1,5 @@
-:root{--bg:#14110f;--bg2:#1c1815;--bg3:#27221e;--line:#3a332d;--text:#f1ece2;--muted:#b3aa9c;--accent:#5fa396;--accent2:#8cd2c2;--on:#0b0a09;--danger:#e36d5d;--ok:#6cc08b;--warn:#e0b05a}
-@media(prefers-color-scheme:light){:root{--bg:#f5f3ee;--bg2:#fff;--bg3:#ece8df;--line:#d9d3c7;--text:#25211c;--muted:#6a6358;--accent:#2f7f70;--accent2:#2f7f70;--on:#fff;--danger:#c0392b;--ok:#2f8f55;--warn:#a3721b}}
+:root{--bg:#14110f;--bg2:#1c1815;--bg3:#27221e;--line:#3a332d;--text:#f1ece2;--muted:#b3aa9c;--accent:#b59b6a;--accent2:#d8c18a;--on:#0b0a09;--danger:#e36d5d;--ok:#6cc08b;--warn:#e0b05a}
+@media(prefers-color-scheme:light){:root{--bg:#f5f3ee;--bg2:#fff;--bg3:#ece8df;--line:#d9d3c7;--text:#25211c;--muted:#6a6358;--accent:#7a5f2e;--accent2:#7a5f2e;--on:#fff;--danger:#c0392b;--ok:#2f8f55;--warn:#a3721b}}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}

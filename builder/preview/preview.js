@@ -12,7 +12,7 @@ function tplBase() {
 const STATUS = { draft: '草稿', pending: '待上線', live: '上線中', overdue: '逾期', suspended: '已暫停', cancelled: '已終止' };
 function say(t, btn) {
   const m = $('#msg'); m.hidden = false; m.replaceChildren(Object.assign(document.createElement('p'), { textContent: t }));
-  if (btn) { const b = document.createElement('button'); b.textContent = btn.text; b.onclick = btn.fn; b.style.cssText = 'font:inherit;padding:8px 16px;border-radius:8px;border:0;background:#5fa396;color:#fff;cursor:pointer'; m.append(b); }
+  if (btn) { const b = document.createElement('button'); b.textContent = btn.text; b.onclick = btn.fn; b.style.cssText = 'font:inherit;padding:8px 16px;border-radius:8px;border:0;background:#b59b6a;color:#0b0a09;cursor:pointer'; m.append(b); }
   $('#top').hidden = true; $('#stage').hidden = true;
 }
 let done = false;
