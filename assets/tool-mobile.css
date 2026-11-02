@@ -24,7 +24,7 @@
   .rsec-head { padding: 16px 16px !important; min-height: 56px; }
   .rsec, .geo-section { scroll-margin-top: 76px; }
   /* 報告目錄 */
-  .m-toc { display: block; margin: 0 0 14px; padding: 14px 14px 12px; border-radius: 14px; background: var(--bg2); border: 1px solid rgba(95, 163, 150, 0.35); scroll-margin-top: 76px; }
+  .m-toc { display: block; margin: 0 0 14px; padding: 14px 14px 12px; border-radius: 14px; background: var(--bg2); border: 1px solid rgba(181, 155, 106, 0.35); scroll-margin-top: 76px; }
   .m-toc-h { font-size: 16px; font-weight: 700; color: var(--text, #DDD8CE); }
   .m-toc-hint { margin: 4px 0 8px; font-size: 12.5px; color: var(--text3); }
   .m-toc-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; font: inherit; color: var(--text, #DDD8CE); background: none; border: 0; border-top: 1px solid var(--border); padding: 12px 2px; min-height: 52px; cursor: pointer; }
@@ -34,7 +34,7 @@
   .m-toc-t small { font-size: 12.5px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .m-toc-go { font-size: 22px; color: var(--text3); line-height: 1; }
   .m-toc-again { display: block; width: 100%; margin-top: 10px; min-height: 46px; border-radius: 10px; border: 1px solid var(--border2, rgba(245, 240, 230, 0.14)); background: var(--bg3); color: var(--accent2); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
-  .m-toc-fab { display: none; position: fixed; right: 14px; bottom: 18px; z-index: 150; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(95, 163, 150, 0.5); background: rgba(20, 18, 15, 0.92); color: var(--accent2); font: inherit; font-size: 14px; font-weight: 700; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); cursor: pointer; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .m-toc-fab { display: none; position: fixed; right: 14px; bottom: 18px; z-index: 150; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(181, 155, 106, 0.5); background: rgba(20, 18, 15, 0.92); color: var(--accent2); font: inherit; font-size: 14px; font-weight: 700; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); cursor: pointer; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
   html.embedded .m-toc-fab { position: absolute; bottom: auto; }
   .m-toc-fab.show { display: inline-flex; align-items: center; }
 }

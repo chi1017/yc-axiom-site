@@ -928,8 +928,8 @@ html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *
     --text-bright: #14110D;
     --on-accent: #FFFFFF;
 }
-/* 工具頁與會員／後台頁維持原本的薄荷綠（避免通過／失敗等狀態色與黃銅混淆） */
-body.on-seo, body.keep-mint {
+/* 會員／後台頁維持原本的薄荷綠（工具頁已改用黃銅色調） */
+body.keep-mint {
     --black: #0B0A09; --surface: #14120F; --surface-2: #1A1815; --surface-hover: #201D18;
     --border-active: rgba(79, 154, 142, 0.45);
     --accent: #5FA396; --accent-light: #8CD2C2; --accent-deep: #3C7A6D;
@@ -937,7 +937,7 @@ body.on-seo, body.keep-mint {
     --accent-dim: rgba(95, 163, 150, 0.08); --accent-glow: rgba(95, 163, 150, 0.14);
     --on-accent: #0B0A09;
 }
-:root[data-theme="light"] body.on-seo, :root[data-theme="light"] body.keep-mint {
+:root[data-theme="light"] body.keep-mint {
     --black: #F6F3EC; --surface: #FFFFFF; --surface-2: #F1EDE3; --surface-hover: #ECE7DA;
     --border-active: rgba(47, 122, 109, 0.5);
     --accent: #2F7A6D; --accent-light: #5FA396; --accent-deep: #1F5A4F;
