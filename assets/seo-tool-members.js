@@ -14,12 +14,12 @@
   st.textContent =
     '#results.yc-gated > *:not(.score-hero):not(#yc-gate){display:none !important}' +
     '#results.yc-gated .score-hero #metricPills,#results.yc-gated .score-hero #scoreBreakdown,#results.yc-gated .score-hero .score-actions{display:none !important}' +
-    '#yc-gate{background:var(--bg2);border:1px solid rgba(95,163,150,.28);border-radius:var(--radius,10px);padding:22px 24px;margin-bottom:20px}' +
+    '#yc-gate{background:var(--bg2);border:1px solid rgba(181,155,106,.28);border-radius:var(--radius,10px);padding:22px 24px;margin-bottom:20px}' +
     '#yc-gate h3{margin:0 0 4px;font-size:16px;color:var(--text)}#yc-gate .yc-sub{margin:0 0 14px;font-size:13px;color:var(--text2)}' +
     '#yc-gate ol{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:8px}' +
     '#yc-gate li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(0,0,0,.18);border-radius:8px;font-size:13px}' +
     '#yc-gate .yc-lv{flex-shrink:0;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-top:2px;background:rgba(239,68,68,.2);color:#f87171}' +
-    '#yc-gate .yc-lv.m{background:rgba(245,158,11,.2);color:#fbbf24}#yc-gate .yc-lv.l{background:rgba(95,163,150,.2);color:#7fd1c2}' +
+    '#yc-gate .yc-lv.m{background:rgba(245,158,11,.2);color:#fbbf24}#yc-gate .yc-lv.l{background:rgba(181,155,106,.2);color:#7fd1c2}' +
     '#yc-gate li b{display:block;color:var(--text);font-weight:600}#yc-gate li span.d{display:block;color:var(--text3);font-size:12px;margin-top:2px}' +
     '#yc-gate .yc-cta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}' +
     '#yc-gate button.yc-go{background:var(--accent);color:#0b0a09;border:0;border-radius:6px;padding:11px 20px;font:700 14px "Noto Sans TC",system-ui,sans-serif;cursor:pointer}' +

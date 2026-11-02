@@ -219,7 +219,7 @@ function extractKeywordsFromHtml(html,label){
   document.getElementById('kwFileName').textContent='✓ '+(label.length>50?label.slice(0,47)+'…':label);
   document.getElementById('kwFileWrap').style.display='block';
   document.getElementById('kwExtracted').innerHTML='<p style="font-size:12px;color:var(--text2);margin-bottom:8px">偵測到的高頻關鍵字（點擊新增）：</p><div style="display:flex;flex-wrap:wrap;gap:6px">'+
-    top.map(([w,c])=>`<span onclick="addKwFromExtract('${escHtml(w)}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(95,163,150,0.1);border:1px solid rgba(95,163,150,0.2);color:var(--accent2);padding:3px 10px;border-radius:20px;font-size:12px;transition:background 0.2s" onmouseover="this.style.background='rgba(95,163,150,0.25)'" onmouseout="this.style.background='rgba(95,163,150,0.1)'">${escHtml(w)} <span style="opacity:0.6;font-size:10px">${c}次</span></span>`).join('')+'</div>';
+    top.map(([w,c])=>`<span onclick="addKwFromExtract('${escHtml(w)}')" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;background:rgba(181,155,106,0.1);border:1px solid rgba(181,155,106,0.2);color:var(--accent2);padding:3px 10px;border-radius:20px;font-size:12px;transition:background 0.2s" onmouseover="this.style.background='rgba(181,155,106,0.25)'" onmouseout="this.style.background='rgba(181,155,106,0.1)'">${escHtml(w)} <span style="opacity:0.6;font-size:10px">${c}次</span></span>`).join('')+'</div>';
 }
 function addKwFromExtract(kw){if(keywords.length>=10||keywords.includes(kw))return;keywords.push(kw);renderKwTags();}
 function clearKwSource(){tabState.t2.html=null;tabState.t2.label='';clearUrl('t2');document.getElementById('kwFileWrap').style.display='none';document.getElementById('kwExtracted').innerHTML='';fi2.value='';}
@@ -624,7 +624,7 @@ function renderContentAnalysis(report) {
       html += `</div></div>`;
     });
   } else if (!kwList.length) {
-    html += `<div style="padding:12px 14px;background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.15);border-radius:var(--radius-sm);font-size:12px;color:var(--text3)">
+    html += `<div style="padding:12px 14px;background:rgba(181,155,106,0.06);border:1px solid rgba(181,155,106,0.15);border-radius:var(--radius-sm);font-size:12px;color:var(--text3)">
       💡 請在「🔑 關鍵字」頁籤加入目標關鍵字，即可看到 LSI 語意相關詞分析。
     </div>`;
   }
@@ -635,7 +635,7 @@ function renderContentAnalysis(report) {
   html += `<div id="ca-gap" class="ca-pane">`;
 
   if (!kwList.length) {
-    html += `<div style="padding:14px;background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.15);border-radius:var(--radius-sm);font-size:13px;color:var(--text3)">
+    html += `<div style="padding:14px;background:rgba(181,155,106,0.06);border:1px solid rgba(181,155,106,0.15);border-radius:var(--radius-sm);font-size:13px;color:var(--text3)">
       💡 請先在「🔑 關鍵字」頁籤加入目標關鍵字，才能進行內容缺口分析。
     </div>`;
   } else {
@@ -759,7 +759,7 @@ function renderContentAnalysis(report) {
       Google 精選摘要（Featured Snippets）特別偏好 FAQ 形式的內容。建議：<br>
       1. 將部分 H2/H3 改寫為疑問句（如「如何…」「${kwList[0]||'關鍵字'}是什麼？」「費用多少？」）<br>
       2. 在問題下方用簡潔段落回答（50–100 字）<br>
-      3. 加入 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 5px;border-radius:3px">FAQPage</code> JSON-LD 讓 Google 正確識別
+      3. 加入 <code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:1px 5px;border-radius:3px">FAQPage</code> JSON-LD 讓 Google 正確識別
     </div>
     <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text3)">
       <div style="color:var(--text2);font-weight:500;margin-bottom:8px">📋 FAQPage Schema 範例：</div>
@@ -1344,7 +1344,7 @@ function renderResults(r){
     ).join('');
     document.getElementById('trendBody').innerHTML=`
       <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:${H}px;overflow:visible">
-        <defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5FA396" stop-opacity="0.25"/><stop offset="100%" stop-color="#5FA396" stop-opacity="0"/></linearGradient></defs>
+        <defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B59B6A" stop-opacity="0.25"/><stop offset="100%" stop-color="#B59B6A" stop-opacity="0"/></linearGradient></defs>
         <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+cH}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
         <line x1="${padL}" y1="${padT+cH}" x2="${W-padR}" y2="${padT+cH}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
         ${[0,25,50,75,100].filter(v=>v>=min&&v<=max).map(v=>{
@@ -1353,7 +1353,7 @@ function renderResults(r){
                  <text x="${padL-4}" y="${y+4}" text-anchor="end" font-size="9" fill="rgba(144,144,168,0.6)">${v}</text>`;
         }).join('')}
         <path d="${areaD}" fill="url(#tg)"/>
-        <path d="${pathD}" fill="none" stroke="#5FA396" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="${pathD}" fill="none" stroke="#B59B6A" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
         ${dots}
         ${svgLabels}
       </svg>
@@ -1412,7 +1412,7 @@ function renderResults(r){
           : '<span style="color:var(--text3)">未設定'+(item.req?' (必填)':'')+'</span>';
         return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">'
           +'<span style="color:'+(ok?'#34d399':'#f87171')+'">'+(ok?'✓':'✗')+'</span>'
-          +'<code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 5px;border-radius:4px;font-size:11px">'+item.label+'</code>'
+          +'<code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:1px 5px;border-radius:4px;font-size:11px">'+item.label+'</code>'
           +'<span style="color:var(--text2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1">'+valHtml+'</span>'
           +'</div>';
       }).join('')+`
@@ -1452,8 +1452,8 @@ function renderResults(r){
         +'<td>'+statusCell+'</td></tr>';
     }).join('');
     var imgHints = '';
-    if(imgD.noLazy>0) imgHints += '<div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#fbbf24">💡 建議在 &lt;img&gt; 標籤加上 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">loading=&quot;lazy&quot;</code> 屬性改善頁面初始載入速度。</div>';
-    if(imgD.noSrcset>0) imgHints += '<div style="background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.15);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--text3);margin-top:8px">💡 建議加入 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">srcset</code> 提供不同解析度版本，提升行動裝置體驗。</div>';
+    if(imgD.noLazy>0) imgHints += '<div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#fbbf24">💡 建議在 &lt;img&gt; 標籤加上 <code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">loading=&quot;lazy&quot;</code> 屬性改善頁面初始載入速度。</div>';
+    if(imgD.noSrcset>0) imgHints += '<div style="background:rgba(181,155,106,0.06);border:1px solid rgba(181,155,106,0.15);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:var(--text3);margin-top:8px">💡 建議加入 <code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">srcset</code> 提供不同解析度版本，提升行動裝置體驗。</div>';
     document.getElementById('imgAnalysis').innerHTML =
       '<table class="gen-table" style="margin-bottom:12px"><thead><tr><th>項目</th><th>數量</th><th>佔比</th><th>狀態</th></tr></thead><tbody>'
       + imgRows + '</tbody></table>' + imgHints;
@@ -1465,7 +1465,7 @@ function renderResults(r){
     return '<div class="ci"><div class="cb '+(ck.ok?'cb-pass':'cb-warn')+'">'+(ck.ok?'✓':'!')+'</div><div class="cc"><span>'+escHtml(ck.msg)+'</span></div></div>';
   }).join('');
   var canonHint = !info.canonical
-    ? '<div style="margin-top:12px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#fbbf24">💡 建議加入範例：<br><code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:2px 6px;border-radius:3px;font-size:11px">&lt;link rel=&quot;canonical&quot; href=&quot;https://your-domain.com/page/&quot;&gt;</code></div>'
+    ? '<div style="margin-top:12px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#fbbf24">💡 建議加入範例：<br><code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:2px 6px;border-radius:3px;font-size:11px">&lt;link rel=&quot;canonical&quot; href=&quot;https://your-domain.com/page/&quot;&gt;</code></div>'
     : '';
   document.getElementById('canonicalResult').innerHTML =
     '<div class="check-list">' + cksHtml + '</div>'
@@ -1648,15 +1648,15 @@ function renderResults(r){
   const fileNameDisplay=isUrl?`<a href="${escHtml(info.fileName)}" target="_blank" rel="noopener" style="color:var(--accent2);word-break:break-all">${escHtml(info.fileName)}</a>`:escHtml(info.fileName);
   document.getElementById('rawInfo').innerHTML=`
     <div style="display:grid;gap:8px;font-size:13px">
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">${isUrl?'🌐':'📄'}</div><div class="cc"><strong>${isUrl?'分析網址':'分析檔案'}</strong><span>${fileNameDisplay}</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">T</div><div class="cc"><strong>Title</strong><span>${escHtml(info.title||'（未設定）')}</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">D</div><div class="cc"><strong>Description</strong><span>${escHtml(info.description||'（未設定）')}</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">H</div><div class="cc"><strong>H1 標題</strong><span>${escHtml(info.h1Text||'（未設定）')}</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🔗</div><div class="cc"><strong>連結數量</strong><span>總計 ${info.linkCount} 個，內部 ${info.internalLinkCount} 個，外部 ${(info.externalLinks||[]).length} 個</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🖼</div><div class="cc"><strong>圖片</strong><span>${info.imgData?.total||0} 張（${info.imgData?.noAlt||0} 張缺少 alt，${info.imgData?.noLazy||0} 張無 lazy，${info.imgData?.modern||0} 張現代格式）</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">📝</div><div class="cc"><strong>頁面文字量</strong><span>約 ${info.textLength} 字，${info.readability?.sentences||0} 個句子</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🗂</div><div class="cc"><strong>Schema.org</strong><span>${info.schemaCount} 筆（${(info.schemaResults||[]).filter(s=>s.valid).length} 筆通過驗證）</span></div></div>
-      <div class="ci"><div class="cb" style="background:rgba(95,163,150,0.15);color:var(--accent2)">🌍</div><div class="cc"><strong>Hreflang</strong><span>${info.hreflang?.length||0} 個語言標籤</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">${isUrl?'🌐':'📄'}</div><div class="cc"><strong>${isUrl?'分析網址':'分析檔案'}</strong><span>${fileNameDisplay}</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">T</div><div class="cc"><strong>Title</strong><span>${escHtml(info.title||'（未設定）')}</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">D</div><div class="cc"><strong>Description</strong><span>${escHtml(info.description||'（未設定）')}</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">H</div><div class="cc"><strong>H1 標題</strong><span>${escHtml(info.h1Text||'（未設定）')}</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">🔗</div><div class="cc"><strong>連結數量</strong><span>總計 ${info.linkCount} 個，內部 ${info.internalLinkCount} 個，外部 ${(info.externalLinks||[]).length} 個</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">🖼</div><div class="cc"><strong>圖片</strong><span>${info.imgData?.total||0} 張（${info.imgData?.noAlt||0} 張缺少 alt，${info.imgData?.noLazy||0} 張無 lazy，${info.imgData?.modern||0} 張現代格式）</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">📝</div><div class="cc"><strong>頁面文字量</strong><span>約 ${info.textLength} 字，${info.readability?.sentences||0} 個句子</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">🗂</div><div class="cc"><strong>Schema.org</strong><span>${info.schemaCount} 筆（${(info.schemaResults||[]).filter(s=>s.valid).length} 筆通過驗證）</span></div></div>
+      <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">🌍</div><div class="cc"><strong>Hreflang</strong><span>${info.hreflang?.length||0} 個語言標籤</span></div></div>
     </div>`;
 
   document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
@@ -1779,7 +1779,7 @@ async function checkRedirectChain(url) {
   }
 
   html += `<div style="margin-top:12px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text3)">
-    ℹ️ <strong style="color:var(--text2)">瀏覽器限制說明</strong>：因 CORS 政策，瀏覽器無法直接追蹤逐跳 HTTP 標頭。此結果由本站的抓取服務取得，已自動跟隨跳轉。如需完整逐跳鏈，請使用 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">curl -I -L URL</code> 或 Redirect Checker 工具。
+    ℹ️ <strong style="color:var(--text2)">瀏覽器限制說明</strong>：因 CORS 政策，瀏覽器無法直接追蹤逐跳 HTTP 標頭。此結果由本站的抓取服務取得，已自動跟隨跳轉。如需完整逐跳鏈，請使用 <code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">curl -I -L URL</code> 或 Redirect Checker 工具。
   </div>`;
 
   el.innerHTML = html;
@@ -1841,7 +1841,7 @@ async function fetchHttpHeaders(url) {
 
     html += `<div style="margin-top:12px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text3)">
       ℹ️ <strong style="color:var(--text2)">注意</strong>：瀏覽器 CORS 限制使得部分 HTTP response headers（如 X-Robots-Tag、Cache-Control、Server）無法透過 Proxy 取得完整數值。
-      帶 <span style="color:var(--text3)">ℹ</span> 符號的項目需透過伺服器直接確認，或使用 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">curl -I URL</code> 查看。
+      帶 <span style="color:var(--text3)">ℹ</span> 符號的項目需透過伺服器直接確認，或使用 <code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">curl -I URL</code> 查看。
     </div>`;
 
     el.innerHTML = html;
@@ -2382,7 +2382,7 @@ function renderCrawlList(inboundCount, orphans, dupTitles, dupDescs, noindexPage
         <div style="color:var(--text2);line-height:1.7">
           這些頁面使用 JavaScript 框架渲染，靜態 HTML 抓取只能拿到空殼（shell），SEO 關鍵內容（Title、H1、內文）可能尚未渲染，<strong style="color:#fbbf24">分析結果不可靠</strong>。<br>
           <span style="color:#34d399">✅ 建議解法：</span><br>
-          1. 在目標頁面按 <code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 5px;border-radius:3px">Ctrl+S</code>（Mac: Cmd+S）另存完整渲染後的 HTML，再上傳分析<br>
+          1. 在目標頁面按 <code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:1px 5px;border-radius:3px">Ctrl+S</code>（Mac: Cmd+S）另存完整渲染後的 HTML，再上傳分析<br>
           2. 或使用 <strong>Puppeteer / Playwright</strong> 等 headless 瀏覽器爬取，另存後再上傳<br>
           3. 或至 <strong>Google Search Console → 網址審查</strong>，取得 Google 實際渲染後的版本
         </div>
@@ -2439,7 +2439,7 @@ function renderCrawlList(inboundCount, orphans, dupTitles, dupDescs, noindexPage
           const indicators = [];
           if (p.inTitle) indicators.push(`<span style="background:rgba(16,185,129,0.15);color:#34d399;padding:1px 7px;border-radius:8px;font-size:10px">Title ✓</span>`);
           if (p.inH1)    indicators.push(`<span style="background:rgba(6,182,212,0.15);color:#22d3ee;padding:1px 7px;border-radius:8px;font-size:10px">H1 ✓</span>`);
-          if (p.bodyCount > 0) indicators.push(`<span style="background:rgba(95,163,150,0.12);color:var(--accent2);padding:1px 7px;border-radius:8px;font-size:10px">內文×${p.bodyCount}</span>`);
+          if (p.bodyCount > 0) indicators.push(`<span style="background:rgba(181,155,106,0.12);color:var(--accent2);padding:1px 7px;border-radius:8px;font-size:10px">內文×${p.bodyCount}</span>`);
           const isCannidalPage = isCann && entry.cannibalized.some(c => c.url === p.url);
           html += `<div style="display:flex;align-items:flex-start;gap:8px;padding:5px 8px;background:var(--bg2);border:1px solid ${isCannidalPage ? 'rgba(239,68,68,0.2)' : 'var(--border)'};border-radius:6px">
             <div style="flex:1;min-width:0">
@@ -2543,7 +2543,7 @@ function renderRankSection(kwList, report) {
 
   // ── 說明卡（誠實定位）──
   let html = `
-    <div style="background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.18);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--text3);margin-bottom:18px;line-height:1.7">
+    <div style="background:rgba(181,155,106,0.06);border:1px solid rgba(181,155,106,0.18);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:var(--text3);margin-bottom:18px;line-height:1.7">
       <div style="display:flex;gap:10px;align-items:flex-start">
         <span style="font-size:16px;flex-shrink:0">🔬</span>
         <div>
@@ -2588,7 +2588,7 @@ function renderRankSection(kwList, report) {
         <div>
           <div style="font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:6px">${escHtml(a.kw)}</div>
           <div style="display:flex;flex-wrap:wrap;gap:5px">
-            <span style="background:rgba(95,163,150,0.12);border:1px solid rgba(95,163,150,0.2);color:var(--accent2);padding:2px 9px;border-radius:12px;font-size:11px">${a.charLen} 字</span>
+            <span style="background:rgba(181,155,106,0.12);border:1px solid rgba(181,155,106,0.2);color:var(--accent2);padding:2px 9px;border-radius:12px;font-size:11px">${a.charLen} 字</span>
             ${a.isBrand ? '<span style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#34d399;padding:2px 9px;border-radius:12px;font-size:11px">🏷 品牌詞</span>' : ''}
             ${a.hasGeo  ? '<span style="background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25);color:#22d3ee;padding:2px 9px;border-radius:12px;font-size:11px">📍 地區詞</span>' : ''}
             <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:${intentColor[a.intent]};padding:2px 9px;border-radius:12px;font-size:11px">${intentLabel[a.intent]}</span>
@@ -2629,7 +2629,7 @@ function renderRankSection(kwList, report) {
       }
 
       <!-- 長尾詞建議 -->
-      <div style="background:rgba(95,163,150,0.05);border:1px solid rgba(95,163,150,0.15);border-radius:8px;padding:12px 14px">
+      <div style="background:rgba(181,155,106,0.05);border:1px solid rgba(181,155,106,0.15);border-radius:8px;padding:12px 14px">
         <div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px">
           🌿 <span>長尾詞延伸建議</span>
           <span style="font-size:11px;font-weight:400;color:var(--text3)">（字數多 → 競爭低 → 更容易排上首頁）</span>
@@ -2720,7 +2720,7 @@ function drawRankRadar(assessments) {
   const ctx = canvas.getContext('2d');
   ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
 
-  const colors = ['#5FA396','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#8b5cf6','#f97316','#84cc16','#14b8a6'];
+  const colors = ['#B59B6A','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899','#8b5cf6','#f97316','#84cc16','#14b8a6'];
   const BAR_H = 20, GAP = 10, PAD_L = 120, PAD_R = 20, PAD_TOP = 16;
 
   ctx.clearRect(0, 0, W, H);
@@ -2985,7 +2985,7 @@ function renderSerpSection(myReport) {
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
           <span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;padding:2px 10px;border-radius:12px;font-size:11px">🏢 大站 ${bigCount} 個</span>
           <span style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:#34d399;padding:2px 10px;border-radius:12px;font-size:11px">🏪 小站 ${smallCount} 個</span>
-          <span style="background:rgba(95,163,150,0.1);border:1px solid rgba(95,163,150,0.2);color:var(--accent2);padding:2px 10px;border-radius:12px;font-size:11px">Title 含關鍵字 ${kwInTitle}/${analyzed.length}</span>
+          <span style="background:rgba(181,155,106,0.1);border:1px solid rgba(181,155,106,0.2);color:var(--accent2);padding:2px 10px;border-radius:12px;font-size:11px">Title 含關鍵字 ${kwInTitle}/${analyzed.length}</span>
         </div>
       </div>
     </div>`;
@@ -3125,13 +3125,13 @@ function exportJSON(){
 // ═══════════════════════════════════════════════════════
 //  v13: WHITE-LABEL / BRAND SETTINGS
 // ═══════════════════════════════════════════════════════
-let brandSettings = JSON.parse(tmpStore.getItem('seo_brand_v13') || '{"name":"SEO Analyzer","color":"#5FA396","contact":""}');
+let brandSettings = JSON.parse(tmpStore.getItem('seo_brand_v13') || '{"name":"SEO Analyzer","color":"#B59B6A","contact":""}');
 
 function toggleWLPanel(){document.getElementById('wlPanel').classList.toggle('open');}
 
 function applyBrand(){
   const name = document.getElementById('wlName')?.value || 'SEO Analyzer';
-  const color = document.getElementById('wlColor')?.value || '#5FA396';
+  const color = document.getElementById('wlColor')?.value || '#B59B6A';
   const contact = document.getElementById('wlContact')?.value || '';
   brandSettings = {name, color, contact};
   tmpStore.setItem('seo_brand_v13', JSON.stringify(brandSettings));
@@ -3168,7 +3168,7 @@ function lightenColor(hex, amount){
     const ci = document.getElementById('wlColor');
     const co = document.getElementById('wlContact');
     if(ni) ni.value = brandSettings.name;
-    if(ci) ci.value = brandSettings.color || '#5FA396';
+    if(ci) ci.value = brandSettings.color || '#B59B6A';
     if(co) co.value = brandSettings.contact || '';
     document.getElementById('brandLogoText').textContent = brandSettings.name;
     if(brandSettings.color){
@@ -3446,7 +3446,7 @@ async function fetchPageSpeed(url){
       <div>${renderDevice(mobileData,'mobile')}</div>
       <div>${renderDevice(desktopData,'desktop')}</div>
     </div>
-    <div style="padding:10px 14px;background:rgba(95,163,150,0.06);border:1px solid rgba(95,163,150,0.18);border-radius:var(--radius-sm);font-size:11px;color:var(--text3);margin-top:4px">
+    <div style="padding:10px 14px;background:rgba(181,155,106,0.06);border:1px solid rgba(181,155,106,0.18);border-radius:var(--radius-sm);font-size:11px;color:var(--text3);margin-top:4px">
       ℹ️ 資料來源：Google PageSpeed Insights API（即時分析，每次結果可能略有差異）。
       <a href="https://pagespeed.web.dev/" target="_blank" style="color:var(--accent2)">在 PageSpeed 網站查看完整報告 ↗</a>
     </div>`;
@@ -3494,7 +3494,7 @@ async function exportPDF(){
     setProg(20,'建立報告畫面...');
 
     const W = 794; // A4 px at 96dpi
-    const accentColor = '#5FA396';
+    const accentColor = '#B59B6A';
 
     // Score colour
     const sc = r.score >= 80 ? '#10b981' : r.score >= 60 ? '#f59e0b' : '#ef4444';
@@ -3583,7 +3583,7 @@ async function exportPDF(){
   </div>
 
   <!-- Score hero -->
-  <div class="card" style="background:linear-gradient(135deg,rgba(95,163,150,0.12),#14120F);border-color:rgba(95,163,150,0.25);">
+  <div class="card" style="background:linear-gradient(135deg,rgba(181,155,106,0.12),#14120F);border-color:rgba(181,155,106,0.25);">
     <div style="padding:20px;display:flex;align-items:center;gap:24px;">
       <div style="width:80px;height:80px;border-radius:50%;border:4px solid ${sc};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
         <div>
@@ -3601,7 +3601,7 @@ async function exportPDF(){
         </div>
       </div>
     </div>
-    <div style="padding:10px 20px 16px;border-top:1px solid rgba(95,163,150,0.15);">${metricsHtml}</div>
+    <div style="padding:10px 20px 16px;border-top:1px solid rgba(181,155,106,0.15);">${metricsHtml}</div>
   </div>
 
   <!-- Two columns: checks + actions -->
@@ -4293,7 +4293,7 @@ function renderV18Sections(r) {
       fHtml += `<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">偵測到的日期來源：</div>`;
       fHtml += `<div class="check-list">${fresh.sources.map(s => `<div class="ci"><div class="cb cb-info">📅</div><div class="cc"><strong>${escHtml(s.type)}</strong><span>${escHtml(s.date)}</span></div></div>`).join('')}</div>`;
     } else {
-      fHtml += `<div class="check-list"><div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>未找到任何日期資訊（article:published_time、datePublished JSON-LD、&lt;time&gt; 標籤均未設定）<br>建議加入：<code style="background:rgba(95,163,150,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">&lt;meta property="article:modified_time" content="2025-01-15"&gt;</code></span></div></div></div>`;
+      fHtml += `<div class="check-list"><div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>未找到任何日期資訊（article:published_time、datePublished JSON-LD、&lt;time&gt; 標籤均未設定）<br>建議加入：<code style="background:rgba(181,155,106,0.15);color:var(--accent2);padding:1px 4px;border-radius:3px">&lt;meta property="article:modified_time" content="2025-01-15"&gt;</code></span></div></div></div>`;
     }
     if(fresh.status === 'old' || fresh.status === 'warn') {
       fHtml += `<div style="margin-top:12px;padding:10px 14px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:var(--radius-sm);font-size:12px;color:var(--text2);line-height:1.7">💡 Google 在競爭性關鍵字上偏好新鮮內容。建議每 6–12 個月更新一次頁面，並更新日期標記。即使是小幅更新也能讓 Google 重新爬取。</div>`;
@@ -4476,12 +4476,12 @@ function renderRadarChart(r, comp) {
   // Score labels on polygon vertices
   let scoreSvg = axes.map((ax, i) => {
     const [mx, my] = pt(i, ax.mine);
-    return `<circle cx="${mx}" cy="${my}" r="4" fill="#5FA396"/><text x="${mx}" y="${my-7}" text-anchor="middle" font-size="9" fill="#a78bfa">${ax.mine}</text>`;
+    return `<circle cx="${mx}" cy="${my}" r="4" fill="#B59B6A"/><text x="${mx}" y="${my-7}" text-anchor="middle" font-size="9" fill="#a78bfa">${ax.mine}</text>`;
   }).join('');
   const svg = `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;height:auto">
     ${gridSvg}${axisSvg}
     <polygon points="${compPts}" fill="rgba(249,115,22,0.12)" stroke="#f97316" stroke-width="2" stroke-linejoin="round"/>
-    <polygon points="${minePts}" fill="rgba(95,163,150,0.18)" stroke="#5FA396" stroke-width="2.5" stroke-linejoin="round"/>
+    <polygon points="${minePts}" fill="rgba(181,155,106,0.18)" stroke="#B59B6A" stroke-width="2.5" stroke-linejoin="round"/>
     ${scoreSvg}
     ${labelSvg}
   </svg>`;
@@ -4489,7 +4489,7 @@ function renderRadarChart(r, comp) {
     <div class="radar-wrap">
       <div style="flex:1;min-width:260px">${svg}</div>
       <div class="radar-legend">
-        <div class="radar-legend-item"><span style="width:14px;height:4px;background:#5FA396;border-radius:2px;display:inline-block"></span><span style="color:var(--text2)">你的網站</span></div>
+        <div class="radar-legend-item"><span style="width:14px;height:4px;background:#B59B6A;border-radius:2px;display:inline-block"></span><span style="color:var(--text2)">你的網站</span></div>
         <div class="radar-legend-item"><span style="width:14px;height:4px;background:#f97316;border-radius:2px;display:inline-block"></span><span style="color:var(--text2)">競爭對手</span></div>
         <div style="margin-top:10px;font-size:12px;color:var(--text3);line-height:1.6">
           雷達圖同時顯示 8 個維度，<br>面積越大代表整體 SEO<br>健康度越好。
