@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, follow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMÉ 光晳 | 純淨植萃保養</title>
+<meta name="description" content="LUMÉ 光晳 — 以純淨植萃配方,喚醒肌膚本來的光感。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+TC:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#faf6f0;
+    --cream-deep:#f2ebe1;
+    --sage:#8a9a80;
+    --sage-deep:#5f6f56;
+    --sage-pale:#e7ebe2;
+    --gold:#b8935f;
+    --gold-soft:#d9bd93;
+    --ink:#26241f;
+    --ink-soft:#6b6558;
+    --white:#ffffff;
+    --line:#e2dccf;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Noto Sans TC',sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4{
+    font-family:'Cormorant Garamond','Noto Serif TC',serif;
+    font-weight:500;
+    letter-spacing:.01em;
+  }
+  a{text-decoration:none;color:inherit;}
+  img{max-width:100%;display:block;}
+  .container{max-width:1200px;margin:0 auto;padding:0 32px;}
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:500;
+    display:inline-block;
+    margin-bottom:16px;
+  }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:15px 30px;
+    font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;
+    cursor:pointer;border:1px solid transparent;transition:all .35s ease;
+    white-space:nowrap;
+  }
+  .btn-ghost-light{background:transparent;border-color:rgba(255,255,255,.65);color:#fff;}
+  .btn-ghost-light:hover{background:#fff;color:var(--ink);border-color:#fff;}
+  .btn-ghost-dark{background:transparent;border-color:var(--ink);color:var(--ink);}
+  .btn-ghost-dark:hover{background:var(--ink);color:#fff;}
+  .btn-fill{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .btn-fill:hover{background:var(--sage-deep);border-color:var(--sage-deep);}
+  .text-link{
+    font-size:13px;letter-spacing:.1em;text-transform:uppercase;
+    border-bottom:1px solid currentColor;padding-bottom:3px;display:inline-flex;gap:8px;align-items:center;
+    transition:opacity .3s ease;
+  }
+  .text-link:hover{opacity:.6;}
+
+  /* ---------- NAV ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:1000;
+    padding:26px 0;
+    transition:all .4s ease;
+    background:transparent;
+    mix-blend-mode:normal;
+  }
+  header .nav-links a, header .logo, header .icon-btn{color:#fff;}
+  header.scrolled{
+    background:rgba(250,246,240,.94);
+    backdrop-filter:blur(10px);
+    padding:16px 0;
+    box-shadow:0 1px 0 var(--line);
+  }
+  header.scrolled .nav-links a, header.scrolled .logo, header.scrolled .icon-btn{color:var(--ink);}
+  nav{display:flex;align-items:center;justify-content:space-between;}
+  .logo{
+    font-family:'Cormorant Garamond',serif;
+    font-size:25px;font-weight:600;letter-spacing:.14em;
+    display:flex;align-items:baseline;gap:9px;
+  }
+  .logo span{font-size:11px;letter-spacing:.22em;font-family:'Noto Sans TC',sans-serif;font-weight:400;opacity:.75;}
+  .nav-links{display:flex;gap:42px;list-style:none;}
+  .nav-links a{font-size:13px;letter-spacing:.06em;position:relative;padding:4px 0;}
+  .nav-links a::after{content:'';position:absolute;left:0;bottom:0;width:0;height:1px;background:currentColor;transition:width .3s ease;}
+  .nav-links a:hover::after{width:100%;}
+  .nav-right{display:flex;align-items:center;gap:22px;}
+  .icon-btn{width:19px;height:19px;cursor:pointer;}
+  .burger{display:none;flex-direction:column;gap:5px;cursor:pointer;}
+  .burger span{width:22px;height:1.5px;background:currentColor;display:block;}
+
+  .mobile-menu{
+    position:fixed;inset:0;background:var(--ink);z-index:1200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
+    transform:translateY(-100%);transition:transform .45s ease;
+  }
+  .mobile-menu.open{transform:translateY(0);}
+  .mobile-menu a{font-family:'Cormorant Garamond',serif;font-size:30px;color:#fff;}
+  .mobile-close{position:absolute;top:26px;right:32px;font-size:30px;cursor:pointer;color:#fff;}
+
+  /* ---------- HERO (full-bleed photography) ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    display:flex;align-items:flex-end;
+    overflow:hidden;
+  }
+  .hero-bg{
+    position:absolute;inset:0;z-index:0;
+  }
+  .hero-bg img{width:100%;height:100%;object-fit:cover;}
+  .hero-bg::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(0deg,rgba(20,19,15,.72) 0%,rgba(20,19,15,.28) 42%,rgba(20,19,15,.08) 65%,rgba(20,19,15,.32) 100%);
+  }
+  .hero-content{position:relative;z-index:1;width:100%;padding-bottom:88px;padding-top:180px;}
+  .hero-content .eyebrow{color:var(--gold-soft);}
+  .hero-content h1{
+    font-size:clamp(44px,6.2vw,86px);
+    line-height:1.06;color:#fff;margin-bottom:26px;max-width:820px;
+  }
+  .hero-content h1 em{font-style:italic;color:var(--gold-soft);}
+  .hero-content p{font-size:16px;color:rgba(255,255,255,.82);max-width:420px;margin-bottom:38px;}
+  .hero-cta{display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+  .scroll-cue{
+    position:absolute;bottom:34px;right:40px;z-index:1;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    font-size:10.5px;letter-spacing:.24em;color:rgba(255,255,255,.75);
+  }
+  .scroll-cue .line{width:1px;height:34px;background:rgba(255,255,255,.6);animation:scrollLine 2s ease-in-out infinite;}
+  @keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+
+  /* ---------- MARQUEE ---------- */
+  .marquee{background:var(--ink);color:rgba(255,255,255,.85);padding:15px 0;overflow:hidden;white-space:nowrap;}
+  .marquee-track{display:inline-flex;animation:marquee 28s linear infinite;}
+  .marquee-track span{font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:.08em;padding:0 26px;display:inline-flex;align-items:center;gap:26px;}
+  @keyframes marquee{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+  /* ---------- SECTION HEAD ---------- */
+  .section{padding:130px 0;}
+  .section-head{max-width:620px;margin:0 auto 70px;text-align:center;}
+  .section-head h2{font-size:clamp(32px,4vw,48px);color:var(--ink);}
+  .section-head p{color:var(--ink-soft);font-size:15px;margin-top:16px;}
+
+  /* ---------- STORY ---------- */
+  .story{background:var(--white);}
+  .story .container{display:grid;grid-template-columns:.95fr 1.05fr;gap:80px;align-items:center;}
+  .story-imgs{position:relative;height:560px;}
+  .story-imgs img{position:absolute;object-fit:cover;}
+  .story-imgs .img1{width:76%;height:82%;top:0;left:0;box-shadow:0 30px 60px -22px rgba(38,36,31,.35);}
+  .story-imgs .img2{width:48%;height:46%;bottom:0;right:0;border:8px solid var(--white);box-shadow:0 24px 50px -18px rgba(38,36,31,.3);}
+  .story-copy h2{font-size:clamp(30px,3.6vw,44px);margin-bottom:24px;}
+  .story-copy p{color:var(--ink-soft);margin-bottom:20px;font-size:15.5px;}
+  .story-stats{display:flex;gap:54px;margin-top:40px;padding-top:36px;border-top:1px solid var(--line);}
+  .story-stats div strong{display:block;font-family:'Cormorant Garamond',serif;font-size:36px;color:var(--sage-deep);font-weight:600;}
+  .story-stats div span{font-size:12px;color:var(--ink-soft);letter-spacing:.03em;}
+
+  /* ---------- VALUES ---------- */
+  .values{background:var(--cream-deep);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .values-grid{display:grid;grid-template-columns:repeat(4,1fr);}
+  .value-card{padding:56px 34px;text-align:center;border-left:1px solid var(--line);}
+  .value-card:first-child{border-left:none;}
+  .value-icon{width:38px;height:38px;margin:0 auto 22px;color:var(--sage-deep);}
+  .value-card h3{font-size:19px;margin-bottom:10px;font-weight:500;}
+  .value-card p{font-size:13px;color:var(--ink-soft);}
+
+  /* ---------- EDITORIAL BREAK ---------- */
+  .editorial{position:relative;height:78vh;min-height:520px;display:flex;align-items:center;overflow:hidden;}
+  .editorial img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .editorial::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,19,15,.62) 0%,rgba(20,19,15,.2) 55%,rgba(20,19,15,.05) 100%);}
+  .editorial-copy{position:relative;z-index:1;max-width:560px;padding-left:64px;}
+  .editorial-copy .eyebrow{color:var(--gold-soft);}
+  .editorial-copy p.quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(26px,3vw,38px);color:#fff;line-height:1.4;margin-bottom:30px;}
+  @media (max-width:980px){.editorial-copy{padding-left:32px;}}
+
+  /* ---------- PRODUCTS ---------- */
+  .products{background:var(--cream);}
+  .product-tabs{display:flex;justify-content:center;gap:38px;margin-bottom:64px;flex-wrap:wrap;}
+  .tab-btn{
+    background:none;border:none;padding:0 0 8px;cursor:pointer;
+    font-size:13px;letter-spacing:.1em;color:var(--ink-soft);border-bottom:1px solid transparent;transition:all .3s ease;
+  }
+  .tab-btn.active,.tab-btn:hover{color:var(--ink);border-bottom-color:var(--ink);}
+  .product-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:44px 34px;}
+  .product-thumb{position:relative;aspect-ratio:3/4;overflow:hidden;margin-bottom:20px;background:var(--sage-pale);}
+  .product-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .7s ease;}
+  .product-card:hover .product-thumb img{transform:scale(1.06);}
+  .product-tag{
+    position:absolute;top:16px;left:16px;
+    font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#fff;
+    padding:6px 0;
+  }
+  .product-info .p-cat{font-size:10.5px;letter-spacing:.14em;color:var(--ink-soft);text-transform:uppercase;}
+  .product-info h4{font-size:19px;margin:9px 0 6px;font-weight:500;}
+  .product-info .p-desc{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;}
+  .p-price{font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--ink);font-weight:600;}
+
+  /* ---------- INGREDIENT BANNER ---------- */
+  .ingredient-banner{position:relative;background:var(--ink);color:#fff;overflow:hidden;}
+  .ingredient-banner .container{display:grid;grid-template-columns:1fr 1fr;align-items:center;min-height:560px;gap:60px;}
+  .ib-img{position:absolute;top:0;right:0;width:50%;height:100%;}
+  .ib-img img{width:100%;height:100%;object-fit:cover;}
+  .ib-img::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(38,36,31,.25) 0%,rgba(38,36,31,0) 30%);}
+  .ib-copy{padding:60px 0;}
+  .ib-copy .eyebrow{color:var(--gold-soft);}
+  .ib-copy h2{font-size:clamp(30px,3.6vw,44px);margin-bottom:22px;color:#fff;}
+  .ib-copy p{color:rgba(255,255,255,.72);margin-bottom:30px;max-width:440px;}
+  .ib-list{display:flex;flex-direction:column;gap:16px;margin-bottom:34px;list-style:none;}
+  .ib-list li{display:flex;gap:14px;align-items:flex-start;font-size:14.5px;color:rgba(255,255,255,.9);}
+  .ib-list li svg{flex-shrink:0;margin-top:3px;color:var(--gold-soft);}
+
+  /* ---------- TESTIMONIALS ---------- */
+  .testimonials{background:var(--cream-deep);text-align:center;}
+  .quote-icon{font-family:'Cormorant Garamond',serif;font-size:80px;color:var(--gold-soft);line-height:1;}
+  .t-slider{max-width:680px;margin:0 auto;position:relative;min-height:210px;}
+  .t-slide{display:none;animation:fadeIn .6s ease;}
+  .t-slide.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .t-slide p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;color:var(--ink);line-height:1.5;margin-bottom:26px;}
+  .t-author{font-size:13px;letter-spacing:.06em;color:var(--ink-soft);}
+  .t-author strong{color:var(--ink);font-weight:600;}
+  .t-dots{display:flex;justify-content:center;gap:10px;margin-top:34px;}
+  .t-dot{width:8px;height:8px;border-radius:50%;background:var(--line);cursor:pointer;transition:background .3s ease;}
+  .t-dot.active{background:var(--sage-deep);}
+
+  /* ---------- GALLERY ---------- */
+  .gallery{background:var(--white);}
+  .gallery-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+  .gallery-grid a{aspect-ratio:1/1;overflow:hidden;position:relative;}
+  .gallery-grid img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+  .gallery-grid a:hover img{transform:scale(1.08);}
+  .gallery-grid a::after{
+    content:'@lume.skincare';position:absolute;inset:0;background:rgba(38,36,31,.4);
+    color:#fff;font-size:11px;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity .3s ease;
+  }
+  .gallery-grid a:hover::after{opacity:1;}
+
+  /* ---------- NEWSLETTER ---------- */
+  .newsletter{background:var(--ink);color:#fff;text-align:center;padding:110px 0;}
+  .newsletter .eyebrow{color:var(--gold-soft);}
+  .newsletter h2{font-size:clamp(30px,3.8vw,46px);margin:18px 0 16px;color:#fff;}
+  .newsletter p{color:rgba(255,255,255,.65);max-width:460px;margin:0 auto 36px;}
+  .news-form{display:flex;justify-content:center;gap:0;max-width:440px;margin:0 auto;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:14px;}
+  .news-form input{flex:1;min-width:180px;padding:8px 4px;border:none;background:transparent;color:#fff;font-size:14px;}
+  .news-form input::placeholder{color:rgba(255,255,255,.5);}
+  .news-form input:focus{outline:none;}
+  .news-form button{background:none;border:none;color:#fff;cursor:pointer;font-size:13px;letter-spacing:.12em;text-transform:uppercase;border-bottom:1px solid #fff;padding-bottom:2px;}
+  .news-note{font-size:12px;color:rgba(255,255,255,.45);margin-top:20px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--cream-deep);padding:80px 0 0;}
+  .footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:50px;padding-bottom:60px;border-bottom:1px solid var(--line);}
+  .footer-brand .logo{margin-bottom:16px;color:var(--ink);}
+  .footer-brand p{color:var(--ink-soft);font-size:13.5px;max-width:280px;margin-bottom:22px;}
+  .social-row{display:flex;gap:14px;}
+  .social-row a{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;transition:all .3s ease;}
+  .social-row a:hover{background:var(--sage-deep);border-color:var(--sage-deep);color:#fff;}
+  .footer-col h5{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px;color:var(--ink);}
+  .footer-col ul{list-style:none;display:flex;flex-direction:column;gap:12px;}
+  .footer-col a{font-size:13.5px;color:var(--ink-soft);transition:color .3s ease;}
+  .footer-col a:hover{color:var(--sage-deep);}
+  .footer-bottom{display:flex;justify-content:space-between;align-items:center;padding:26px 0;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;gap:10px;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:980px){
+    .nav-links{display:none;}
+    .burger{display:flex;}
+    .story .container{grid-template-columns:1fr;}
+    .story-imgs{height:400px;margin-bottom:20px;}
+    .values-grid{grid-template-columns:repeat(2,1fr);}
+    .value-card:nth-child(2n+1){border-left:none;}
+    .value-card{border-top:1px solid var(--line);}
+    .value-card:nth-child(-n+2){border-top:none;}
+    .product-grid{grid-template-columns:repeat(2,1fr);}
+    .ingredient-banner .container{grid-template-columns:1fr;}
+    .ib-img{position:relative;width:100%;height:320px;}
+    .ib-copy{padding:50px 0;}
+    .gallery-grid{grid-template-columns:repeat(3,1fr);}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+    .editorial-copy{padding-left:32px;padding-right:32px;}
+  }
+  @media (max-width:560px){
+    .section{padding:80px 0;}
+    .product-grid{grid-template-columns:1fr 1fr;gap:26px 16px;}
+    .values-grid{grid-template-columns:1fr;}
+    .value-card{border-left:none !important;border-top:1px solid var(--line);}
+    .value-card:first-child{border-top:none;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr);}
+    .footer-grid{grid-template-columns:1fr;gap:34px;}
+    .story-stats{gap:30px;flex-wrap:wrap;}
+    .hero-cta{gap:20px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header id="siteHeader">
+  <div class="container">
+    <nav>
+      <a href="#top" class="logo">LUMÉ<span>光晳 SKINCARE</span></a>
+      <ul class="nav-links">
+        <li><a href="#about">品牌故事</a></li>
+        <li><a href="#products">熱銷商品</a></li>
+        <li><a href="#ingredients">核心成分</a></li>
+        <li><a href="#reviews">顧客評價</a></li>
+        <li><a href="#contact">聯絡我們</a></li>
+      </ul>
+      <div class="nav-right">
+        <svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg class="icon-btn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        <div class="burger" id="burgerBtn"><span></span><span></span><span></span></div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-close" id="mobileClose">&times;</div>
+  <a href="#about">品牌故事</a>
+  <a href="#products">熱銷商品</a>
+  <a href="#ingredients">核心成分</a>
+  <a href="#reviews">顧客評價</a>
+  <a href="#contact">聯絡我們</a>
+</div>
+
+<!-- ================= HERO (real full-bleed photography) ================= -->
+<section class="hero" id="top">
+  <div class="hero-bg">
+    <img src="https://images.unsplash.com/photo-1785581778868-79100f7fe56c?q=80&w=1800&auto=format&fit=crop" alt="LUMÉ 保養品大理石情境攝影">
+  </div>
+  <div class="hero-content">
+    <div class="container">
+      <span class="eyebrow">純淨植萃 · 科學配方</span>
+      <h1>讓肌膚<br><em>由內而外</em>綻放光感</h1>
+      <p>LUMÉ 光晳,萃取高山植物精華,結合實驗室級生技配方,為每一寸肌膚找回天生的透亮與彈潤。</p>
+      <div class="hero-cta">
+        <a href="#products" class="btn btn-ghost-light">探索系列商品</a>
+        <a href="#about" class="text-link" style="color:#fff">認識我們的故事 →</a>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>SCROLL</span><span class="line"></span></div>
+</section>
+
+<!-- ================= MARQUEE ================= -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>✦ 天然植萃 &nbsp;&nbsp; ✦ 無添加酒精 &nbsp;&nbsp; ✦ 皮膚科測試 &nbsp;&nbsp; ✦ 純素配方 &nbsp;&nbsp; ✦ 環保包裝</span>
+    <span>✦ 天然植萃 &nbsp;&nbsp; ✦ 無添加酒精 &nbsp;&nbsp; ✦ 皮膚科測試 &nbsp;&nbsp; ✦ 純素配方 &nbsp;&nbsp; ✦ 環保包裝</span>
+  </div>
+</div>
+
+<!-- ================= STORY ================= -->
+<section class="section story" id="about">
+  <div class="container">
+    <div class="story-imgs">
+      <img class="img1" src="https://images.unsplash.com/photo-1655026392641-bf283a5f12d4?q=80&w=1000&auto=format&fit=crop" alt="使用者塗抹精華液">
+      <img class="img2" src="https://images.unsplash.com/photo-1782607537180-0ca83bf60aef?q=80&w=700&auto=format&fit=crop" alt="植萃原料特寫">
+    </div>
+    <div class="story-copy">
+      <span class="eyebrow">我們的故事</span>
+      <h2>從一株植物<br>到一瓶信任</h2>
+      <p>LUMÉ 光晳成立於對「純淨保養」的堅持。我們相信真正有效的保養品,來自對成分的誠實與對肌膚的尊重。每一項產品皆通過皮膚科測試,並以可追溯的永續植萃原料製成。</p>
+      <p>從產地溯源到實驗室配方調製,我們花費三年時間打磨每一支瓶身背後的故事,只為給你安心、有感的保養體驗。</p>
+      <div class="story-stats">
+        <div><strong>12+</strong><span>年研發經驗</span></div>
+        <div><strong>50K+</strong><span>信賴顧客</span></div>
+        <div><strong>100%</strong><span>純素友善</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VALUES ================= -->
+<section class="values">
+  <div class="values-grid">
+    <div class="value-card">
+      <svg class="value-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M12 2C8 6 4 9 4 14a8 8 0 0 0 16 0c0-5-4-8-8-12Z"/></svg>
+      <h3>純淨萃取</h3>
+      <p>來自高山與有機農場的植物精華,低溫萃取保留活性營養。</p>
+    </div>
+    <div class="value-card">
+      <svg class="value-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <h3>科學實證</h3>
+      <p>與皮膚科學實驗室合作,每項配方皆經臨床測試驗證功效。</p>
+    </div>
+    <div class="value-card">
+      <svg class="value-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <h3>溫和無負擔</h3>
+      <p>不含酒精、矽靈與人工香精,敏弱肌也能安心使用。</p>
+    </div>
+    <div class="value-card">
+      <svg class="value-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <h3>永續包裝</h3>
+      <p>採用可回收玻璃瓶身與再生紙材,對地球溫柔以待。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRODUCTS ================= -->
+<section class="section products" id="products">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Bestsellers</span>
+      <h2>本季熱銷系列</h2>
+      <p>四款經典配方,從清潔、精華到保濕修護,打造完整保養儀式。</p>
+    </div>
+
+    <div class="product-tabs">
+      <button class="tab-btn active">全部商品</button>
+      <button class="tab-btn">精華液</button>
+      <button class="tab-btn">乳霜</button>
+      <button class="tab-btn">潔顏</button>
+    </div>
+
+    <div class="product-grid">
+      <div class="product-card">
+        <div class="product-thumb">
+          <img src="https://images.unsplash.com/photo-1613803745799-ba6c10aace85?q=80&w=800&auto=format&fit=crop" alt="光感修護精華">
+          <span class="product-tag">熱銷 No.1</span>
+        </div>
+        <div class="product-info">
+          <span class="p-cat">精華液</span>
+          <h4>光感修護精華</h4>
+          <p class="p-desc">玻尿酸 × 積雪草,密集補水鎖水</p>
+          <span class="p-price">NT$ 1,680</span>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-thumb">
+          <img src="https://images.unsplash.com/photo-1718490953028-021d352b14fd?q=80&w=800&auto=format&fit=crop" alt="植萃保濕系列">
+        </div>
+        <div class="product-info">
+          <span class="p-cat">乳霜</span>
+          <h4>植萃保濕乳霜</h4>
+          <p class="p-desc">乳木果油 × 神經醯胺,修復屏障</p>
+          <span class="p-price">NT$ 1,480</span>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-thumb">
+          <img src="https://images.unsplash.com/photo-1597931752949-98c74b5b159f?q=80&w=800&auto=format&fit=crop" alt="胺基酸洗顏慕斯">
+          <span class="product-tag">新品</span>
+        </div>
+        <div class="product-info">
+          <span class="p-cat">潔顏</span>
+          <h4>胺基酸洗顏慕斯</h4>
+          <p class="p-desc">溫和潔淨,洗後不緊繃</p>
+          <span class="p-price">NT$ 780</span>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-thumb">
+          <img src="https://images.unsplash.com/photo-1623143445418-40c192fa3d11?q=80&w=800&auto=format&fit=crop" alt="晚安修護油">
+        </div>
+        <div class="product-info">
+          <span class="p-cat">精華油</span>
+          <h4>晚安修護油</h4>
+          <p class="p-desc">玫瑰果油 × 維他命E,一夜煥新</p>
+          <span class="p-price">NT$ 1,980</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EDITORIAL BREAK ================= -->
+<section class="editorial">
+  <img src="https://images.unsplash.com/photo-1670201203208-055d6d79db4a?q=80&w=1800&auto=format&fit=crop" alt="使用者塗抹精華液特寫">
+  <div class="container">
+    <div class="editorial-copy">
+      <span class="eyebrow">The Ritual</span>
+      <p class="quote">「保養不是妝點,而是每天給肌膚的一句溫柔提醒。」</p>
+      <a href="#products" class="btn btn-ghost-light">開始你的保養儀式</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= INGREDIENT BANNER ================= -->
+<section class="ingredient-banner" id="ingredients">
+  <div class="container">
+    <div class="ib-copy">
+      <span class="eyebrow">核心成分</span>
+      <h2>看得見的<br>植萃科技</h2>
+      <p>我們只選擇經臨床驗證、來源透明的活性成分,讓每一滴精華都發揮最大功效。</p>
+      <ul class="ib-list">
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>玻尿酸 — 深層鎖水,提升肌膚含水量</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>積雪草萃取 — 舒緩鎮定,強化屏障</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>維他命 C 衍生物 — 提亮膚色,抗氧化</li>
+      </ul>
+      <a href="#products" class="text-link">了解完整成分表 →</a>
+    </div>
+  </div>
+  <div class="ib-img"><img src="https://images.unsplash.com/photo-1782687633966-1ceb2a3fdf0f?q=80&w=1200&auto=format&fit=crop" alt="植萃成分情境圖"></div>
+</section>
+
+<!-- ================= TESTIMONIALS ================= -->
+<section class="section testimonials" id="reviews">
+  <div class="container">
+    <div class="quote-icon">"</div>
+    <div class="t-slider">
+      <div class="t-slide active">
+        <p>用了三週,肌膚明顯變得更透亮有彈性,質地清爽完全不黏膩,已經是每天保養必備的第一步。</p>
+        <div class="t-author"><strong>Wendy Chen</strong> · 忠實顧客</div>
+      </div>
+      <div class="t-slide">
+        <p>敏弱肌終於找到能安心使用的保養品,成分單純又有感,連換季都沒有再泛紅過敏。</p>
+        <div class="t-author"><strong>Kevin Lin</strong> · 皮膚科診所推薦</div>
+      </div>
+      <div class="t-slide">
+        <p>包裝質感非常好,送禮自用兩相宜,香氣清淡舒服,是我回購率最高的保養品牌。</p>
+        <div class="t-author"><strong>Amy Hsu</strong> · 三年老顧客</div>
+      </div>
+    </div>
+    <div class="t-dots">
+      <span class="t-dot active" data-i="0"></span>
+      <span class="t-dot" data-i="1"></span>
+      <span class="t-dot" data-i="2"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GALLERY ================= -->
+<section class="section gallery" style="padding-top:0;">
+  <div class="section-head">
+    <span class="eyebrow">#LumeSkincare</span>
+    <h2>與我們分享你的光感時刻</h2>
+  </div>
+  <div class="container">
+    <div class="gallery-grid">
+      <a href="#"><img src="https://images.unsplash.com/photo-1636740599648-ae84f705fc2e?q=80&w=500&auto=format&fit=crop" alt="gallery"></a>
+      <a href="#"><img src="https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?q=80&w=500&auto=format&fit=crop" alt="gallery"></a>
+      <a href="#"><img src="https://images.unsplash.com/photo-1763503839418-2b45c3d7a3c3?q=80&w=500&auto=format&fit=crop" alt="gallery"></a>
+      <a href="#"><img src="https://images.unsplash.com/photo-1576426863848-c21f53c60b19?q=80&w=500&auto=format&fit=crop" alt="gallery"></a>
+      <a href="#"><img src="https://images.unsplash.com/photo-1597931752949-98c74b5b159f?q=80&w=500&auto=format&fit=crop" alt="gallery"></a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NEWSLETTER ================= -->
+<section class="newsletter" id="contact">
+  <div class="container">
+    <span class="eyebrow">訂閱電子報</span>
+    <h2>搶先獲得新品與專屬優惠</h2>
+    <p>加入 LUMÉ 光晳會員,享新會員 9 折優惠,並優先獲得保養知識與限定活動資訊。</p>
+    <form class="news-form" onsubmit="event.preventDefault(); this.querySelector('input').value=''; alert('感謝訂閱!請至信箱收取確認信。');">
+      <input type="email" placeholder="輸入您的 Email" required>
+      <button type="submit">訂閱 →</button>
+    </form>
+    <p class="news-note">我們尊重您的隱私,不會將資料提供給第三方。</p>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#top" class="logo">LUMÉ<span>光晳 SKINCARE</span></a>
+        <p>純淨植萃保養,喚醒肌膚由內而外的光感。用誠實的成分,寫下你的保養日常。</p>
+        <div class="social-row">
+          <a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+          <a href="#" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3Z"/></svg></a>
+          <a href="#" aria-label="Line"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 10v4M12 10v4M16 10v4"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>選購</h5>
+        <ul>
+          <li><a href="#products">精華液</a></li>
+          <li><a href="#products">乳霜</a></li>
+          <li><a href="#products">潔顏</a></li>
+          <li><a href="#products">禮盒組合</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>關於我們</h5>
+        <ul>
+          <li><a href="#about">品牌故事</a></li>
+          <li><a href="#ingredients">核心成分</a></li>
+          <li><a href="#">永續承諾</a></li>
+          <li><a href="#">門市據點</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>顧客服務</h5>
+        <ul>
+          <li><a href="#">常見問題</a></li>
+          <li><a href="#">運送與退換貨</a></li>
+          <li><a href="#contact">聯絡我們</a></li>
+          <li><a href="#">隱私權政策</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 LUMÉ 光晳 Skincare. All rights reserved.</span>
+      <span>Design template · made for 保養品牌</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 40));
+
+  const burger = document.getElementById('burgerBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const mobileClose = document.getElementById('mobileClose');
+  burger.addEventListener('click', () => mobileMenu.classList.add('open'));
+  mobileClose.addEventListener('click', () => mobileMenu.classList.remove('open'));
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileMenu.classList.remove('open')));
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  const slides = document.querySelectorAll('.t-slide');
+  const dots = document.querySelectorAll('.t-dot');
+  let tIndex = 0;
+  function showSlide(i){
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
+    slides[i].classList.add('active');
+    dots[i].classList.add('active');
+    tIndex = i;
+  }
+  dots.forEach(dot => dot.addEventListener('click', () => showSlide(parseInt(dot.dataset.i))));
+  setInterval(() => showSlide((tIndex + 1) % slides.length), 5000);
+</script>
+</body>
+</html>

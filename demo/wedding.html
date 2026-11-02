@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth overflow-x-hidden">
+<head>
+    <meta charset="UTF-8">
+<meta name="robots" content="noindex, follow">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éternel Wedding 雋永婚禮顧問 | 訂製奢華浪漫與永恆愛情故事</title>
+    <meta name="description" content="Éternel Wedding 雋永婚禮顧問，專注為品味新人打造法式優雅、現代精品的奢華婚禮。提供一站式婚禮企劃、婚紗攝影、求婚企劃、戶外莊園婚禮與宴會佈置。">
+    <meta name="keywords" content="婚禮顧問, 婚禮企劃, 奢華婚禮, 戶外婚禮, 婚紗攝影, 新娘秘書, 婚禮佈置, 花藝設計, 法式婚禮, 精品婚禮">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Éternel Wedding 雋永婚禮顧問 | 訂製奢華浪漫與永恆愛情故事">
+    <meta property="og:description" content="專注為品味新人打造法式優雅、現代精品的奢華婚禮。一站式顧問服務、頂級婚紗與婚紗影像。">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1200">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://img.icons8.com/ios-filled/50/c5a880/rose.png">
+
+    <!-- CSS/JS CDNs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#c5a880',
+                            goldlight: '#f2e9dc',
+                            golddark: '#a88960',
+                            charcoal: '#2c2a29', // 高質感暖深灰，取代死板黑色
+                            alabaster: '#FAF6F0', // 頂奢主色调（羊脂白）
+                            blush: '#FDF7F5', // 柔嫩粉櫻
+                            sand: '#F5EFE6', // 靜謐沙灘白
+                            mist: '#EAEBE6' // 迷濛淺灰
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CSS Reset and Smooth Scrolling */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background-color: #FAF6F0;
+            color: #2c2a29;
+            overflow-x: hidden;
+            font-feature-settings: "palt";
+        }
+        
+        /* Noise Overlay for luxury paper feel */
+        .noise-bg {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
+        }
+
+        /* Glassmorphism Navigation */
+        .glass-nav {
+            background: rgba(250, 246, 240, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(197, 168, 128, 0.12);
+        }
+
+        /* Liquid Aura Gradients */
+        .aura-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.45;
+            mix-blend-mode: multiply;
+            pointer-events: none;
+            z-index: 1;
+            transition: transform 10s ease-in-out;
+        }
+
+        @keyframes blob-float {
+            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+            33% { transform: translateY(-50px) scale(1.15) rotate(120deg); }
+            66% { transform: translateY(50px) scale(0.9) rotate(240deg); }
+        }
+        .animate-blob-1 {
+            animation: blob-float 16s infinite ease-in-out;
+        }
+        .animate-blob-2 {
+            animation: blob-float 22s infinite ease-in-out;
+        }
+
+        /* Custom Floating Petal Animation */
+        @keyframes float-petal {
+            0% {
+                transform: translateY(-10%) rotate(0deg) translateX(0);
+                opacity: 0;
+            }
+            15% { opacity: 0.6; }
+            85% { opacity: 0.6; }
+            100% {
+                transform: translateY(110vh) rotate(360deg) translateX(120px);
+                opacity: 0;
+            }
+        }
+        .petal {
+            position: absolute;
+            background: radial-gradient(circle, rgba(253,228,225,0.8) 0%, rgba(245,214,204,0.3) 100%);
+            border-radius: 50% 10% 50% 50%;
+            pointer-events: none;
+            animation: float-petal 12s linear infinite;
+        }
+
+        /* Golden dust particles */
+        .sparkle-dust {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, #dfcfb7 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            animation: pulse-sparkle 4s infinite ease-in-out;
+        }
+        @keyframes pulse-sparkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.5); }
+            50% { opacity: 0.9; transform: scale(1.2); }
+        }
+
+        /* Ken Burns Banner Zoom */
+        @keyframes kenburns {
+            0%, 100% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.08) translate(-1%, 1%); }
+        }
+        .ken-burns {
+            animation: kenburns 30s ease-in-out infinite;
+        }
+
+        /* 3D Tilt Card Base Setup */
+        .tilt-card {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s ease;
+        }
+        .tilt-card-inner {
+            transform: translateZ(30px);
+        }
+
+        /* Shimmer Gold Line effect on buttons */
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 30%;
+            height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(30deg);
+            transition: all 0.7s ease;
+        }
+        .shimmer-btn:hover::after {
+            left: 140%;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF6F0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c5a880;
+            border-radius: 9px;
+        }
+
+        /* Page transition curtains */
+        #transition-curtain-1, #transition-curtain-2 {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            transform: translateY(100%);
+            pointer-events: none;
+        }
+        #transition-curtain-1 {
+            background-color: #FAF6F0;
+        }
+        #transition-curtain-2 {
+            background-color: #dfcfb7;
+        }
+
+        /* Hide Scrollbar helper during transitions */
+        .no-scroll {
+            overflow: hidden !important;
+        }
+    </style>
+</head>
+<body class="bg-brand-alabaster text-brand-charcoal font-sans noise-bg overflow-x-hidden">
+
+    <div id="loading-screen" class="fixed inset-0 bg-brand-alabaster z-[10000] flex flex-col items-center justify-center transition-all duration-1000">
+        <div class="text-center relative">
+            <div class="mb-4 inline-block relative">
+                <h1 class="font-serif text-5xl md:text-7xl text-brand-golddark tracking-[0.25em] uppercase font-bold select-none opacity-0" id="loader-logo">Éternel</h1>
+                <div class="absolute inset-x-0 bottom-0 h-[2px] bg-brand-gold/40 scale-x-0 origin-left" id="loader-line"></div>
+            </div>
+            <p class="text-brand-gold tracking-[0.4em] text-xs uppercase opacity-0 font-medium translate-y-3" id="loader-subtitle">Wedding & Event Design</p>
+            <div class="w-64 h-[1px] bg-brand-gold/20 mx-auto mt-12 relative overflow-hidden rounded-full">
+                <div class="absolute h-full bg-brand-golddark w-1/3 rounded animate-infinite-loading left-0" id="loader-progress-bar" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="scroll-progress" class="fixed top-0 left-0 h-1 bg-gradient-to-r from-brand-gold via-brand-goldlight to-brand-golddark z-[1001] w-0 transition-all duration-75"></div>
+
+    <!-- Transition Panels -->
+    <div id="transition-curtain-2"></div>
+    <div id="transition-curtain-1" class="flex flex-col items-center justify-center">
+        <span class="font-serif text-3xl md:text-4xl text-brand-golddark tracking-[0.3em] uppercase">Éternel</span>
+    </div>
+
+    <!-- Liquid Background Gradients -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-75">
+        <div class="aura-blob animate-blob-1 bg-[#FDE7E3] w-[40vw] h-[40vw] top-[10%] left-[5%]"></div>
+        <div class="aura-blob animate-blob-2 bg-[#F9EBD2] w-[45vw] h-[45vw] bottom-[15%] right-[5%]"></div>
+        <div class="aura-blob animate-blob-1 bg-[#EAEBE6] w-[35vw] h-[35vw] top-[50%] left-[40%]"></div>
+    </div>
+
+    <header id="main-header" class="fixed top-0 left-0 w-full z-[1000] transition-all duration-500 glass-nav">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <!-- Brand Logo with micro hover parallax effect -->
+            <a href="#/home" onclick="navigateTo('home'); return false;" class="group flex flex-col items-start focus:outline-none" id="brand-identity">
+                <span class="font-serif text-2xl md:text-3xl text-brand-golddark tracking-[0.22em] font-bold uppercase group-hover:text-brand-gold transition-colors duration-500">Éternel</span>
+                <span class="text-[9px] tracking-[0.42em] text-brand-gold uppercase group-hover:text-brand-charcoal transition-colors duration-500 font-semibold">Wedding & Design</span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden lg:flex items-center space-x-6" id="nav-container">
+                <a href="#/home" onclick="navigateTo('home'); return false;" class="nav-link text-brand-charcoal hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em] font-semibold active-nav" data-page="home">首頁</a>
+                <a href="#/services" onclick="navigateTo('services'); return false;" class="nav-link text-brand-charcoal/80 hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em]" data-page="services">服務介紹</a>
+                <a href="#/gallery" onclick="navigateTo('gallery'); return false;" class="nav-link text-brand-charcoal/80 hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em]" data-page="gallery">婚禮作品</a>
+                <a href="#/about" onclick="navigateTo('about'); return false;" class="nav-link text-brand-charcoal/80 hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em]" data-page="about">品牌故事</a>
+                <a href="#/projects" onclick="navigateTo('projects'); return false;" class="nav-link text-brand-charcoal/80 hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em]" data-page="projects">經典案例</a>
+                <a href="#/process" onclick="navigateTo('process'); return false;" class="nav-link text-brand-charcoal/80 hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em]" data-page="process">婚禮流程</a>
+                <a href="#/testimonials" onclick="navigateTo('testimonials'); return false;" class="nav-link text-brand-charcoal/80 hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em]" data-page="testimonials">新人評價</a>
+                <a href="#/faq" onclick="navigateTo('faq'); return false;" class="nav-link text-brand-charcoal/80 hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em]" data-page="faq">常見問題</a>
+                <a href="#/blog" onclick="navigateTo('blog'); return false;" class="nav-link text-brand-charcoal/80 hover:text-brand-golddark transition-colors text-xs uppercase tracking-[0.2em]" data-page="blog">美學專欄</a>
+            </nav>
+
+            <!-- Premium Magnetic Button -->
+            <div class="hidden lg:block">
+                <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn relative inline-flex items-center justify-center px-7 py-3 overflow-hidden font-bold text-xs tracking-widest text-white transition-all duration-300 ease-out border border-brand-golddark rounded-full bg-brand-golddark shadow-lg shadow-brand-gold/15 group">
+                    <span class="absolute inset-0 flex items-center justify-center w-full h-full text-brand-charcoal duration-300 -translate-x-full bg-brand-goldlight group-hover:translate-x-0 ease font-bold">
+                        <i class="fa-solid fa-calendar-days mr-2"></i> 即刻預約諮詢
+                    </span>
+                    <span class="absolute flex items-center justify-center w-full h-full text-white transition-all duration-300 transform group-hover:translate-x-full ease">預約雋永婚禮</span>
+                    <span class="relative invisible">預約雋永婚禮</span>
+                </a>
+            </div>
+
+            <!-- Hamburger Button -->
+            <button id="mobile-menu-btn" class="lg:hidden text-brand-charcoal hover:text-brand-golddark focus:outline-none focus:ring-2 focus:ring-brand-gold rounded p-1" aria-label="Toggle Menu">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path id="menu-icon-path" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-brand-alabaster/95 backdrop-blur-lg border-b border-brand-gold/15 w-full transition-all duration-300">
+            <div class="px-6 py-8 flex flex-col space-y-4 text-center">
+                <a href="#/home" onclick="navigateTo('home'); toggleMobileMenu(); return false;" class="text-brand-charcoal hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">首頁</a>
+                <a href="#/services" onclick="navigateTo('services'); toggleMobileMenu(); return false;" class="text-brand-charcoal/80 hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">服務介紹</a>
+                <a href="#/gallery" onclick="navigateTo('gallery'); toggleMobileMenu(); return false;" class="text-brand-charcoal/80 hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">婚禮作品</a>
+                <a href="#/about" onclick="navigateTo('about'); toggleMobileMenu(); return false;" class="text-brand-charcoal/80 hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">品牌故事</a>
+                <a href="#/projects" onclick="navigateTo('projects'); toggleMobileMenu(); return false;" class="text-brand-charcoal/80 hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">經典案例</a>
+                <a href="#/process" onclick="navigateTo('process'); toggleMobileMenu(); return false;" class="text-brand-charcoal/80 hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">婚禮流程</a>
+                <a href="#/testimonials" onclick="navigateTo('testimonials'); toggleMobileMenu(); return false;" class="text-brand-charcoal/80 hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">新人評價</a>
+                <a href="#/faq" onclick="navigateTo('faq'); toggleMobileMenu(); return false;" class="text-brand-charcoal/80 hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">常見問題</a>
+                <a href="#/blog" onclick="navigateTo('blog'); toggleMobileMenu(); return false;" class="text-brand-charcoal/80 hover:text-brand-golddark text-xs tracking-widest uppercase py-3 border-b border-brand-gold/10 font-bold">美學專欄</a>
+                <a href="#/contact" onclick="navigateTo('contact'); toggleMobileMenu(); return false;" class="bg-brand-golddark text-white font-bold py-4 px-6 rounded-full hover:bg-brand-gold tracking-widest uppercase text-xs">預約諮詢</a>
+            </div>
+        </div>
+    </header>
+
+    <div id="petal-container" class="fixed inset-0 pointer-events-none z-[40] overflow-hidden"></div>
+
+    <!-- MAIN APP ROUTER VIEW -->
+    <main id="app-view" class="pt-20 min-h-screen relative z-10">
+        <!-- SPA dynamic page elements will be rendered here -->
+    </main>
+
+    <!-- Floating CTAs -->
+    <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn fixed bottom-24 right-6 md:right-8 z-[900] bg-gradient-to-r from-brand-gold to-brand-golddark text-white p-4 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 group" aria-label="聯絡我們">
+        <i class="fa-solid fa-envelope text-xl"></i>
+        <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 ease-out whitespace-nowrap text-xs tracking-widest font-bold font-serif ml-0 group-hover:ml-2">訂製您的婚禮</span>
+    </a>
+
+    <button id="back-to-top" class="fixed bottom-8 right-6 md:right-8 z-[900] bg-white/95 border border-brand-gold/30 hover:border-brand-gold text-brand-golddark p-4 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 opacity-0 invisible" aria-label="回到最上面">
+        <i class="fa-solid fa-arrow-up text-lg"></i>
+    </button>
+
+    <footer class="bg-brand-blush text-brand-charcoal relative z-50 border-t border-brand-gold/25 overflow-hidden">
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+        <div class="max-w-7xl mx-auto px-6 py-20 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+                <div class="space-y-6">
+                    <h2 class="font-serif text-3xl text-brand-golddark tracking-[0.25em] uppercase font-bold">Éternel</h2>
+                    <p class="text-brand-charcoal/70 text-sm leading-relaxed font-light">
+                        「以法式藝術眼光，譜寫屬於新人的不朽篇章。」Éternel 雋永婚禮是國際高端客製化婚禮品牌，為您編織一場浪漫且無瑕的婚禮盛宴。
+                    </p>
+                    <div class="flex space-x-4 pt-2">
+                        <a href="https://facebook.com" target="_blank" class="w-10 h-10 rounded-full border border-brand-gold/30 flex items-center justify-center text-brand-golddark hover:bg-brand-golddark hover:text-white transition-all duration-300" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://instagram.com" target="_blank" class="w-10 h-10 rounded-full border border-brand-gold/30 flex items-center justify-center text-brand-golddark hover:bg-brand-golddark hover:text-white transition-all duration-300" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://line.me" target="_blank" class="w-10 h-10 rounded-full border border-brand-gold/30 flex items-center justify-center text-brand-golddark hover:bg-brand-golddark hover:text-white transition-all duration-300" aria-label="LINE"><i class="fa-brands fa-line"></i></a>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="text-xs uppercase tracking-[0.3em] text-brand-golddark font-bold">精選頁面</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#/services" onclick="navigateTo('services'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">頂級婚禮服務</a></li>
+                        <li><a href="#/gallery" onclick="navigateTo('gallery'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">奢華作品畫廊</a></li>
+                        <li><a href="#/about" onclick="navigateTo('about'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">關於團隊與理念</a></li>
+                        <li><a href="#/process" onclick="navigateTo('process'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">完美婚禮八大流程</a></li>
+                        <li><a href="#/faq" onclick="navigateTo('faq'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">常見合約與問題</a></li>
+                    </ul>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="text-xs uppercase tracking-[0.3em] text-brand-golddark font-bold">熱門婚禮風格</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#/projects" onclick="navigateTo('projects'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">法式莫內莊園婚禮</a></li>
+                        <li><a href="#/projects" onclick="navigateTo('projects'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">美式森林仙境草地婚禮</a></li>
+                        <li><a href="#/projects" onclick="navigateTo('projects'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">古典奢華城堡皇家盛宴</a></li>
+                        <li><a href="#/projects" onclick="navigateTo('projects'); return false;" class="text-brand-charcoal/70 hover:text-brand-golddark transition-colors font-medium">極簡日系清新白櫻花禮</a></li>
+                    </ul>
+                </div>
+
+                <div class="space-y-6">
+                    <h3 class="text-xs uppercase tracking-[0.3em] text-brand-golddark font-bold">奢華諮詢所</h3>
+                    <p class="text-brand-charcoal/70 text-sm leading-relaxed font-light">
+                        預約專線：(02) 2712-3456<br>
+                        電子信箱：service@eternel-wedding.com<br>
+                        營業時間：11:00 - 21:00 (週三公休)<br>
+                        地址：台北市大安區敦化南路二段 88 號 12 樓
+                    </p>
+                    <div class="pt-2">
+                        <span class="inline-block bg-brand-gold/10 text-brand-golddark border border-brand-gold/30 rounded-full px-4 py-1.5 text-xs tracking-wider font-semibold">採 VIP 尊榮預約制</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 pt-8 border-t border-brand-gold/15 text-center text-xs text-brand-charcoal/50 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p>© 2026 Éternel Wedding & Design Co. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-brand-golddark transition-colors">隱私權政策</a>
+                    <a href="#" class="hover:text-brand-golddark transition-colors">服務條款</a>
+                    <a href="#/faq" onclick="navigateTo('faq'); return false;" class="hover:text-brand-golddark transition-colors">免責聲明</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LIGHTBOX SYSTEM -->
+    <div id="lightbox" class="fixed inset-0 bg-white/95 backdrop-blur-xl z-[9999] hidden items-center justify-center p-4">
+        <button id="lightbox-close" class="absolute top-6 right-6 text-brand-charcoal hover:text-brand-golddark text-3xl focus:outline-none" aria-label="關閉畫廊"><i class="fa-solid fa-xmark"></i></button>
+        <button id="lightbox-prev" class="absolute left-6 text-brand-charcoal hover:text-brand-golddark text-4xl focus:outline-none" aria-label="上一張"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="max-w-4xl max-h-[80vh] flex flex-col items-center">
+            <img id="lightbox-img" src="" alt="婚禮作品大圖" class="max-w-full max-h-[70vh] rounded-lg shadow-2xl object-contain border border-brand-gold/10">
+            <p id="lightbox-caption" class="text-brand-golddark font-serif mt-4 text-center tracking-widest text-lg font-semibold"></p>
+        </div>
+        <button id="lightbox-next" class="absolute right-6 text-brand-charcoal hover:text-brand-golddark text-4xl focus:outline-none" aria-label="下一張"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+
+    <script>
+        /* Single-Page-App (SPA) Pure Light Theme Pages Database */
+        const pages = {
+            // === HOME PAGE ===
+            home: {
+                title: "Éternel Wedding 雋永婚禮顧問 | 訂製您的雋永婚禮盛宴",
+                description: "Éternel 雋永婚禮官方網站首頁。提供全螢幕浪漫美學背景、精緻婚禮流程、大師級婚紗作品與專屬 VIP 預約系統。",
+                render: () => `
+                    <!-- Hero Banner with extreme parallax and visual layers -->
+                    <section class="relative h-[90vh] md:h-screen w-full flex items-center justify-center overflow-hidden bg-brand-alabaster">
+                        <div class="absolute inset-0">
+                            <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1920" alt="法式奢華戶外婚禮全景" class="w-full h-full object-cover opacity-60 ken-burns" onerror="this.src='https://placehold.co/1920x1080/FAF6F0/c5a880?text=Eternel+Wedding'">
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-brand-alabaster via-transparent to-brand-alabaster/40"></div>
+                        
+                        <!-- Magnetic dynamic text overlay -->
+                        <div class="relative z-10 text-center px-6 max-w-4xl mx-auto space-y-6" id="hero-content">
+                            <span class="text-xs md:text-sm tracking-[0.6em] text-brand-golddark font-bold uppercase block opacity-0 translate-y-4" id="hero-sub">L'Amour Fine Art Weddings</span>
+                            <h1 class="font-serif text-4xl md:text-7xl text-brand-charcoal tracking-[0.15em] leading-tight font-bold opacity-0 translate-y-6" id="hero-main">
+                                訂製您的<br><span class="text-brand-golddark font-serif italic font-semibold">雋永盛宴</span>
+                            </h1>
+                            <p class="text-brand-charcoal/90 max-w-xl mx-auto text-sm md:text-base tracking-[0.25em] leading-relaxed font-light opacity-0 translate-y-8" id="hero-para">
+                                以極致法式美學、一站式高規格管家服務，為品味新人打造令人屏息的奢華婚禮藝術。
+                            </p>
+                            <div class="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4 opacity-0 translate-y-10" id="hero-cta">
+                                <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn bg-brand-golddark text-white hover:bg-brand-gold hover:scale-105 transition-all duration-300 font-bold px-8 py-4 rounded-full text-xs tracking-widest uppercase shadow-lg shadow-brand-gold/15">
+                                    即刻預約諮詢
+                                </a>
+                                <a href="#/gallery" onclick="navigateTo('gallery'); return false;" class="magnetic-btn bg-white/90 text-brand-charcoal border border-brand-gold/30 hover:bg-white hover:border-brand-gold hover:text-brand-golddark transition-all duration-300 px-8 py-4 rounded-full text-xs tracking-widest uppercase shadow-sm">
+                                    查看婚禮作品
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Brand Philosophy -->
+                    <section class="py-24 bg-brand-blush relative overflow-hidden">
+                        <div class="max-w-6xl mx-auto px-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                                <div class="relative group overflow-hidden rounded-3xl shadow-xl border border-brand-gold/15 aspect-[4/5] tilt-card">
+                                    <div class="absolute inset-0 z-10 bg-gradient-to-t from-white/30 to-transparent"></div>
+                                    <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=1000" alt="婚紗攝影新娘微笑" class="w-full h-full object-cover hover:scale-105 transition-transform duration-[1.5s]" onerror="this.src='https://placehold.co/800x1000/FAF6F0/c5a880?text=Happy+Couple'">
+                                </div>
+                                <div class="space-y-8">
+                                    <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block">The Promise of Love</span>
+                                    <h2 class="font-serif text-3xl md:text-5xl tracking-wide leading-snug text-brand-charcoal font-semibold">讓最幸福的瞬間，成為永不退色的雋永</h2>
+                                    <p class="text-brand-charcoal/80 text-sm leading-relaxed font-light">
+                                        愛情是無可替代的交響詩。在 Éternel，我們不只是籌備婚禮，而是用極致挑剔的眼光為您剪裁空間、編織花語、凝結影像，將這生僅有一次的約定，打造成永生難忘的精品藝術。
+                                    </p>
+                                    <div class="border-l-2 border-brand-gold pl-6 py-2 italic text-brand-charcoal/70 text-sm font-light">
+                                        「因為懂得您的精緻優雅，我們堅持客製化細節，從主視覺配色到餐巾折法，每一處都令人屏息。」
+                                    </div>
+                                    <div class="pt-2">
+                                        <a href="#/about" onclick="navigateTo('about'); return false;" class="magnetic-btn inline-flex items-center text-xs tracking-widest text-brand-golddark hover:text-brand-gold font-bold uppercase transition-colors">
+                                            探索品牌故事 <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Before/After Slider section -->
+                    <section class="py-24 bg-brand-alabaster border-t border-brand-gold/15">
+                        <div class="max-w-4xl mx-auto px-6">
+                            <div class="text-center space-y-4 mb-16">
+                                <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold">Space Magic</span>
+                                <h2 class="font-serif text-3xl md:text-4xl text-brand-charcoal font-semibold">極致唯美佈置：Before & After 奇蹟蛻變</h2>
+                                <p class="text-brand-charcoal/70 text-sm font-light">拖曳中央滑桿，見證我們如何將原生態草地翻轉為浪漫洋溢的法式莊園。</p>
+                            </div>
+                            
+                            <!-- Before/After Slider Container -->
+                            <div id="before-after-slider" class="relative h-[320px] md:h-[480px] w-full overflow-hidden rounded-3xl shadow-2xl select-none cursor-ew-resize border border-brand-gold/25">
+                                <!-- Before Image -->
+                                <div class="absolute inset-0">
+                                    <img src="https://images.unsplash.com/photo-1507504038482-7621cc224ee1?auto=format&fit=crop&q=80&w=1200" alt="空曠的森林草地現場" class="w-full h-full object-cover">
+                                    <span class="absolute top-4 left-4 bg-white/95 text-brand-charcoal text-xs px-4 py-2 rounded-full tracking-widest font-semibold shadow-md border border-brand-gold/10">婚禮佈置前 (Empty Site)</span>
+                                </div>
+                                <!-- After Image Cover Container -->
+                                <div id="after-image-container" class="absolute inset-y-0 left-0 right-0 overflow-hidden w-1/2">
+                                    <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=1200" alt="浪漫法式戶外婚禮花藝佈置現場" class="absolute top-0 left-0 h-full w-full object-cover" style="max-width: none;">
+                                    <span class="absolute top-4 right-4 bg-brand-golddark text-white font-bold text-xs px-4 py-2 rounded-full tracking-widest shadow-md">婚禮佈置後 (After Transformation)</span>
+                                </div>
+                                <!-- Sliding Bar -->
+                                <div id="slider-handle" class="absolute inset-y-0 left-1/2 w-1 bg-brand-golddark cursor-ew-resize flex items-center justify-center">
+                                    <div class="w-10 h-10 bg-white text-brand-golddark rounded-full flex items-center justify-center shadow-2xl border border-brand-gold/50">
+                                        <i class="fa-solid fa-arrows-left-right text-xs"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4 Flagship Offers -->
+                    <section class="py-24 bg-white relative border-t border-brand-gold/10">
+                        <div class="absolute inset-0 opacity-[0.03] noise-bg pointer-events-none"></div>
+                        <div class="max-w-7xl mx-auto px-6 relative z-10">
+                            <div class="text-center space-y-4 mb-20">
+                                <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold">Services</span>
+                                <h2 class="font-serif text-3xl md:text-5xl text-brand-charcoal font-semibold">四大旗艦婚禮方案</h2>
+                                <p class="text-brand-charcoal/70 text-sm max-w-xl mx-auto font-light">為不同品味新人，規劃最優雅動人的儀式感。</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                <div class="bg-brand-blush/80 border border-brand-gold/20 p-8 rounded-3xl space-y-6 flex flex-col justify-between tilt-card shadow-sm hover:shadow-xl transition-all duration-300">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-4xl"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal">1. 頂級婚禮企劃</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">一站式全天候婚禮管家，包含行程規劃、預算控管、廠商調度、突發狀況全方位應變。</p>
+                                    </div>
+                                    <a href="#/services" onclick="navigateTo('services'); return false;" class="text-xs text-brand-golddark hover:text-brand-gold uppercase tracking-widest font-bold">探索方案 <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></a>
+                                </div>
+                                <div class="bg-brand-blush/80 border border-brand-gold/20 p-8 rounded-3xl space-y-6 flex flex-col justify-between tilt-card shadow-sm hover:shadow-xl transition-all duration-300">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-4xl"><i class="fa-solid fa-champagne-glasses"></i></div>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal">2. 頂奢花藝美學佈置</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">進口玫瑰與高端精緻道具搭建，將大自然的神聖芬芳引入室內，為您客製專屬的奇幻花園。</p>
+                                    </div>
+                                    <a href="#/services" onclick="navigateTo('services'); return false;" class="text-xs text-brand-golddark hover:text-brand-gold uppercase tracking-widest font-bold">探索方案 <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></a>
+                                </div>
+                                <div class="bg-brand-blush/80 border border-brand-gold/20 p-8 rounded-3xl space-y-6 flex flex-col justify-between tilt-card shadow-sm hover:shadow-xl transition-all duration-300">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-4xl"><i class="fa-solid fa-camera-retro"></i></div>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal">3. 紀實美學婚紗攝影</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">首席大師親自掌鏡，融合日系清新與美式紀實，捕捉新人間最細微的柔情與永恆視線。</p>
+                                    </div>
+                                    <a href="#/services" onclick="navigateTo('services'); return false;" class="text-xs text-brand-golddark hover:text-brand-gold uppercase tracking-widest font-bold">探索方案 <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></a>
+                                </div>
+                                <div class="bg-brand-blush/80 border border-brand-gold/20 p-8 rounded-3xl space-y-6 flex flex-col justify-between tilt-card shadow-sm hover:shadow-xl transition-all duration-300">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-4xl"><i class="fa-solid fa-gem"></i></div>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal">4. 頂級尊榮客製婚禮</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">無預算上限、跨國海外籌辦。古堡婚宴、遊艇派對或私人海島婚禮極致訂製。</p>
+                                    </div>
+                                    <a href="#/services" onclick="navigateTo('services'); return false;" class="text-xs text-brand-golddark hover:text-brand-gold uppercase tracking-widest font-bold">探索方案 <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Numbers Dashboard -->
+                    <section class="py-24 bg-brand-blush">
+                        <div class="max-w-7xl mx-auto px-6">
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center" id="counter-section">
+                                <div class="space-y-2">
+                                    <p class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold counter-val" data-target="500">0</p>
+                                    <p class="text-brand-charcoal/70 text-xs tracking-[0.3em] uppercase font-semibold">幸福婚禮圓滿籌辦</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold counter-val" data-target="100">0</p>
+                                    <p class="text-brand-charcoal/70 text-xs tracking-[0.3em] uppercase font-semibold">全方位客製化滿意度</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold counter-val" data-target="15">0</p>
+                                    <p class="text-brand-charcoal/70 text-xs tracking-[0.3em] uppercase font-semibold">國際金獎婚禮大師</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <p class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold counter-val" data-target="8">0</p>
+                                    <p class="text-brand-charcoal/70 text-xs tracking-[0.3em] uppercase font-semibold">完美無瑕婚禮流程保證</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === SERVICES PAGE ===
+            services: {
+                title: "頂級婚禮服務與收費方案 | Éternel 雋永婚禮顧問",
+                description: "提供完整十二大項精品級婚禮服務，包含求婚策劃、場地規劃、主持與秘書、極奢花藝、戶外及海外婚禮，費用公開透明，量身打造最適合您的完美宴席。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="services-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">The Premium Offerings</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">精雕細琢的頂級婚禮服務</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-xl mx-auto leading-relaxed font-light opacity-0 translate-y-5">
+                                我們深知每對新人都擁有獨特的靈魂，為此提供多達 12 項專業領域的精緻對接服務。
+                            </p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-alabaster">
+                        <div class="max-w-7xl mx-auto px-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <!-- Service 1 -->
+                                <div class="bg-white border border-brand-gold/20 rounded-3xl p-8 space-y-6 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-500 tilt-card">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-3xl"><i class="fa-solid fa-calendar-check"></i></div>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">1. 婚禮企劃 (Wedding Planning)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">從備婚第一步到完美的送客，全方位管理時程、排練儀式，提供最穩固的心理與現場支持。</p>
+                                        <ul class="text-[11px] text-brand-charcoal/60 space-y-1.5 list-disc pl-4 font-light">
+                                            <li>一對一客製專屬備婚進度表</li>
+                                            <li>婚禮流程與突發狀況彩排指導</li>
+                                            <li>推薦：預約時間在婚期前 6-12 個月</li>
+                                        </ul>
+                                    </div>
+                                    <div class="pt-6 border-t border-brand-gold/15">
+                                        <p class="text-[10px] text-brand-charcoal/40 uppercase tracking-widest font-semibold">尊榮定價區間</p>
+                                        <p class="text-brand-golddark font-serif text-xl font-bold">NT$ 68,000 - 128,000</p>
+                                        <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn block text-center bg-brand-golddark text-white hover:bg-brand-gold font-bold py-3 rounded-full text-xs tracking-widest uppercase mt-4 transition-all duration-300">預約此方案</a>
+                                    </div>
+                                </div>
+
+                                <!-- Service 2 -->
+                                <div class="bg-white border border-brand-gold/20 rounded-3xl p-8 space-y-6 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-500 tilt-card">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-3xl"><i class="fa-solid fa-microphone"></i></div>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">2. 婚禮主持 (Master of Ceremony)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">金獎雙語婚禮主持人，掌握幽默與溫馨的最佳比例，用溫柔富有感染力的嗓音，穿針引線幸福時刻。</p>
+                                        <ul class="text-[11px] text-brand-charcoal/60 space-y-1.5 list-disc pl-4 font-light">
+                                            <li>中、英、日多語種無縫主持切換</li>
+                                            <li>專業婚禮音樂曲風量身精選</li>
+                                            <li>適合：講求儀式感與賓客互動的新人</li>
+                                        </ul>
+                                    </div>
+                                    <div class="pt-6 border-t border-brand-gold/15">
+                                        <p class="text-[10px] text-brand-charcoal/40 uppercase tracking-widest font-semibold">尊榮定價區間</p>
+                                        <p class="text-brand-golddark font-serif text-xl font-bold">NT$ 28,000 - 58,000</p>
+                                        <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn block text-center bg-brand-golddark text-white hover:bg-brand-gold font-bold py-3 rounded-full text-xs tracking-widest uppercase mt-4 transition-all duration-300">預約此方案</a>
+                                    </div>
+                                </div>
+
+                                <!-- Service 3 -->
+                                <div class="bg-white border border-brand-gold/20 rounded-3xl p-8 space-y-6 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-500 tilt-card">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-3xl"><i class="fa-solid fa-store"></i></div>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">3. 婚禮佈置 (Venue Styling)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">頂奢客製化背板、主題式迎賓區、奢華地毯，為您的宴會空間穿上量身訂製的高級訂製服。</p>
+                                        <ul class="text-[11px] text-brand-charcoal/60 space-y-1.5 list-disc pl-4 font-light">
+                                            <li>3D 空間模擬視覺效果搶先看</li>
+                                            <li>大型立體懸吊道具與舞台設計</li>
+                                            <li>適合：講究宴會視覺與拍照效果的新人</li>
+                                        </ul>
+                                    </div>
+                                    <div class="pt-6 border-t border-brand-gold/15">
+                                        <p class="text-[10px] text-brand-charcoal/40 uppercase tracking-widest font-semibold">尊榮定價區間</p>
+                                        <p class="text-brand-golddark font-serif text-xl font-bold">NT$ 150,000 - 450,000</p>
+                                        <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn block text-center bg-brand-golddark text-white hover:bg-brand-gold font-bold py-3 rounded-full text-xs tracking-widest uppercase mt-4 transition-all duration-300">預約此方案</a>
+                                    </div>
+                                </div>
+
+                                <!-- Service 4 -->
+                                <div class="bg-white border border-brand-gold/20 rounded-3xl p-8 space-y-6 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-500 tilt-card">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-3xl"><i class="fa-solid fa-camera"></i></div>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">4. 婚紗攝影 (Bridal Photography)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">引領時尚的頂級婚紗照！大師級掌鏡、多款法式訂製白紗挑選，全片幅美學精修。</p>
+                                        <ul class="text-[11px] text-brand-charcoal/60 space-y-1.5 list-disc pl-4 font-light">
+                                            <li>雙人攝影團隊、高規格棚內與外景</li>
+                                            <li>含 30 張頂級手感皮革精修相本</li>
+                                        </ul>
+                                    </div>
+                                    <div class="pt-6 border-t border-brand-gold/15">
+                                        <p class="text-[10px] text-brand-charcoal/40 uppercase tracking-widest font-semibold">尊榮定價區間</p>
+                                        <p class="text-brand-golddark font-serif text-xl font-bold">NT$ 78,000 - 158,000</p>
+                                        <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn block text-center bg-brand-golddark text-white hover:bg-brand-gold font-bold py-3 rounded-full text-xs tracking-widest uppercase mt-4 transition-all duration-300">預約此方案</a>
+                                    </div>
+                                </div>
+
+                                <!-- Service 5 -->
+                                <div class="bg-white border border-brand-gold/20 rounded-3xl p-8 space-y-6 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-500 tilt-card">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-3xl"><i class="fa-solid fa-video"></i></div>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">5. 婚禮攝影 (Wedding Day Media)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">婚宴當日快剪快播 (SDE)，4K高畫質多機錄影攝影，將新娘的落淚與擁抱完美定格。</p>
+                                        <ul class="text-[11px] text-brand-charcoal/60 space-y-1.5 list-disc pl-4 font-light">
+                                            <li>雙機高感光紀實，動態精華 MV 交付</li>
+                                            <li>完整毛片數位雲端永恆保存</li>
+                                        </ul>
+                                    </div>
+                                    <div class="pt-6 border-t border-brand-gold/15">
+                                        <p class="text-[10px] text-brand-charcoal/40 uppercase tracking-widest font-semibold">尊榮定價區間</p>
+                                        <p class="text-brand-golddark font-serif text-xl font-bold">NT$ 58,000 - 120,000</p>
+                                        <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn block text-center bg-brand-golddark text-white hover:bg-brand-gold font-bold py-3 rounded-full text-xs tracking-widest uppercase mt-4 transition-all duration-300">預約此方案</a>
+                                    </div>
+                                </div>
+
+                                <!-- Service 6 -->
+                                <div class="bg-white border border-brand-gold/20 rounded-3xl p-8 space-y-6 flex flex-col justify-between shadow-sm hover:shadow-xl transition-all duration-500 tilt-card">
+                                    <div class="space-y-4 tilt-card-inner">
+                                        <div class="text-brand-golddark text-3xl"><i class="fa-solid fa-wand-magic"></i></div>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">6. 新娘秘書 (Bridal Makeup)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">明星級造型師貼身服務，注重自然光澤肌膚底妝、精緻歐美線條或韓系無瑕妝容。</p>
+                                        <ul class="text-[11px] text-brand-charcoal/60 space-y-1.5 list-disc pl-4 font-light">
+                                            <li>含全程跟妝及頂級永生花頭飾設計</li>
+                                            <li>免費提供婚期前一次精緻試妝服務</li>
+                                        </ul>
+                                    </div>
+                                    <div class="pt-6 border-t border-brand-gold/15">
+                                        <p class="text-[10px] text-brand-charcoal/40 uppercase tracking-widest font-semibold">尊榮定價區間</p>
+                                        <p class="text-brand-golddark font-serif text-xl font-bold">NT$ 32,000 - 68,000</p>
+                                        <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn block text-center bg-brand-golddark text-white hover:bg-brand-gold font-bold py-3 rounded-full text-xs tracking-widest uppercase mt-4 transition-all duration-300">預約此方案</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === GALLERY PAGE ===
+            gallery: {
+                title: "奢華婚禮作品畫廊 | Éternel 雋永婚禮顧問",
+                description: "精選 Éternel 經典婚紗攝影、奢華現場佈置與戶外婚禮作品。支援 Masonry 瀑布流分類篩選及極致流暢的光箱瀏覽器。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="gallery-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">Portfolios</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">定格永恆的幸福瞬間</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-lg mx-auto font-light opacity-0 translate-y-5">輕觸每一幅影像，翻開蘊藏其中的神聖誓言與深情凝視。</p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-alabaster">
+                        <div class="max-w-7xl mx-auto px-6">
+                            <!-- Category Filters -->
+                            <div class="flex flex-wrap justify-center gap-4 mb-16" id="gallery-filters">
+                                <button onclick="filterGallery('all')" class="gallery-filter-btn px-7 py-3 rounded-full border border-brand-gold bg-brand-gold text-brand-charcoal font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-md" data-filter="all">全部作品</button>
+                                <button onclick="filterGallery('photo')" class="gallery-filter-btn px-7 py-3 rounded-full border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 text-brand-charcoal font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-sm" data-filter="photo">精美婚紗</button>
+                                <button onclick="filterGallery('styling')" class="gallery-filter-btn px-7 py-3 rounded-full border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 text-brand-charcoal font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-sm" data-filter="styling">極奢佈置</button>
+                                <button onclick="filterGallery('outdoor')" class="gallery-filter-btn px-7 py-3 rounded-full border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 text-brand-charcoal font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-sm" data-filter="outdoor">莊園戶外</button>
+                            </div>
+
+                            <!-- Masonry Grid with 3D tilts -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="gallery-grid">
+                                <!-- Photo 1 -->
+                                <div class="gallery-item photo overflow-hidden rounded-3xl shadow-lg group relative cursor-pointer aspect-[3/4] tilt-card" onclick="openLightbox('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1200', '莫內莊園：法式玫瑰婚紗攝影')">
+                                    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800" alt="浪漫戶外婚禮花藝佈置" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                    <div class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
+                                        <span class="text-brand-golddark text-xs uppercase tracking-widest font-bold">精美婚紗</span>
+                                        <h4 class="font-serif text-brand-charcoal text-2xl mt-2 font-bold leading-tight">莫內莊園：法式玫瑰婚紗攝影</h4>
+                                    </div>
+                                </div>
+                                <!-- Photo 2 -->
+                                <div class="gallery-item styling overflow-hidden rounded-3xl shadow-lg group relative cursor-pointer aspect-[3/4] tilt-card" onclick="openLightbox('https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=1200', '奢華宮廷：歐式水晶吊燈宴會設計')">
+                                    <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=800" alt="法式婚禮場景設計" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                    <div class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
+                                        <span class="text-brand-golddark text-xs uppercase tracking-widest font-bold">極奢佈置</span>
+                                        <h4 class="font-serif text-brand-charcoal text-2xl mt-2 font-bold leading-tight">奢華宮廷：歐式水晶吊燈宴會設計</h4>
+                                    </div>
+                                </div>
+                                <!-- Photo 3 -->
+                                <div class="gallery-item outdoor overflow-hidden rounded-3xl shadow-lg group relative cursor-pointer aspect-[3/4] tilt-card" onclick="openLightbox('https://images.unsplash.com/photo-1507504038482-7621cc224ee1?auto=format&fit=crop&q=80&w=1200', '森林仙境：陽光灑落的午後誓言')">
+                                    <img src="https://images.unsplash.com/photo-1507504038482-7621cc224ee1?auto=format&fit=crop&q=80&w=800" alt="森林綠意草地婚禮場景" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                                    <div class="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
+                                        <span class="text-brand-golddark text-xs uppercase tracking-widest font-bold">莊園戶外</span>
+                                        <h4 class="font-serif text-brand-charcoal text-2xl mt-2 font-bold leading-tight">森林仙境：陽光灑落的午後誓言</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === ABOUT PAGE ===
+            about: {
+                title: "品牌故事、團隊介紹與理念 | Éternel 雋永婚禮顧問",
+                description: "探索 Éternel 創立初心與設計哲學。深入認識我們的創意總監、明星攝影師、首席彩妝師、與花藝設計師，攜手為您編織一生的精緻藝術。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="about-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">About Éternel</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">以藝術靈魂，致敬一生唯一的愛情</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-xl mx-auto leading-relaxed font-light opacity-0 translate-y-5">
+                                Éternel 誕生於法國巴黎，由一群深愛精緻高級訂製服與花藝空間設計的藝術家共同創立。
+                            </p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-alabaster">
+                        <div class="max-w-7xl mx-auto px-6">
+                            <div class="text-center space-y-4 mb-20">
+                                <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block">The Creative Minds</span>
+                                <h2 class="font-serif text-3xl md:text-5xl text-brand-charcoal font-bold">打造您完美婚禮的靈魂團隊</h2>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                <!-- Member 1 -->
+                                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-gold/15 group tilt-card hover:shadow-xl transition-all duration-300">
+                                    <div class="h-80 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800" alt="創辦人兼創意總監" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    </div>
+                                    <div class="p-6 text-center space-y-2">
+                                        <p class="text-[10px] text-brand-golddark tracking-widest uppercase font-bold">Founder & Creative Director</p>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal">Vivienne Chen (陳維維)</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">曾任巴黎時裝週空間設計總監，秉持挑剔與極簡奢華的藝術理念。</p>
+                                    </div>
+                                </div>
+                                <!-- Member 2 -->
+                                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-gold/15 group tilt-card hover:shadow-xl transition-all duration-300">
+                                    <div class="h-80 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800" alt="首席攝影大師" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    </div>
+                                    <div class="p-6 text-center space-y-2">
+                                        <p class="text-[10px] text-brand-golddark tracking-widest uppercase font-bold">Chief Wedding Photographer</p>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal">Jasper Wu (吳加斯)</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">WPJA 國際婚禮紀實攝影金獎得主，擅長捕捉自然真摯的靈魂凝望。</p>
+                                    </div>
+                                </div>
+                                <!-- Member 3 -->
+                                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-gold/15 group tilt-card hover:shadow-xl transition-all duration-300">
+                                    <div class="h-80 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=800" alt="頂級彩妝造型總監" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    </div>
+                                    <div class="p-6 text-center space-y-2">
+                                        <p class="text-[10px] text-brand-golddark tracking-widest uppercase font-bold">Lead Makeup & Styling</p>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal">Ariel Liang (梁晨)</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">曾任多位一線明星指定彩妝造型師，專注無瑕、通透的新娘妝感。</p>
+                                    </div>
+                                </div>
+                                <!-- Member 4 -->
+                                <div class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-gold/15 group tilt-card hover:shadow-xl transition-all duration-300">
+                                    <div class="h-80 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=800" alt="資深花藝設計美學師" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    </div>
+                                    <div class="p-6 text-center space-y-2">
+                                        <p class="text-[10px] text-brand-golddark tracking-widest uppercase font-bold">Senior Floral Artisan</p>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal">Camille Lin (林嘉蜜)</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">法國麥爾梅森皇家花藝大賽金獎，深諳古典歐風與森系空間魔法。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === PROJECTS PAGE ===
+            projects: {
+                title: "夢幻婚禮案例與風格提案 | Éternel 雋永婚禮顧問",
+                description: "從神秘森林莊園、浪漫海岸沙灘、到神聖宮殿古堡，探索我們為全球 100 多對高端新人精雕細琢的婚禮案例與美學風格設計。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="projects-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">Exclusive Venues</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">高端訂製风格案例</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-xl mx-auto font-light opacity-0 translate-y-5">點選您憧憬的場景，與我們一同構築您夢寐以求的唯美盛宴。</p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-alabaster">
+                        <div class="max-w-7xl mx-auto px-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <!-- Card 1 -->
+                                <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-brand-gold/15 transition-all duration-300 group tilt-card">
+                                    <div class="h-64 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=800" alt="歐式皇家城堡奢華婚宴" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1s]">
+                                    </div>
+                                    <div class="p-8 space-y-4">
+                                        <span class="text-brand-golddark text-xs uppercase tracking-widest font-bold">1. 古典奢華城堡婚宴</span>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">皇家凡爾賽之夜</h3>
+                                        <p class="text-brand-charcoal/80 text-xs font-light">大理石拱門與萬朵白玫瑰相連，頂奢水晶吊燈垂墜其間，實現公主要求的極致宮廷婚禮。</p>
+                                        <div class="pt-4 border-t border-brand-gold/10">
+                                            <a href="#/gallery-detail" onclick="navigateTo('gallery-detail'); return false;" class="text-xs text-brand-golddark font-bold tracking-widest hover:text-brand-gold inline-flex items-center">查看案例詳情 <i class="fa-solid fa-arrow-right ml-2 text-[10px]"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 2 -->
+                                <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-brand-gold/15 transition-all duration-300 group tilt-card">
+                                    <div class="h-64 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1507504038482-7621cc224ee1?auto=format&fit=crop&q=80&w=800" alt="美式大自然草皮森系婚禮" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1s]">
+                                    </div>
+                                    <div class="p-8 space-y-4">
+                                        <span class="text-brand-golddark text-xs uppercase tracking-widest font-bold">2. 美式草地森林派對</span>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">莫內花園：落羽松午後誓約</h3>
+                                        <p class="text-brand-charcoal/80 text-xs font-light">引進北歐冷色系花材，在陽光斑駁的杉林樹影之下，打造無拘無束、宛若精靈國度的純天然婚宴。</p>
+                                        <div class="pt-4 border-t border-brand-gold/10">
+                                            <a href="#/gallery-detail" onclick="navigateTo('gallery-detail'); return false;" class="text-xs text-brand-golddark font-bold tracking-widest hover:text-brand-gold inline-flex items-center">查看案例詳情 <i class="fa-solid fa-arrow-right ml-2 text-[10px]"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 3 -->
+                                <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-brand-gold/15 transition-all duration-300 group tilt-card">
+                                    <div class="h-64 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800" alt="浪漫濱海婚禮佈置" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1s]">
+                                    </div>
+                                    <div class="p-8 space-y-4">
+                                        <span class="text-brand-golddark text-xs uppercase tracking-widest font-bold">3. 藍海極簡戶外誓詞</span>
+                                        <h3 class="font-serif text-2xl font-bold text-brand-charcoal">琴海之約：地中海唯美蔚藍</h3>
+                                        <p class="text-brand-charcoal/80 text-xs font-light">以極致白與地中海蔚藍為主調，細碎的海浪聲成為新郎許下承諾的最佳背景和絃。</p>
+                                        <div class="pt-4 border-t border-brand-gold/10">
+                                            <a href="#/gallery-detail" onclick="navigateTo('gallery-detail'); return false;" class="text-xs text-brand-golddark font-bold tracking-widest hover:text-brand-gold inline-flex items-center">查看案例詳情 <i class="fa-solid fa-arrow-right ml-2 text-[10px]"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === PROCESS PAGE ===
+            process: {
+                title: "完美婚禮八大黃金步驟與時程表 | Éternel 雋永婚禮顧問",
+                description: "從初次諮詢、婚禮策劃、舞台設計，到當日的金牌管家執行，我們提供最嚴謹、有系統的八大流程，讓您在無焦慮的期待中輕鬆成婚。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="process-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">Wedding Roadmap</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">完美婚禮的八大黃金步驟</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-xl mx-auto font-light opacity-0 translate-y-5">不慌不忙、從容優雅，我們的全天候策劃管家將帶您穩健邁向神聖紅毯。</p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-alabaster">
+                        <div class="max-w-4xl mx-auto px-6">
+                            <div class="relative border-l-2 border-brand-gold/30 pl-8 md:pl-16 ml-4 md:ml-12 space-y-16">
+                                <!-- Step 1 -->
+                                <div class="relative timeline-step opacity-0 translate-x-[-20px]">
+                                    <div class="absolute -left-[53px] md:-left-[85px] w-12 h-12 md:w-16 md:h-16 rounded-full bg-brand-goldlight border-4 border-white flex items-center justify-center text-brand-charcoal font-serif font-bold text-lg shadow-md">01</div>
+                                    <div class="bg-white rounded-3xl p-6 md:p-8 border border-brand-gold/15 shadow-sm space-y-3">
+                                        <h3 class="font-serif text-xl md:text-2xl font-bold text-brand-charcoal">初次深度諮詢 (Initial Consultation)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">一對一 VIP 諮詢、了解新人愛情故事、憧憬的婚禮風格、預算範圍及預計賓客人數。提供品牌高規格香檳與法式甜點款待。</p>
+                                    </div>
+                                </div>
+                                <!-- Step 2 -->
+                                <div class="relative timeline-step opacity-0 translate-x-[-20px]">
+                                    <div class="absolute -left-[53px] md:-left-[85px] w-12 h-12 md:w-16 md:h-16 rounded-full bg-brand-goldlight border-4 border-white flex items-center justify-center text-brand-charcoal font-serif font-bold text-lg shadow-md">02</div>
+                                    <div class="bg-white rounded-3xl p-6 md:p-8 border border-brand-gold/15 shadow-sm space-y-3">
+                                        <h3 class="font-serif text-xl md:text-2xl font-bold text-brand-charcoal">需求統整與提案設計 (Concept Design)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">設計團隊提出初步婚禮美學風格提案（ Moodboard）、色彩學搭配、花藝提案、以及全方位預算大綱初步確認。</p>
+                                    </div>
+                                </div>
+                                <!-- Step 3 -->
+                                <div class="relative timeline-step opacity-0 translate-x-[-20px]">
+                                    <div class="absolute -left-[53px] md:-left-[85px] w-12 h-12 md:w-16 md:h-16 rounded-full bg-brand-goldlight border-4 border-white flex items-center justify-center text-brand-charcoal font-serif font-bold text-lg shadow-md">03</div>
+                                    <div class="bg-white rounded-3xl p-6 md:p-8 border border-brand-gold/15 shadow-sm space-y-3">
+                                        <h3 class="font-serif text-xl md:text-2xl font-bold text-brand-charcoal">合約簽訂與管家組建 (Vendor Assembling)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">正式簽約付款。組建新人專屬專案團隊（包含婚顧管家、主持、首席造型師、攝影師等），開啟線上專屬無時差管家服務。</p>
+                                    </div>
+                                </div>
+                                <!-- Step 4 -->
+                                <div class="relative timeline-step opacity-0 translate-x-[-20px]">
+                                    <div class="absolute -left-[53px] md:-left-[85px] w-12 h-12 md:w-16 md:h-16 rounded-full bg-brand-goldlight border-4 border-white flex items-center justify-center text-brand-charcoal font-serif font-bold text-lg shadow-md">04</div>
+                                    <div class="bg-white rounded-3xl p-6 md:p-8 border border-brand-gold/15 shadow-sm space-y-3">
+                                        <h3 class="font-serif text-xl md:text-2xl font-bold text-brand-charcoal">婚禮視覺 3D 精確設計 (3D Space Styling)</h3>
+                                        <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">將設計細化，提供極度逼真的 3D 空間模擬視覺與實體打樣。您將直接提前體驗到婚禮當天現場所呈現的高質感花飾與背板細節。</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-center pt-20">
+                                <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn shimmer-btn bg-brand-golddark text-white font-bold px-10 py-4.5 rounded-full text-xs tracking-widest uppercase hover:scale-105 transition-all shadow-lg shadow-brand-gold/15">即刻預約首部諮詢</a>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === TESTIMONIALS PAGE ===
+            testimonials: {
+                title: "幸福新人暖心證言與真實評價 | Éternel 雋永婚禮顧問",
+                description: "看看超過 500 對頂端新人在 Éternel 策劃下，完成夢想婚宴後的暖心真心話、評價照片與對我們的無盡感謝。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="testimonials-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">Testimonials</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">我們攜手守護的真實幸福</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-xl mx-auto font-light opacity-0 translate-y-5">聽聽新人們最真實的淚水與笑顏反饋，這也是我們前行的最大動力。</p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-blush">
+                        <div class="max-w-4xl mx-auto px-6 relative" id="testimonial-carousel-container">
+                            <div class="relative overflow-hidden bg-white p-8 md:p-16 rounded-3xl shadow-2xl border border-brand-gold/15 space-y-6">
+                                <div class="text-brand-gold text-5xl text-center"><i class="fa-solid fa-quote-left"></i></div>
+                                
+                                <div class="testimonial-track relative min-h-[220px]">
+                                    <!-- Testimonial Item 1 -->
+                                    <div class="testimonial-slide text-center space-y-4 transition-all duration-500 absolute inset-0 opacity-100 scale-100">
+                                        <p class="text-brand-charcoal/80 text-sm md:text-base leading-loose italic font-light">
+                                            「因為遇見了 Éternel，我的婚禮才稱得上是真正的藝術品。陳總監對細節的要求甚至超越我這個新娘！從香檳金的絲綢桌布到莫內莊園感的落羽松森林佈置，每一個細節都讓我跟先生，以及所有賓客瘋狂合照、落淚，簡直美到令人無法呼吸。一生唯一的選擇，絕無後悔！」
+                                        </p>
+                                        <div class="pt-4">
+                                            <h4 class="font-serif text-lg font-bold text-brand-charcoal">新娘：佩筑 & 先生：宇廷</h4>
+                                            <p class="text-brand-golddark text-[10px] tracking-widest uppercase mt-1 font-semibold">台北君悅大飯店案例 • 2025.10.12</p>
+                                        </div>
+                                    </div>
+                                    <!-- Testimonial Item 2 (Hidden by default but accessible via JS) -->
+                                    <div class="testimonial-slide text-center space-y-4 transition-all duration-500 absolute inset-0 opacity-0 scale-95 pointer-events-none">
+                                        <p class="text-brand-charcoal/80 text-sm md:text-base leading-loose italic font-light">
+                                            「Jasper 吳老師的鏡頭彷彿會說話！當天迎娶、擁抱爸媽時最真切的眼淚，都在不知不覺中被他記錄下來。看完了快剪快播（SDE），台下的賓客全部落淚，連長輩都誇讚這是有史以來辦得最精緻、最專業、也最具美感的婚禮！」
+                                        </p>
+                                        <div class="pt-4">
+                                            <h4 class="font-serif text-lg font-bold text-brand-charcoal">新娘：雅婷 & 先生：明修</h4>
+                                            <p class="text-brand-golddark text-[10px] tracking-widest uppercase mt-1 font-semibold">私密山莊玻璃屋案例 • 2025.12.24</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pagination Dots -->
+                                <div class="flex justify-center space-x-3 pt-6" id="testimonial-pagination">
+                                    <button class="w-3 h-3 rounded-full bg-brand-golddark transition-all duration-300" onclick="switchTestimonial(0)"></button>
+                                    <button class="w-3 h-3 rounded-full bg-brand-gold/30 transition-all duration-300" onclick="switchTestimonial(1)"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === FAQ PAGE ===
+            faq: {
+                title: "常見合約細則與婚顧 FAQ | Éternel 雋永婚禮顧問",
+                description: "為您解答婚期多久前預約、訂金比例、天候退款政策、影像交付時間等實用問題，讓合約與流程公開透明，備婚超放心。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="faq-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">Frequently Asked Questions</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">解答您的備婚疑惑</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-lg mx-auto font-light opacity-0 translate-y-5">我們堅持資訊公開透明，以最誠摯的心解除您內心的焦慮。</p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-alabaster">
+                        <div class="max-w-3xl mx-auto px-6 space-y-4">
+                            <!-- Question 1 -->
+                            <div class="bg-white border border-brand-gold/20 rounded-3xl overflow-hidden shadow-sm transition-all duration-300">
+                                <button onclick="toggleFaq(this)" class="w-full text-left px-8 py-6 flex items-center justify-between font-serif text-lg font-bold text-brand-charcoal hover:bg-brand-gold/5 focus:outline-none">
+                                    <span>Q1: 建議在婚期多久之前與 Éternel 進行諮詢？</span>
+                                    <i class="fa-solid fa-chevron-down text-brand-golddark text-sm transition-transform duration-300"></i>
+                                </button>
+                                <div class="faq-answer max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                                    <div class="px-8 pb-6 text-brand-charcoal/80 text-xs leading-relaxed font-light">
+                                        為了確保大師級攝影師、造型師及心儀場地團隊的檔期，我們強烈建議新人在「婚期前 6 至 12 個月」與我們預約初次深度諮詢。特別是戶外莊園或古堡主題，需提前籌辦以應對各種時序要求。
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Question 2 -->
+                            <div class="bg-white border border-brand-gold/20 rounded-3xl overflow-hidden shadow-sm transition-all duration-300">
+                                <button onclick="toggleFaq(this)" class="w-full text-left px-8 py-6 flex items-center justify-between font-serif text-lg font-bold text-brand-charcoal hover:bg-brand-gold/5 focus:outline-none">
+                                    <span>Q2: 戶外婚禮若遇上雨天等氣候問題，該如何應對？</span>
+                                    <i class="fa-solid fa-chevron-down text-brand-golddark text-sm transition-transform duration-300"></i>
+                                </button>
+                                <div class="faq-answer max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                                    <div class="px-8 pb-6 text-brand-charcoal/80 text-xs leading-relaxed font-light">
+                                        Éternel 的核心團隊皆備妥完善「雨備計畫 (Plan B) 」。在婚前 1 個月與場地共同定案 Plan B 路線（如美式高級白色防水帳棚搭建，或即時移至優雅的玻璃宴會廳），並確保當日流程、花藝美感、音響線路皆有高規格雨備配置，讓雨水化為大自然最美的點綴。
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Question 3 -->
+                            <div class="bg-white border border-brand-gold/20 rounded-3xl overflow-hidden shadow-sm transition-all duration-300">
+                                <button onclick="toggleFaq(this)" class="w-full text-left px-8 py-6 flex items-center justify-between font-serif text-lg font-bold text-brand-charcoal hover:bg-brand-gold/5 focus:outline-none">
+                                    <span>Q3: 定金比例如何支付？若因故更動婚期如何處理？</span>
+                                    <i class="fa-solid fa-chevron-down text-brand-golddark text-sm transition-transform duration-300"></i>
+                                </button>
+                                <div class="faq-answer max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                                    <div class="px-8 pb-6 text-brand-charcoal/80 text-xs leading-relaxed font-light">
+                                        簽定合約時支付總費用之 30% 做為保留大師檔期之定金。若遇上突發狀況，合約明文保障於婚期前 60 天前皆可享有免費更動日期乙次（需視合約團隊檔期而定），我們將盡最大努力協助新人調整。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === GALLERY DETAIL ===
+            "gallery-detail": {
+                title: "作品詳細：法式莫內花園婚禮 | Éternel 雋永婚禮顧問",
+                description: "精選奢華婚禮詳細解析，揭秘法式莫內莊園佈置之色彩調色盤、設計美學理念、新人幸福故事與當季進口高端花藝花材。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="detail-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">Case Detail</span>
+                            <h1 class="font-serif text-4xl md:text-5xl text-brand-golddark font-bold opacity-0 translate-y-4">莫內花園：落羽松午後誓約</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-xl mx-auto font-light opacity-0 translate-y-5">廷宇 & 晴羽 的法式森林莊園婚禮實景解析</p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-alabaster">
+                        <div class="max-w-5xl mx-auto px-6">
+                            <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1200" alt="法式婚禮莊園設計細節" class="w-full h-[480px] object-cover rounded-3xl shadow-xl border border-brand-gold/15 mb-16">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-16">
+                                <div class="space-y-6 md:col-span-2">
+                                    <h3 class="font-serif text-2xl md:text-3xl font-bold text-brand-charcoal">莫內色調與自然森林的交響</h3>
+                                    <p class="text-brand-charcoal/80 text-sm leading-relaxed font-light">
+                                        這場婚禮的主調啟發自莫內的名畫《睡蓮》。新娘熱愛法式莊園的隨興與浪漫，因此花藝設計大量使用進口柔紫、嫩粉、以及鼠尾草綠的漸層鮮花。不刻意雕琢的藤蔓自然攀附於白色的羅馬柱上，彷彿與這片落羽松杉林自然共生。
+                                    </p>
+                                    <h4 class="font-serif text-xl font-semibold pt-4 text-brand-charcoal">使用的頂級服務項目</h4>
+                                    <div class="flex flex-wrap gap-3">
+                                        <span class="bg-brand-gold/10 text-brand-golddark font-semibold text-xs px-4 py-2 rounded-full border border-brand-gold/20">頂級婚禮企劃</span>
+                                        <span class="bg-brand-gold/10 text-brand-golddark font-semibold text-xs px-4 py-2 rounded-full border border-brand-gold/20">法式花藝空間美學</span>
+                                        <span class="bg-brand-gold/10 text-brand-golddark font-semibold text-xs px-4 py-2 rounded-full border border-brand-gold/20">大師雙機紀實錄影</span>
+                                        <span class="bg-brand-gold/10 text-brand-golddark font-semibold text-xs px-4 py-2 rounded-full border border-brand-gold/20">明星造型師 Ariel 團隊</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-8 rounded-3xl border border-brand-gold/20 space-y-6 shadow-lg">
+                                    <h4 class="font-serif text-lg font-bold border-b border-brand-gold/10 pb-4 text-brand-charcoal">婚禮色彩美學調色盤</h4>
+                                    <div class="flex space-x-3">
+                                        <div class="w-8 h-8 rounded-full bg-[#E6D7E3] border border-brand-gold/25" title="莫內香氛粉紫"></div>
+                                        <div class="w-8 h-8 rounded-full bg-[#FCF3EA] border border-brand-gold/25" title="象牙香檳白"></div>
+                                        <div class="w-8 h-8 rounded-full bg-[#8F9E8B] border border-brand-gold/25" title="鼠尾草幽綠"></div>
+                                        <div class="w-8 h-8 rounded-full bg-[#C5A880] border border-brand-gold/25" title="雋永古銅金"></div>
+                                    </div>
+                                    <div class="space-y-3 pt-4 border-t border-brand-gold/10 text-xs text-brand-charcoal/80 font-light">
+                                        <p><strong>主辦場地：</strong> 陽明山私密玻璃莊園</p>
+                                        <p><strong>賓客規模：</strong> 120 位至親好友</p>
+                                        <p><strong>風格氛圍：</strong> 森林仙境、法式優雅、無拘派對</p>
+                                    </div>
+                                    <a href="#/contact" onclick="navigateTo('contact'); return false;" class="magnetic-btn block text-center bg-brand-golddark text-white font-bold py-3.5 rounded-full text-xs tracking-widest uppercase mt-6 hover:bg-brand-gold shadow-md transition-all duration-300">諮詢此方案配置</a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === BLOG PAGE ===
+            blog: {
+                title: "婚禮美學趨勢、最新消息與新娘祕技 | Éternel 雋永婚禮顧問",
+                description: "看看大師級婚禮專欄，提供當季法式新娘彩妝趨勢、熱門白紗禮服剪裁、以及如何有條不紊籌辦美式婚禮的避坑指南。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="blog-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">Eternel Journal</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">最新消息與美學專欄</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-xl mx-auto font-light opacity-0 translate-y-5">分享前沿的婚禮趨勢與美感避坑指南，祝您在幸福中從容備戰。</p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-alabaster">
+                        <div class="max-w-7xl mx-auto px-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <article class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-gold/15 hover:shadow-xl transition-all duration-500 group tilt-card">
+                                    <div class="h-56 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800" alt="新娘秘書造型趨勢" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    </div>
+                                    <div class="p-8 space-y-4">
+                                        <div class="flex items-center text-[10px] text-brand-golddark font-bold uppercase tracking-widest space-x-3">
+                                            <span>Beauty Trend</span>
+                                            <span>•</span>
+                                            <span>2026.04.12</span>
+                                        </div>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal group-hover:text-brand-gold transition-colors">極致光澤底妝：2026 頂奢新娘妝感關鍵解析</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">Ariel 彩妝造型師分享，如何利用輕透底妝與局部金箔，打造能在陽光下微微閃爍的仙氣容顏。</p>
+                                    </div>
+                                </article>
+
+                                <article class="bg-white rounded-3xl overflow-hidden shadow-sm border border-brand-gold/15 hover:shadow-xl transition-all duration-500 group tilt-card">
+                                    <div class="h-56 overflow-hidden relative tilt-card-inner">
+                                        <img src="https://images.unsplash.com/photo-1469371670807-013ccf25f16a?auto=format&fit=crop&q=80&w=800" alt="戶外婚禮避坑指南" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    </div>
+                                    <div class="p-8 space-y-4">
+                                        <div class="flex items-center text-[10px] text-brand-golddark font-bold uppercase tracking-widest space-x-3">
+                                            <span>Planner Tips</span>
+                                            <span>•</span>
+                                            <span>2026.03.20</span>
+                                        </div>
+                                        <h3 class="font-serif text-xl font-bold text-brand-charcoal group-hover:text-brand-gold transition-colors">如何辦一場不慌張的戶外草地婚禮？頂級婚顧不外傳指南</h3>
+                                        <p class="text-brand-charcoal/70 text-xs leading-relaxed font-light">從防水帳棚挑選、美式高級外燴配置到音訊防爆指南，帶您一步步避開地雷，輕鬆成婚。</p>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </section>
+                `
+            },
+
+            // === CONTACT PAGE ===
+            contact: {
+                title: "預約專屬諮詢 | Éternel 雋永婚禮顧問",
+                description: "填寫高級預約表單，我們的金牌婚禮顧問管家將在 24 小時內親自與您聯繫，啟動尊榮浪漫定制之旅。",
+                render: () => `
+                    <section class="py-24 bg-gradient-to-b from-brand-blush to-brand-alabaster border-b border-brand-gold/15 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                        <div class="max-w-7xl mx-auto px-6 text-center space-y-4 relative z-10" id="contact-header">
+                            <span class="text-brand-golddark text-xs uppercase tracking-[0.4em] font-bold block opacity-0 translate-y-3">Begin Your Journey</span>
+                            <h1 class="font-serif text-4xl md:text-6xl text-brand-golddark font-bold opacity-0 translate-y-4">訂製您的雋永美學婚宴</h1>
+                            <p class="text-brand-charcoal/80 text-sm max-w-xl mx-auto leading-relaxed font-light opacity-0 translate-y-5">
+                                尊榮 VIP 採完全預約制。填寫下方諮詢表單，婚禮管家將於 24 小時內專人為您服務。
+                            </p>
+                        </div>
+                    </section>
+
+                    <section class="py-24 bg-brand-blush">
+                        <div class="max-w-6xl mx-auto px-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-16 items-start">
+                                <!-- Form Area -->
+                                <div class="bg-white p-8 md:p-12 rounded-3xl shadow-2xl border border-brand-gold/15 lg:col-span-3 space-y-8">
+                                    <h3 class="font-serif text-2xl font-bold text-brand-charcoal">填寫預約詳細資訊</h3>
+                                    
+                                    <form id="booking-form" onsubmit="handleFormSubmit(event)" class="space-y-6">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div class="space-y-2">
+                                                <label class="block text-xs font-bold uppercase tracking-wider text-brand-charcoal/80">新人姓名 *</label>
+                                                <input type="text" required class="w-full bg-brand-alabaster border border-brand-gold/20 focus:border-brand-gold text-brand-charcoal text-sm p-4 rounded-xl focus:outline-none transition-all font-light" placeholder="例：林廷宇 & 陳晴羽">
+                                            </div>
+                                            <div class="space-y-2">
+                                                <label class="block text-xs font-bold uppercase tracking-wider text-brand-charcoal/80">聯絡電話 *</label>
+                                                <input type="tel" required class="w-full bg-brand-alabaster border border-brand-gold/20 focus:border-brand-gold text-brand-charcoal text-sm p-4 rounded-xl focus:outline-none transition-all font-light" placeholder="0912-345-678">
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div class="space-y-2">
+                                                <label class="block text-xs font-bold uppercase tracking-wider text-brand-charcoal/80">預計婚禮日期</label>
+                                                <input type="date" class="w-full bg-brand-alabaster border border-brand-gold/20 focus:border-brand-gold text-brand-charcoal text-sm p-4 rounded-xl focus:outline-none transition-all font-light">
+                                            </div>
+                                            <div class="space-y-2">
+                                                <label class="block text-xs font-bold uppercase tracking-wider text-brand-charcoal/80">預估桌數 / 賓客數</label>
+                                                <select class="w-full bg-brand-alabaster border border-brand-gold/20 focus:border-brand-gold text-brand-charcoal text-sm p-4 rounded-xl focus:outline-none transition-all font-light">
+                                                    <option>50人以下迷你私密派對</option>
+                                                    <option>50 - 150人精緻中型宴會</option>
+                                                    <option>150 - 300人大型莊園盛宴</option>
+                                                    <option>300人以上頂奢千人家宴</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-brand-charcoal/80">憧憬的婚禮風格 (可複選)</label>
+                                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2">
+                                                <label class="flex items-center space-x-2 text-xs text-brand-charcoal/80 cursor-pointer">
+                                                    <input type="checkbox" class="rounded text-brand-golddark focus:ring-brand-gold" value="戶外森林"> <span>戶外莊園森林</span>
+                                                </label>
+                                                <label class="flex items-center space-x-2 text-xs text-brand-charcoal/80 cursor-pointer">
+                                                    <input type="checkbox" class="rounded text-brand-golddark focus:ring-brand-gold" value="奢華古堡"> <span>奢華宮廷古堡</span>
+                                                </label>
+                                                <label class="flex items-center space-x-2 text-xs text-brand-charcoal/80 cursor-pointer">
+                                                    <input type="checkbox" class="rounded text-brand-golddark focus:ring-brand-gold" value="日韓清新"> <span>日韓清新極簡</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        <div class="space-y-2">
+                                            <label class="block text-xs font-bold uppercase tracking-wider text-brand-charcoal/80">新人悄悄話 / 特殊美感要求</label>
+                                            <textarea class="w-full bg-brand-alabaster border border-brand-gold/20 focus:border-brand-gold text-brand-charcoal text-sm p-4 rounded-xl focus:outline-none transition-all h-32 font-light" placeholder="與我們分享你們相識相戀的浪漫故事，或是對這場一生一次婚禮的所有美麗想像..."></textarea>
+                                        </div>
+
+                                        <button type="submit" class="magnetic-btn shimmer-btn w-full bg-brand-golddark text-white hover:bg-brand-gold font-bold py-4 rounded-xl text-xs tracking-widest uppercase shadow-md transition-all duration-300">
+                                            提交預約單 • 開啟幸福故事
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <!-- Contact Info -->
+                                <div class="lg:col-span-2 space-y-8">
+                                    <div class="bg-white text-brand-charcoal p-8 rounded-3xl space-y-6 shadow-xl border border-brand-gold/20 relative overflow-hidden">
+                                        <div class="absolute inset-0 opacity-[0.03] pointer-events-none noise-bg"></div>
+                                        <h3 class="font-serif text-2xl text-brand-golddark font-semibold">Éternel 諮詢會館</h3>
+                                        
+                                        <div class="space-y-4 text-xs text-brand-charcoal/80 font-light">
+                                            <p class="flex items-center"><i class="fa-solid fa-phone mr-3 text-brand-golddark"></i> (02) 2712-3456</p>
+                                            <p class="flex items-center"><i class="fa-solid fa-envelope mr-3 text-brand-golddark"></i> service@eternel-wedding.com</p>
+                                            <p class="flex items-center"><i class="fa-solid fa-location-dot mr-3 text-brand-golddark"></i> 台北市大安區敦化南路二段 88 號 12 樓</p>
+                                            <p class="flex items-center"><i class="fa-solid fa-clock mr-3 text-brand-golddark"></i> 11:00 - 21:00 (每週三公休)</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Mock Map with dynamic visual border -->
+                                    <div class="rounded-3xl overflow-hidden shadow-lg border border-brand-gold/20 h-64 relative bg-slate-300">
+                                        <div class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-brand-alabaster">
+                                            <i class="fa-solid fa-map-location-dot text-brand-golddark text-4xl mb-4 animate-bounce"></i>
+                                            <p class="font-serif text-sm font-bold text-brand-charcoal">敦南林蔭 VIP 諮詢室</p>
+                                            <p class="text-[11px] text-brand-charcoal/70 mt-2 leading-relaxed font-light">台北市大安區敦化南路二段88號 (捷運信義安和站 2 號出口旁)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `
+            }
+        };
+
+        /* Core Form Submission handler */
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-brand-charcoal/30 backdrop-blur-md z-[11000] flex items-center justify-center p-6';
+            modal.innerHTML = `
+                <div class="bg-brand-alabaster p-8 md:p-12 rounded-3xl max-w-md w-full text-center space-y-6 border border-brand-gold/30 shadow-2xl relative">
+                    <div class="w-16 h-16 rounded-full bg-brand-gold/20 text-brand-golddark flex items-center justify-center text-3xl mx-auto"><i class="fa-solid fa-heart"></i></div>
+                    <h3 class="font-serif text-2xl font-bold text-brand-charcoal">預約受理成功</h3>
+                    <p class="text-brand-charcoal/80 text-xs leading-relaxed font-light">
+                        親愛的新人，我們已收到您的夢想婚禮諮詢資訊！專屬婚禮管家將於 24 小時內與您聯繫，為您譜寫完美樂章。
+                    </p>
+                    <button onclick="this.closest('.fixed').remove();" class="w-full bg-brand-golddark text-white hover:bg-brand-gold font-bold py-3 rounded-full text-xs tracking-widest uppercase shadow-sm transition-all">關閉</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            e.target.reset();
+        }
+
+        /* 3D Tilt Effect Controller */
+        function apply3dTilt() {
+            const cards = document.querySelectorAll('.tilt-card');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const xc = rect.width / 2;
+                    const yc = rect.height / 2;
+                    
+                    const angleX = (yc - y) / 15; // Max angle degree
+                    const angleY = (x - xc) / 15; 
+                    
+                    card.style.transform = `rotateX(${angleX}deg) rotateY(${angleY}deg) scale(1.02)`;
+                    card.style.boxShadow = '0 30px 50px rgba(197, 168, 128, 0.18)';
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'rotateX(0deg) rotateY(0deg) scale(1)';
+                    card.style.boxShadow = '';
+                });
+            });
+        }
+
+        /* Magnetic Button Controller */
+        function applyMagneticButtons() {
+            const btns = document.querySelectorAll('.magnetic-btn');
+            btns.forEach(btn => {
+                btn.addEventListener('mousemove', (e) => {
+                    const rect = btn.getBoundingClientRect();
+                    const x = e.clientX - rect.left - rect.width / 2;
+                    const y = e.clientY - rect.top - rect.height / 2;
+                    
+                    // Smooth move towards cursor
+                    gsap.to(btn, {
+                        x: x * 0.35,
+                        y: y * 0.35,
+                        duration: 0.3,
+                        ease: "power2.out"
+                    });
+                });
+
+                btn.addEventListener('mouseleave', () => {
+                    gsap.to(btn, {
+                        x: 0,
+                        y: 0,
+                        duration: 0.5,
+                        ease: "elastic.out(1, 0.3)"
+                    });
+                });
+            });
+        }
+
+        /* Floating Petals generator */
+        function initPetals() {
+            const container = document.getElementById('petal-container');
+            const count = 18;
+            for (let i = 0; i < count; i++) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                
+                const size = Math.random() * 12 + 8;
+                petal.style.width = `${size}px`;
+                petal.style.height = `${size}px`;
+                petal.style.left = `${Math.random() * 100}vw`;
+                
+                const delay = Math.random() * 12;
+                const duration = Math.random() * 8 + 10;
+                petal.style.animationDelay = `${delay}s`;
+                petal.style.animationDuration = `${duration}s`;
+                
+                container.appendChild(petal);
+                petal.addEventListener('animationiteration', () => {
+                    petal.style.left = `${Math.random() * 100}vw`;
+                });
+            }
+        }
+
+        /* Dynamic Sparkle Dust particles generator */
+        function initSparkles() {
+            const container = document.body;
+            const count = 20;
+            for (let i = 0; i < count; i++) {
+                const dust = document.createElement('div');
+                dust.className = 'sparkle-dust';
+                const size = Math.random() * 4 + 2;
+                dust.style.width = `${size}px`;
+                dust.style.height = `${size}px`;
+                dust.style.left = `${Math.random() * 100}vw`;
+                dust.style.top = `${Math.random() * 100}vh`;
+                dust.style.animationDelay = `${Math.random() * 5}s`;
+                dust.style.animationDuration = `${Math.random() * 4 + 4}s`;
+                container.appendChild(dust);
+            }
+        }
+
+        /* Interactive Before-After slider controller */
+        function initBeforeAfterSlider() {
+            const slider = document.getElementById('before-after-slider');
+            const afterContainer = document.getElementById('after-image-container');
+            const handle = document.getElementById('slider-handle');
+
+            if (!slider || !afterContainer || !handle) return;
+
+            let isSliding = false;
+
+            const slide = (clientX) => {
+                const rect = slider.getBoundingClientRect();
+                let positionX = clientX - rect.left;
+                if (positionX < 0) positionX = 0;
+                if (positionX > rect.width) positionX = rect.width;
+
+                const percent = (positionX / rect.width) * 100;
+                afterContainer.style.width = `${percent}%`;
+                handle.style.left = `${percent}%`;
+            };
+
+            slider.addEventListener('mousedown', (e) => { isSliding = true; slide(e.clientX); });
+            window.addEventListener('mouseup', () => { isSliding = false; });
+            window.addEventListener('mousemove', (e) => { if (isSliding) slide(e.clientX); });
+
+            slider.addEventListener('touchstart', (e) => { isSliding = true; slide(e.touches[0].clientX); });
+            window.addEventListener('touchend', () => { isSliding = false; });
+            window.addEventListener('touchmove', (e) => { if (isSliding) slide(e.touches[0].clientX); });
+        }
+
+        /* Numeric Increment Dashboard Animations */
+        function initCounterAnimations() {
+            const counterSection = document.getElementById('counter-section');
+            if (!counterSection) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const counters = document.querySelectorAll('.counter-val');
+                        counters.forEach(counter => {
+                            const target = parseInt(counter.getAttribute('data-target'), 10);
+                            const duration = 1500; // Animation duration in ms
+                            let startTime = null;
+
+                            const step = (timestamp) => {
+                                if (!startTime) startTime = timestamp;
+                                const progress = Math.min((timestamp - startTime) / duration, 1);
+                                counter.textContent = Math.floor(progress * target) + (target === 100 ? '%' : '+');
+                                if (progress < 1) {
+                                    window.requestAnimationFrame(step);
+                                }
+                            };
+                            window.requestAnimationFrame(step);
+                        });
+                        observer.unobserve(counterSection);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            observer.observe(counterSection);
+        }
+
+        /* Testimonial Carousel swapper */
+        let currentTestimonial = 0;
+        function switchTestimonial(index) {
+            const slides = document.querySelectorAll('.testimonial-slide');
+            const dots = document.querySelectorAll('#testimonial-pagination button');
+            if (!slides.length) return;
+
+            slides.forEach((slide, i) => {
+                if (i === index) {
+                    slide.classList.add('opacity-100', 'scale-100');
+                    slide.classList.remove('opacity-0', 'scale-95', 'pointer-events-none');
+                    dots[i].classList.add('bg-brand-golddark');
+                    dots[i].classList.remove('bg-brand-gold/30');
+                } else {
+                    slide.classList.add('opacity-0', 'scale-95', 'pointer-events-none');
+                    slide.classList.remove('opacity-100', 'scale-100');
+                    dots[i].classList.remove('bg-brand-golddark');
+                    dots[i].classList.add('bg-brand-gold/30');
+                }
+            });
+            currentTestimonial = index;
+        }
+
+        /* GALLERY FILTERING */
+        function filterGallery(category) {
+            const items = document.querySelectorAll('.gallery-item');
+            const buttons = document.querySelectorAll('.gallery-filter-btn');
+
+            buttons.forEach(btn => {
+                if (btn.getAttribute('data-filter') === category) {
+                    btn.className = "gallery-filter-btn px-7 py-3 rounded-full border border-brand-gold bg-brand-gold text-brand-charcoal font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-md";
+                } else {
+                    btn.className = "gallery-filter-btn px-7 py-3 rounded-full border border-brand-gold/30 hover:border-brand-gold hover:bg-brand-gold/10 text-brand-charcoal font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-sm";
+                }
+            });
+
+            items.forEach(item => {
+                if (category === 'all' || item.classList.contains(category)) {
+                    item.style.display = 'block';
+                    gsap.fromTo(item, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5 });
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        /* Dynamic Lightbox triggers */
+        function openLightbox(url, caption) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxCaption = document.getElementById('lightbox-caption');
+
+            lightboxImg.src = url;
+            lightboxCaption.textContent = caption;
+            lightbox.classList.remove('hidden');
+            lightbox.classList.add('flex');
+            
+            gsap.fromTo(lightboxImg, { scale: 0.85, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" });
+        }
+
+        document.getElementById('lightbox-close').addEventListener('click', () => {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.add('hidden');
+            lightbox.classList.remove('flex');
+        });
+
+        /* Accordion Collapsing logic */
+        function toggleFaq(btn) {
+            const answer = btn.nextElementSibling;
+            const icon = btn.querySelector('i');
+            const isOpen = answer.style.maxHeight && answer.style.maxHeight !== '0px';
+
+            document.querySelectorAll('.faq-answer').forEach(el => {
+                el.style.maxHeight = '0px';
+                el.previousElementSibling.querySelector('i').style.transform = 'rotate(0deg)';
+            });
+
+            if (!isOpen) {
+                answer.style.maxHeight = `${answer.scrollHeight}px`;
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                answer.style.maxHeight = '0px';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        /* Master Dynamic SPA Router with dual Curtain GSAP transition */
+        function navigateTo(pageId) {
+            const appView = document.getElementById('app-view');
+            const page = pages[pageId] || pages['home'];
+            document.body.classList.add('no-scroll');
+
+            // 1. Curtain Up animation
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    // Render page content
+                    document.title = page.title;
+                    document.querySelector('meta[name="description"]').setAttribute('content', page.description);
+                    appView.innerHTML = page.render();
+
+                    // Re-instantiate features
+                    initBeforeAfterSlider();
+                    initCounterAnimations();
+                    apply3dTilt();
+                    applyMagneticButtons();
+                    window.scrollTo(0, 0);
+
+                    // Fade-in layout headers
+                    animatePageHeader(pageId);
+
+                    // 2. Curtain Down animation
+                    gsap.to('#transition-curtain-1', { translateY: '-100%', duration: 0.6, ease: "power4.inOut" });
+                    gsap.to('#transition-curtain-2', { translateY: '-100%', duration: 0.6, ease: "power4.inOut", delay: 0.1, onComplete: () => {
+                        // Reset curtains to bottom
+                        gsap.set('#transition-curtain-1', { translateY: '100%' });
+                        gsap.set('#transition-curtain-2', { translateY: '100%' });
+                        document.body.classList.remove('no-scroll');
+                    }});
+                }
+            });
+
+            tl.to('#transition-curtain-2', { translateY: '0%', duration: 0.6, ease: "power4.inOut" })
+              .to('#transition-curtain-1', { translateY: '0%', duration: 0.6, ease: "power4.inOut" }, "-=0.45");
+
+            // Update Active Link styles
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.getAttribute('data-page') === pageId) {
+                    link.classList.add('text-brand-golddark', 'font-semibold');
+                    link.classList.remove('text-brand-charcoal/80');
+                } else {
+                    link.classList.remove('text-brand-golddark', 'font-semibold');
+                    link.classList.add('text-brand-charcoal/80');
+                }
+            });
+        }
+
+        /* Editorial Header Text Split animation */
+        function animatePageHeader(pageId) {
+            let containerId = `${pageId}-header`;
+            if (pageId === 'home') containerId = 'hero-content';
+            
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (pageId === 'home') {
+                gsap.to('#hero-sub', { opacity: 1, y: 0, duration: 1, delay: 0.2, ease: "power3.out" });
+                gsap.to('#hero-main', { opacity: 1, y: 0, duration: 1, delay: 0.4, ease: "power3.out" });
+                gsap.to('#hero-para', { opacity: 1, y: 0, duration: 1, delay: 0.6, ease: "power3.out" });
+                gsap.to('#hero-cta', { opacity: 1, y: 0, duration: 1, delay: 0.8, ease: "power3.out" });
+            } else {
+                const sub = container.querySelector('span');
+                const title = container.querySelector('h1');
+                const desc = container.querySelector('p');
+
+                if (sub) gsap.to(sub, { opacity: 1, y: 0, duration: 0.8, delay: 0.1, ease: "power3.out" });
+                if (title) gsap.to(title, { opacity: 1, y: 0, duration: 0.8, delay: 0.25, ease: "power3.out" });
+                if (desc) gsap.to(desc, { opacity: 1, y: 0, duration: 0.8, delay: 0.4, ease: "power3.out" });
+            }
+        }
+
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIconPath = document.getElementById('menu-icon-path');
+
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+        function toggleMobileMenu() {
+            const isHidden = mobileMenu.classList.contains('hidden');
+            if (isHidden) {
+                mobileMenu.classList.remove('hidden');
+                menuIconPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIconPath.setAttribute('d', 'M4 6h16M4 12h16M4 18h16');
+            }
+        }
+
+        window.onload = function() {
+            // First load sequences: animate Loader Out
+            const loaderTimeline = gsap.timeline({
+                onComplete: () => {
+                    const loader = document.getElementById('loading-screen');
+                    gsap.to(loader, { opacity: 0, duration: 0.8, ease: "power2.out", onComplete: () => loader.remove() });
+                }
+            });
+
+            loaderTimeline.to('#loader-logo', { opacity: 1, duration: 0.8, ease: "power2.out" })
+                          .to('#loader-line', { scaleX: 1, duration: 1, ease: "power1.inOut" }, "-=0.4")
+                          .to('#loader-subtitle', { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, "-=0.6")
+                          .to('#loader-progress-bar', { width: '100%', duration: 1.2, ease: "power2.inOut" }, "-=0.5");
+
+            // Bind SPA Hash routing
+            const handleHashChange = () => {
+                const hash = window.location.hash.replace('#/', '');
+                navigateTo(hash || 'home');
+            };
+
+            window.addEventListener('hashchange', handleHashChange);
+            handleHashChange(); // Execute on initial page load
+
+            // Run luxury visual decorators
+            initPetals();
+            initSparkles();
+
+            // Setup scrolling progress and header compression
+            window.addEventListener('scroll', () => {
+                const header = document.getElementById('main-header');
+                const btt = document.getElementById('back-to-top');
+                const progress = document.getElementById('scroll-progress');
+
+                const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+                const scrollPercent = (window.scrollY / totalHeight) * 100;
+                progress.style.width = `${scrollPercent}%`;
+
+                if (window.scrollY > 40) {
+                    header.classList.add('py-2', 'shadow-md');
+                    header.classList.remove('py-4');
+                } else {
+                    header.classList.add('py-4');
+                    header.classList.remove('py-2', 'shadow-md');
+                }
+
+                if (window.scrollY > 300) {
+                    btt.classList.remove('opacity-0', 'invisible');
+                    btt.classList.add('opacity-100', 'visible');
+                } else {
+                    btt.classList.add('opacity-0', 'invisible');
+                    btt.classList.remove('opacity-100', 'visible');
+                }
+            });
+
+            document.getElementById('back-to-top').addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        };
+    </script>
+</body>
+</html>

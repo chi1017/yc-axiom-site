@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARTISAN 靜境空間設計｜台北室內設計・老屋翻新・住宅裝潢・商業空間規劃</title>
+    <meta name="description" content="ARTISAN 靜境空間設計提供專業室內設計、新成屋裝潢、老屋翻新、商業空間規劃與軟裝整合服務。以現代極簡與侘寂美學，打造具備生活儀式感與品質的靜謐空間。">
+    <meta name="keywords" content="室內設計, 住宅裝潢, 老屋翻新, 商業空間設計, 台北裝潢推薦, 侘寂風裝潢, 北歐風設計, 系統櫃規劃, 空間設計公司">
+    <meta name="author" content="ARTISAN 靜境空間設計">
+    <meta name="robots" content="noindex, follow">
+
+    <meta property="og:title" content="ARTISAN 靜境空間設計｜締造生活儀式感，淬鍊空間靜謐之美">
+    <meta property="og:description" content="專注於住宅空間設計、老屋翻新與商業空間規劃。從初步丈量到完工驗收，嚴格把關工程品質與設計細節。">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="ARTISAN 靜境空間設計">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ARTISAN 靜境空間設計">
+    <meta name="twitter:description" content="專業室內設計・住宅裝潢・商業空間規劃｜質感美學與高品質工藝">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+    <style>
+        /* CSS Design System Tokens */
+        :root {
+            --bg-primary: #FAF8F5;
+            --bg-surface: #FFFFFF;
+            --bg-card: #F4F1EA;
+            --text-primary: #1C1917;
+            --text-secondary: #666059;
+            --text-muted: #948E85;
+            --accent-gold: #B8976C;
+            --accent-gold-hover: #A08055;
+            --dark-obsidian: #141312;
+            --border-color: rgba(184, 151, 108, 0.2);
+            --border-light: #E7E3DC;
+            --shadow-subtle: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.12);
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            --font-title: 'Noto Serif TC', serif;
+            --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --container-max: 1280px;
+        }
+
+        /* Base Resets */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            line-height: 1.7;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* Scroll Progress Bar */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), #E0C89F);
+            z-index: 9999;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Page Layout & Container */
+        .container {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section-padding {
+            padding: 7rem 0;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, .font-serif {
+            font-family: var(--font-title);
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .section-tag {
+            display: inline-block;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            line-height: 1.3;
+            color: var(--text-primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 650px;
+            margin-bottom: 3rem;
+        }
+
+        /* Buttons & UI Elements */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 2.25rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--dark-obsidian);
+            color: #FFFFFF;
+            border-color: var(--dark-obsidian);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-gold);
+            border-color: var(--accent-gold);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(184, 151, 108, 0.3);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-primary);
+            border-color: var(--dark-obsidian);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--dark-obsidian);
+            color: #FFFFFF;
+            transform: translateY(-3px);
+        }
+
+        /* Glass Navbar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 1.5rem 0;
+            transition: var(--transition-smooth);
+        }
+
+        .navbar.scrolled {
+            padding: 1rem 0;
+            background: rgba(250, 248, 245, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-logo {
+            font-family: var(--font-title);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .brand-logo span {
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            border-left: 1px solid var(--border-color);
+            padding-left: 0.75rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            font-size: 0.92rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            position: relative;
+            padding: 0.25rem 0;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background-color: var(--accent-gold);
+            transition: var(--transition-smooth);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .mobile-toggle span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background-color: var(--text-primary);
+            margin: 5px 0;
+            transition: var(--transition-smooth);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 5rem;
+            background: linear-gradient(180deg, rgba(20, 19, 18, 0.4) 0%, rgba(20, 19, 18, 0.6) 100%), 
+                        url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1920&q=85') center/cover no-repeat;
+            color: #FFFFFF;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .hero .section-tag {
+            color: #E0C89F;
+        }
+
+        .hero-title {
+            font-size: 3.8rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: #FFFFFF;
+        }
+
+        .hero-desc {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+        }
+
+        .hero-btn-group {
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .hero .btn-outline {
+            border-color: #FFFFFF;
+            color: #FFFFFF;
+        }
+
+        .hero .btn-outline:hover {
+            background-color: #FFFFFF;
+            color: var(--text-primary);
+        }
+
+        /* Counter Bar */
+        .counter-section {
+            background-color: var(--dark-obsidian);
+            color: #FFFFFF;
+            padding: 3.5rem 0;
+        }
+
+        .counter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .counter-number {
+            font-size: 3rem;
+            font-family: var(--font-title);
+            color: var(--accent-gold);
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .counter-label {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 0.05em;
+        }
+
+        /* Feature Cards & Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .service-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            padding: 2.5rem;
+            border-radius: 4px;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .service-icon {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .service-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .service-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-link {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Portfolio Gallery & Filter */
+        .portfolio-filter {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 30px;
+            transition: var(--transition-smooth);
+        }
+
+        .filter-btn.active, .filter-btn:hover {
+            background-color: var(--dark-obsidian);
+            color: #FFFFFF;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: var(--dark-obsidian);
+            cursor: pointer;
+        }
+
+        .project-img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .project-card:hover .project-img {
+            transform: scale(1.08);
+            opacity: 0.85;
+        }
+
+        .project-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 2rem;
+            background: linear-gradient(180deg, transparent 0%, rgba(20, 19, 18, 0.9) 100%);
+            color: #FFFFFF;
+            transform: translateY(10px);
+            transition: var(--transition-smooth);
+        }
+
+        .project-card:hover .project-overlay {
+            transform: translateY(0);
+        }
+
+        .project-cat {
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .project-title {
+            font-size: 1.5rem;
+            margin: 0.25rem 0 0.5rem 0;
+            color: #FFFFFF;
+        }
+
+        .project-meta {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Process Steps */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            position: relative;
+        }
+
+        .process-card {
+            background-color: var(--bg-surface);
+            padding: 2.25rem;
+            border-left: 3px solid var(--accent-gold);
+            border-radius: 0 4px 4px 0;
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+        }
+
+        .process-num {
+            font-size: 2.5rem;
+            font-family: var(--font-title);
+            color: var(--accent-gold);
+            opacity: 0.5;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        /* FAQ Accordion */
+        .faq-accordion {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .faq-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            user-select: none;
+        }
+
+        .faq-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+            color: var(--accent-gold);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 2rem;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .faq-item.active .faq-body {
+            padding: 0 2rem 1.5rem 2rem;
+            max-height: 300px;
+        }
+
+        /* Testimonials Slider/Grid */
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background-color: var(--bg-surface);
+            padding: 2.5rem;
+            border-radius: 4px;
+            box-shadow: var(--shadow-subtle);
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stars {
+            color: #E5A93C;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .testimonial-quote {
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+
+        .client-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .client-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .client-project {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Contact Section & Form */
+        .contact-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .contact-info {
+            background-color: var(--dark-obsidian);
+            color: #FFFFFF;
+            padding: 3.5rem;
+            border-radius: 4px;
+        }
+
+        .contact-info h3 {
+            color: #FFFFFF;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .info-icon {
+            color: var(--accent-gold);
+            font-size: 1.2rem;
+            margin-top: 0.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 2px;
+            background-color: var(--bg-surface);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: var(--transition-smooth);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(184, 151, 108, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--dark-obsidian);
+            color: rgba(255,255,255,0.7);
+            padding: 5rem 0 2rem 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr repeat(3, 1fr);
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .footer-brand h2 {
+            color: #FFFFFF;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-title {
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-gold);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.85rem;
+        }
+
+        /* Floating CTA & Back to Top */
+        .floating-cta {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            z-index: 900;
+        }
+
+        .float-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--dark-obsidian);
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 1px solid var(--border-color);
+        }
+
+        .float-btn:hover {
+            background-color: var(--accent-gold);
+            transform: scale(1.1);
+        }
+
+        /* Multi-page View Switching Engine */
+        .page-view {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .page-view.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Keyframes Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* RWD Responsive Design */
+        @media (max-width: 992px) {
+            .hero-title { font-size: 2.8rem; }
+            .contact-wrapper { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                right: -100%;
+                width: 80%;
+                height: calc(100vh - 70px);
+                background-color: var(--bg-surface);
+                flex-direction: column;
+                padding: 3rem 2rem;
+                transition: var(--transition-smooth);
+                box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            }
+            .nav-menu.open { right: 0; }
+            .mobile-toggle { display: block; }
+            .hero-title { font-size: 2.2rem; }
+            .section-title { font-size: 2rem; }
+            .portfolio-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Accessibility: Prefers Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <header class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="#home" class="brand-logo" onclick="switchPage('home')">
+                ARTISAN <span>靜境設計</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#home" class="nav-link active" onclick="switchPage('home')">首頁</a></li>
+                    <li><a href="#services" class="nav-link" onclick="switchPage('services')">服務項目</a></li>
+                    <li><a href="#projects" class="nav-link" onclick="switchPage('projects')">作品案例</a></li>
+                    <li><a href="#about" class="nav-link" onclick="switchPage('about')">品牌介紹</a></li>
+                    <li><a href="#process" class="nav-link" onclick="switchPage('process')">設計流程</a></li>
+                    <li><a href="#blog" class="nav-link" onclick="switchPage('blog')">設計知識</a></li>
+                    <li><a href="#testimonials" class="nav-link" onclick="switchPage('testimonials')">客戶評價</a></li>
+                    <li><a href="#faq" class="nav-link" onclick="switchPage('faq')">常見問題</a></li>
+                    <li><a href="#contact" class="nav-link" onclick="switchPage('contact')">聯絡我們</a></li>
+                </ul>
+            </nav>
+
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigation Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <main id="mainContent">
+
+        <div id="page-home" class="page-view active">
+            <section class="hero">
+                <div class="container">
+                    <div class="hero-content">
+                        <span class="section-tag">TAIPEI INTERIOR DESIGN</span>
+                        <h1 class="hero-title">締造生活儀式感<br>淬鍊空間靜謐之美</h1>
+                        <p class="hero-desc">以現代極簡與日式侘寂語彙，專注於住宅空間設計、老屋翻新與商業質感規劃。從光影到建材細節，為您量身規劃專屬的靈魂歸屬。</p>
+                        <div class="hero-btn-group">
+                            <a href="#projects" class="btn btn-primary" onclick="switchPage('projects')">探索作品案例</a>
+                            <a href="#contact" class="btn btn-outline" onclick="switchPage('contact')">預約免費丈量</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="counter-section">
+                <div class="container">
+                    <div class="counter-grid">
+                        <div>
+                            <div class="counter-number" data-target="12">0</div>
+                            <div class="counter-label">品牌歷程 (YEARS)</div>
+                        </div>
+                        <div>
+                            <div class="counter-number" data-target="380">0</div>
+                            <div class="counter-label">完工住宅案例 (PROJECTS)</div>
+                        </div>
+                        <div>
+                            <div class="counter-number" data-target="99">0</div>
+                            <div class="counter-label">客戶滿意度 (%)</div>
+                        </div>
+                        <div>
+                            <div class="counter-number" data-target="100">0</div>
+                            <div class="counter-label">施工不追加預算 (%)</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-padding reveal">
+                <div class="container">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+                        <div>
+                            <span class="section-tag">PHILOSOPHY</span>
+                            <h2 class="section-title">回歸居住的本質<br>讓空間成為生活的容器</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                我們相信，好的空間設計不僅是視覺的堆疊，更是生活習慣與情感脈絡的沉澱。ARTISAN 團隊深入了解屋主的生活軌跡，精準調和自然採光、流暢動線與高品質環保建材。
+                            </p>
+                            <a href="#about" class="btn btn-outline" onclick="switchPage('about')">了解品牌理念 &rarr;</a>
+                        </div>
+                        <div>
+                            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faAEA6?auto=format&fit=crop&w=1000&q=80" alt="現代風格室內設計客廳" style="border-radius: 4px; box-shadow: var(--shadow-hover);" loading="lazy">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-padding reveal" style="background-color: var(--bg-card);">
+                <div class="container">
+                    <span class="section-tag">OUR SERVICES</span>
+                    <h2 class="section-title">核心服務領域</h2>
+                    <p class="section-subtitle">從住宅到商業空間，提供一站式全方位室內設計與工程整合管理。</p>
+
+                    <div class="services-grid">
+                        <div class="service-card">
+                            <div class="service-icon">❖</div>
+                            <h3 class="service-title">住宅空間設計</h3>
+                            <p class="service-desc">專為新成屋與預售屋客變打造，結合格局微調、流暢動線與隱形收納，實現質感生活美學。</p>
+                            <a href="#services" onclick="switchPage('services')" class="service-link">了解更多 &rarr;</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">◈</div>
+                            <h3 class="service-title">老屋翻新工程</h3>
+                            <p class="service-desc">基礎工程重整、水電管線更換、結構補強與防水防潮，賦予高齡老宅全新生命與現代機能。</p>
+                            <a href="#services" onclick="switchPage('services')" class="service-link">了解更多 &rarr;</a>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-icon">◇</div>
+                            <h3 class="service-title">商業與辦公空間</h3>
+                            <p class="service-desc">結合品牌識別與消費者體驗，打造兼具商業價值、視覺震撼與高效率功能的空間設計。</p>
+                            <a href="#services" onclick="switchPage('services')" class="service-link">了解更多 &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-services" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <span class="section-tag">SERVICES</span>
+                    <h1 class="section-title">全方位設計與施工服務</h1>
+                    <p class="section-subtitle">ARTISAN 提供頂級的室內規劃、工程監造與全屋軟裝配置，確保每一個細節皆達完美。</p>
+
+                    <div class="services-grid" style="margin-top: 3rem;">
+                        <div class="service-card">
+                            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="新成屋裝潢與客變" style="margin-bottom: 1.5rem; height: 200px; width:100%; border-radius:4px;" loading="lazy">
+                            <h2 class="service-title">新成屋／預售屋客變</h2>
+                            <p class="service-desc">工程預期：約 2 - 3 個月<br>適用對象：首購族、新婚夫妻、換屋族<br>服務內容：隔間規劃、水電配置、建材退換評估、3D 視覺渲染模擬。</p>
+                            <a href="#contact" onclick="switchPage('contact')" class="btn btn-primary" style="width:100%; margin-top:1rem;">諮詢此服務</a>
+                        </div>
+
+                        <div class="service-card">
+                            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80" alt="老屋翻新工程" style="margin-bottom: 1.5rem; height: 200px; width:100%; border-radius:4px;" loading="lazy">
+                            <h2 class="service-title">高齡老屋整建翻新</h2>
+                            <p class="service-desc">工程預期：約 3 - 5 個月<br>適用對象：屋齡 15 年以上老宅、中古屋翻修<br>服務內容：結構補強、全室水電重拉、採光改善、防水保固工程。</p>
+                            <a href="#contact" onclick="switchPage('contact')" class="btn btn-primary" style="width:100%; margin-top:1rem;">諮詢此服務</a>
+                        </div>
+
+                        <div class="service-card">
+                            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80" alt="商業與辦公空間設計" style="margin-bottom: 1.5rem; height: 200px; width:100%; border-radius:4px;" loading="lazy">
+                            <h2 class="service-title">商業與精品辦公空間</h2>
+                            <p class="service-desc">工程預期：依坪數與工程規模而定<br>適用對象：餐飲品牌、咖啡廳、精品店、企業總部<br>服務內容：品牌視覺融合、動線優化、消防安檢申報、燈光營造。</p>
+                            <a href="#contact" onclick="switchPage('contact')" class="btn btn-primary" style="width:100%; margin-top:1rem;">諮詢此服務</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-projects" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <span class="section-tag">PORTFOLIO</span>
+                    <h1 class="section-title">精選設計作品案例</h1>
+                    <p class="section-subtitle">探索我們在住宅、老屋翻新與商業空間中的實境作品，感受視覺與機能的和諧平衡。</p>
+
+                    <div class="portfolio-filter">
+                        <button class="filter-btn active" onclick="filterProjects('all')">全部作品</button>
+                        <button class="filter-btn" onclick="filterProjects('japandi')">日式侘寂風</button>
+                        <button class="filter-btn" onclick="filterProjects('modern')">現代輕奢</button>
+                        <button class="filter-btn" onclick="filterProjects('nordic')">北歐極簡</button>
+                        <button class="filter-btn" onclick="filterProjects('commercial')">商業空間</button>
+                    </div>
+
+                    <div class="portfolio-grid" id="projectGrid">
+                        <div class="project-card" data-category="japandi" onclick="openProjectDetail('靜光映木')">
+                            <img src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=800&q=80" alt="日式侘寂風室內設計案例 - 靜光映木" class="project-img" loading="lazy">
+                            <div class="project-overlay">
+                                <span class="project-cat">日式侘寂風 ｜ 35 坪</span>
+                                <h3 class="project-title">《靜光映木》</h3>
+                                <p class="project-meta">台北市大安區・住宅全室規劃</p>
+                            </div>
+                        </div>
+
+                        <div class="project-card" data-category="modern" onclick="openProjectDetail('流光墨境')">
+                            <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=800&q=80" alt="現代輕奢風客廳設計 - 流光墨境" class="project-img" loading="lazy">
+                            <div class="project-overlay">
+                                <span class="project-cat">現代輕奢 ｜ 52 坪</span>
+                                <h3 class="project-title">《流光墨境》</h3>
+                                <p class="project-meta">新北市板橋區・新成屋裝潢</p>
+                            </div>
+                        </div>
+
+                        <div class="project-card" data-category="nordic" onclick="openProjectDetail('日光原木')">
+                            <img src="https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=800&q=80" alt="北歐小坪數收納設計 - 日光原木" class="project-img" loading="lazy">
+                            <div class="project-overlay">
+                                <span class="project-cat">北歐極簡 ｜ 22 坪</span>
+                                <h3 class="project-title">《日光原木》</h3>
+                                <p class="project-meta">台中市西區・小坪數大收納</p>
+                            </div>
+                        </div>
+
+                        <div class="project-card" data-category="commercial" onclick="openProjectDetail('曜黑藝廊')">
+                            <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80" alt="商業空間咖啡廳設計 - 曜黑藝廊" class="project-img" loading="lazy">
+                            <div class="project-overlay">
+                                <span class="project-cat">商業空間 ｜ 68 坪</span>
+                                <h3 class="project-title">《曜黑藝廊咖啡》</h3>
+                                <p class="project-meta">台北市信義區・品牌概念店</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-project-detail" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <a href="#projects" onclick="switchPage('projects')" style="color: var(--accent-gold); font-weight:600; margin-bottom: 1rem; display:inline-block;">&larr; 返回作品列表</a>
+                    <h1 class="section-title" id="detailTitle">《靜光映木》— 現代日式侘寂宅</h1>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">台北市大安區 ｜ 35 坪 ｜ 3房 2廳 2衛 ｜ 微水泥、橡木實木皮、藝術漆、樂土</p>
+
+                    <img id="detailMainImg" src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80" alt="室內設計案例詳細畫面" style="width: 100%; height: 500px; border-radius: 4px; margin-bottom: 3rem;" loading="lazy">
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 3rem;">
+                        <div>
+                            <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">設計理念與細節</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                本案以「靜謐與自然」為核心概念，將屋主對日式侘寂（Wabi-Sabi）風格的喜愛融入 35 坪空間中。整體色彩以溫暖的奶茶色與灰泥色為基底，結合弧形牆角設計，弱化空間梁柱的壓迫感。
+                            </p>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                開放式客餐廳規劃極大化了光線的流動，搭配無縫微水泥地坪與手作藝術塗料牆面，營造出質樸而細緻的觸感體驗。
+                            </p>
+                        </div>
+                        <div style="background: var(--bg-surface); padding: 2rem; border-radius: 4px; border: 1px solid var(--border-light);">
+                            <h3 style="margin-bottom: 1rem;">專案資訊</h3>
+                            <ul style="font-size: 0.95rem; color: var(--text-secondary);">
+                                <li style="margin-bottom:0.5rem;"><strong>座落地點：</strong> 台北市大安區</li>
+                                <li style="margin-bottom:0.5rem;"><strong>空間坪數：</strong> 35 坪</li>
+                                <li style="margin-bottom:0.5rem;"><strong>設計風格：</strong> 日式侘寂風格</li>
+                                <li style="margin-bottom:0.5rem;"><strong>主要建材：</strong> 樂土、手作漆、實木木皮</li>
+                                <li style="margin-bottom:0.5rem;"><strong>施工期程：</strong> 3.5 個月</li>
+                            </ul>
+                            <a href="#contact" onclick="switchPage('contact')" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">預約類似風格設計</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-about" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <span class="section-tag">ABOUT US</span>
+                    <h1 class="section-title">品牌故事與施工品質承諾</h1>
+                    <p class="section-subtitle">ARTISAN 創立於 2014 年，由一群熱愛建築與室內美學的資深設計師組成。</p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; margin-top: 3rem; align-items: center;">
+                        <img src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?auto=format&fit=crop&w=1000&q=80" alt="室內設計公司團隊與作品展示" style="border-radius:4px;" loading="lazy">
+                        <div>
+                            <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">嚴謹工藝・ transparancy 透明施工</h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                                我們深知「家」是每個人一生最重要的投資之一。因此，ARTISAN 堅持三大核心原則：
+                            </p>
+                            <ul style="list-style: disc; padding-left: 1.2rem; color: var(--text-secondary); line-height: 2;">
+                                <li><strong>透明報價系統：</strong> 施工項目規格全公開，絕不惡意低價搶單再中途追加。</li>
+                                <li><strong>國家級證照監工：</strong> 所有監工人員皆持有建築物室內裝修專業技術人員登記證。</li>
+                                <li><strong>結構安心保固：</strong> 提供基礎工程最高 5 年保固與完善售後線上客服。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-process" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <span class="section-tag">OUR PROCESS</span>
+                    <h1 class="section-title">透明嚴謹的設計服務流程</h1>
+                    <p class="section-subtitle">從第一次對話到完美的交屋入住，六大標準化步驟確保品質與進度。</p>
+
+                    <div class="process-grid" style="margin-top: 3rem;">
+                        <div class="process-card">
+                            <div class="process-num">01</div>
+                            <h3 style="margin-bottom: 0.5rem;">初步諮詢與丈量</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">免費現場丈量，了解屋主家庭成員、生活習慣、風格喜好與預算範圍。</p>
+                        </div>
+                        <div class="process-card">
+                            <div class="process-num">02</div>
+                            <h3 style="margin-bottom: 0.5rem;">平面配置與提案</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">提供動線規劃與平面配置圖，討論空間可能性與建材初步挑選。</p>
+                        </div>
+                        <div class="process-card">
+                            <div class="process-num">03</div>
+                            <h3 style="margin-bottom: 0.5rem;">3D 渲染與簽約</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">擬真 3D 效果圖確認，提供詳細工程報價單，簽署正式設計與工程合約。</p>
+                        </div>
+                        <div class="process-card">
+                            <div class="process-num">04</div>
+                            <h3 style="margin-bottom: 0.5rem;">專業工程進場</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">依施工圖精準施作，每日線上更新施工日誌，嚴格控制工程進度。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-blog" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <span class="section-tag">DESIGN KNOWLEDGE</span>
+                    <h1 class="section-title">裝潢知識與美學文章</h1>
+                    <p class="section-subtitle">分享專業室內設計指南、預算規劃技巧與最新建材趨勢。</p>
+
+                    <div class="services-grid" style="margin-top: 3rem;">
+                        <article class="service-card">
+                            <img src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?auto=format&fit=crop&w=800&q=80" alt="裝潢預算規劃指南" style="height:200px; width:100%; border-radius:4px; margin-bottom:1rem;" loading="lazy">
+                            <span style="font-size: 0.8rem; color: var(--accent-gold);">2026 預算攻略</span>
+                            <h2 style="font-size: 1.3rem; margin: 0.5rem 0;">【2026 裝潢預算表】新成屋、老屋翻新每坪費用到底怎麼算？</h2>
+                            <p class="service-desc">解析預算分配比例（工程費用、設計費、軟裝家電），教你如何把錢花在刀口上。</p>
+                        </article>
+
+                        <article class="service-card">
+                            <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80" alt="侘寂風空間設計要素" style="height:200px; width:100%; border-radius:4px; margin-bottom:1rem;" loading="lazy">
+                            <span style="font-size: 0.8rem; color: var(--accent-gold);">風格解析</span>
+                            <h2 style="font-size: 1.3rem; margin: 0.5rem 0;">當代侘寂風（Wabi-sabi）住宅設計的 5 個核心元素</h2>
+                            <p class="service-desc">什麼是無縫微水泥？如何運用手作藝術塗料與自然光塑造寧靜祥和的 home retreat。</p>
+                        </article>
+
+                        <article class="service-card">
+                            <img src="https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800&q=80" alt="小坪數收納技巧" style="height:200px; width:100%; border-radius:4px; margin-bottom:1rem;" loading="lazy">
+                            <span style="font-size: 0.8rem; color: var(--accent-gold);">收納美學</span>
+                            <h2 style="font-size: 1.3rem; margin: 0.5rem 0;">小坪數變大兩倍！5 個視覺延伸與隱形收納黃金法則</h2>
+                            <p class="service-desc">告別擁擠壓迫，透過鏡面反射、穿透式隔間與多功能系統櫃打造寬敞無負擔的空間。</p>
+                        </article>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-testimonials" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <span class="section-tag">TESTIMONIALS</span>
+                    <h1 class="section-title">屋主真實體驗與評價</h1>
+                    <p class="section-subtitle">聆聽與我們共同完成夢想城堡的屋主們的真實心得回饋。</p>
+
+                    <div class="testimonial-grid" style="margin-top: 3rem;">
+                        <div class="testimonial-card">
+                            <div>
+                                <div class="stars">★★★★★</div>
+                                <p class="testimonial-quote">「ARTISAN 團隊非常細心！在老屋翻新工程中發現結構隱患時，第一時間回報並提供專業解方。完工後的侘寂質感完全超越我們的期待！」</p>
+                            </div>
+                            <div class="client-info">
+                                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" alt="屋主照片" class="client-avatar" loading="lazy">
+                                <div>
+                                    <div class="client-name">林小姐</div>
+                                    <div class="client-project">大安區 35坪 老屋翻新</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="testimonial-card">
+                            <div>
+                                <div class="stars">★★★★★</div>
+                                <p class="testimonial-quote">「3D 模擬圖跟最終完工的還原度極高！溝通過程中完全沒有強推昂貴建材，而是從我們的生活實用度出發，非常值得信賴的設計公司。」</p>
+                            </div>
+                            <div class="client-info">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="屋主照片" class="client-avatar" loading="lazy">
+                                <div>
+                                    <div class="client-name">陳先生</div>
+                                    <div class="client-project">板橋區 52坪 新成屋裝潢</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-faq" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <span class="section-tag">FREQUENTLY ASKED QUESTIONS</span>
+                    <h1 class="section-title">常見裝潢與諮詢問題</h1>
+                    <p class="section-subtitle">整理屋主在室內裝修前後最關心的解惑指南。</p>
+
+                    <div class="faq-accordion" style="margin-top: 3rem;">
+                        <div class="faq-item">
+                            <div class="faq-header">
+                                Q: 室內設計費用與工程費用是如何計算的？
+                                <span class="faq-icon">&#9660;</span>
+                            </div>
+                            <div class="faq-body">
+                                ARTISAN 採用透明計費方式：設計費依實際坪數計算（約 NT$ 6,000 - 9,000 / 坪）；工程費用則依選用建材、施工難易度精算，提供詳細項目報價單，合約簽定後絕不任意追加。
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-header">
+                                Q: 從初步溝通到完工交屋大約需要多久時間？
+                                <span class="faq-icon">&#9660;</span>
+                            </div>
+                            <div class="faq-body">
+                                一般新成屋設計期約 1 - 1.5 個月，施工期約 2 - 3 個月；若為中古老屋翻新，因涉及水電基礎工程與結構補強，施工期約需 3.5 - 5 個月。
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-header">
+                                Q: 施工期間你們會提供品質保固嗎？
+                                <span class="faq-icon">&#9660;</span>
+                            </div>
+                            <div class="faq-body">
+                                我們提供全室裝修 1 年保固、基礎水電與結構工程最高 5 年保固。完工交屋時皆會附上保固書與建材保養手冊。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <div id="page-contact" class="page-view">
+            <section class="section-padding">
+                <div class="container">
+                    <span class="section-tag">CONTACT US</span>
+                    <h1 class="section-title">預約您的質感空間諮詢</h1>
+                    <p class="section-subtitle">填寫預約表單或透過電話、LINE 與我們聯絡，讓我們為您打造專屬的夢想領域。</p>
+
+                    <div class="contact-wrapper" style="margin-top: 3rem;">
+                        <div class="contact-info">
+                            <h3>聯絡資訊</h3>
+                            <div class="info-item">
+                                <div class="info-icon">📍</div>
+                                <div>
+                                    <strong>公司地址</strong><br>
+                                    台北市大安區敦化南路二段 88 號 12 樓
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-icon">📞</div>
+                                <div>
+                                    <strong>諮詢專線</strong><br>
+                                    02-0000-0000 (週一至週五 09:30 - 18:30)
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-icon">✉️</div>
+                                <div>
+                                    <strong>客服信箱</strong><br>
+                                    service@artisandesign.com.tw
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-icon">💬</div>
+                                <div>
+                                    <strong>LINE 官方帳號</strong><br>
+                                    @artisandesign (24小時線上預約)
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="contactForm" onsubmit="handleFormSubmit(event)">
+                            <div class="form-group">
+                                <label class="form-label" for="userName">您的姓名 *</label>
+                                <input type="text" id="userName" class="form-control" required placeholder="例如：林先生 / 先生">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label" for="userPhone">聯絡電話 *</label>
+                                    <input type="tel" id="userPhone" class="form-control" required placeholder="0912-345-678">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="userEmail">電子信箱</label>
+                                    <input type="email" id="userEmail" class="form-control" placeholder="name@example.com">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group">
+                                    <label class="form-label" for="projectType">需求類型</label>
+                                    <select id="projectType" class="form-control">
+                                        <option>新成屋裝潢</option>
+                                        <option>老屋翻新</option>
+                                        <option>商業空間設計</option>
+                                        <option>預售屋客變</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="projectSize">屋況與坪數</label>
+                                    <input type="text" id="projectSize" class="form-control" placeholder="例如：30坪 / 3房2廳">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="userMessage">設計需求與備註</label>
+                                <textarea id="userMessage" class="form-control" placeholder="請簡述您的偏好風格、預計裝修時間或特殊需求..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">提交諮詢預約</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h2>ARTISAN 靜境設計</h2>
+                    <p style="font-size: 0.9rem; margin-bottom: 1.5rem;">
+                        以匠心工藝與極簡美學，淬鍊空間靜謐之美。提供台北市、新北市及全台優質住宅與商業空間設計工程服務。
+                    </p>
+                </div>
+                <div>
+                    <h3 class="footer-title">快速連結</h3>
+                    <ul class="footer-links">
+                        <li><a href="#services" onclick="switchPage('services')">服務項目</a></li>
+                        <li><a href="#projects" onclick="switchPage('projects')">精選作品</a></li>
+                        <li><a href="#about" onclick="switchPage('about')">品牌理念</a></li>
+                        <li><a href="#process" onclick="switchPage('process')">設計流程</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-title">知識專區</h3>
+                    <ul class="footer-links">
+                        <li><a href="#blog" onclick="switchPage('blog')">裝潢預算攻略</a></li>
+                        <li><a href="#blog" onclick="switchPage('blog')">日式侘寂風介紹</a></li>
+                        <li><a href="#blog" onclick="switchPage('blog')">小坪數收納法則</a></li>
+                        <li><a href="#faq" onclick="switchPage('faq')">常見問題 FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="footer-title">聯絡專區</h3>
+                    <p style="font-size: 0.88rem; line-height: 1.8;">
+                        台北市大安區敦化南路二段88號12樓<br>
+                        電話：02-0000-0000<br>
+                        信箱：service@artisandesign.com.tw
+                    </p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                &copy; 2026 ARTISAN Interior Design Studio. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <div class="floating-cta">
+        <a href="#contact" onclick="switchPage('contact')" class="float-btn" title="線上預約" aria-label="線上預約">📅</a>
+        <button onclick="scrollToTop()" class="float-btn" title="返回頂部" aria-label="返回頂部">↑</button>
+    </div>
+
+    <script>
+        // 1. Router & Multi-Page Switcher Engine
+        function switchPage(pageId) {
+            const pages = document.querySelectorAll('.page-view');
+            pages.forEach(page => page.classList.remove('active'));
+
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Update Active Link State
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === `#${pageId}`) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Close mobile menu if open
+            const navMenu = document.getElementById('navMenu');
+            if (navMenu.classList.contains('open')) {
+                navMenu.classList.remove('open');
+            }
+
+            // Re-trigger reveal animation check
+            setTimeout(checkScrollReveal, 100);
+        }
+
+        // 2. Scroll Progress & Glass Navbar Effect
+        window.addEventListener('scroll', () => {
+            const winScroll = document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('scrollProgress').style.width = scrolled + '%';
+
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            checkScrollReveal();
+        });
+
+        // 3. Mobile Navigation Toggle
+        const mobileToggle = document.getElementById('mobileToggle');
+        const navMenu = document.getElementById('navMenu');
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('open');
+        });
+
+        // 4. Portfolio Filter Engine
+        function filterProjects(category) {
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const cards = document.querySelectorAll('#projectGrid .project-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // 5. Project Detail Switcher Demo
+        function openProjectDetail(title) {
+            document.getElementById('detailTitle').innerText = `《${title}》— 品牌設計專案`;
+            switchPage('project-detail');
+        }
+
+        // 6. FAQ Accordion Mechanism
+        document.querySelectorAll('.faq-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const item = header.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+
+        // 7. Counter Animation with Intersection Observer
+        let animated = false;
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter-number');
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const increment = target / 50;
+                let current = 0;
+
+                const updateCount = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.innerText = Math.ceil(current);
+                        setTimeout(updateCount, 30);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            });
+        }
+
+        // 8. Scroll Reveal Observer
+        function checkScrollReveal() {
+            const reveals = document.querySelectorAll('.reveal');
+            reveals.forEach(element => {
+                const windowHeight = window.innerHeight;
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+
+                if (elementTop < windowHeight - elementVisible) {
+                    element.classList.add('visible');
+                    if (!animated && element.querySelector('.counter-number')) {
+                        animateCounters();
+                        animated = true;
+                    }
+                }
+            });
+        }
+
+        // 9. Smooth Scroll Back To Top
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 10. Contact Form Handler
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            alert('感謝您的預約！ARTISAN 設計團隊將於 24 小時內與您聯繫安排初步諮詢。');
+            document.getElementById('contactForm').reset();
+        }
+
+        // Initial Execution
+        document.addEventListener('DOMContentLoaded', () => {
+            checkScrollReveal();
+            animateCounters();
+        });
+    </script>
+</body>
+</html>
