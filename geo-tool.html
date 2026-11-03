@@ -121,6 +121,8 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
   .score-hero,.geo-section{background:#fff;border-color:#bbb;color:#111}.score-info h2,.geo-section h3,.score-num{color:#111}
   .item .t,.issue b{color:#111}.item .n,.issue p,.cat-row .pt{color:#333}html.embedded,html.embedded body{overflow:visible}
 }
+.learn-link{display:inline-block;margin-top:6px;font-size:12.5px;color:var(--accent2,#D8C18A);text-decoration:none;border-bottom:1px solid currentColor}
+.learn-link:hover{opacity:.75}
 </style>
 <script>
 (function () {
@@ -218,6 +220,9 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
 
 <script src="assets/geo-engine.js?v=2026-10-16b"></script>
 <script>
+var LEARN_MAP = {"a_oai": "ai-crawlers-robots-txt", "a_bing": "ai-crawlers-robots-txt", "a_perp": "ai-crawlers-robots-txt", "a_claude_search": "ai-crawlers-robots-txt", "a_gpt": "ai-crawlers-robots-txt", "a_claude": "ai-crawlers-robots-txt", "a_gext": "ai-crawlers-robots-txt", "a_meta": "what-is-noindex", "b_text": "javascript-content", "b_sem": "ai-friendly-content", "b_alt": "image-alt-text", "c_name": "business-info-consistency", "c_addr": "business-info-consistency", "c_phone": "business-info-consistency", "c_hours": "business-info-consistency", "c_schema_type": "structured-data", "c_schema_fields": "structured-data", "d_faq": "faq-section", "d_faqschema": "faq-section", "d_direct": "faq-section", "e_author": "content-trust", "e_date": "content-trust", "e_proof": "content-trust", "f_h1_one": "heading-structure", "f_h1_desc": "heading-structure", "f_levels": "heading-structure", "g_list": "ai-friendly-content", "g_table": "ai-friendly-content", "g_facts": "ai-friendly-content"};
+function learnLink(id){ var s = LEARN_MAP[id]; return s ? ' <a class="learn-link" href="learn/' + s + '/" target="_top">這是什麼？看白話說明 →</a>' : ''; }
+
 var DISCLAIMER = GEO.DISCLAIMER;
 ['disclaimerTop', 'disclaimerBottom'].forEach(function (id) { document.getElementById(id).textContent = DISCLAIMER + '本工具檢查的是網站讓 AI 容易讀懂的條件，不是實際詢問 AI。'; });
 var currentReport = null;
@@ -393,7 +398,7 @@ function renderResults(r) {
   var lvTxt = { high: '高', medium: '中', low: '低' };
   $('issueList').innerHTML = r.issues.map(function (i) {
     return '<div class="issue"><span class="lv ' + i.level + '">' + lvTxt[i.level] + '</span><div><b>' + esc(i.title) + '<span class="loss">失 ' + fmt(i.loss) + ' 分</span></b>' +
-      '<p>' + esc(i.note) + '</p>' + (i.why ? '<p>' + esc(i.why) + '</p>' : '') + '<p><strong>怎麼改：</strong>' + esc(i.fix) + '</p></div></div>';
+      '<p>' + esc(i.note) + '</p>' + (i.why ? '<p>' + esc(i.why) + '</p>' : '') + '<p><strong>怎麼改：</strong>' + esc(i.fix) + '</p>' + learnLink(i.id) + '</div></div>';
   }).join('');
 
   // 逐項
@@ -404,7 +409,7 @@ function renderResults(r) {
       var bad = i.status === 'warn' || i.status === 'fail';
       html += '<div class="item st-' + i.status + '"><span class="chip">' + STATUS_TXT[i.status] + '</span><span class="t">' + esc(i.title) + '</span><span class="pts">' + (i.counted ? fmt(i.earned) + ' / ' + i.max : '不計分') + '</span>' +
         '<span class="n">' + esc(i.note) + '</span>' +
-        (bad && i.fix && !(i.suppressIssue) && r.issues.length > 0 ? '<div class="fixbox"><b>怎麼改：</b>' + esc(i.fix) + '</div>' : '') + '</div>';
+        (bad && i.fix && !(i.suppressIssue) && r.issues.length > 0 ? '<div class="fixbox"><b>怎麼改：</b>' + esc(i.fix) + learnLink(i.id) + '</div>' : '') + '</div>';
     });
   });
   $('itemList').innerHTML = html;
