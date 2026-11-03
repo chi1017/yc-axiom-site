@@ -1,3 +1,23 @@
+
+// 檢測項目 → 問題說明中心的對應頁面（learn/<slug>/）
+const LEARN_MAP=[
+  [/Robots|noindex/i,'what-is-noindex'],
+  [/Title|<title>|Meta Description|Description/i,'title-and-meta-description'],
+  [/H1|H2|H3|標題層級/,'heading-structure'],
+  [/alt/i,'image-alt-text'],
+  [/寬高|版面跳動/,'image-width-height'],
+  [/Canonical/i,'canonical-tag'],
+  [/結構化資料|Schema/i,'structured-data'],
+  [/Viewport|RWD/i,'what-is-rwd'],
+  [/Open Graph|Twitter/i,'open-graph'],
+  [/meta refresh|轉址/i,'redirect-301'],
+  [/JavaScript|文字量|頁面文字/,'javascript-content'],
+  [/內部連結/,'internal-links'],
+  [/HTTPS|SSL/i,'what-is-https'],
+  [/sitemap/i,'sitemap-xml'],
+  [/速度|載入|LCP|PageSpeed/i,'website-slow'],
+];
+function learnSlug(t){t=String(t||'');for(const [re,slug] of LEARN_MAP){if(re.test(t))return slug;}return '';}
 /* SEO 分析工具（seo-tool.html）的主程式。修改後執行 npm run build 產生 assets/dist/seo-tool.min.js */
 // ═══════════════════════════════════════════════════════
 //  STATE
@@ -1424,7 +1444,8 @@ function renderResults(r){
   document.getElementById('checkSummary').textContent=`${r.pass}✓ ${r.warn}! ${r.fail}✗${ignoredCount>0?' (已忽略'+ignoredCount+'項)':''}`;
   document.getElementById('checkList').innerHTML='<div class="check-list">'+filteredChecks.map(c=>{
     const bc=c.status==='pass'?'cb-pass':c.status==='warn'?'cb-warn':'cb-fail';
-    return`<div class="ci"><div class="cb ${bc}">${c.status==='pass'?'✓':c.status==='warn'?'!':'✗'}</div><div class="cc"><strong>${escHtml(c.title)}</strong><span>${escHtml(c.detail)}</span></div></div>`;
+    const lk=c.status==='pass'?'':learnSlug(c.title);
+    return`<div class="ci"><div class="cb ${bc}">${c.status==='pass'?'✓':c.status==='warn'?'!':'✗'}</div><div class="cc"><strong>${escHtml(c.title)}</strong><span>${escHtml(c.detail)}</span>${lk?`<a class="learn-link" href="learn/${lk}/" target="_top">這是什麼？看白話說明 →</a>`:''}</div></div>`;
   }).join('')+'</div>';
 
   // ── 圖片深度分析 ──

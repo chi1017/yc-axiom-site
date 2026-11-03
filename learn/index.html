@@ -35,7 +35,7 @@
     </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>問題說明中心｜SEO、AI 搜尋與做網站常見問題 - YC AXIOM</title>
-<meta name="description" content="用白話回答店家最常問的網站問題：為什麼 Google 搜不到、SEO 與 GEO 是什麼、網站很慢怎麼辦、小店需要官網嗎、客製網站和網站租用差在哪。">
+<meta name="description" content="用白話回答店家最常問的 29 個網站問題：Google 搜不到、noindex 是什麼、SEO 與 GEO 差在哪、AI 爬蟲與 robots.txt、網站很慢怎麼辦、客製網站和網站租用差在哪，每題都有檢查方法與修改步驟。">
 <meta name="author" content="YC AXIOM">
 <link rel="icon" type="image/png" href="https://yc-axiom.pages.dev/favicon-32.png">
 <link rel="apple-touch-icon" href="https://yc-axiom.pages.dev/apple-touch-icon.png?v=20261102">
@@ -46,7 +46,7 @@
 <link rel="canonical" href="https://yc-axiom.pages.dev/learn/">
 <meta name="robots" content="index, follow">
 <meta property="og:title" content="問題說明中心｜SEO、AI 搜尋與做網站常見問題 - YC AXIOM">
-<meta property="og:description" content="用白話回答店家最常問的網站問題：為什麼 Google 搜不到、SEO 與 GEO 是什麼、網站很慢怎麼辦、小店需要官網嗎、客製網站和網站租用差在哪。">
+<meta property="og:description" content="用白話回答店家最常問的 29 個網站問題：Google 搜不到、noindex 是什麼、SEO 與 GEO 差在哪、AI 爬蟲與 robots.txt、網站很慢怎麼辦、客製網站和網站租用差在哪，每題都有檢查方法與修改步驟。">
 <meta property="og:image" content="https://yc-axiom.pages.dev/og-image.png">
 <meta property="og:url" content="https://yc-axiom.pages.dev/learn/">
 <meta property="og:locale" content="zh_TW">
@@ -54,7 +54,7 @@
 <meta property="og:site_name" content="YC AXIOM">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="問題說明中心｜SEO、AI 搜尋與做網站常見問題 - YC AXIOM">
-<meta name="twitter:description" content="用白話回答店家最常問的網站問題：為什麼 Google 搜不到、SEO 與 GEO 是什麼、網站很慢怎麼辦、小店需要官網嗎、客製網站和網站租用差在哪。">
+<meta name="twitter:description" content="用白話回答店家最常問的 29 個網站問題：Google 搜不到、noindex 是什麼、SEO 與 GEO 差在哪、AI 爬蟲與 robots.txt、網站很慢怎麼辦、客製網站和網站租用差在哪，每題都有檢查方法與修改步驟。">
 <meta name="twitter:image" content="https://yc-axiom.pages.dev/og-image.png">
 <meta name="theme-color" content="#B59B6A">
 <script>(function(){try{var t=localStorage.getItem('yc-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();</script>
@@ -147,119 +147,181 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
+  "@type": "ItemList",
+  "itemListElement": [
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 1,
       "name": "為什麼在 Google 搜不到我的網站？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "最常見的原因有三個：網站剛上線，Google 還沒來得及讀取；網站設定不小心擋掉了搜尋引擎（例如頁面加了「不要收錄」的標記）；或是網站內容太少，Google 不知道該在什麼搜尋時顯示你。可以先用 SEO 檢測檢查有沒有被擋，再到 Google Search Console（Google 提供的免費網站管理工具）提交網站。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/google-cant-find-my-website/"
     },
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 2,
       "name": "新網站多久會出現在 Google 上？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "沒有固定時間，通常是幾天到幾週。提交 Search Console、在 Google 商家檔案和社群放上網址，都能讓 Google 比較快發現你的網站。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/how-long-google-index/"
     },
     {
-      "@type": "Question",
-      "name": "SEO 是什麼？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "SEO（Search Engine Optimization，搜尋引擎優化）是讓網站更容易在 Google 搜尋結果中被找到的各種調整，例如寫清楚每一頁的標題與說明、讓網頁載入快、讓手機好讀。它不是一次性的設定，而是讓網站「講清楚自己是誰」的基本功。"
-      }
+      "@type": "ListItem",
+      "position": 3,
+      "name": "SEO 是什麼？小店需要做 SEO 嗎？",
+      "url": "https://yc-axiom.pages.dev/learn/what-is-seo/"
     },
     {
-      "@type": "Question",
-      "name": "什麼是網頁標題和描述？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "網頁標題是搜尋結果裡那行藍色大字，描述是下面那一兩行說明文字。它們決定客人在搜尋結果看到你時，會不會想點進來。每一頁都應該有自己的標題與描述，並包含客人會搜尋的詞，例如「台中 甜點店」。"
-      }
+      "@type": "ListItem",
+      "position": 4,
+      "name": "網頁標題（Title）和描述（Meta Description）是什麼？",
+      "url": "https://yc-axiom.pages.dev/learn/title-and-meta-description/"
     },
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 5,
+      "name": "網站 noindex 是什麼？為什麼會讓 Google 搜不到？",
+      "url": "https://yc-axiom.pages.dev/learn/what-is-noindex/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 6,
+      "name": "H1、H2、H3 標題是什麼？為什麼要有層級？",
+      "url": "https://yc-axiom.pages.dev/learn/heading-structure/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 7,
+      "name": "圖片的 alt 文字是什麼？要怎麼寫？",
+      "url": "https://yc-axiom.pages.dev/learn/image-alt-text/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 8,
+      "name": "Canonical 標籤是什麼？什麼時候需要？",
+      "url": "https://yc-axiom.pages.dev/learn/canonical-tag/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 9,
+      "name": "Sitemap 是什麼？要怎麼提交給 Google？",
+      "url": "https://yc-axiom.pages.dev/learn/sitemap-xml/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 10,
+      "name": "網站換網址，要怎麼轉址才不會掉排名？",
+      "url": "https://yc-axiom.pages.dev/learn/redirect-301/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 11,
+      "name": "內部連結是什麼？為什麼重要？",
+      "url": "https://yc-axiom.pages.dev/learn/internal-links/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 12,
       "name": "GEO 是什麼？跟 SEO 有什麼不同？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "GEO（Generative Engine Optimization，生成式引擎優化）是讓 ChatGPT、Gemini 這類 AI 更容易讀懂、引用你網站的調整。它和 SEO 大部分重疊，例如清楚的文字內容與一致的店家資料；GEO 會更強調常見問答、一句話說清楚你是誰，以及給機器看的結構化資料。可以用 GEO 檢測看看你的網站狀況。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/what-is-geo/"
     },
     {
-      "@type": "Question",
-      "name": "客人問 ChatGPT 找店，我的店會被推薦嗎？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "沒有人能保證，但可以提高被正確理解的機會：重要資訊用文字寫在官網、各平台的店家資料一致、把常見問題寫成問答。完整做法請看這篇文章，也可以用 AI 提及檢測看看現況。"
-      }
+      "@type": "ListItem",
+      "position": 13,
+      "name": "AI 爬蟲是什麼？robots.txt 要怎麼設定？",
+      "url": "https://yc-axiom.pages.dev/learn/ai-crawlers-robots-txt/"
     },
     {
-      "@type": "Question",
-      "name": "結構化資料是什麼？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "結構化資料是寫在網頁程式碼裡、給機器看的標籤，用來標明「這是一家咖啡廳、地址在哪、幾點營業」。客人看不到，但搜尋引擎和 AI 能更準確讀取。一般店家不需要自己寫，請網站製作者加上即可。"
-      }
+      "@type": "ListItem",
+      "position": 14,
+      "name": "llms.txt 是什麼？一定要放嗎？",
+      "url": "https://yc-axiom.pages.dev/learn/llms-txt/"
     },
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 15,
+      "name": "結構化資料（Schema.org）是什麼？",
+      "url": "https://yc-axiom.pages.dev/learn/structured-data/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 16,
+      "name": "為什麼網站要有「常見問題」區塊？",
+      "url": "https://yc-axiom.pages.dev/learn/faq-section/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 17,
+      "name": "網站上要放哪些店家資料？各平台要怎麼寫才一致？",
+      "url": "https://yc-axiom.pages.dev/learn/business-info-consistency/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 18,
+      "name": "為什麼網站內容要「不用 JavaScript 也看得到」？",
+      "url": "https://yc-axiom.pages.dev/learn/javascript-content/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 19,
+      "name": "怎麼寫內容，AI 比較容易引用？",
+      "url": "https://yc-axiom.pages.dev/learn/ai-friendly-content/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 20,
+      "name": "為什麼文章要標作者、日期，網站要放真實案例？",
+      "url": "https://yc-axiom.pages.dev/learn/content-trust/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 21,
       "name": "網站打開很慢怎麼辦？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "最常見的原因是圖片太大。手機照片一張常有好幾 MB，壓縮後通常能小好幾倍，畫質卻差不多。可以用圖片壓縮工具先處理圖片，再用 SEO 檢測確認速度有沒有改善。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/website-slow/"
     },
     {
-      "@type": "Question",
-      "name": "什麼是 RWD？我的網站需要嗎？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "RWD（響應式網頁設計）是讓同一個網站在電腦、平板、手機上都會自動調整版面。現在大部分客人用手機看網站，所以一定需要。判斷方法很簡單：用手機打開你的網站，如果要放大才看得到字，就是沒有做好。"
-      }
+      "@type": "ListItem",
+      "position": 22,
+      "name": "為什麼圖片要設定寬高？",
+      "url": "https://yc-axiom.pages.dev/learn/image-width-height/"
     },
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 23,
+      "name": "RWD 是什麼？我的網站需要嗎？",
+      "url": "https://yc-axiom.pages.dev/learn/what-is-rwd/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 24,
       "name": "網址前面的 https 是什麼？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "https 代表網站和瀏覽器之間的連線有加密，瀏覽器才不會顯示「不安全」的警告。現在的網站都應該使用 https，大部分主機服務都能免費開啟。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/what-is-https/"
     },
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 25,
+      "name": "為什麼分享到 LINE、Facebook 時沒有預覽圖？",
+      "url": "https://yc-axiom.pages.dev/learn/open-graph/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 26,
       "name": "小店需要官網嗎？只有 IG 不夠嗎？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "IG 適合經營已經追蹤你的人，官網則負責讓「還不認識你的人」在搜尋時找到你、看懂你。兩者分工最好，詳細比較請看小店需要官網嗎。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/small-shop-need-website/"
     },
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 27,
       "name": "客製網站和網站租用差在哪？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "客製網站依你的品牌從頭設計，驗收後交付完整原始碼，一次買斷、不綁約；網站租用是使用我們設計的行業版型，內容自己填，我們負責上線與維護，一頁版每月 NT$599 起，但版型與程式不移交原始碼。預算有限、想先上線可以選租用；需要獨特設計或特殊功能選客製。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/custom-vs-rental/"
     },
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 28,
       "name": "網域是什麼？一定要買嗎？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "網域就是網址，例如 yourshop.com.tw。自己的網域比較好記，也比較專業，但不是上線的必要條件，可以先用平台提供的網址，之後再換。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/what-is-domain/"
     },
     {
-      "@type": "Question",
+      "@type": "ListItem",
+      "position": 29,
       "name": "做好的網站，我可以自己改內容嗎？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "網站租用的版型可以登入後自己改，電腦或手機都能編輯。客製網站則依你的需求決定，常改的內容可以設計成自己就能更新的方式，討論時提出來即可。"
-      }
+      "url": "https://yc-axiom.pages.dev/learn/edit-website-myself/"
     }
   ]
 }
@@ -366,42 +428,16 @@
         <div class="breadcrumb reveal" role="navigation" aria-label="麵包屑"><a href="../">首頁</a><span aria-hidden="true">›</span><span aria-current="page">問題說明中心</span></div>
         <p class="section-eyebrow reveal">Help Center / 問題說明中心</p>
         <h1 class="section-title reveal">問題說明中心<br>網站常見問題，白話說清楚.</h1>
-        <p class="sp-lede reveal">檢測結果看不懂？做網站前有疑問？這裡用一般人看得懂的方式，回答店家與品牌最常問的 SEO、AI 搜尋、網站速度與做網站問題，每題都附上可以動手做的下一步。</p>
-        <ul class="sp-svc-list reveal"><li><a href="#learn-1"><strong>搜尋與 Google</strong><span>4 個問題</span></a></li><li><a href="#learn-2"><strong>AI 搜尋</strong><span>3 個問題</span></a></li><li><a href="#learn-3"><strong>網站速度與體驗</strong><span>3 個問題</span></a></li><li><a href="#learn-4"><strong>做網站</strong><span>4 個問題</span></a></li></ul>
-        <div class="article-body reveal">
-            <h2 class="sp-h2" id="learn-1">搜尋與 Google</h2>
-            <h3>為什麼在 Google 搜不到我的網站？</h3>
-            <p>最常見的原因有三個：網站剛上線，Google 還沒來得及讀取；網站設定不小心擋掉了搜尋引擎（例如頁面加了「不要收錄」的標記）；或是網站內容太少，Google 不知道該在什麼搜尋時顯示你。可以先用 <a href="../seo/">SEO 檢測</a>檢查有沒有被擋，再到 Google Search Console（Google 提供的免費網站管理工具）提交網站。</p>
-            <h3>新網站多久會出現在 Google 上？</h3>
-            <p>沒有固定時間，通常是幾天到幾週。提交 Search Console、在 Google 商家檔案和社群放上網址，都能讓 Google 比較快發現你的網站。</p>
-            <h3>SEO 是什麼？</h3>
-            <p>SEO（Search Engine Optimization，搜尋引擎優化）是讓網站更容易在 Google 搜尋結果中被找到的各種調整，例如寫清楚每一頁的標題與說明、讓網頁載入快、讓手機好讀。它不是一次性的設定，而是讓網站「講清楚自己是誰」的基本功。</p>
-            <h3>什麼是網頁標題和描述？</h3>
-            <p>網頁標題是搜尋結果裡那行藍色大字，描述是下面那一兩行說明文字。它們決定客人在搜尋結果看到你時，會不會想點進來。每一頁都應該有自己的標題與描述，並包含客人會搜尋的詞，例如「台中 甜點店」。</p>
-            <h2 class="sp-h2" id="learn-2">AI 搜尋</h2>
-            <h3>GEO 是什麼？跟 SEO 有什麼不同？</h3>
-            <p>GEO（Generative Engine Optimization，生成式引擎優化）是讓 ChatGPT、Gemini 這類 AI 更容易讀懂、引用你網站的調整。它和 SEO 大部分重疊，例如清楚的文字內容與一致的店家資料；GEO 會更強調常見問答、一句話說清楚你是誰，以及給機器看的結構化資料。可以用 <a href="../geo/">GEO 檢測</a>看看你的網站狀況。</p>
-            <h3>客人問 ChatGPT 找店，我的店會被推薦嗎？</h3>
-            <p>沒有人能保證，但可以提高被正確理解的機會：重要資訊用文字寫在官網、各平台的店家資料一致、把常見問題寫成問答。完整做法請看<a href="../articles/chatgpt-recommend-your-shop/">這篇文章</a>，也可以用 <a href="../geo/ai-mentions/">AI 提及檢測</a>看看現況。</p>
-            <h3>結構化資料是什麼？</h3>
-            <p>結構化資料是寫在網頁程式碼裡、給機器看的標籤，用來標明「這是一家咖啡廳、地址在哪、幾點營業」。客人看不到，但搜尋引擎和 AI 能更準確讀取。一般店家不需要自己寫，請網站製作者加上即可。</p>
-            <h2 class="sp-h2" id="learn-3">網站速度與體驗</h2>
-            <h3>網站打開很慢怎麼辦？</h3>
-            <p>最常見的原因是圖片太大。手機照片一張常有好幾 MB，壓縮後通常能小好幾倍，畫質卻差不多。可以用<a href="../tools/image-compress/">圖片壓縮工具</a>先處理圖片，再用 <a href="../seo/">SEO 檢測</a>確認速度有沒有改善。</p>
-            <h3>什麼是 RWD？我的網站需要嗎？</h3>
-            <p>RWD（響應式網頁設計）是讓同一個網站在電腦、平板、手機上都會自動調整版面。現在大部分客人用手機看網站，所以一定需要。判斷方法很簡單：用手機打開你的網站，如果要放大才看得到字，就是沒有做好。</p>
-            <h3>網址前面的 https 是什麼？</h3>
-            <p>https 代表網站和瀏覽器之間的連線有加密，瀏覽器才不會顯示「不安全」的警告。現在的網站都應該使用 https，大部分主機服務都能免費開啟。</p>
-            <h2 class="sp-h2" id="learn-4">做網站</h2>
-            <h3>小店需要官網嗎？只有 IG 不夠嗎？</h3>
-            <p>IG 適合經營已經追蹤你的人，官網則負責讓「還不認識你的人」在搜尋時找到你、看懂你。兩者分工最好，詳細比較請看<a href="../articles/shop-website-vs-instagram/">小店需要官網嗎</a>。</p>
-            <h3>客製網站和網站租用差在哪？</h3>
-            <p>客製網站依你的品牌從頭設計，驗收後交付完整原始碼，一次買斷、不綁約；<a href="../rental/">網站租用</a>是使用我們設計的行業版型，內容自己填，我們負責上線與維護，一頁版每月 NT$599 起，但版型與程式不移交原始碼。預算有限、想先上線可以選租用；需要獨特設計或特殊功能選客製。</p>
-            <h3>網域是什麼？一定要買嗎？</h3>
-            <p>網域就是網址，例如 yourshop.com.tw。自己的網域比較好記，也比較專業，但不是上線的必要條件，可以先用平台提供的網址，之後再換。</p>
-            <h3>做好的網站，我可以自己改內容嗎？</h3>
-            <p>網站租用的版型可以登入後自己改，電腦或手機都能編輯。客製網站則依你的需求決定，常改的內容可以設計成自己就能更新的方式，討論時提出來即可。</p>
-        </div>
+        <p class="sp-lede reveal">檢測結果看不懂？做網站前有疑問？這裡用一般人看得懂的方式，回答店家與品牌最常問的 SEO、AI 搜尋、網站速度與做網站問題。每個問題都有獨立的說明頁，附上檢查方法與可以動手做的下一步。</p>
+        <ul class="sp-svc-list reveal"><li><a href="#learn-1"><strong>搜尋與 Google</strong><span>11 個問題</span></a></li><li><a href="#learn-2"><strong>AI 搜尋</strong><span>9 個問題</span></a></li><li><a href="#learn-3"><strong>網站速度與體驗</strong><span>5 個問題</span></a></li><li><a href="#learn-4"><strong>做網站</strong><span>4 個問題</span></a></li></ul>
+        <h2 class="sp-h2 reveal" id="learn-1">搜尋與 Google</h2>
+        <ul class="sp-svc-list reveal"><li><a href="../learn/google-cant-find-my-website/"><strong>為什麼在 Google 搜不到我的網站？</strong><span>最常見的原因有三個：網站剛上線 Google 還沒讀到、網站設定擋掉了搜尋引擎（noindex），或內容太少，Googl…</span></a></li><li><a href="../learn/how-long-google-index/"><strong>新網站多久會出現在 Google 上？</strong><span>沒有固定時間，通常是幾天到幾週。主動在 Google Search Console 提交網站與 sitemap，並在其他…</span></a></li><li><a href="../learn/what-is-seo/"><strong>SEO 是什麼？小店需要做 SEO 嗎？</strong><span>SEO（Search Engine Optimization，搜尋引擎優化）是讓網站更容易在 Google 搜尋結果中被…</span></a></li><li><a href="../learn/title-and-meta-description/"><strong>網頁標題（Title）和描述（Meta Description）是什麼？</strong><span>標題是搜尋結果裡那行藍色大字，描述是下面一兩行說明文字。它們決定客人在搜尋結果看到你時，會不會想點進來。</span></a></li><li><a href="../learn/what-is-noindex/"><strong>網站 noindex 是什麼？為什麼會讓 Google 搜不到？</strong><span>noindex 是寫在網頁裡、告訴搜尋引擎「這頁不要放進搜尋結果」的指令。如果正式網站不小心設定了 noindex，Go…</span></a></li><li><a href="../learn/heading-structure/"><strong>H1、H2、H3 標題是什麼？為什麼要有層級？</strong><span>H1 是整頁的主標題，H2、H3 是底下的段落標題。清楚的層級就像書的目錄，讓搜尋引擎和 AI 一眼看懂這頁的重點與段落…</span></a></li><li><a href="../learn/image-alt-text/"><strong>圖片的 alt 文字是什麼？要怎麼寫？</strong><span>alt 是替圖片寫的文字說明。搜尋引擎、AI 和使用螢幕報讀軟體的人看不到圖片內容，只能靠 alt 知道這張圖在拍什麼。</span></a></li><li><a href="../learn/canonical-tag/"><strong>Canonical 標籤是什麼？什麼時候需要？</strong><span>Canonical 是告訴搜尋引擎「這一頁的正式網址是哪一個」的標籤。當同一個內容有好幾個網址可以打開時，它能避免 Go…</span></a></li><li><a href="../learn/sitemap-xml/"><strong>Sitemap 是什麼？要怎麼提交給 Google？</strong><span>Sitemap 是一份列出網站所有頁面網址的清單檔案（通常叫 sitemap.xml），讓搜尋引擎知道你有哪些頁面、什麼…</span></a></li><li><a href="../learn/redirect-301/"><strong>網站換網址，要怎麼轉址才不會掉排名？</strong><span>用 301 永久轉址，把舊網址一對一導到新網址。它會告訴搜尋引擎「這頁搬家了」，大部分累積的搜尋表現可以跟著轉過去。</span></a></li><li><a href="../learn/internal-links/"><strong>內部連結是什麼？為什麼重要？</strong><span>內部連結是網站裡連到自己其他頁面的連結。它幫訪客找到下一步要看的內容，也讓搜尋引擎發現並理解網站的所有頁面。</span></a></li></ul>
+        <h2 class="sp-h2 reveal" id="learn-2">AI 搜尋</h2>
+        <ul class="sp-svc-list reveal"><li><a href="../learn/what-is-geo/"><strong>GEO 是什麼？跟 SEO 有什麼不同？</strong><span>GEO（Generative Engine Optimization，生成式引擎優化）是讓 ChatGPT、Gemini…</span></a></li><li><a href="../learn/ai-crawlers-robots-txt/"><strong>AI 爬蟲是什麼？robots.txt 要怎麼設定？</strong><span>AI 爬蟲是 AI 公司用來讀取網頁的自動程式，例如 ChatGPT 搜尋用的 OAI-SearchBot。robots…</span></a></li><li><a href="../learn/llms-txt/"><strong>llms.txt 是什麼？一定要放嗎？</strong><span>llms.txt 是放在網站根目錄的純文字檔，用簡單的格式整理網站重點與重要頁面連結，方便 AI 快速理解。這是比較新的…</span></a></li><li><a href="../learn/structured-data/"><strong>結構化資料（Schema.org）是什麼？</strong><span>結構化資料是寫在網頁程式碼裡、給機器看的標籤，用來標明「這是一家烘焙坊、地址在哪、幾點營業」。客人看不到，但搜尋引擎和 …</span></a></li><li><a href="../learn/faq-section/"><strong>為什麼網站要有「常見問題」區塊？</strong><span>常見問題用一問一答的方式，回答客人最常問的事。它正好對應客人問 AI 與搜尋時的問法，是最容易被搜尋引擎與 AI 引用的…</span></a></li><li><a href="../learn/business-info-consistency/"><strong>網站上要放哪些店家資料？各平台要怎麼寫才一致？</strong><span>至少要用文字寫清楚店名、完整地址、電話與營業時間，並在官網、Google 商家檔案、IG、LINE 官方帳號用完全相同的…</span></a></li><li><a href="../learn/javascript-content/"><strong>為什麼網站內容要「不用 JavaScript 也看得到」？</strong><span>有些網站的文字要等瀏覽器執行 JavaScript 程式後才出現。Google 通常能處理，但很多 AI 爬蟲不會執行 …</span></a></li><li><a href="../learn/ai-friendly-content/"><strong>怎麼寫內容，AI 比較容易引用？</strong><span>把重點整理成條列、比較與價目用表格、多寫具體的數字與事實，並用清楚的標題分段。AI 整理答案時，偏好這種一眼就能抓到重點…</span></a></li><li><a href="../learn/content-trust/"><strong>為什麼文章要標作者、日期，網站要放真實案例？</strong><span>作者、發布與更新日期、真實案例與客戶評價，都是讓搜尋引擎、AI 和客人判斷「這些資訊可不可信、是不是最新的」的線索。</span></a></li></ul>
+        <h2 class="sp-h2 reveal" id="learn-3">網站速度與體驗</h2>
+        <ul class="sp-svc-list reveal"><li><a href="../learn/website-slow/"><strong>網站打開很慢怎麼辦？</strong><span>最常見的原因是圖片太大。手機照片一張常有好幾 MB，壓縮並縮小尺寸後通常能小好幾倍，畫質卻差不多。</span></a></li><li><a href="../learn/image-width-height/"><strong>為什麼圖片要設定寬高？</strong><span>圖片設定寬高，瀏覽器在圖片下載完成前就能先留好位置，頁面才不會在載入過程中跳來跳去，客人也不會點錯按鈕。</span></a></li><li><a href="../learn/what-is-rwd/"><strong>RWD 是什麼？我的網站需要嗎？</strong><span>RWD（響應式網頁設計）是讓同一個網站在電腦、平板、手機上都會自動調整版面。現在大部分客人用手機看網站，所以一定需要。</span></a></li><li><a href="../learn/what-is-https/"><strong>網址前面的 https 是什麼？</strong><span>https 代表網站和瀏覽器之間的連線有加密，瀏覽器才不會顯示「不安全」的警告。現在的網站都應該使用 https，大部分…</span></a></li><li><a href="../learn/open-graph/"><strong>為什麼分享到 LINE、Facebook 時沒有預覽圖？</strong><span>分享預覽的圖片、標題與說明，來自網頁裡的 Open Graph 標籤。沒有設定，LINE 或 Facebook 就只能隨…</span></a></li></ul>
+        <h2 class="sp-h2 reveal" id="learn-4">做網站</h2>
+        <ul class="sp-svc-list reveal"><li><a href="../learn/small-shop-need-website/"><strong>小店需要官網嗎？只有 IG 不夠嗎？</strong><span>IG 適合經營已經追蹤你的人，官網則負責讓「還不認識你的人」在搜尋與 AI 推薦時找到你、看懂你。兩者分工最好。</span></a></li><li><a href="../learn/custom-vs-rental/"><strong>客製網站和網站租用差在哪？</strong><span>客製網站依你的品牌從頭設計，驗收後交付完整原始碼，一次買斷；網站租用是使用現成的行業版型，內容自己填，我們負責上線與維護…</span></a></li><li><a href="../learn/what-is-domain/"><strong>網域是什麼？一定要買嗎？</strong><span>網域就是網址，例如 yourshop.com.tw。自己的網域比較好記，也比較專業，但不是上線的必要條件，可以先用平台提…</span></a></li><li><a href="../learn/edit-website-myself/"><strong>做好的網站，我可以自己改內容嗎？</strong><span>可以。網站租用的版型登入後就能自己改，電腦或手機都能編輯；客製網站則依需求設計，常改的內容可以做成自己就能更新的方式。</span></a></li></ul>
         <div class="cta-banner reveal" style="margin-top:64px;">
             <p>Free Consultation / 免費諮詢</p>
             <h3>找不到你的問題？<br><span>加 LINE 直接問，我們用白話回答你。</span></h3>

@@ -25,9 +25,9 @@
 - [SEO 檢測](https://yc-axiom.pages.dev/seo/)：輸入網址，檢查網站在 Google 搜尋的基本體質
 - [GEO 檢測](https://yc-axiom.pages.dev/geo/)：檢查 AI 搜尋（ChatGPT、Gemini 等）是否讀得懂你的網站
 - [圖片壓縮](https://yc-axiom.pages.dev/tools/image-compress/)：在瀏覽器裡壓縮圖片、轉 WebP，圖片不會上傳
-- [咖啡廳網站健檢](https://yc-axiom.pages.dev/tools/website-check/cafe/)：咖啡廳專用的網站檢查清單與檢測入口
+- [產業網站健檢](https://yc-axiom.pages.dev/tools/website-check/)：咖啡廳、烘焙坊、花店、寵物美容專用的網站檢查清單與檢測入口
 - [免費工具總覽](https://yc-axiom.pages.dev/tools/)
-- [問題說明中心](https://yc-axiom.pages.dev/learn/)：用白話回答 SEO、AI 搜尋、網站速度與做網站的常見問題
+- [問題說明中心](https://yc-axiom.pages.dev/learn/)：29 個網站常見問題，每題一頁，用白話說明原因、檢查方法與修改步驟（例如 noindex、AI 爬蟲與 robots.txt、結構化資料）
 
 ## 作品與文章
 
