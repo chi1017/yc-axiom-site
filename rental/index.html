@@ -64,7 +64,7 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="../assets/dist/site.min.css?v=f3224e8c17">
+<link rel="stylesheet" href="../assets/dist/site.min.css?v=940f93ec0b">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -188,7 +188,11 @@
         "@type": "Answer",
         "text": "不能保證，也沒有人能保證。網站會用 SEO 與 AI 搜尋友善的方式產生（完整的 HTML 內容、結構化資料、sitemap、robots.txt、llms.txt），並每月自動體檢一次、把分數與建議顯示在會員專區；這些是提高被找到與被引用的機會，實際成效仍取決於搜尋引擎與 AI 的演算法與你的內容。"
       }
-    }
+    },
+    {"@type": "Question", "name": "網站放在哪裡？打開會不會很慢？", "acceptedAnswer": {"@type": "Answer", "text": "網站放在全球 CDN 主機網路上，網頁從離訪客最近的節點送出，台灣打開也很快。網站是預先產生好的網頁，不需要主機即時運算，速度穩定。"}},
+    {"@type": "Question", "name": "有流量限制嗎？很多人同時看會不會掛掉？", "acceptedAnswer": {"@type": "Answer", "text": "沒有流量限制。同時很多人瀏覽也不會變慢，也不會因為流量多而加收費用。"}},
+    {"@type": "Question", "name": "網站空間夠嗎？需要另外買主機嗎？", "acceptedAnswer": {"@type": "Answer", "text": "不需要另外買主機或空間。主機與空間由我們統一管理，照片會自動壓縮成適合網頁的大小，一般小店的內容全部放滿也夠用。可以放的內容請看上方「網站規格」。"}},
+    {"@type": "Question", "name": "照片太大或用手機拍的可以上傳嗎？", "acceptedAnswer": {"@type": "Answer", "text": "可以。單張原檔 5MB 以內，JPG、PNG、WebP 與 iPhone 的 HEIC 都能直接上傳，系統會自動縮小並轉成適合網頁的格式。"}}
   ]
 }
 </script>
@@ -379,6 +383,10 @@
         <div class="sp-price reveal"><table><tbody><tr><td>自架版・一頁版（預先設計的版型、線上編輯器、發佈與維護、每月網站體檢；所有內容在同一頁，含價目、照片、常見問題、最新消息等區塊）</td><td class="sp-price-v">{{yc:single_label}}</td></tr><tr><td>{{yc:single_year_row}}</td><td class="sp-price-v">{{yc:single_year}}／年</td></tr><tr><td>自架版・多頁版（同上，另有關於、價目、照片、消息、常見問題、聯絡等獨立頁面，可自選）</td><td class="sp-price-v">{{yc:multi_label}}</td></tr><tr><td>{{yc:multi_year_row}}</td><td class="sp-price-v">{{yc:multi_year}}／年</td></tr><tr><td>進階功能（加購，一頁版、多頁版都能加：預約行事曆讓客人直接選時段、額滿自動擋；自訂程式碼與嵌入，經審核後放進網站；多人協作，最多 5 人一起編輯）</td><td class="sp-price-v">每月加 {{yc:pro_month}}（一次付 12 個月加 {{yc:pro_year}}）</td></tr></tbody></table>
             <p class="sp-note">以銀行轉帳付款，確認收款後開通；有問題歡迎先用 LINE 或<a href="../contact/">聯絡表單</a>詢問。客製設計與額外功能另行報價。完整價目請看<a href="../pricing/">定價頁</a>。</p></div>
 
+        <h2 class="sp-h2 reveal" id="specs">網站規格</h2>
+        <div class="sp-price sp-spec reveal"><table><tbody><tr><td>主機</td><td class="sp-price-v">全球 CDN 主機網路，由我們管理</td></tr><tr><td>每月流量</td><td class="sp-price-v">不限</td></tr><tr><td>網址加密（HTTPS）</td><td class="sp-price-v">內含</td></tr><tr><td>自己的網域</td><td class="sp-price-v">可協助綁定</td></tr><tr><td>照片</td><td class="sp-price-v">最多約 38 張，自動壓縮成網頁大小</td></tr><tr><td>單張照片上傳</td><td class="sp-price-v">原檔 5MB 以內，手機照片（含 HEIC）可直接上傳</td></tr><tr><td>價目／服務項目</td><td class="sp-price-v">12 項</td></tr><tr><td>線上購買商品</td><td class="sp-price-v">24 項</td></tr><tr><td>文章（每篇有自己的網頁）</td><td class="sp-price-v">12 篇，每篇 3,000 字</td></tr><tr><td>最新消息／常見問題／客人評價</td><td class="sp-price-v">6 則／8 題／6 則</td></tr></tbody></table>
+            <p class="sp-note">一頁版與多頁版可放的內容相同；多頁版另有關於、價目、照片、消息、常見問題、聯絡等獨立頁面。主機、空間與流量都已包含在月租費裡，不需要另外購買。</p></div>
+
         <div class="faq-section reveal">
             <h2 class="sp-h2">常見問題</h2>
             <div class="faq-list">
@@ -431,6 +439,34 @@
                     </div>
                     <div class="faq-answer">不能保證，也沒有人能保證。網站會用 SEO 與 AI 搜尋友善的方式產生（完整的 HTML 內容、結構化資料、sitemap、robots.txt、llms.txt），並每月自動體檢一次、把分數與建議顯示在會員專區；這些是提高被找到與被引用的機會，實際成效仍取決於搜尋引擎與 AI 的演算法與你的內容。</div>
                 </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)" onkeydown="faqKeydown(event,this)" tabindex="0" role="button" aria-expanded="false">
+                        <span>08. 網站放在哪裡？打開會不會很慢？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">網站放在全球 CDN 主機網路上，網頁從離訪客最近的節點送出，台灣打開也很快。網站是預先產生好的網頁，不需要主機即時運算，速度穩定。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)" onkeydown="faqKeydown(event,this)" tabindex="0" role="button" aria-expanded="false">
+                        <span>09. 有流量限制嗎？很多人同時看會不會掛掉？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">沒有流量限制。同時很多人瀏覽也不會變慢，也不會因為流量多而加收費用。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)" onkeydown="faqKeydown(event,this)" tabindex="0" role="button" aria-expanded="false">
+                        <span>10. 網站空間夠嗎？需要另外買主機嗎？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">不需要另外買主機或空間。主機與空間由我們統一管理，照片會自動壓縮成適合網頁的大小，一般小店的內容全部放滿也夠用。可以放的內容請看上方「網站規格」。</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)" onkeydown="faqKeydown(event,this)" tabindex="0" role="button" aria-expanded="false">
+                        <span>11. 照片太大或用手機拍的可以上傳嗎？</span>
+                        <span class="faq-icon">+</span>
+                    </div>
+                    <div class="faq-answer">可以。單張原檔 5MB 以內，JPG、PNG、WebP 與 iPhone 的 HEIC 都能直接上傳，系統會自動縮小並轉成適合網頁的格式。</div>
+                </div>
             </div>
         </div>
 
@@ -472,7 +508,7 @@
             <a href="../contact/">聯絡</a>
         </div>
         <div class="footer-services" aria-label="服務與地區"><a href="../services/brand-website/">品牌形象網站</a><a href="../services/ecommerce-website/">品牌電商網站</a><a href="../services/seo-performance/">SEO 與效能調校</a><a href="../services/geo-optimization/">GEO／AI 搜尋優化</a><a href="../services/custom-system/">全客製多頁與系統</a><a href="../services/data-cleaning/">商業資料清洗與整理</a><a href="../services/market-intelligence/">市場情報與競品分析</a><a href="../taichung-web-design/">台中網頁設計</a></div>
-        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程<a class="footer-privacy" href="../privacy/">隱私權政策</a></div>
+        <div class="footer-copy">© 2026 YC AXIOM — 商業品牌網頁設計與工程・網站內容與版型未經授權請勿轉載<a class="footer-privacy" href="../privacy/">隱私權政策</a></div>
         <div class="footer-status">
             <span class="status-dot"></span>
             現正接案中 · 台灣在地服務 · 服務時間：週一至週五 09:00–18:00
