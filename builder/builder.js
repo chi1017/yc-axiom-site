@@ -5,7 +5,8 @@ const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
 const SAVE_DELAY = 2000, RENDER_DELAY = 150;
-const TERMS_VERSION = '2026-10-v8';   // 條款有實質修改時改這個版本代號（會記錄客戶同意的是哪一版）
+// 條款版本：由後台價格設定產生（assets/rental-plan.js 的 TERMS_VERSION）；價格改變時版本會變，客人下次發佈要重新同意
+const termsVersion = () => (S.plan && S.plan.TERMS_VERSION) || '2026-10-v8';
 const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
 // 標題字型檔（預覽用完整的常用字版本；正式網站只放用到的字）
 const FONT_FILE = { serif: 'NotoSerifTC-Bold-common.woff2', sans: 'NotoSansTC-Bold-common.woff2', round: 'Huninn-common.woff2', kai: 'LXGWWenKaiTC-Bold-common.woff2' };
@@ -141,7 +142,7 @@ const isMulti = () => S.layout === 'multi';
 // 方案月費文字（例如「每月 NT$899」）；價格未定或模組沒載入時回傳空字串
 function priceText(layout) {
   const PM = S.plan; if (!PM || !PM.planFor) return '';
-  const P = PM.planFor(layout);
+  const P = PM.planFor(layout, S.site && S.site.price_lock);
   return PM.hasPrice(P) ? '每月 ' + PM.money(P.monthly) : '';
 }
 // 區塊／頁面的名稱跟著行業走（菜單→服務項目、店內環境→作品集…）
@@ -490,9 +491,9 @@ function paintFontBox() {
 // 進階方案功能的說明（一般方案可以先設定、在預覽看效果，升級後才會出現在正式網站）
 function proNote() {
   if (S.isPro) return h('div', { class: 'msg ok', text: '你的網站是進階方案，這個功能已開放。' });
-  const add = S.plan && S.plan.PRO_ADDON ? S.plan.PRO_ADDON.monthly : 400;
+  const add = S.plan && S.plan.proFor ? S.plan.proFor(S.site.price_lock).monthly : 400;
   const msg = S.site.pro_pending ? '進階功能已申請，確認收到差額後就會開通。現在可以先設定、在預覽看效果。'
-    : '這是進階功能（每月加 NT$' + add + '）。可以先設定、在預覽看效果；到會員專區「我的網站」按「加購進階功能」開通後，才會出現在正式網站。';
+    : '這是進階功能（每月加 NT$' + Number(add).toLocaleString('en-US') + '）。可以先設定、在預覽看效果；到會員專區「我的網站」按「加購進階功能」開通後，才會出現在正式網站。';
   return h('div', { class: 'msg pro-lock' }, msg, ' ', h('a', { href: YC.url('dashboard/'), target: '_blank', rel: 'noopener', text: '前往會員專區' }));
 }
 function goPage(key, anchor) {
@@ -1546,9 +1547,9 @@ async function publish() {
     try {
       const ok = await save(); if (!ok) throw new Error('草稿尚未儲存成功，請稍後再按發佈');
       if (needTerms()) {
-        const t = await YC.client.rpc('rental_accept_terms', { p_site_id: S.site.id, p_version: TERMS_VERSION });
+        const t = await YC.client.rpc('rental_accept_terms', { p_site_id: S.site.id, p_version: termsVersion() });
         if (t.error) throw new Error('無法記錄條款同意，請稍後再試');
-        S.site.terms_accepted_at = t.data || new Date().toISOString(); S.site.terms_version = TERMS_VERSION;
+        S.site.terms_accepted_at = t.data || new Date().toISOString(); S.site.terms_version = termsVersion();
       }
       const r = await YC.client.functions.invoke('publish-site', { body: { site_id: S.site.id } });
       if (r.error) {
@@ -1566,15 +1567,16 @@ async function publish() {
     let priceBox = null;
     const PM = S.plan;
     if (PM && PM.planFor) {
-      const P = PM.planFor(S.layout);
+      const lock = S.site.price_lock;
+      const P = PM.planFor(S.layout, lock);
       const pages = isMulti() ? S.pageList.filter((p) => p.key !== 'home').map((p) => p.label).join('、') : '';
       const box = (...kids) => h('div', { style: 'margin:12px 0 0;padding:12px 14px;border:1px solid var(--line,#3a342c);border-radius:10px;font-size:14px;line-height:1.7' }, ...kids);
       const pay = h('div', { style: 'color:var(--muted,#9a8f80)', text: '送出後請到會員專區付款，付款確認後網站就會開通。' });
       if (PM.hasPrice(P)) {
-        const q = PM.quote(12, S.layout, S.site.tier);
+        const q = PM.quote(12, S.layout, S.site.tier, lock);
         priceBox = box(h('div', { style: 'font-weight:700' }, '租用方案：' + P.name),
-          h('div', {}, h('b', { text: S.site.tier === 'pro' || !PM.earlyBird ? PM.money(q.monthly || P.monthly) + '／月' : PM.earlyBird(P.monthly) }), S.site.tier === 'pro' ? '（含進階功能）' : ''),
-          h('div', { style: 'color:var(--muted,#9a8f80)', text: '一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + PM.money(q.amount) + '。' + (isMulti() ? '包含' + pages + '等頁面。' : sectionLabel('menu') + '、' + sectionLabel('interior') + '、常見問題、最新消息都包含，不另外加價。') }),
+          h('div', {}, h('b', { text: S.site.tier === 'pro' || !PM.earlyBird || lock ? PM.money(q.monthly || P.monthly) + '／月' : PM.earlyBird(P.monthly) }), S.site.tier === 'pro' ? '（含進階功能）' : ''),
+          h('div', { style: 'color:var(--muted,#9a8f80)', text: (PM.yearText ? PM.yearText(S.layout, S.site.tier, lock) : '一次付 12 個月：' + PM.money(q.amount)) + '。' + (isMulti() ? '包含' + pages + '等頁面。' : sectionLabel('menu') + '、' + sectionLabel('interior') + '、常見問題、最新消息都包含，不另外加價。') }),
           pay);
       } else {
         // 價格尚未定案的方案（目前是多頁版）：不顯示任何金額
@@ -1605,7 +1607,7 @@ async function publish() {
   }
 }
 // 是否需要（重新）同意條款：從沒同意過，或同意的不是目前版本
-function needTerms() { return !S.site.terms_accepted_at || (S.site.terms_version || '') !== TERMS_VERSION; }
+function needTerms() { return !S.site.terms_accepted_at || (S.site.terms_version || '') !== termsVersion(); }
 
 // ── 手機版（像 App 一樣）：下方分頁 → 設定清單 → 點一項進入那一頁設定，左上「‹」或手機的返回鍵回清單 ──
 const isMob = () => matchMedia('(max-width:860px)').matches;

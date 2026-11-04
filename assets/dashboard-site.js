@@ -60,7 +60,7 @@
       var uid = YC.session.user.id;
       var cm = await YC.client.from('site_members').select('site_id').eq('member_id', uid).eq('status', 'active');
       var collabIds = cm.error ? [] : (cm.data || []).map(function (x) { return x.site_id; });
-      var cols = 'id,member_id,tier,slug,status,layout,content,public_url,paid_until,first_published_at,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status,upgrade_pending,upgrade_amount,pro_pending,pro_amount,next_layout,next_tier';
+      var cols = 'id,member_id,tier,slug,status,layout,content,public_url,paid_until,first_published_at,last_published_at,suspend_reason,terms_accepted_at,custom_domain,domain_status,upgrade_pending,upgrade_amount,pro_pending,pro_amount,next_layout,next_tier,price_lock';
       var r = collabIds.length
         ? await YC.client.from('rental_sites').select(cols).or('member_id.eq.' + uid + ',id.in.(' + collabIds.join(',') + ')').order('created_at')
         : await YC.client.from('rental_sites').select(cols).eq('member_id', uid).order('created_at');
@@ -202,12 +202,12 @@
 
   // ── 方案：加購進階功能、下一期改方案 ──
   function planToolsHtml(s, PM) {
-    var id = esc(s.id), add = PM && PM.PRO_ADDON ? PM.PRO_ADDON.monthly : 400, h = '';
+    var id = esc(s.id), proP = PM && PM.proFor ? PM.proFor(s.price_lock) : (PM && PM.PRO_ADDON) || { monthly: 400, yearly: 4000 }, add = proP.monthly, h = '';
     var box = function (inner, color) { return '<div style="margin:10px 0 0;padding:10px 14px;border:1px solid ' + (color || 'rgba(255,255,255,.15)') + ';border-radius:10px;font-size:14px;line-height:1.7">' + inner + '</div>'; };
     if (s.pro_pending) h += box('<b style="color:#e0b05a">進階功能：待補差額 ' + esc(money(s.pro_amount || 0)) + '</b><br>請匯款到下方帳戶，匯款後用 LINE（@788cblaq）告訴我們帳號末五碼，確認後就會開通。', '#e0b05a');
     else if (s.tier === 'pro') h += '<p style="margin:6px 0;font-size:13px;color:#9a8f80">已開通進階功能：預約行事曆、自訂程式碼與嵌入、多人協作。</p>';
-    else if (s.status !== 'cancelled') h += box('<b>進階功能</b>　每月加 ' + esc(money(add)) + '（一次付 12 個月加 ' + esc(money(add * 10)) + '）<br><span style="color:#9a8f80;font-size:13px">預約行事曆（客人直接選時段、額滿自動擋）、自訂程式碼與嵌入、多人協作。已付費的期間要補剩餘天數的差額。</span>' +
-      '<div style="margin-top:8px"><button class="m-btn sm" data-plan="pro" data-site="' + id + '">加購進階功能</button></div>');
+    else if (s.status !== 'cancelled') h += box('<b>進階功能</b>　每月加 ' + esc(money(add)) + '（一次付 12 個月加 ' + esc(money(proP.yearly || add * 10)) + '）<br><span style="color:#9a8f80;font-size:13px">預約行事曆（客人直接選時段、額滿自動擋）、自訂程式碼與嵌入、多人協作。已付費的期間要補剩餘天數的差額。</span>' +
+      '<div style="margin-top:8px"><button class="m-btn sm" data-plan="pro" data-add="' + esc(Number(add).toLocaleString('en-US')) + '" data-site="' + id + '">加購進階功能</button></div>');
     // 下一期改方案
     var nexts = [];
     if (s.layout === 'multi' && !s.upgrade_pending) nexts.push(s.next_layout === 'single' ? '<button class="m-btn sm" data-plan="next" data-k="next_layout" data-v="" data-site="' + id + '">取消「下期改回一頁版」</button>' : '<button class="m-btn sm" data-plan="next" data-k="next_layout" data-v="single" data-site="' + id + '">下期改回一頁版</button>');
@@ -226,7 +226,8 @@
     try {
       if (b.getAttribute('data-plan') === 'pro') {
         var q = await invoke({ action: 'pro_quote', site_id: sid });
-        var msg = q.amount ? '加購進階功能：這一期還剩 ' + q.days + ' 天，要補差額 ' + money(q.amount) + '。確認收到差額後開通，下一期起每月多 NT$ 400。確定申請？' : '加購進階功能：目前不用補差額，會立即開通，下一期起每月多 NT$ 400。確定？';
+        var addTxt = (b.getAttribute('data-add') || '400');
+        var msg = q.amount ? '加購進階功能：這一期還剩 ' + q.days + ' 天，要補差額 ' + money(q.amount) + '。確認收到差額後開通，下一期起每月多 NT$ ' + addTxt + '。確定申請？' : '加購進階功能：目前不用補差額，會立即開通，下一期起每月多 NT$ ' + addTxt + '。確定？';
         if (!confirm(msg)) { b.disabled = false; return; }
         var j = await invoke({ action: 'request_pro', site_id: sid });
         out.textContent = j.message || '已申請';
@@ -312,12 +313,13 @@
       var msgs = await YC.client.from('site_messages').select('name,contact,message,created_at,kind,meta', { count: 'exact' }).eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var planHtml = '';
       try {
-        var P = PM.planFor ? PM.planFor(s.layout) : PM.PLAN;
-        var yq = PM.hasPrice && PM.hasPrice(P) ? PM.quote(12, s.layout, s.tier) : null;
+        var P = PM.planFor ? PM.planFor(s.layout, s.price_lock) : PM.PLAN;
+        var yq = PM.hasPrice && PM.hasPrice(P) ? PM.quote(12, s.layout, s.tier, s.price_lock) : null;
         var pro = s.tier === 'pro' && PM.PRO_ADDON;
+        var showEarly = !pro && PM.earlyBird && !s.price_lock;
         planHtml = yq
-          ? '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + (pro ? '＋' + esc(PM.PRO_ADDON.name) : '') + '　' + '<b>' + (pro || !PM.earlyBird ? esc(PM.money(yq.monthly || P.monthly)) + '／月' : esc(PM.earlyBird(P.monthly))) + '</b>' +
-            '<br><span style="font-size:13px;color:#9a8f80">一次付 12 個月只收 ' + P.yearPaidMonths + ' 個月：' + esc(PM.money(yq.amount)) + '</span></p>'
+          ? '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + (pro ? '＋' + esc(PM.PRO_ADDON.name) : '') + '　' + '<b>' + (showEarly ? esc(PM.earlyBird(P.monthly)) : esc(PM.money(yq.monthly || P.monthly)) + '／月') + '</b>' + (s.price_lock ? '（早鳥價，續約維持）' : '') +
+            '<br><span style="font-size:13px;color:#9a8f80">' + esc(PM.yearText ? PM.yearText(s.layout, s.tier, s.price_lock) : '一次付 12 個月：' + PM.money(yq.amount)) + '</span></p>'
           : '<p style="margin:6px 0;font-size:14px;line-height:1.7">租用方案：' + esc(P.name) + '<br><span style="font-size:13px;color:#9a8f80">費用確認中，我們會與你聯絡確認。</span></p>';
       } catch (e2) { /* 略過 */ }
       var dl = daysLeft(s.paid_until);

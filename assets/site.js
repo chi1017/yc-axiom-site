@@ -701,3 +701,59 @@
         }
     }
 })();
+
+/* ── 早鳥滑出卡片（設定來自後台「價格與活動」，建置時寫成 /assets/site-promo.json）──
+   只在設定的頁面出現；捲動到設定的百分比或停留設定的秒數（先到為準）才滑出。
+   不用遮罩、不鎖捲動；手機版在下方分頁列上方。工具頁、編輯器、會員專區、後台一律不顯示。 */
+(function () {
+    var PV = window.YC_PROMO_PREVIEW;   // 後台預覽：直接用傳入的設定，立刻顯示、不記錄關閉
+    var path = PV ? PV.path : location.pathname;
+    if (/^\/(seo|geo|tools|builder|dashboard|admin)\//.test(path)) return;
+    if (!window.fetch && !PV) return;
+    var KEY = 'yc-promo-card';
+    var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function ga(e) { try { if (window.gtag) window.gtag('event', e, { placement: 'card' }); } catch (x) { /* ignore */ } }
+    function allowed(pages) {
+        return (pages || []).some(function (p) { return p.slice(-1) === '*' ? path.indexOf(p.slice(0, -1)) === 0 : (path === p || path === p + 'index.html'); });
+    }
+    (PV ? Promise.resolve(PV.cfg) : fetch('/assets/site-promo.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; })).then(function (cfg) {
+        var c = cfg && cfg.card;
+        if (!c || !c.show || !allowed(c.pages)) return;
+        var now = Date.now();
+        if (c.start && now < Date.parse(c.start)) return;
+        if (c.end && now > Date.parse(c.end)) return;
+        if (!PV) { try { var v = JSON.parse(localStorage.getItem(KEY) || 'null'); if (v && v.id === c.id && now - v.t < (c.dismiss_days || 0) * 864e5) return; } catch (e) { /* 讀不到就照常顯示 */ } }
+        var shown = false, timer = 0;
+        function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (ch) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]; }); }
+        function show() {
+            if (shown) return; shown = true; clearTimeout(timer); window.removeEventListener('scroll', onScroll);
+            var el = document.createElement('aside');
+            el.className = 'yc-card' + (reduce ? ' yc-card--still' : '');
+            el.setAttribute('aria-label', '優惠資訊');
+            el.innerHTML = '<button type="button" class="yc-card-x" aria-label="關閉優惠卡片">×</button>' +
+                '<p class="yc-card-t">' + esc(c.title) + '</p>' + (c.body ? '<p class="yc-card-d">' + esc(c.body) + '</p>' : '') +
+                '<div class="yc-card-a">' + (c.b1_text ? '<a class="yc-card-b1" href="' + esc(c.b1_link) + '">' + esc(c.b1_text) + '</a>' : '') +
+                (c.b2_text ? '<a class="yc-card-b2" href="' + esc(c.b2_link) + '"' + (/^https?:/.test(c.b2_link || '') && (c.b2_link || '').indexOf(location.host) < 0 ? ' target="_blank" rel="noopener"' : '') + '>' + esc(c.b2_text) + '</a>' : '') + '</div>';
+            document.body.appendChild(el);
+            requestAnimationFrame(function () { el.classList.add('is-in'); });
+            ga('early_bird_view');
+            function close() {
+                el.classList.remove('is-in'); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, reduce ? 0 : 260);
+                document.removeEventListener('keydown', onKey);
+                if (!PV) { try { localStorage.setItem(KEY, JSON.stringify({ id: c.id, t: Date.now() })); } catch (e) { /* ignore */ } ga('early_bird_close'); }
+            }
+            function onKey(e) { if (e.key === 'Escape') close(); }
+            el.querySelector('.yc-card-x').addEventListener('click', close);
+            Array.prototype.forEach.call(el.querySelectorAll('a'), function (a) { a.addEventListener('click', function () { ga('early_bird_click'); }); });
+            document.addEventListener('keydown', onKey);
+        }
+        function onScroll() {
+            var h = document.documentElement.scrollHeight - window.innerHeight;
+            if (h > 0 && (window.scrollY / h) * 100 >= (c.scroll_pct || 0)) show();
+        }
+        if (PV) { show(); return; }
+        if (c.scroll_pct > 0) window.addEventListener('scroll', onScroll, { passive: true });
+        if (c.delay_sec > 0) timer = setTimeout(show, c.delay_sec * 1000);
+        if (!(c.scroll_pct > 0) && !(c.delay_sec > 0)) show();
+    }).catch(function () { /* 讀不到設定就不顯示 */ });
+})();
