@@ -52,6 +52,18 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
 .learn-link:hover{opacity:.75}
 </style>
 <script>
+// 檢測完成後捲動到分數區塊：嵌在官網裡時請外層頁面捲動（扣掉上方導覽列與手機底部選單），單獨開啟時自己捲動；減少動態效果時直接跳轉
+window.ycScrollToScore = function () {
+  var el = document.querySelector('#results .score-hero') || document.getElementById('results');
+  if (!el || !el.getBoundingClientRect().height) return;
+  var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (window.parent === window) { el.scrollIntoView({ behavior: reduce ? 'instant' : 'smooth', block: 'start' }); return; }
+  // 等結果撐開 iframe 高度（外層收到新高度）之後再請外層捲動
+  setTimeout(function () { requestAnimationFrame(function () {
+    var r = el.getBoundingClientRect();
+    parent.postMessage({ type: 'seo-tool-scroll', top: r.top + (window.scrollY || 0), height: r.height }, '*');
+  }); }, 120);
+};
 (function () {
   if (window.parent === window) return;
   var de = document.documentElement;
@@ -713,59 +725,11 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
   </div>
 </div>
 
-<script src="assets/dist/seo-tool.min.js?v=7c0740a689"></script>
+<script src="assets/dist/seo-tool.min.js?v=3ca1750d90"></script>
 
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">↑</button>
 <div id="toast"></div>
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <div class="logo">
-          <div class="logo-dot"></div>
-          <span id="footerBrandText">SEO Analyzer</span>
-          <span style="font-family:'Noto Sans TC',sans-serif;font-weight:400;font-size:11px;color:var(--text3);letter-spacing:0;margin-left:2px">Pro</span>
-        </div>
-        <p>專為中文網站設計的深度 SEO 分析工具。分析在瀏覽器本機執行；登入會員後才會保存檢測紀錄。</p>
-      </div>
-
-      <div class="footer-cols">
-        <div class="footer-col">
-          <h4>分析功能</h4>
-          <ul>
-            <li><span>🔬</span>技術 SEO 健診</li>
-            <li><span>🔑</span>關鍵字覆蓋分析</li>
-            <li><span>📊</span>TF-IDF / LSI 語意</li>
-            <li><span>🔎</span>SERP 競爭分析</li>
-            <li><span>⚙</span>PageSpeed Insights</li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>工具特色</h4>
-          <ul>
-            <li><span>⚡</span>瀏覽器本機分析</li>
-            <li><span>🏢</span>18 種產業模板</li>
-            <li><span>📄</span>PDF / JSON 匯出</li>
-            <li><span>🕐</span>歷史趨勢追蹤</li>
-            <li><span>🎨</span>白標品牌設定</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <div class="footer-bottom-left">
-        © 2026 SEO Analyzer Pro · 版本 v19 · Ctrl+Enter 快速分析
-      </div>
-      <div class="footer-pills">
-        <span class="footer-pill"><span class="dot"></span>純前端架構</span>
-        <span class="footer-pill"><span class="dot"></span>登入才保存紀錄</span>
-        <span class="footer-pill"><span class="dot dot-v"></span><span class="js-rule-count">18 項</span> SEO 規則</span>
-      </div>
-    </div>
-  </div>
-</footer>
 
 <script>window.YC_BASE = './';</script>
 <script src="assets/supabase-config.js?v=2026-10-15"></script>

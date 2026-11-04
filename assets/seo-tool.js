@@ -1680,7 +1680,7 @@ function renderResults(r){
       <div class="ci"><div class="cb" style="background:rgba(181,155,106,0.15);color:var(--accent2)">🌍</div><div class="cc"><strong>Hreflang</strong><span>${info.hreflang?.length||0} 個語言標籤</span></div></div>
     </div>`;
 
-  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+  if (window.ycScrollToScore) window.ycScrollToScore();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -3867,7 +3867,7 @@ window.renderResults = function(r) {
   
   // Scroll to results
   setTimeout(() => {
-    document.getElementById('results')?.scrollIntoView({behavior:'smooth', block:'start'});
+    if (window.ycScrollToScore) window.ycScrollToScore();
   }, 300);
 };
 
