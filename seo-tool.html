@@ -15,8 +15,8 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314120F'/%3E%3Ccircle cx='13' cy='13' r='6' fill='none' stroke='%23B59B6A' stroke-width='2.5'/%3E%3Cline x1='17.5' y1='17.5' x2='24' y2='24' stroke='%23D8C18A' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='13' cy='13' r='2.5' fill='%23B59B6A' opacity='0.6'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/dist/seo-tool.min.css?v=371815a6bf">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/dist/seo-tool.min.css?v=cbd9e21624">
 <style id="quick-start">
 /* 快速開始與進階設定（2026-11） */
 .qs-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:var(--radius);padding:18px 18px 14px;margin:0 0 14px}
@@ -101,7 +101,7 @@ window.ycScrollToScore = function () {
   <div class="logo">
     <div class="logo-dot"></div>
     <span id="brandLogoText">SEO Analyzer</span>
-    <span style="font-family:'Noto Sans TC',sans-serif;font-weight:400;font-size:11px;color:var(--text3);letter-spacing:0;margin-left:2px">Pro</span>
+    <span style="font-family:'PingFang TC','Heiti TC','Microsoft JhengHei','Noto Sans TC',sans-serif;font-weight:400;font-size:11px;color:var(--text3);letter-spacing:0;margin-left:2px">Pro</span>
   </div>
   <div class="badge-wrap">
     <button class="hist-toggle" onclick="toggleHistory()">
@@ -356,7 +356,7 @@ window.ycScrollToScore = function () {
       <div id="serpFileWrap" style="display:none;margin-top:14px">
         <div class="file-select-row">
           <span id="serpFileName" style="color:#34d399;font-size:13px"></span>
-          <button onclick="clearSerpSource()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">移除</button>
+          <button onclick="clearSerpSource()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:'PingFang TC','Heiti TC','Microsoft JhengHei','Noto Sans TC',sans-serif">移除</button>
         </div>
         <div id="serpPreview" style="margin-top:10px"></div>
       </div>
@@ -735,8 +735,8 @@ window.ycScrollToScore = function () {
 <script src="assets/supabase-config.js?v=2026-10-15"></script>
 <script>/* 嵌在官網頁面裡時，直接借用外層已載入的登入套件，不重複下載與解析（約 210KB）；單獨打開工具時才自己載入 */
 (function(){var p=null;try{if(window.parent!==window&&window.parent.supabase&&window.parent.supabase.createClient)p=window.parent.supabase;}catch(e){}
-if(p){window.supabase=p;}else{document.write('<script src="assets/vendor/supabase-2.117.2.min.js"><\/script>');}})();</script>
-<script src="assets/yc-auth.js?v=2026-10-28a"></script>
+if(p){window.supabase=p;}else if(window.parent!==window){window.YC_LAZY_AUTH=true;}else{document.write('<script src="assets/vendor/supabase-2.117.2.min.js"><\/script>');}})();</script>
+<script src="assets/yc-auth.js?v=2026-11-04a"></script>
 <script src="assets/seo-tool-members.js?v=2026-10-16"></script>
 <script src="assets/cross-links.js?v=2026-10-15"></script>
 <script src="assets/tool-mobile.js?v=2026-10-28b" defer></script>

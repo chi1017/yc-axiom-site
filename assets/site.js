@@ -731,6 +731,8 @@
     var path = PV ? PV.path : location.pathname;
     if (/^\/(seo|geo|tools|builder|dashboard|admin)\//.test(path)) return;
     if (!window.fetch && !PV) return;
+    // 建置時只有卡片要顯示時才在 <html> 加上 data-yc-card；卡片關閉時連設定檔都不讀
+    if (!PV && document.documentElement.getAttribute('data-yc-card') !== '1') return;
     var KEY = 'yc-promo-card';
     var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     function ga(e) { try { if (window.gtag) window.gtag('event', e, { placement: 'card' }); } catch (x) { /* ignore */ } }

@@ -19,7 +19,9 @@
             --text-dim: #9C9686;
             --text-bright: #F5F2EA;
             --f-display: 'Fraunces', 'Noto Serif TC', 'Songti TC', 'PMingLiU', serif;
-            --f-ui: 'Instrument Sans', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            --f-ui: 'Instrument Sans', 'PingFang TC', 'Heiti TC', 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
+            /* 中文內文用裝置內建字型（不從網路下載）；標題的宋體只載入一種粗細 */
+            --f-cjk: 'PingFang TC', 'Heiti TC', 'Microsoft JhengHei', 'Noto Sans TC', sans-serif;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -35,7 +37,7 @@
             background-attachment: fixed;
             color: var(--text);
             overflow-x: hidden;
-            font-family: 'Noto Sans TC', var(--f-ui);
+            font-family: var(--f-cjk);
             font-weight: 300;
             line-height: 1.65;
             -webkit-font-smoothing: antialiased;

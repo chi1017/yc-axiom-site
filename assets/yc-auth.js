@@ -7,8 +7,11 @@
   var CONSENT_TEXT = '我同意 YC AXIOM 保存我的檢測紀錄，並寄送檢測報告與網站改善建議';
   var LINE_URL = 'https://line.me/R/ti/p/%40788cblaq';
   var listeners = [];
+  // 延後載入（工具頁設定 window.YC_LAZY_AUTH = true）：沒有登入過的訪客不先下載約 210KB 的會員套件，
+  // 按「登入」或已有登入紀錄時才載入；其他頁面維持原本一開始就載入。
+  var LAZY = !!window.YC_LAZY_AUTH && !window.supabase;
   var YC = window.YC = {
-    enabled: !!(CFG.supabaseUrl && CFG.supabaseAnonKey && window.supabase),
+    enabled: !!(CFG.supabaseUrl && CFG.supabaseAnonKey && (window.supabase || LAZY)),
     client: null, session: null, member: null,
     CONSENT_VERSION: CONSENT_VERSION, LINE_URL: LINE_URL,
     features: CFG.features || {}
@@ -18,8 +21,40 @@
   function baseUrl() { return new URL(window.YC_BASE || './', location.href); }
   YC.url = function (p) { return new URL(p, baseUrl()).href; };
 
+  // ── 延後載入會員套件 ──
+  function hasStoredLogin() {
+    if (/[?&](code|error)=/.test(location.search) || /access_token=/.test(location.hash)) return true;
+    try { for (var i = 0; i < localStorage.length; i++) { if (/^sb-.+-auth-token/.test(localStorage.key(i) || '')) return true; } } catch (e) { return true; }
+    return false;
+  }
+  var libP = null;
+  YC.loadLib = function () {
+    if (window.supabase) return Promise.resolve();
+    try { if (window.parent !== window && window.parent.supabase) { window.supabase = window.parent.supabase; return Promise.resolve(); } } catch (e) { /* 不同源 */ }
+    if (!libP) libP = new Promise(function (res, rej) {
+      var sc = document.createElement('script');
+      sc.src = YC.url('assets/vendor/supabase-2.117.2.min.js');
+      sc.onload = function () { res(); };
+      sc.onerror = function () { libP = null; rej(new Error('會員功能載入失敗，請檢查網路後再試一次')); };
+      document.head.appendChild(sc);
+    });
+    return libP;
+  };
+  async function needClient() {
+    if (!YC.client && YC.enabled) { await YC.loadLib(); YC.init(); }
+    if (!YC.client) throw new Error('會員功能尚未啟用');
+    return YC.client;
+  }
+  YC.ensureClient = needClient;
+
   // ── 初始化 ──
   YC.init = function () {
+    if (YC.enabled && !YC.client && !window.supabase) {
+      // 延後載入模式：有登入紀錄（或剛從登入頁回來）就立刻載入；否則先當作未登入
+      if (hasStoredLogin()) YC.loadLib().then(function () { YC.init(); }, function () { emit('INIT'); });
+      else if (!YC.ready) setTimeout(function () { emit('INIT'); }, 0);
+      return null;
+    }
     if (!YC.enabled) { if (!YC.ready) setTimeout(function () { emit('INIT'); }, 0); return null; }   // 未啟用：仍通知頁面「已就緒」，讓會員專區／管理後台顯示未開放，而不是一直載入中
     if (YC.client) return YC.client;
     YC.client = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey, {
@@ -48,7 +83,7 @@
   }
   // iframe 內：收到父頁通知後重新讀取登入狀態
   YC.reload = async function () {
-    if (!YC.client) return;
+    if (!YC.client) { if (YC.enabled && hasStoredLogin()) { await YC.loadLib(); YC.init(); } return; }
     var r = await YC.client.auth.getSession();
     YC.session = (r.data && r.data.session) || null;
     await YC.refreshMember(); emit('RELOAD');
@@ -85,7 +120,7 @@
     try { var t = window.top.location; return t.origin + t.pathname; } catch (e) { return location.origin + location.pathname; }
   }
   YC.signInWithGoogle = async function () {
-    if (!YC.client) throw new Error('會員功能尚未啟用');
+    await needClient();
     // prompt=select_account：每次都讓 Google 顯示帳號選擇畫面，手機或電腦登入多個 Google 帳號時可以選要用哪一個
     var r = await YC.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: returnUrl(), skipBrowserRedirect: true, queryParams: { prompt: 'select_account' } } });
     if (r.error) throw r.error;
@@ -95,12 +130,14 @@
   YC.switchAccount = function () { return YC.signInWithGoogle(); };
   YC.signInWithEmail = async function (email) {
     if (!YC.features.magicLink) throw new Error('Email 魔法連結尚未開放');
+    await needClient();
     var r = await YC.client.auth.signInWithOtp({ email: email, options: { emailRedirectTo: returnUrl(), shouldCreateUser: true } });
     if (r.error) throw r.error;
   };
   // 信中的驗證碼登入：換瀏覽器或手機信件 App 內開連結而失敗時的備援
   YC.verifyEmailOtp = async function (email, token) {
     if (!YC.features.magicLink) throw new Error('Email 登入尚未開放');
+    await needClient();
     var r = await YC.client.auth.verifyOtp({ email: email, token: String(token).trim(), type: 'email' });
     if (r.error) throw r.error;
   };

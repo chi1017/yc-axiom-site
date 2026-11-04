@@ -9,7 +9,7 @@
 // 測試：SITE_SETTINGS_FILE=設定.json SETTINGS_USED=0 SETTINGS_NOW=2027-03-01T00:00:00Z node tools/apply-settings.mjs <資料夾>
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
-import { normalize, effective, tokens, render, hasTokens, promo, planSettings, stateOf, barHead, barBody } from './site-settings.mjs';
+import { normalize, effective, tokens, render, hasTokens, promo, planSettings, stateOf, barHead, barBody, cardAllowed } from './site-settings.mjs';
 
 const OUT = process.argv[2];
 if (!OUT || !existsSync(OUT)) { console.log('::error::缺少要部署的資料夾'); process.exit(1); }
@@ -64,6 +64,11 @@ for (const f of walk(OUT)) {
   if (!/\.(html|txt|xml|json|webmanifest)$/.test(rel)) continue;
   let s = readFileSync(f, 'utf8'), o = s;
   if (hasTokens(s)) s = render(s, tok);
+  // 卡片要顯示的頁面：<html> 加上 data-yc-card="1"（前端只有看到這個才讀設定檔）
+  if (rel.endsWith('.html') && pr.card.show && !NO_BAR.test(rel) && /<html[^>]*>/i.test(s) && !/data-yc-card=/.test(s)) {
+    const path = '/' + rel.replace(/index\.html$/, '');
+    if (cardAllowed(pr.card.pages, path)) s = s.replace(/<html([^>]*)>/i, (m, a) => '<html' + a + ' data-yc-card="1">');
+  }
   if (rel.endsWith('.html') && pr.bar.show && !NO_BAR.test(rel) && /<\/head>/i.test(s) && /<body[^>]*>/i.test(s) && !s.includes('id="yc-bar"')) {
     s = s.replace(/<\/head>/i, barHead(pr.bar) + '\n</head>').replace(/<body([^>]*)>/i, (m) => m + '\n' + barBody(pr.bar));
     bars++;

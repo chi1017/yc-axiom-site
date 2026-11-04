@@ -15,12 +15,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314120F'/%3E%3Ccircle cx='16' cy='16' r='6' fill='none' stroke='%23B59B6A' stroke-width='3'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0B0A09;--bg2:#14120F;--bg3:#1A1815;--border:rgba(245,240,230,.08);--border2:rgba(245,240,230,.14);--accent:#B59B6A;--accent2:#D8C18A;--green:#10b981;--red:#ef4444;--gold:#f59e0b;--text:#DDD8CE;--text2:#9C9686;--text3:#6b6558;--radius:14px;--radius-sm:8px;}
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:14px;line-height:1.7;min-height:100vh}
+body{background:var(--bg);color:var(--text);font-family:'PingFang TC','Heiti TC','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:14px;line-height:1.7;min-height:100vh}
 a{color:var(--accent2)}
 header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;background:var(--bg2);gap:12px;flex-wrap:wrap}
 .logo{font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:-.02em;display:flex;align-items:center;gap:10px}
@@ -28,7 +28,7 @@ header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;alig
 .badge-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .offline-badge{font-size:11px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:#34d399;padding:4px 12px;border-radius:20px;font-weight:500}
 .v-badge{font-size:11px;background:rgba(181,155,106,.15);border:1px solid rgba(181,155,106,.3);color:var(--accent2);padding:4px 10px;border-radius:20px;font-weight:600}
-.hist-toggle{display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--border);color:var(--text2);padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-size:13px;transition:all .2s}
+.hist-toggle{display:flex;align-items:center;gap:7px;background:none;border:1px solid var(--border);color:var(--text2);padding:7px 14px;border-radius:var(--radius-sm);cursor:pointer;font-family:'PingFang TC','Heiti TC','Microsoft JhengHei','Noto Sans TC',sans-serif;font-size:13px;transition:all .2s}
 .hist-toggle:hover{border-color:var(--accent);color:var(--accent2);background:rgba(181,155,106,.08)}
 .main{max-width:960px;margin:0 auto;padding:40px 24px 70px}
 .hero{text-align:center;margin-bottom:32px}
@@ -46,9 +46,9 @@ header{border-bottom:1px solid var(--border);padding:18px 32px;display:flex;alig
 textarea#htmlIn{width:100%;min-height:150px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font:12px/1.6 ui-monospace,Menlo,Consolas,monospace;padding:12px;margin-bottom:10px;resize:vertical}
 .field-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .field-row input[type=url]{flex:1;min-width:200px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font:13px inherit;font-family:inherit}
-.btn-run{width:100%;padding:13px;background:var(--accent);color:#0b0a09;border:0;border-radius:var(--radius-sm);font:700 15px 'Noto Sans TC',sans-serif;cursor:pointer}
+.btn-run{width:100%;padding:13px;background:var(--accent);color:#0b0a09;border:0;border-radius:var(--radius-sm);font:700 15px 'PingFang TC','Heiti TC','Microsoft JhengHei','Noto Sans TC',sans-serif;cursor:pointer}
 .btn-run:hover:not(:disabled){filter:brightness(1.08)}.btn-run:disabled{opacity:.55;cursor:not-allowed}
-.btn-sub{background:var(--bg3);border:1px solid var(--border2);color:var(--accent2);border-radius:var(--radius-sm);padding:9px 14px;font:13px 'Noto Sans TC',sans-serif;cursor:pointer}
+.btn-sub{background:var(--bg3);border:1px solid var(--border2);color:var(--accent2);border-radius:var(--radius-sm);padding:9px 14px;font:13px 'PingFang TC','Heiti TC','Microsoft JhengHei','Noto Sans TC',sans-serif;cursor:pointer}
 .btn-sub:hover{border-color:var(--accent)}
 .note{display:flex;gap:8px;background:rgba(181,155,106,.06);border:1px solid rgba(181,155,106,.15);border-radius:var(--radius-sm);padding:9px 12px;font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.6}
 .status{display:none;font-size:13px;padding:9px 12px;border-radius:var(--radius-sm);margin-top:12px}
@@ -482,8 +482,8 @@ function shareReport() { return; }
 <script src="assets/supabase-config.js?v=2026-10-15"></script>
 <script>/* 嵌在官網頁面裡時，直接借用外層已載入的登入套件，不重複下載與解析（約 210KB）；單獨打開工具時才自己載入 */
 (function(){var p=null;try{if(window.parent!==window&&window.parent.supabase&&window.parent.supabase.createClient)p=window.parent.supabase;}catch(e){}
-if(p){window.supabase=p;}else{document.write('<script src="assets/vendor/supabase-2.117.2.min.js"><\/script>');}})();</script>
-<script src="assets/yc-auth.js?v=2026-10-28a"></script>
+if(p){window.supabase=p;}else if(window.parent!==window){window.YC_LAZY_AUTH=true;}else{document.write('<script src="assets/vendor/supabase-2.117.2.min.js"><\/script>');}})();</script>
+<script src="assets/yc-auth.js?v=2026-11-04a"></script>
 <script src="assets/geo-tool-members.js?v=2026-10-16"></script>
 <script src="assets/cross-links.js?v=2026-10-15"></script>
 <script src="assets/tool-mobile.js?v=2026-10-28b" defer></script>
