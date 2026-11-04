@@ -3,7 +3,8 @@
 import { startReveal, wireNav, morphFrame, settleReveal, wireEditPills, flashSection, sectionKey } from './preview-fx.js';
 const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
-const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
+// 版型檔案由官網自己提供（部署官網時從 yc-axiom-sites 複製到 /tpl/）
+const DEFAULT_TPL_BASE = location.origin + '/tpl/';
 const SAVE_DELAY = 2000, RENDER_DELAY = 150;
 // 條款版本：由後台價格設定產生（assets/rental-plan.js 的 TERMS_VERSION）；價格改變時版本會變，客人下次發佈要重新同意
 const termsVersion = () => (S.plan && S.plan.TERMS_VERSION) || '2026-10-v8';
