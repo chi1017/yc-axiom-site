@@ -1,4 +1,5 @@
 // 產生網站實際載入的壓縮檔，並自動更新 HTML 裡的版本號（?v=內容雜湊），讓瀏覽器拿到新版。
+// 注意：編輯器、預覽與後台的版型檔案在部署時才放到 /tpl/（由 yc-axiom-sites 的 deploy-official-site.yml 複製），本機測試請用 ?tplbase=。
 // 用法：npm run build（產生）／npm run check（只檢查 dist 是否和原始檔一致，GitHub Actions 用）
 import { build } from 'esbuild';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
