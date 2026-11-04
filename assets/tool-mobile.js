@@ -44,7 +44,7 @@
     setTimeout(function () { s.el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30);
   }
 
-  function inputCard() { return document.querySelector('.input-card'); }
+  function inputCard() { return document.getElementById('qsCard') || document.querySelector('.input-card'); }
 
   function build() {
     timer = 0;

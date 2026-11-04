@@ -14,10 +14,16 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="網站編輯器">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="dist/builder.min.css?v=4f54853662">
+<link rel="stylesheet" href="dist/builder.min.css?v=2e3239bbf9">
 </head>
 <body>
 <div id="app" class="app" hidden>
+  <div class="trial-bar" id="trialBar" hidden>
+    <a class="tb-home" href="../" aria-label="回到 YC AXIOM 官網首頁">← YC AXIOM</a>
+    <nav class="tb-nav" aria-label="網站導覽"><a href="../rental/">網站租用</a><a href="../rental/templates/">版型展示</a><a href="../pricing/">定價</a><a href="../contact/">聯絡我們</a></nav>
+    <p class="tb-msg" id="tbMsg" role="status"></p>
+    <button type="button" class="btn small primary" id="trialLogin" hidden>登入並儲存</button>
+  </div>
   <header class="bar">
     <a class="bar-back" href="../dashboard/" title="回到會員專區" aria-label="回到會員專區">←<span class="bb-t"> 會員專區</span></a>
     <button type="button" class="m-back" id="mBack" aria-label="回到設定清單">‹</button>
@@ -30,6 +36,7 @@
     </div>
     <button type="button" class="btn bar-more" id="btnMore" aria-haspopup="dialog" aria-label="更多"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="19" cy="12" r="2" fill="currentColor"/></svg></button>
     <button type="button" class="btn" id="btnFull" title="在新分頁用整個畫面看網站（還沒發佈也可以）">全螢幕預覽</button>
+    <button type="button" class="btn" id="btnSave" hidden>儲存</button>
     <button type="button" class="btn primary" id="btnPublish">發佈</button>
   </header>
   <div class="split">
@@ -62,6 +69,6 @@
 <script src="../assets/supabase-config.js"></script>
 <script src="../assets/vendor/supabase-2.117.2.min.js"></script>
 <script src="../assets/yc-auth.js?v=2026-10-28a"></script>
-<script type="module" src="dist/builder.min.js?v=7c27e1da14"></script>
+<script type="module" src="dist/builder.min.js?v=9568ea608f"></script>
 </body>
 </html>

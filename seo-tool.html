@@ -17,6 +17,31 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/dist/seo-tool.min.css?v=371815a6bf">
+<style id="quick-start">
+/* 快速開始與進階設定（2026-11） */
+.qs-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:var(--radius);padding:18px 18px 14px;margin:0 0 14px}
+.qs-title{font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin:0 0 6px}
+.qs-lede{font-size:13.5px;color:var(--text2);line-height:1.7;margin:0 0 12px}
+.qs-form{display:flex;gap:8px;flex-wrap:wrap}
+.qs-form input{flex:1 1 220px;min-width:0;min-height:46px;padding:10px 14px;font-size:16px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg3);color:var(--text)}
+.qs-form input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.qs-btn{min-height:46px;padding:0 22px;border:none;border-radius:var(--radius-sm);background:var(--accent);color:#14120f;font-weight:700;font-size:15px;cursor:pointer;font-family:inherit}
+.qs-btn:disabled{opacity:.6;cursor:wait}
+.qs-status{font-size:13px;color:var(--text2);margin-top:8px;min-height:0}
+.qs-status:empty{display:none}
+.qs-status.err{color:#f87171}
+.qs-note{font-size:12px;color:var(--text3);margin:10px 0 0}
+.adv-settings{border:1px solid var(--border);border-radius:var(--radius);background:var(--bg2);margin:0 0 16px}
+.adv-settings>summary{cursor:pointer;list-style:none;padding:14px 18px;min-height:48px;display:flex;flex-direction:column;gap:2px}
+.adv-settings>summary::-webkit-details-marker{display:none}
+.adv-settings>summary b{font-size:14px;color:var(--text)}
+.adv-settings>summary b::after{content:' ＋';color:var(--accent2)}
+.adv-settings[open]>summary b::after{content:' －'}
+.adv-settings>summary span{font-size:12px;color:var(--text3)}
+.adv-body{padding:4px 14px 14px}
+@media(max-width:600px){.qs-btn{flex:1 1 100%}.qs-card{padding:14px 14px 12px}.qs-title{font-size:18px;margin-bottom:4px}.qs-lede{font-size:13px;margin-bottom:10px}header .logo{display:none}}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.glow-orb{display:none!important}}
+</style>
 <style id="embed-mode">
 html.embedded, html.embedded body { overflow: hidden; }
 html.embedded body { min-height: 0; }
@@ -126,38 +151,29 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
     </div>
   </div>
 
-  <div class="hero fade-up fade-up-1">
-    <div class="hero-eyebrow">免費工具・瀏覽器本機分析・登入可存紀錄</div>
-    <h1>SEO 分析工具</h1>
-    <p>輸入網址或上傳 HTML，一次深度分析 <span class="js-rule-count">18 項</span> SEO 規則<br>
-       <span style="color:var(--accent2);opacity:0.8">PageSpeed · Schema · TF-IDF · 爬蟲 · SERP · 競爭分析</span></p>
-
-    <div class="hero-features">
-      <div class="hero-feat">
-        <div class="hf-icon">🔬</div>
-        <div class="hf-title"><span class="js-rule-count">18 項</span>深度檢測</div>
-        <div class="hf-desc">Title、Meta、H1、Schema、Canonical、Hreflang、圖片優化⋯一次全掃描，逐項顯示通過 / 警告 / 失敗。</div>
-      </div>
-      <div class="hero-feat">
-        <div class="hf-icon">⚡</div>
-        <div class="hf-title">本機分析・登入才保存</div>
-        <div class="hf-desc">分析運算在你的瀏覽器執行；未登入不會保存任何資料。登入會員後才保存檢測紀錄，並可隨時刪除帳號與全部資料。</div>
-      </div>
-      <div class="hero-feat">
-        <div class="hf-icon">📊</div>
-        <div class="hf-title">SERP 競爭 + TF-IDF</div>
-        <div class="hf-desc">上傳 Google 搜尋結果頁，自動解析前10名競爭者。TF-IDF 分析關鍵字密度與語意缺口。</div>
+  <div class="qs-card" id="qsCard">
+    <h1 class="qs-title">SEO 檢測</h1>
+    <p class="qs-lede">輸入網址，免費檢查網站在 Google 搜尋的基本體質（標題、描述、手機版、圖片說明等 <span class="js-rule-count">18 項</span>），逐項告訴你哪裡可以改。</p>
+    <form class="qs-form" id="qsForm" novalidate>
+      <input type="url" id="qsUrl" inputmode="url" autocomplete="url" spellcheck="false" placeholder="輸入網址，例如 yourshop.com.tw" aria-label="要檢測的網址">
+      <button type="submit" class="qs-btn" id="qsBtn">開始檢測</button>
+    </form>
+    <div class="qs-status" id="qsStatus" role="status" aria-live="polite"></div>
+    <p class="qs-note">檢測在你的瀏覽器裡進行，未登入時不會保存任何資料。</p>
+  </div>
+  <div id="historyPanel">
+    <div class="hist-head">
+      <h3>📋 分析紀錄 <span style="font-size:11px;font-weight:400;color:var(--text3);margin-left:6px">僅本次有效，關閉網頁就清除</span></h3>
+      <div style="display:flex;gap:12px;align-items:center">
+        <button class="clear-btn" onclick="clearHistory()">清除全部</button>
       </div>
     </div>
-
-    <div class="hero-badge-row">
-      <span class="hero-tag"><span>⚙</span>PageSpeed Insights 整合</span>
-      <span class="hero-tag"><span>📄</span>PDF / JSON 匯出</span>
-      <span class="hero-tag"><span>🏢</span>18 種產業 LSI 資料庫</span>
-      <span class="hero-tag"><span>🕐</span>歷史趨勢紀錄</span>
-    </div>
+    <div id="historyList"><div class="empty-hist">還沒有分析紀錄</div></div>
   </div>
 
+  <details class="adv-settings" id="advSettings">
+    <summary><b>進階設定</b><span>產業類型、關鍵字、競爭對手、Google 搜尋結果比較、上傳 HTML</span></summary>
+    <div class="adv-body">
   <!-- 產業快速選擇 -->
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:18px;box-shadow:var(--shadow-sm)">
     <div style="font-size:11px;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:0.07em;font-weight:500">
@@ -192,22 +208,12 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
     <span>分析引擎在你的瀏覽器本機執行，<strong>未登入時不會保存任何資料</strong>；登入會員後才會保存檢測紀錄。URL 模式由本站的抓取服務代為取得頁面原始碼。</span>
   </div>
 
-  <div id="historyPanel">
-    <div class="hist-head">
-      <h3>📋 分析紀錄 <span style="font-size:11px;font-weight:400;color:var(--text3);margin-left:6px">僅本次有效，關閉網頁就清除</span></h3>
-      <div style="display:flex;gap:12px;align-items:center">
-        <button class="clear-btn" onclick="clearHistory()">清除全部</button>
-      </div>
-    </div>
-    <div id="historyList"><div class="empty-hist">還沒有分析紀錄</div></div>
-  </div>
-
   <div class="input-card fade-up fade-up-2">
     <div class="input-tabs">
       <button class="tab-btn active" onclick="switchTab('file')">🌐 分析目標</button>
       <button class="tab-btn" onclick="switchTab('paste')">🔑 關鍵字</button>
       <button class="tab-btn" onclick="switchTab('kw')">⚔️ 競爭對手</button>
-      <button class="tab-btn" onclick="switchTab('serp')">🔎 SERP 競爭</button>
+      <button class="tab-btn" onclick="switchTab('serp')">🔎 搜尋結果比較</button>
     </div>
 
     <!-- Tab 1 -->
@@ -377,6 +383,9 @@ html.embedded #toast { position: absolute; bottom: auto; top: calc(var(--vt, 0px
     </button>
     <button class="cancel-btn" id="cancelBtn" onclick="cancelAnalysis()">✕ 取消</button>
   </div>
+    </div>
+  </details>
+
   <div class="error-box" id="errorBox"></div>
   <div id="progress">
     <div class="prog-label" id="progLabel">分析中...</div>
@@ -767,5 +776,29 @@ if(p){window.supabase=p;}else{document.write('<script src="assets/vendor/supabas
 <script src="assets/seo-tool-members.js?v=2026-10-16"></script>
 <script src="assets/cross-links.js?v=2026-10-15"></script>
 <script src="assets/tool-mobile.js?v=2026-10-28b" defer></script>
+<script>
+/* 快速開始：輸入網址 → 抓取 → 分析（與 ?url= 自動檢測同一流程） */
+(function(){
+  var f=document.getElementById('qsForm'); if(!f) return;
+  var inp=document.getElementById('qsUrl'), st=document.getElementById('qsStatus'), btn=document.getElementById('qsBtn');
+  try{ var q=new URLSearchParams(location.search).get('url'); if(q) inp.value=q; }catch(e){}
+  function say(t,err){ st.textContent=t||''; st.classList.toggle('err',!!err); }
+  f.addEventListener('submit', async function(e){
+    e.preventDefault();
+    var v=(inp.value||'').trim();
+    if(!v){ say('請輸入網址',true); inp.focus(); return; }
+    btn.disabled=true; say('正在讀取網頁，約需 5–15 秒…');
+    try{
+      if(typeof switchTab==='function') switchTab('file');
+      if(typeof switchSource==='function') switchSource('t1','url');
+      var t1=document.getElementById('t1Url'); t1.value=v;
+      await fetchUrl('t1');
+      if(tabState.t1.html){ say(''); runAnalysis(); }
+      else { var s=document.getElementById('t1UrlStatus'); say((s&&s.textContent)||'無法讀取這個網址，請確認網址是否正確。',true); }
+    }catch(err){ say('檢測失敗，請稍後再試。',true); }
+    btn.disabled=false;
+  });
+})();
+</script>
 </body>
 </html>
