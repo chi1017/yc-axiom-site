@@ -167,8 +167,9 @@
         }
         .nav-logo:hover .nav-logo-img { border-color: var(--accent); box-shadow: 0 0 20px var(--accent-glow); }
         .nav-logo img { width: 100%; height: 100%; object-fit: cover; }
-        .nav-logo-name { font-family: var(--f-ui); font-weight: 600; font-size: 17px; font-weight: 700; letter-spacing: 0.05em; color: var(--text-bright); }
-        .nav-logo-sub { font-family: var(--f-ui); font-weight: 600; font-weight: 600; font-size: 12px; color: rgba(var(--accent-rgb), 0.85); margin-top: 2px; letter-spacing: 0.05em; }
+        /* 品牌字：和名片一致（YC AXIOM 用 Cinzel 古典羅馬體、金色漸層、寬字距；品牌與工程用宋體） */
+        .nav-logo-name { font-family: 'Cinzel', var(--f-display); font-weight: 500; font-size: 18px; letter-spacing: 0.2em; line-height: 1.1; color: #D8C18A; background: linear-gradient(180deg, #F3E6BF 0%, #D8C18A 45%, #A88A55 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-logo-sub { font-family: 'Noto Serif TC', 'Songti TC', serif; font-weight: 600; font-size: 11.5px; color: rgba(var(--accent-rgb), 0.85); margin-top: 5px; letter-spacing: 0.42em; }
 
         .nav-links { display: flex; align-items: center; gap: 40px; list-style: none; }
         .nav-links :is(button, a) {
@@ -1943,3 +1944,4 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
 .sp-more[open] > summary::after { content: '－'; }
 .sp-more--spec > .sp-spec { margin-top: 8px; }
 .sp-specline { margin: -4px 0 0; color: var(--text); font-size: 15px; line-height: 1.8; }
+[data-theme="light"] .nav-logo-name { color: #8A7448; background: linear-gradient(180deg, #B59B6A 0%, #8A7448 60%, #6E5A34 100%); -webkit-background-clip: text; background-clip: text; }

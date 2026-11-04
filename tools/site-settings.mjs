@@ -7,8 +7,8 @@
 export const DEFAULTS = {
   prices: { single_month: 700, single_year: 7000, multi_month: 1000, multi_year: 10000, pro_month: 400, pro_year: 4000 },
   early: { enabled: true, single_month: 599, single_year: 5990, multi_month: 899, multi_year: 8990, deadline: '2027-02-03T23:59:00+08:00', quota: null },
-  bar: { enabled: true, follow_early: true, text: '小店月租網站早鳥價 {早鳥價}／月，至 {截止日}', text_mobile: '早鳥價 {早鳥價}／月', button: '看方案 →', link: '/rental/', start: null, end: null, dismiss_days: 7 },
-  card: { enabled: true, follow_early: true, title: '早鳥價 {早鳥價}／月', body: '小店專屬月租網站，自己填內容就能上線', b1_text: '看方案', b1_link: '/rental/', b2_text: 'LINE 詢問', b2_link: 'https://line.me/R/ti/p/%40788cblaq', scroll_pct: 40, delay_sec: 10, pages: ['/', '/rental/', '/services/', '/pricing/', '/articles/*'], dismiss_days: 7, start: null, end: null }
+  bar: { enabled: true, follow_early: true, text: '中小企業月租網站早鳥價 {早鳥價}／月，至 {截止日}', text_mobile: '早鳥價 {早鳥價}／月', button: '看方案 →', link: '/rental/', start: null, end: null, dismiss_days: 7 },
+  card: { enabled: true, follow_early: true, title: '早鳥價 {早鳥價}／月', body: '中小企業專屬月租網站，自己填內容就能上線', b1_text: '看方案', b1_link: '/rental/', b2_text: 'LINE 詢問', b2_link: 'https://line.me/R/ti/p/%40788cblaq', scroll_pct: 40, delay_sec: 10, pages: ['/', '/rental/', '/services/', '/pricing/', '/articles/*'], dismiss_days: 7, start: null, end: null }
 };
 
 // 卡片永遠不顯示的頁面（工具頁、編輯器、會員專區、後台）
