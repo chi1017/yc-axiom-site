@@ -64,7 +64,7 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap">
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="./assets/dist/site.min.css?v=b4d76b3ad3">
+<link rel="stylesheet" href="./assets/dist/site.min.css?v=884c0a61e7">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -322,9 +322,17 @@
             <h1 class="rh-h1 reveal">專注為商業品牌打造<br><em>高質感數位門面。</em></h1>
             <p class="rh-sub reveal">YC AXIOM 專注品牌網頁設計與商業網站設計，結合極簡視覺美學與高效能前端工程，讓您的事業精準吸引對的客群。</p>
             <div class="rh-btns reveal">
-                <a href="./services/" class="btn-primary">看服務項目</a>
-                <a href="./contact/" class="btn-secondary">聯絡我們</a>
+                <a href="./rental/" class="btn-primary">小店月租網站 NT$599 起</a>
+                <a href="./services/" class="btn-secondary">客製品牌網站</a>
             </div>
+            <form class="rh-check reveal" action="./geo/" method="get" role="search" aria-label="免費網站檢測">
+                <label for="rhCheckUrl">貼上你的網址，免費檢測</label>
+                <div class="rh-check-row">
+                    <input type="text" name="url" id="rhCheckUrl" inputmode="url" autocomplete="url" spellcheck="false" placeholder="例如 yourshop.com.tw" required>
+                    <button type="submit">免費檢測</button>
+                </div>
+                <p>看看 Google 與 ChatGPT 等 AI 讀不讀得懂你的網站，不用註冊。</p>
+            </form>
             <ul class="rh-promises reveal">
                 <li>客製網站：原始碼完整交給你 · 不綁約</li>
                 <li>客製網站一次買斷 · 也可選每月租用</li>
@@ -531,12 +539,15 @@
         </div>
     </div>
 </footer>
-<script src="./assets/dist/site.min.js?v=9cf9489c36" defer></script>
+<script src="./assets/dist/site.min.js?v=5a527d1d6d" defer></script>
 <script>
 /* old single-page links (#about, #works ...) -> the new real pages */
 (function () {
     var m = {"home": "", "about": "about/", "services": "services/", "works": "works/", "case-imassage": "works/imassage/", "articles": "articles/", "article-imassage": "articles/imassage-weebly-to-wordpress/", "article-xiaofang": "articles/xiaofang-brand-website/", "seo": "seo/", "pricing": "pricing/", "contact": "contact/", "svc-brand-website": "services/brand-website/", "svc-ecommerce": "services/ecommerce-website/", "svc-seo-performance": "services/seo-performance/", "svc-custom-system": "services/custom-system/", "svc-data-cleaning": "services/data-cleaning/", "svc-market-intelligence": "services/market-intelligence/", "case-xiaofang": "works/xiaofang/", "taichung": "taichung-web-design/", "privacy": "privacy/", "geo": "geo/"}, h = (location.hash || '').replace('#', '');
     if (h && m[h] !== undefined && h !== 'home') location.replace('./' + m[h]);
 })();
-</script></body>
+</script><script>
+(function(){var f=document.querySelector('.rh-check');if(!f)return;f.addEventListener('submit',function(e){var i=f.querySelector('input'),v=(i.value||'').trim();if(!v){e.preventDefault();i.focus();return;}if(!/^https?:\/\//i.test(v))i.value='https://'+v;});})();
+</script>
+</body>
 </html>

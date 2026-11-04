@@ -171,12 +171,13 @@
         });
     }
 
-    /* ── Scroll Progress Bar ── */
-    window.addEventListener('scroll', () => {
+    /* ── Scroll Progress Bar（減少動態效果時不啟用）── */
+    const REDUCE_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    if (!REDUCE_MOTION) window.addEventListener('scroll', () => {
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
         const scrolled = (winScroll / height) * 100;
-        document.getElementById('scroll-progress').style.width = scrolled + '%';
+        const bar = document.getElementById('scroll-progress'); if (bar) bar.style.width = scrolled + '%';
     });
 
     /* ── IntersectionObserver Scroll Reveal & Text Decode Trigger ── */
@@ -204,7 +205,9 @@
     const cursorDot = document.getElementById('cursor-dot');
     const cursorFollower = document.getElementById('cursor-follower');
 
-    if (window.innerWidth > 1024) {
+    /* 只在滑鼠＋可懸停的裝置啟用；觸控裝置與「減少動態效果」完全停用 */
+    const FINE_POINTER = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+    if (cursorDot && cursorFollower && FINE_POINTER && !REDUCE_MOTION && window.innerWidth > 1024) {
         window.addEventListener('mousemove', (e) => {
             const posX = e.clientX;
             const posY = e.clientY;
@@ -287,6 +290,28 @@
     }
 
     /* ── Page Navigation ── */
+    /* ── 內嵌工具：載入完成就隱藏「工具載入中…」；10 秒仍未完成，顯示重新載入與直接開啟的連結 ── */
+    (function () {
+        Array.prototype.forEach.call(document.querySelectorAll('.seo-tool-iframe-inner'), function (box) {
+            var fr = box.querySelector('iframe'), ld = box.querySelector('.seo-tool-loading');
+            if (!fr || !ld) return;
+            function done() { box.classList.add('loaded'); ld.hidden = true; }
+            if (box.classList.contains('loaded')) { done(); return; }
+            fr.addEventListener('load', done);
+            setTimeout(function () {
+                if (box.classList.contains('loaded')) return;
+                var src = fr.getAttribute('src') || '';
+                ld.innerHTML = '<div class="seo-tool-slow"><p>工具載入的時間比平常久，可能是網路比較慢。</p>' +
+                    '<div class="seo-tool-slow-actions"><button type="button" class="btn-primary">重新載入</button>' +
+                    '<a class="btn-secondary" href="' + src.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">直接開啟工具 ↗</a></div></div>';
+                ld.querySelector('button').addEventListener('click', function () {
+                    ld.innerHTML = '<span class="seo-tool-spinner"></span>工具載入中…';
+                    fr.src = src;
+                });
+            }, 10000);
+        });
+    })();
+
     /* ── SEO tool: auto-size the embedded tool so it scrolls with the page (no inner scrollbar) ── */
     (function () {
         var fr = document.getElementById('seoToolFrame');

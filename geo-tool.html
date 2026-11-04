@@ -123,6 +123,22 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
 }
 .learn-link{display:inline-block;margin-top:6px;font-size:12.5px;color:var(--accent2,#D8C18A);text-decoration:none;border-bottom:1px solid currentColor}
 .learn-link:hover{opacity:.75}
+
+/* 快速開始與進階設定（2026-11） */
+.qs-title{font-size:16px;font-weight:700;color:var(--text);margin:0 0 4px}
+.qs-lede{font-size:13px;color:var(--text2);line-height:1.7;margin:0 0 12px}
+.qs-note{font-size:12px;color:var(--text3);margin:10px 0 0;line-height:1.7}
+#paneUrl .btn-run{min-height:46px}
+#urlIn{font-size:16px}
+.adv-settings{border:1px solid var(--border);border-radius:10px;margin-top:14px}
+.adv-settings>summary{cursor:pointer;list-style:none;padding:12px 14px;min-height:48px;display:flex;flex-direction:column;gap:2px}
+.adv-settings>summary::-webkit-details-marker{display:none}
+.adv-settings>summary b{font-size:14px;color:var(--text)}
+.adv-settings>summary b::after{content:' ＋';color:var(--accent2)}
+.adv-settings[open]>summary b::after{content:' －'}
+.adv-settings>summary span{font-size:12px;color:var(--text3)}
+.adv-settings .pane{padding:0 14px 14px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.glow-orb{display:none!important}}
 </style>
 <script>
 (function () {
@@ -165,23 +181,26 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
   </div>
 
   <div class="input-card">
-    <div class="tabs" role="tablist">
-      <button class="tab-btn active" id="tabUrl" role="tab" onclick="switchSource('url')">輸入網址檢測</button>
-      <button class="tab-btn" id="tabHtml" role="tab" onclick="switchSource('html')">貼上或上傳 HTML</button>
-    </div>
+
     <div class="pane active" id="paneUrl">
+      <h2 class="qs-title">輸入網址，開始檢測</h2>
+      <p class="qs-lede">檢查 ChatGPT、Google AI 摘要等 AI 讀不讀得懂你的網站，得到 0–100 分與白話的改善建議。</p>
       <div class="url-wrap"><span>🌐</span><input type="text" id="urlIn" placeholder="例如 https://你的網站.com" autocomplete="off" inputmode="url" aria-label="要檢測的網址"></div>
-      <div class="note"><span>ℹ️</span><span>檢測在你的瀏覽器中進行。網頁與 robots.txt 由本站的抓取服務代為取得；若網站有防爬蟲機制抓不到，可改用「貼上或上傳 HTML」。</span></div>
-      <button class="btn-run" id="runBtn" onclick="runUrl()">開始檢測 AI 可見度</button>
+      
+      <button class="btn-run" id="runBtn" onclick="runUrl()">開始檢測</button>
+      <p class="qs-note">檢測在你的瀏覽器裡進行，大約 10–30 秒。少數網站會擋住自動讀取，這時可以展開下方「進階設定」，貼上網頁原始碼再檢測。</p>
     </div>
-    <div class="pane" id="paneHtml">
+    <div class="status" id="status" role="status" aria-live="polite"></div>
+    <details class="adv-settings" id="advSettings">
+      <summary><b>進階設定</b><span>網站擋住自動讀取時，改用貼上或上傳 HTML 檢測</span></summary>
+    <div class="pane active" id="paneHtml">
       <div class="field-row"><input type="url" id="htmlBase" placeholder="（選填）這個頁面的網址，用於判斷路徑，例如 https://你的網站.com/"></div>
       <textarea id="htmlIn" placeholder="貼上網頁的 HTML 原始碼…" aria-label="HTML 原始碼"></textarea>
       <div class="field-row"><button class="btn-sub" onclick="document.getElementById('fileIn').click()">或選擇 .html 檔案</button><input type="file" id="fileIn" accept=".html,.htm,text/html" style="display:none"></div>
       <div class="note"><span>ℹ️</span><span>用 HTML 原始碼檢測時，無法讀取網站的 robots.txt 與 llms.txt，這兩項不計分。</span></div>
       <button class="btn-run" onclick="runHtml()">開始檢測</button>
     </div>
-    <div class="status" id="status" role="status" aria-live="polite"></div>
+    </details>
   </div>
   <p class="disclaimer top" id="disclaimerTop"></p>
 
@@ -270,8 +289,7 @@ function detectJsSite(html) {
 
 function switchSource(m) {
   tabState.t1.mode = m === 'html' ? 'html' : 'url';
-  $('tabUrl').classList.toggle('active', m !== 'html'); $('tabHtml').classList.toggle('active', m === 'html');
-  $('paneUrl').classList.toggle('active', m !== 'html'); $('paneHtml').classList.toggle('active', m === 'html');
+  var d = $('advSettings'); if (d) d.open = (m === 'html');
 }
 
 // ── 抓取：優先走本站自己的抓取服務（Supabase Edge Function fetch-page），連不上才退回公開 CORS Proxy ──

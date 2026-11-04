@@ -53,6 +53,52 @@ const S = {
   events: [], dirty: false, saving: false, saveErr: false, lastSaved: null, fresh: new Set(), timers: {}, publishing: false, hist: [], hpos: 0, applying: false
 };
 
+// ── 試用模式：沒登入也能用範例內容試編輯，內容暫存在這個瀏覽器（localStorage）；按儲存／發佈才要求登入 ──
+const TRIAL_KEY = 'yc-builder-trial';
+function readTrial() { try { const v = JSON.parse(localStorage.getItem(TRIAL_KEY) || 'null'); return v && v.content ? v : null; } catch (e) { return null; } }
+function writeTrial(extra) {
+  const cur = readTrial() || {};
+  const v = Object.assign(cur, { template: S.site.template, palette: S.palette, sections: S.sections, layout: 'single', content: S.content, slug: S.slug, savedAt: Date.now() }, extra || {});
+  try { localStorage.setItem(TRIAL_KEY, JSON.stringify(v)); return true; } catch (e) { return false; }
+}
+function clearTrial() { try { localStorage.removeItem(TRIAL_KEY); } catch (e) { /* ignore */ } }
+// 範例內容：與「版型展示」同一份虛構店家資料（templates/gallery/samples.mjs）；讀不到時用空白內容
+async function sampleContent(key) {
+  const L = S.lib, c = L.emptyContent();
+  try {
+    const M = await import(tplBase() + 'templates/gallery/samples.mjs');
+    const sm = M.SAMPLES.find((x) => x.k === key) || M.SAMPLES.find((x) => x.k === 'cafe');
+    Object.assign(c, { name: sm.name, tagline: sm.tag, intro: sm.intro, address: sm.area + (sm.area.endsWith('全區') ? '' : '示範路 100 號'), phone: '04-0000-0000',
+      menu: sm.items.map(([name, price]) => ({ name, price: price || null })), faq: sm.faq.map(([q, a]) => ({ q, a })) });
+    if (M.HOURS && M.HOURS[sm.h]) c.hours = M.HOURS[sm.h];
+    return { content: L.normalizeContent(c), palette: sm.pal || 'forest' };
+  } catch (e) { c.name = '我的店'; return { content: L.normalizeContent(c), palette: 'forest' }; }
+}
+async function startTrial() {
+  booted = 'trial';
+  gate([h('p', { text: '載入編輯器…' })]);
+  try {
+    await loadLib();
+    const L = S.lib, saved = readTrial();
+    const q = new URLSearchParams(location.search);
+    const key = (saved && saved.template) || (L.getIndustry(q.get('industry') || '') ? q.get('industry') : 'cafe');
+    const smp = saved ? { content: saved.content, palette: saved.palette } : await sampleContent(key);
+    S.trial = true; document.body.classList.add('is-trial');
+    mount({ id: 'trial', member_id: 'trial', slug: (saved && saved.slug) || 'my-shop', status: 'draft', template: key, palette: smp.palette,
+      sections: saved ? saved.sections : L.defaultSections(), content: smp.content, layout: 'single' });
+    if (!saved) { S.dirty = true; save(); }
+  } catch (e) {
+    console.error(e);
+    gate([h('h1', { text: '載入失敗' }), h('p', { text: String((e && e.message) || e) }), h('button', { class: 'btn', onclick: () => location.reload() }, '重新整理')]);
+  }
+}
+// 試用中按「儲存／發佈／上傳」：先把內容暫存，再請對方登入；登入回來後會帶著內容建立網站
+function askLoginToKeep(what) {
+  save(); writeTrial({ pending: true });
+  if (!YC.enabled) { toast('會員功能即將開放，你編輯的內容已暫存在這個瀏覽器。', 5000); return; }
+  YC.openLogin({ title: '登入後' + what, reason: '登入後會把你剛剛編輯的內容帶進帳號，建立你自己的網站。免費，不用設定密碼。' });
+}
+
 // 版型模組可能還是瀏覽器快取的舊版（GitHub Pages 約 10 分鐘更新），缺新函式時用本機版本，編輯器不會因此打不開
 function colorWarningsLocal(pal) {
   const cr = pal.contrast || ((a, b) => { const x = pal.luminance(a), y = pal.luminance(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); });
@@ -113,11 +159,7 @@ const photoUrl = (path) => YC_CONFIG.supabaseUrl.replace(/\/$/, '') + '/storage/
 let booted = false;
 async function boot() {
   if (booted) return;
-  if (!YC.enabled) return gate([h('h1', { text: '網站編輯器即將開放' }), h('p', { text: '會員功能正在準備中，請稍後再來。' })]);
-  if (!YC.loggedIn()) {
-    return gate([h('h1', { text: '請先登入' }), h('p', { text: '登入後就能建立並編輯你的網站。免費，不用設定密碼。' }),
-      h('button', { class: 'btn primary', onclick: () => YC.openLogin({ title: '登入網站編輯器', reason: '登入後可建立並編輯你的網站。' }) }, '登入 / 註冊')]);
-  }
+  if (!YC.enabled || !YC.loggedIn()) return startTrial();
   if (!YC.consented()) {
     gate([h('h1', { text: '還差最後一步' }), h('p', { text: '請先完成註冊（同意條款），才能使用編輯器。' }), h('button', { class: 'btn primary', onclick: () => YC.ensureConsent() }, '完成註冊')]);
     return;
@@ -127,6 +169,7 @@ async function boot() {
     gate([h('p', { text: '載入編輯器…' })]);
     await loadLib();
     const uid = YC.session.user.id;
+    const pendingTrial = readTrial();
     // 一個會員可以有多個網站：網址 ?site=<id> 指定要編輯哪一個，沒指定就開上次編輯的（或第一個）
     // 先接受寄到自己 Email 的協作邀請，再把「自己的網站」和「協作中的網站」一起列出
     try { await YC.client.functions.invoke('member-site', { body: { action: 'accept_invites' } }); } catch (e) { /* ignore */ }
@@ -140,6 +183,7 @@ async function boot() {
     S.mySites = r.data.filter((x) => !(x.status === 'cancelled' && !x.first_published_at));
     r.data = S.mySites;
     const q = new URLSearchParams(location.search);
+    if (pendingTrial && pendingTrial.pending) return showCreate(pendingTrial);
     if (!r.data.length || q.get('new') === '1') return showCreate();
     let last = ''; try { last = localStorage.getItem('yc-builder-site') || ''; } catch (e) { /* ignore */ }
     const pick = r.data.find((x) => x.id === q.get('site')) || r.data.find((x) => x.id === last) || r.data[0];
@@ -152,7 +196,7 @@ async function boot() {
 }
 
 // ── 第一次：建立網站 ──
-function showCreate() {
+function showCreate(trial) {
   const L = S.lib;
   const slug = h('input', { type: 'text', id: 'cSlug', maxlength: '30', autocomplete: 'off', spellcheck: 'false', placeholder: 'my-shop' });
   const name = h('input', { type: 'text', id: 'cName', maxlength: '40', placeholder: '你的店名或品牌名稱' });
@@ -193,8 +237,8 @@ function showCreate() {
   slug.addEventListener('input', check);
   btn.addEventListener('click', async () => {
     if (!ok || !ind.value) return; btn.disabled = true; btn.textContent = '建立中…';
-    const c = L.emptyContent(); c.name = name.value.trim();
-    const row = { member_id: YC.session.user.id, slug: slug.value, template: ind.value, palette: 'forest', sections: L.defaultSections(), content: c };
+    const c = trial ? L.normalizeContent(trial.content) : L.emptyContent(); c.name = name.value.trim() || c.name;
+    const row = { member_id: YC.session.user.id, slug: slug.value, template: ind.value, palette: trial ? L.normalizePalette(trial.palette) : 'forest', sections: trial ? L.normalizeSections(trial.sections) : L.defaultSections(), content: c };
     if (layout === 'multi') { row.layout = 'multi'; row.pages = L.defaultPages(); }
     const r = await YC.client.from('rental_sites').insert(row).select('*').single();
     if (r.error) {
@@ -203,12 +247,21 @@ function showCreate() {
       msg.textContent = '建立失敗：' + (/duplicate|unique/i.test(m) ? '這個名稱剛被使用了，請換一個' : /row-level security|policy/i.test(m) ? '你的網站數量已達上限（每位會員最多 5 個），需要更多請聯絡我們' : m);
       btn.textContent = '建立我的網站'; btn.disabled = false; return;
     }
+    if (trial) clearTrial();
     S.mySites = (S.mySites || []).concat(r.data);
     try { history.replaceState(null, '', location.pathname + '?site=' + r.data.id); } catch (e) { /* ignore */ }
     mount(r.data);
   });
   const back = (S.mySites || []).length ? h('p', { style: 'margin:0 0 8px' }, h('a', { href: location.pathname, text: '← 回到我的網站' })) : null;
-  gate([back, h('h1', { text: (S.mySites || []).length ? '建立另一個網站' : '建立你的網站' }), h('p', { text: '先決定行業、網址代稱與店名，之後都可以在編輯器裡修改內容（網址代稱在第一次發佈後就不能再改）。' }),
+  if (trial) {
+    if (trial.template && L.getIndustry(trial.template)) { ind.value = trial.template; }
+    if (trial.content && trial.content.name) name.value = trial.content.name;
+    if (trial.slug && trial.slug !== 'my-shop') { slug.value = trial.slug; setTimeout(check, 0); }
+    sync();
+  }
+  const trialNote = trial ? h('div', { class: 'msg ok', style: 'margin:0 0 12px' }, '已帶入你試用時編輯的內容。範例中的地址與電話是虛構的，建立後記得改成你的資料。 ',
+    h('a', { href: '#', onclick: (e) => { e.preventDefault(); clearTrial(); location.href = location.pathname; } }, '不要帶入')) : null;
+  gate([back, h('h1', { text: trial ? '建立你的網站' : (S.mySites || []).length ? '建立另一個網站' : '建立你的網站' }), trialNote, h('p', { text: '先決定行業、網址代稱與店名，之後都可以在編輯器裡修改內容（網址代稱在第一次發佈後就不能再改）。' }),
     h('label', { class: 'field', for: 'cInd' }, h('span', { text: '行業' }), ind), indMsg,
     layoutBox,
     h('label', { class: 'field', for: 'cSlug', style: 'margin-top:14px' }, h('span', { text: '網址代稱' }), slug), msg, url,
@@ -219,6 +272,7 @@ function showCreate() {
 // 上方的網站切換（有多個網站時）與「建立新網站」
 function paintSiteSwitch(into) {
   const box = into || $('#siteSwitch'); if (!box) return;
+  if (S.trial) { box.replaceChildren(); return; }
   const list = S.mySites || [];
   const sel = h('select', { class: 'sel', 'aria-label': '切換網站' },
     list.map((x) => h('option', { value: x.id, text: ((x.content && x.content.name) || x.slug) + '（' + x.slug + '）' + (x.member_id !== YC.session.user.id ? '・協作' : '') })),
@@ -262,10 +316,11 @@ function askDeleteSite() {
 function mount(site) {
   const L = S.lib;
   S.site = site; S.slug = site.slug;
-  S.isOwner = site.member_id === YC.session.user.id;   // 協作者不能改網址代稱、行業、版型，也不能刪除網站
+  S.isOwner = S.trial || site.member_id === YC.session.user.id;   // 協作者不能改網址代稱、行業、版型，也不能刪除網站
   S.isPro = site.tier === 'pro';
-  try { localStorage.setItem('yc-builder-site', site.id); } catch (e) { /* ignore */ }
+  if (!S.trial) { try { localStorage.setItem('yc-builder-site', site.id); } catch (e) { /* ignore */ } }
   paintSiteSwitch();
+  paintTrialBar();
   S.content = L.normalizeContent(site.content);
   S.palette = L.normalizePalette(site.palette);
   S.sections = L.normalizeSections(site.sections);
@@ -390,6 +445,7 @@ function previewFont() {
   return { previewFontUrl: '', previewFontFormat: '' };
 }
 async function loadFontBlob() {
+  if (S.trial) return;
   const cf = S.content.style.customFont;
   if (!cf || S.fontLoading === cf.path || (S.fontBlob && S.fontBlob.path === cf.path)) return;
   S.fontLoading = cf.path;
@@ -402,6 +458,7 @@ async function loadFontBlob() {
 }
 const FONT_EXT = ['woff2', 'woff', 'ttf', 'otf'];
 async function uploadFont(file, msg, btn) {
+  if (S.trial) return askLoginToKeep('上傳字型');
   const ext = (file.name.split('.').pop() || '').toLowerCase();
   if (!FONT_EXT.includes(ext)) { msg.className = 'msg bad'; msg.textContent = '只能上傳 TTF、OTF、WOFF 或 WOFF2 字型檔'; return; }
   if (file.size > 20 * 1024 * 1024) { msg.className = 'msg bad'; msg.textContent = '字型檔超過 20MB，請改用較小的檔案（例如只含常用字的版本）'; return; }
@@ -515,13 +572,14 @@ function paintUndo() { const u = $('#btnUndo'), r = $('#btnRedo'); if (u) u.disa
 
 function touch() {
   if (!S.applying) { clearTimeout(S.timers.hist); S.timers.hist = setTimeout(recordHist, 700); }
-  S.dirty = true; S.saveErr = false; setSaveText();
+  S.dirty = true; S.saveErr = false; setSaveText(); if (S.trial) S.trialEdited = true;
   $('#barName').textContent = S.content.name || '我的網站';
   renderPreview(); clearTimeout(S.timers.todo); S.timers.todo = setTimeout(refreshTodo, 400);
   clearTimeout(S.timers.save); S.timers.save = setTimeout(save, SAVE_DELAY);
 }
 function setSaveText() {
   const e = $('#saveState'); e.classList.toggle('err', S.saveErr);
+  if (S.trial) { e.textContent = S.dirty ? '試用中・尚未暫存' : '試用中・已暫存在這個瀏覽器'; return; }
   if (S.saveErr) e.textContent = '儲存失敗，稍後自動重試';
   else if (S.saving) e.textContent = '儲存中…';
   else if (S.dirty) e.textContent = '尚未儲存（2 秒後自動儲存）';
@@ -531,6 +589,7 @@ async function save() {
   clearTimeout(S.timers.save);
   if (S.saving) { S.timers.save = setTimeout(save, 500); return true; }
   if (!S.dirty) return true;
+  if (S.trial) { writeTrial(); S.dirty = false; S.lastSaved = new Date(); setSaveText(); return true; }
   S.saving = true; setSaveText();
   const snapshot = clone({ content: S.content, palette: S.palette, sections: S.sections, pages: S.pages });
   const payload = { content: snapshot.content, palette: snapshot.palette, sections: snapshot.sections };
@@ -552,7 +611,7 @@ async function save() {
   if (S.dirty) S.timers.save = setTimeout(save, 300);
   return true;
 }
-window.addEventListener('beforeunload', (e) => { if (S.dirty || S.saving) { e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('beforeunload', (e) => { if (S.trial) { if (S.dirty) save(); return; } if (S.dirty || S.saving) { e.preventDefault(); e.returnValue = ''; } });
 
 // ── 狀態 ──
 function deriveStatus() {
@@ -570,6 +629,7 @@ function deriveStatus() {
   return { text: st === 'overdue' ? '上線中（待續約）' : '上線中', cls: 'live' };
 }
 async function refreshStatus() {
+  if (S.trial) { const b = $('#barStatus'); b.textContent = '試用'; b.className = 'badge pending'; paintSlug(); paintLinks(); return { text: '試用', cls: 'pending' }; }
   const [s, e] = await Promise.all([
     YC.client.from('rental_sites').select('status,public_url,paid_until,live_version_id,first_published_at,last_published_at,cf_project_name,terms_accepted_at,terms_version,upgrade_pending,upgrade_amount').eq('id', S.site.id).single(),
     YC.client.from('site_events').select('type,detail,created_at').eq('site_id', S.site.id).order('created_at', { ascending: false }).limit(20)
@@ -625,6 +685,7 @@ function buildPanel() {
     const err = L.slugError(v);
     if (err) { S.slugState = { ok: false, msg: err }; paintSlug(); touch(); return; }
     if (v === S.site.slug) { S.slugState = { ok: true, msg: '' }; paintSlug(); touch(); return; }
+    if (S.trial) { S.slugState = { ok: true, msg: '登入建立網站時，會再確認這個名稱能不能用' }; paintSlug(); touch(); return; }
     S.slugState = { ok: false, msg: '檢查中…', pending: true }; paintSlug();
     st = setTimeout(async () => {
       const r = await YC.client.rpc('rental_slug_available', { p_slug: v });
@@ -1000,6 +1061,12 @@ function industryField() {
     const moved = isMulti() ? L.pagesFor(to.key).filter((p) => { const o = L.pagesFor(from.key).find((x) => x.key === p.key); return o && o.path !== p.path && S.pages[p.key]; }) : [];
     const goBtn = h('button', { class: 'btn primary' }, '確定更改');
     goBtn.addEventListener('click', async () => {
+      if (S.trial) {
+        S.site.template = to.key;
+        if (!S.trialEdited) { const smp = await sampleContent(to.key); S.content = smp.content; S.palette = smp.palette; }
+        closeModal(); buildPanel(); renderPreview(true); S.dirty = true; save();
+        toast('已改為「' + to.label + '」', 3000); return;
+      }
       goBtn.disabled = true; goBtn.textContent = '更改中…';
       if (!(await save())) { goBtn.disabled = false; goBtn.textContent = '確定更改'; toast('目前的內容還沒儲存成功，請稍後再試', 5000); return; }
       const r = await YC.client.from('rental_sites').update({ template: to.key }).eq('id', S.site.id).select('template').single();
@@ -1053,6 +1120,7 @@ function paintLayout() {
 }
 // 升級成多頁版：已付費、還有剩餘天數的網站要補差額；確認收到差額後才發佈多頁版（在那之前正式網站維持一頁版）
 async function askUpgrade() {
+  if (S.trial) return askLoginToKeep('升級成多頁版');
   const L = S.lib;
   const pages = L.pagesFromSections(S.sections);
   const names = L.pagesFor(S.site.template).filter((p) => pages[p.key]).map((p) => p.label).join('、');
@@ -1285,6 +1353,7 @@ async function paintCodeStatus() {
   if (!L.codeHash || !L.hasCustomCode) { el.textContent = ''; return; }
   const c = L.normalizeContent(S.content);
   if (!L.hasCustomCode(c)) { el.className = 'msg mute'; el.textContent = '目前沒有自訂程式碼。'; return; }
+  if (S.trial) { el.className = 'msg mute'; el.textContent = '登入並發佈後，自訂程式碼會送給我們審核。'; return; }
   const hash = await L.codeHash(c);
   const r = await YC.client.from('site_code_reviews').select('status,note').eq('site_id', S.site.id).eq('hash', hash).maybeSingle();
   const rv = r.data;
@@ -1299,6 +1368,7 @@ function paintSeoHints(r) {
 }
 // 版本紀錄：列出最近發佈的版本，可以還原成草稿
 async function openHistory() {
+  if (S.trial) return askLoginToKeep('查看版本紀錄');
   const r = await YC.client.from('site_versions').select('id,created_at,content,palette,sections,pages').eq('site_id', S.site.id).order('created_at', { ascending: false }).limit(20);
   if (r.error) { toast('讀取版本失敗，請稍後再試'); return; }
   const live = S.site.live_version_id;
@@ -1420,6 +1490,7 @@ async function compress(file) {
   return { blob, ext, w, h: hh };
 }
 async function uploadPhoto(sl, file, nm, btn) {
+  if (S.trial) return askLoginToKeep('上傳照片');
   btn.disabled = true; nm.className = 'nm'; nm.textContent = '處理中…';
   try {
     const { blob, ext, w, h: hh } = await compress(file);
@@ -1461,6 +1532,7 @@ function refreshTodo() {
 
 // ── 發佈 ──
 async function publish() {
+  if (S.trial) return askLoginToKeep('發佈');
   if (S.publishing) return;
   const v = validate();
   if (!v.ok) {
@@ -1614,6 +1686,18 @@ function setTab(t) {
 }
 // 手機版的「更多」：全螢幕預覽、切換網站、刪除、教學、回會員專區
 function openMoreSheet() {
+  if (S.trial) {
+    const m = modal('試用模式', [h('p', { text: '目前是試用模式，內容只暫存在這個瀏覽器。登入後才能儲存到帳號、上傳照片與發佈。' }),
+      h('div', { class: 'more-list' },
+        h('button', { type: 'button', class: 'btn primary', onclick: () => { closeModal(); askLoginToKeep('儲存'); } }, '登入並儲存'),
+        h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openFullPreview(); } }, '全螢幕預覽'),
+        h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openGuide(); } }, '使用教學'),
+        h('a', { class: 'btn', href: '../rental/' }, '網站租用說明'),
+        h('a', { class: 'btn', href: '../' }, '回官網首頁'),
+        h('button', { type: 'button', class: 'btn', onclick: async () => { closeModal(); clearTrial(); location.reload(); } }, '清除試用內容，重新開始'))],
+      [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '關閉')]);
+    m.classList.add('sheet'); return;
+  }
   const d = deriveStatus();
   const sw = h('div', { class: 'more-switch' }); paintSiteSwitch(sw);
   const m = modal(((S.content && S.content.name) || S.site.slug), [
@@ -1631,6 +1715,19 @@ function openMoreSheet() {
   m.classList.add('sheet');
 }
 
+function paintTrialBar() {
+  const tb = $('#trialBar'); if (!tb) return;
+  tb.hidden = false;
+  const msg = $('#tbMsg'), btn = $('#trialLogin'), sv = $('#btnSave'), back = $('.bar-back');
+  if (S.trial) {
+    msg.textContent = '目前是試用模式，登入後才能儲存與發布';
+    btn.hidden = false; btn.onclick = () => askLoginToKeep('儲存');
+    if (sv) { sv.hidden = false; sv.onclick = () => askLoginToKeep('儲存'); }
+    if (back) { back.href = '../rental/'; back.title = '回到網站租用'; back.setAttribute('aria-label', '回到網站租用'); back.innerHTML = '←<span class="bb-t"> 網站租用</span>'; }
+  } else {
+    msg.textContent = ''; btn.hidden = true; if (sv) sv.hidden = true;
+  }
+}
 function bindChrome() {
   if (bindChrome.done) return; bindChrome.done = true;
   $('#btnPublish').addEventListener('click', publish);
@@ -1668,5 +1765,9 @@ function bindChrome() {
   $('#btnUndo').addEventListener('click', undo); $('#btnRedo').addEventListener('click', redo);
 }
 
-YC.onChange((ev) => { if (ev === 'SIGNED_OUT') location.reload(); if (!booted) boot(); });
+YC.onChange((ev) => {
+  if (ev === 'SIGNED_OUT') location.reload();
+  if (S.trial && YC.loggedIn()) { save(); location.reload(); return; }
+  if (!booted) boot();
+});
 YC.init();
