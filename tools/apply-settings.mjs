@@ -80,7 +80,7 @@ if (existsSync(rp)) {
   writeFileSync(rp, s.replace(re, (m, a, b) => a + 'const S = ' + JSON.stringify(planSettings(data, eff)) + ';' + b));
 }
 
-writeFileSync(join(OUT, 'assets/site-promo.json'), JSON.stringify({ version: S.version, built_at: now.toISOString(), early: eff.early, bar: pr.bar, card: pr.card }));
+writeFileSync(join(OUT, 'assets/site-promo.json'), JSON.stringify({ version: S.version, built_at: now.toISOString(), early: eff.early, bar: pr.bar.show ? pr.bar : { show: false }, card: pr.card.show ? pr.card : { show: false } }));
 writeFileSync(join(OUT, 'settings-state.json'), JSON.stringify({ version: S.version, built_at: now.toISOString(), state: stateOf(data, now, S.used), used: S.used }));
 
 // 最後檢查：不能留下沒換掉的標記
