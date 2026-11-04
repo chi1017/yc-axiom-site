@@ -83,7 +83,8 @@
     members.style.display = t === 'members' ? '' : 'none';
     root.hidden = t !== 'rental';
     Array.prototype.forEach.call(tabs.querySelectorAll('[data-tab]'), function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-tab') === t)); });
-    try { history.replaceState(null, '', t === 'rental' ? '#rental' : location.pathname + location.search); } catch (e) { /* ignore */ }
+    try { history.replaceState(null, '', t === 'members' ? location.pathname + location.search : '#' + t); } catch (e) { /* ignore */ }
+    try { document.dispatchEvent(new CustomEvent('yc-admin-tab', { detail: t })); } catch (e) { /* ignore */ }
     if (t === 'rental') render();
   }
   Array.prototype.forEach.call(tabs.querySelectorAll('[data-tab]'), function (b) { b.addEventListener('click', function () { setTab(b.getAttribute('data-tab')); }); });
@@ -94,12 +95,12 @@
     if (r.error) throw r.error;
     state.rows = r.data || [];
     // 版型（一頁／多頁）不在總覽 view 裡，另外讀 rental_sites 合併（管理員可讀全部）
-    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at,tier,upgrade_pending,upgrade_amount,pro_pending,pro_amount,next_layout,next_tier').limit(2000);
+    var lay = await YC.client.from('rental_sites').select('id,layout,upgraded_at,tier,upgrade_pending,upgrade_amount,pro_pending,pro_amount,next_layout,next_tier,price_lock').limit(2000);
     var byId = {}; (lay.data || []).forEach(function (x) { byId[x.id] = x; });
     // 待審核的自訂程式碼（進階方案）
     var rv = await YC.client.from('site_code_reviews').select('site_id,hash,status,created_at,version_id,note').eq('status', 'pending').limit(500);
     var pend = {}; (rv.data || []).forEach(function (x) { (pend[x.site_id] = pend[x.site_id] || []).push(x); });
-    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; x.tier = (l && l.tier) || 'basic'; x.upgrade_pending = !!(l && l.upgrade_pending); x.upgrade_amount = l ? l.upgrade_amount : null; x.pro_pending = !!(l && l.pro_pending); x.pro_amount = l ? l.pro_amount : null; x.next_layout = l ? l.next_layout : null; x.next_tier = l ? l.next_tier : null; x.codePending = (pend[x.id] || []).length; });
+    state.rows.forEach(function (x) { var l = byId[x.id]; x.layout = l && l.layout === 'multi' ? 'multi' : 'single'; x.upgraded_at = l ? l.upgraded_at : null; x.tier = (l && l.tier) || 'basic'; x.price_lock = (l && l.price_lock) || null; x.upgrade_pending = !!(l && l.upgrade_pending); x.upgrade_amount = l ? l.upgrade_amount : null; x.pro_pending = !!(l && l.pro_pending); x.pro_amount = l ? l.pro_amount : null; x.next_layout = l ? l.next_layout : null; x.next_tier = l ? l.next_tier : null; x.codePending = (pend[x.id] || []).length; });
     loadIndustries();
     var s = await YC.client.from('settings').select('key,value').in('key', ['bank_transfer', 'plan']);
     state.bank = null; state.plan = null;
@@ -492,7 +493,7 @@
     var shop = esc(r.shop_name || r.slug);
     if (act === 'pay') return askPayment(r);
     if (act === 'pro') {
-      return modal('確認收到進階功能差額？', '<div class="rn-form"><p class="rn-note">「' + shop + '」申請加購進階功能，差額 <b>' + esc(money(r.pro_amount || 0)) + '</b>。確認後立即開通並寄信通知客戶，下一期起每月多 NT$ 400。</p>' +
+      return modal('確認收到進階功能差額？', '<div class="rn-form"><p class="rn-note">「' + shop + '」申請加購進階功能，差額 <b>' + esc(money(r.pro_amount || 0)) + '</b>。確認後立即開通並寄信通知客戶，下一期起每月多 ' + esc(money((PMOD && PMOD.proFor ? PMOD.proFor(r.price_lock).monthly : 400))) + '。</p>' +
         '<label>匯款末五碼／備註（選填）<input type="text" id="rn-proref" maxlength="100"></label><label class="rn-chk"><input type="checkbox" id="rn-prowaive"> 免收差額（不記收款金額）</label></div>', '確認', false,
         async function () { var res = await call('confirm_pro', r.id, { reference: document.getElementById('rn-proref').value.trim(), waived: document.getElementById('rn-prowaive').checked }); toast(res.message || '已確認'); await refreshAfter(r.id, r.status === 'live' || r.status === 'overdue'); });
     }
@@ -573,10 +574,10 @@
         // 依網站的版型算應收金額；多頁版價格未定案時不預填，請自行輸入與客戶談定的金額
         // 續約時套用客戶申請的下期降級（首次上線不套用）
         var lay = pend ? r.layout : (r.next_layout || r.layout), tr = pend ? r.tier : (r.next_tier || r.tier);
-        var P = PMOD.planFor ? PMOD.planFor(lay) : PMOD.PLAN;
-        var q = PMOD.quote(n, lay, tr);
+        var P = PMOD.planFor ? PMOD.planFor(lay, r.price_lock) : PMOD.PLAN;
+        var q = PMOD.quote(n, lay, tr, r.price_lock);
         if (q) {
-          pv.textContent += '　｜　依方案「' + P.name + (tr === 'pro' ? '＋進階功能' : '') + '」應收 ' + PMOD.money(q.amount) + (q.freeMonths ? '（' + q.months + ' 個月只收 ' + q.paidMonths + ' 個月）' : '') + (!pend && (r.next_layout || r.next_tier) ? '（已套用客戶申請的下期降級，收款後生效）' : '');
+          pv.textContent += '　｜　依方案「' + P.name + (tr === 'pro' ? '＋進階功能' : '') + '」應收 ' + PMOD.money(q.amount) + (q.freeMonths ? '（' + q.months + ' 個月只收 ' + q.paidMonths + ' 個月）' : '') + (r.price_lock ? '（早鳥鎖定價）' : '') + (!pend && (r.next_layout || r.next_tier) ? '（已套用客戶申請的下期降級，收款後生效）' : '');
           if (!amtTouched) amtEl.value = String(q.amount);   // 預填金額，仍可自行修改
         } else {
           pv.textContent += '　｜　「' + P.name + '」的價格尚未定案，請輸入與客戶確認的金額';
@@ -635,8 +636,8 @@
     }
     busy = false; if (again) { again = false; render(); }
   }
-  function setTabQuiet(t) { state.tab = t; members.style.display = ''; root.hidden = true; Array.prototype.forEach.call(tabs.querySelectorAll('[data-tab]'), function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-tab') === t)); }); }
+  function setTabQuiet(t) { state.tab = t; members.style.display = ''; root.hidden = true; Array.prototype.forEach.call(tabs.querySelectorAll('[data-tab]'), function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-tab') === t)); }); try { document.dispatchEvent(new CustomEvent('yc-admin-tab', { detail: t })); } catch (e) { /* ignore */ } }
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (document.getElementById('rn-modal')) closeModal(); else if (state.sel) closeDrawer(); } });
   YC.onChange(function () { render(); });
-  if (location.hash === '#rental') { state.tab = 'rental'; members.style.display = 'none'; root.hidden = false; Array.prototype.forEach.call(tabs.querySelectorAll('[data-tab]'), function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-tab') === 'rental')); }); }
+  if (location.hash === '#rental' || location.hash === '#prices') { var h0 = location.hash.slice(1); state.tab = h0; members.style.display = 'none'; root.hidden = h0 !== 'rental'; Array.prototype.forEach.call(tabs.querySelectorAll('[data-tab]'), function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-tab') === h0)); }); }
 })();
