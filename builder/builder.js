@@ -60,7 +60,7 @@ const TRIAL_KEY = 'yc-builder-trial';
 function readTrial() { try { const v = JSON.parse(localStorage.getItem(TRIAL_KEY) || 'null'); return v && v.content ? v : null; } catch (e) { return null; } }
 function writeTrial(extra) {
   const cur = readTrial() || {};
-  const v = Object.assign(cur, { template: S.site.template, palette: S.palette, sections: S.sections, layout: 'single', content: S.content, slug: S.slug, savedAt: Date.now() }, extra || {});
+  const v = Object.assign(cur, { template: S.site.template, palette: S.palette, sections: S.sections, layout: S.layout === 'multi' ? 'multi' : 'single', content: S.content, slug: S.slug, savedAt: Date.now() }, extra || {});
   try { localStorage.setItem(TRIAL_KEY, JSON.stringify(v)); return true; } catch (e) { return false; }
 }
 function clearTrial() { try { localStorage.removeItem(TRIAL_KEY); } catch (e) { /* ignore */ } }
@@ -76,18 +76,36 @@ async function sampleContent(key) {
     return { content: L.normalizeContent(c), palette: sm.pal || 'forest' };
   } catch (e) { c.name = '我的店'; return { content: L.normalizeContent(c), palette: 'forest' }; }
 }
+// 官網「風格範例」：/builder/?showcase=<id> 直接套用版面、配色、字型、區塊順序與範例文字（照片請換成自己的）
+async function showcasePreset(id) {
+  if (!/^[a-z0-9-]{3,30}$/.test(id || '')) return null;
+  try { const M = await import(tplBase() + 'templates/gallery/showcases.mjs'); return M.showcaseForEditor(id); } catch (e) { return null; }
+}
 async function startTrial() {
   booted = 'trial';
   gate([h('p', { text: '載入編輯器…' })]);
   try {
     await loadLib();
-    const L = S.lib, saved = readTrial();
-    const q = new URLSearchParams(location.search);
+    const L = S.lib, q = new URLSearchParams(location.search);
+    const preset = await showcasePreset(q.get('showcase'));
+    if (preset) {
+      clearTrial();
+      S.trial = true; document.body.classList.add('is-trial');
+      const multi = preset.layout === 'multi' && L.getIndustry(preset.template);
+      mount({ id: 'trial', member_id: 'trial', slug: 'my-shop', status: 'draft', template: preset.template, palette: preset.palette,
+        sections: L.defaultSections(), content: L.normalizeContent(preset.content), layout: multi ? 'multi' : 'single', pages: multi ? L.defaultPages() : null });
+      S.dirty = true; save();
+      try { history.replaceState(null, '', location.pathname); } catch (e) { /* ignore */ }
+      toast('已套用風格範例。把店名、文字換成你的，照片上傳自己的就完成了。', 6000);
+      return;
+    }
+    const saved = readTrial();
     const key = (saved && saved.template) || (L.getIndustry(q.get('industry') || '') ? q.get('industry') : 'cafe');
     const smp = saved ? { content: saved.content, palette: saved.palette } : await sampleContent(key);
     S.trial = true; document.body.classList.add('is-trial');
+    const sLayout = saved && saved.layout === 'multi' ? 'multi' : 'single';
     mount({ id: 'trial', member_id: 'trial', slug: (saved && saved.slug) || 'my-shop', status: 'draft', template: key, palette: smp.palette,
-      sections: saved ? saved.sections : L.defaultSections(), content: smp.content, layout: 'single' });
+      sections: saved ? saved.sections : L.defaultSections(), content: smp.content, layout: sLayout, pages: sLayout === 'multi' ? L.defaultPages() : null });
     if (!saved) { S.dirty = true; save(); }
   } catch (e) {
     console.error(e);
@@ -185,6 +203,9 @@ async function boot() {
     S.mySites = r.data.filter((x) => !(x.status === 'cancelled' && !x.first_published_at));
     r.data = S.mySites;
     const q = new URLSearchParams(location.search);
+    // 已登入的會員從「風格範例」進來：用範例內容建立新網站
+    const scp = await showcasePreset(q.get('showcase'));
+    if (scp) return showCreate({ ...scp, sections: S.lib.defaultSections(), slug: '' });
     if (pendingTrial && pendingTrial.pending) return showCreate(pendingTrial);
     if (!r.data.length || q.get('new') === '1') return showCreate();
     let last = ''; try { last = localStorage.getItem('yc-builder-site') || ''; } catch (e) { /* ignore */ }
@@ -206,7 +227,7 @@ function showCreate(trial) {
   const ind = h('select', { id: 'cInd', class: 'sel' }, h('option', { value: '', text: '請選擇' }),
     L.INDUSTRY_GROUPS.map((g) => h('optgroup', { label: g }, L.INDUSTRIES.filter((i) => i.group === g).map((i) => h('option', { value: i.key, text: i.label })))));
   const indMsg = h('div', { class: 'msg mute', text: '網站的用詞（例如菜單、服務項目、課程）會依行業自動調整。之後也可以在編輯器裡更改。' });
-  let layout = 'single';
+  let layout = trial && trial.layout === 'multi' && multiOpen() ? 'multi' : 'single';
   const lay = (v, title, desc) => {
     const r = h('input', { type: 'radio', name: 'cLayout', value: v }); r.checked = v === layout;
     r.addEventListener('change', () => { if (r.checked) layout = v; });

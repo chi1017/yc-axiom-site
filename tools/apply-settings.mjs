@@ -43,7 +43,7 @@ function walk(dir, out = []) {
 }
 
 // 公告列：不放在編輯器、會員專區、後台、工具內嵌頁、範例網站、業務展示頁
-const NO_BAR = /^(builder|dashboard|admin|demo|showcase|seo\/dashboard)\/|^[a-z-]+-tool\.html$|^google[0-9a-f]+\.html$/;
+const NO_BAR = /^(builder|dashboard|admin|demo|showcase|seo\/dashboard|rental\/styles)\/|^[a-z-]+-tool\.html$|^google[0-9a-f]+\.html$/;
 const S = await loadSettings();
 const data = normalize(S.data);
 const now = process.env.SETTINGS_NOW ? new Date(process.env.SETTINGS_NOW) : new Date();
