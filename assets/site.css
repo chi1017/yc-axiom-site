@@ -1918,3 +1918,6 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
 .sc-btn.sc-ghost { background: transparent; color: var(--text-bright); border: 1px solid var(--border-strong, rgba(245, 240, 230, .22)); box-shadow: none; }
 .sc-btn.sc-ghost:hover { border-color: var(--accent); color: var(--accent); }
 [data-theme="light"] .sc-btn.sc-ghost { border-color: rgba(0, 0, 0, .2); }
+.sc-group { font: 700 15px var(--f-ui); color: var(--text-bright); letter-spacing: .04em; margin: 8px 0 12px; }
+.sc-grid + .sc-group { margin-top: 28px; }
+@media (min-width: 1100px) { .sc-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
