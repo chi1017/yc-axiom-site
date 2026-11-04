@@ -225,7 +225,7 @@
   function loadIndustries() {
     if (IND) return;
     IND = {};
-    import('https://chi1017.github.io/yc-axiom-sites/templates/shared/industries.js').then(function (m) {
+    import(location.origin + '/tpl/templates/shared/industries.js').then(function (m) {
       m.INDUSTRIES.forEach(function (i) { IND[i.key] = i.label; });
       if (state.tab === 'rental') drawList();
     }).catch(function () { /* 讀不到就顯示代碼 */ });

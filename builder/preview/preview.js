@@ -3,7 +3,8 @@
 import { startReveal, wireNav } from '../preview-fx.js';
 const YC = window.YC;
 const $ = (s) => document.querySelector(s);
-const DEFAULT_TPL_BASE = 'https://chi1017.github.io/yc-axiom-sites/';
+// 版型檔案由官網自己提供（部署官網時從 yc-axiom-sites 複製到 /tpl/）
+const DEFAULT_TPL_BASE = location.origin + '/tpl/';
 function tplBase() {
   const q = new URLSearchParams(location.search).get('tplbase');
   if (q && /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && /^http:\/\/(127\.0\.0\.1|localhost):\d+\/$/.test(q)) return q;
