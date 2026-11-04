@@ -1492,6 +1492,8 @@ h1.section-title { margin: 0; }
 .sp-price table { width: 100%; border-collapse: collapse; }
 .sp-price td { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--text); line-height: 1.7; vertical-align: top; }
 .sp-price td.sp-price-v { text-align: right; white-space: nowrap; font-family: var(--f-ui); font-weight: 700; color: var(--text-bright); padding-left: 20px; }
+.sp-spec td.sp-price-v { white-space: normal; max-width: 60%; }
+@media (max-width: 600px) { .sp-spec td.sp-price-v { max-width: none; } }
 .sp-note { margin: 14px 0 0; font-size: 13px; color: var(--text-dim); line-height: 1.8; }
 .sp-related { padding: 24px 28px; margin-top: 56px; }
 .sp-related ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px 24px; }
