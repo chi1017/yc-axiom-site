@@ -332,7 +332,28 @@
         function queue() { if (!raf) raf = requestAnimationFrame(sendViewport); }
         window.addEventListener('scroll', queue, { passive: true });
         window.addEventListener('resize', queue);
+        // 工具檢測完成：捲動外層頁面，讓分數區塊完整出現在上方導覽列與手機底部選單之間
+        var scrollWant = null, scrollTimer = 0;
+        function scrollToScore() {
+            scrollTimer = 0;
+            var d = scrollWant; if (!d) return; scrollWant = null;
+            var nv = document.querySelector('body>nav') || document.querySelector('nav'), tb = document.getElementById('yc-tabbar');
+            var ns = nv && getComputedStyle(nv);
+            var head = nv && (ns.position === 'fixed' || ns.position === 'sticky') ? nv.getBoundingClientRect().height + (parseFloat(ns.top) || 0) : 0;
+            var foot = tb && getComputedStyle(tb).display !== 'none' ? tb.getBoundingClientRect().height : 0;
+            var avail = window.innerHeight - head - foot;
+            var top = window.scrollY + fr.getBoundingClientRect().top + d.top;
+            var gap = Math.max(8, Math.min(24, (avail - d.height) / 2));
+            var y = Math.max(0, top - head - gap);
+            var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+            window.scrollTo({ top: y, behavior: reduce ? 'instant' : 'smooth' });
+        }
         window.addEventListener('message', function (e) {
+            if (e.source === fr.contentWindow && e.data && e.data.type === 'seo-tool-scroll') {
+                scrollWant = { top: Number(e.data.top) || 0, height: Number(e.data.height) || 0 };
+                clearTimeout(scrollTimer); scrollTimer = setTimeout(scrollToScore, 60);
+                return;
+            }
             if (e.source !== fr.contentWindow || !e.data || e.data.type !== 'seo-tool-height') return;
             var h = Math.ceil(e.data.height);
             if (h > 200) fr.style.height = h + 'px';

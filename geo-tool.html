@@ -141,6 +141,18 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}.glow-orb{display:none!important}}
 </style>
 <script>
+// 檢測完成後捲動到分數區塊：嵌在官網裡時請外層頁面捲動（扣掉上方導覽列與手機底部選單），單獨開啟時自己捲動；減少動態效果時直接跳轉
+window.ycScrollToScore = function () {
+  var el = document.querySelector('#results .score-hero') || document.getElementById('results');
+  if (!el || !el.getBoundingClientRect().height) return;
+  var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (window.parent === window) { el.scrollIntoView({ behavior: reduce ? 'instant' : 'smooth', block: 'start' }); return; }
+  // 等結果撐開 iframe 高度（外層收到新高度）之後再請外層捲動
+  setTimeout(function () { requestAnimationFrame(function () {
+    var r = el.getBoundingClientRect();
+    parent.postMessage({ type: 'seo-tool-scroll', top: r.top + (window.scrollY || 0), height: r.height }, '*');
+  }); }, 120);
+};
 (function () {
   if (window.parent === window) return;
   var de = document.documentElement;
@@ -383,7 +395,7 @@ function finish(r) {
   renderResults(r);
   var js = detectJsSite(tabState.t1 && tabState.t1.html);
   var jn = $('jsNote'); if (jn) jn.style.display = js.is ? 'flex' : 'none';
-  var el = $('results'); if (el && el.scrollIntoView && window.parent === window) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  window.ycScrollToScore();
 }
 
 // ── 顯示結果 ──
