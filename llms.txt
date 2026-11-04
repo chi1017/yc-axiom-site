@@ -16,7 +16,7 @@
 
 ## 網站租用
 
-- [網站租用](https://yc-axiom.pages.dev/rental/)：45 種行業版型，電腦或手機都能編輯；一頁版每月 {{yc:from}} 起、多頁版每月 {{yc:multi_from}} 起；我們負責發佈、主機與維護，每月自動做 SEO 與 AI 可見度檢測。版型與程式不移交原始碼。
+- [網站租用](https://yc-axiom.pages.dev/rental/)：多種行業版型，電腦或手機都能編輯；一頁版每月 {{yc:from}} 起、多頁版每月 {{yc:multi_from}} 起；我們負責發佈、主機與維護，每月自動做 SEO 與 AI 可見度檢測。版型與程式不移交原始碼。
 - [版型展示](https://yc-axiom.pages.dev/rental/templates/)：每個行業一個範例網站（範例店家為虛構）
 - [網站租用條款](https://yc-axiom.pages.dev/terms/rental/)
 
