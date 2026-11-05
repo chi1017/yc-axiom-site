@@ -9,7 +9,7 @@
 // 測試：SITE_SETTINGS_FILE=設定.json SETTINGS_USED=0 SETTINGS_NOW=2027-03-01T00:00:00Z node tools/apply-settings.mjs <資料夾>
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
-import { normalize, effective, tokens, render, hasTokens, promo, planSettings, stateOf, barHead, barBody } from './site-settings.mjs';
+import { normalize, effective, tokens, render, hasTokens, promo, planSettings, stateOf, barHead, barBody, tokensEn } from './site-settings.mjs';
 
 const OUT = process.argv[2];
 if (!OUT || !existsSync(OUT)) { console.log('::error::缺少要部署的資料夾'); process.exit(1); }
@@ -43,12 +43,12 @@ function walk(dir, out = []) {
 }
 
 // 公告列：不放在編輯器、會員專區、後台、工具內嵌頁、範例網站、業務展示頁
-const NO_BAR = /^(builder|dashboard|admin|demo|showcase|seo\/dashboard|rental\/styles)\/|^[a-z-]+-tool\.html$|^google[0-9a-f]+\.html$/;
+const NO_BAR = /^(en|builder|dashboard|admin|demo|showcase|seo\/dashboard|rental\/styles)\/|^[a-z-]+-tool\.html$|^google[0-9a-f]+\.html$/;
 const S = await loadSettings();
 const data = normalize(S.data);
 const now = process.env.SETTINGS_NOW ? new Date(process.env.SETTINGS_NOW) : new Date();
 const eff = effective(data, now, S.used);
-const tok = tokens(data, eff);
+const tok = tokens(data, eff), tokEn = tokensEn(data, eff);
 const pr = promo(data, eff, now);
 console.log('價格設定 v' + S.version + '：早鳥' + (eff.early ? '進行中（至 ' + eff.until + '）' : '未進行') + '，一頁版 ' + tok.from + '／月、多頁版 ' + tok.multi_from + '／月；公告列' + (pr.bar.show ? '顯示' : '不顯示') + '、卡片' + (pr.card.show ? '顯示' : '不顯示'));
 
@@ -63,7 +63,7 @@ for (const f of walk(OUT)) {
   if (rel.startsWith('admin/preview-src/')) continue;
   if (!/\.(html|txt|xml|json|webmanifest)$/.test(rel)) continue;
   let s = readFileSync(f, 'utf8'), o = s;
-  if (hasTokens(s)) s = render(s, tok);
+  if (hasTokens(s)) s = render(s, rel.startsWith('en/') ? tokEn : tok);
   if (rel.endsWith('.html') && pr.bar.show && !NO_BAR.test(rel) && /<\/head>/i.test(s) && /<body[^>]*>/i.test(s) && !s.includes('id="yc-bar"')) {
     s = s.replace(/<\/head>/i, barHead(pr.bar) + '\n</head>').replace(/<body([^>]*)>/i, (m) => m + '\n' + barBody(pr.bar));
     bars++;

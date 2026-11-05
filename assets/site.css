@@ -1945,3 +1945,14 @@ nav .nav-inner { padding-left: max(20px, env(safe-area-inset-left, 0px)); paddin
 .sp-more--spec > .sp-spec { margin-top: 8px; }
 .sp-specline { margin: -4px 0 0; color: var(--text); font-size: 15px; line-height: 1.8; }
 [data-theme="light"] .nav-logo-name { color: #8A7448; background: linear-gradient(180deg, #B59B6A 0%, #8A7448 60%, #6E5A34 100%); -webkit-background-clip: text; background-clip: text; }
+
+/* 中英切換（導覽列右側） */
+.lang-toggle { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 10px; border: 1px solid var(--border-active); border-radius: 2px; color: var(--accent); font-size: 13px; font-weight: 600; letter-spacing: .06em; text-decoration: none; transition: color .2s, border-color .2s; }
+.lang-toggle:hover { background: var(--accent-dim); border-color: var(--accent); }
+.nav-cta .cta-s { display: none; }
+@media (max-width: 768px) {
+  .has-tabbar .nav-right .lang-toggle { display: none; }
+  .has-tabbar .nav-cta .cta-l { display: none; }
+  .has-tabbar .nav-cta .cta-s { display: inline; }
+}
+@media (max-width: 900px) { .lang-toggle { height: 38px; min-width: 38px; padding: 0 8px; font-size: 12px; } }
