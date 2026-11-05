@@ -104,6 +104,27 @@ export function tokens(s, eff) {
   };
 }
 
+// 英文版頁面（/en/）用的 {{yc:名稱}} 文字
+export function tokensEn(s, eff) {
+  const E = eff, sm = E.single.month, sy = E.single.year, mm = E.multi.month, my = E.multi.year;
+  const label = (m) => (E.early ? 'early-bird ' + money(m) + '/month (until ' + E.until + ')' : money(m) + '/month');
+  const labelHtml = (m) => (E.early ? '<strong>early-bird ' + money(m) + '/month</strong> (until ' + E.until + ')' : '<strong>' + money(m) + '/month</strong>');
+  const yp = (m, y, sep) => { const k = y / m; return 'pay 12 months up front' + (Number.isInteger(k) && k < 12 ? ' for the price of ' + k : '') + sep + money(y); };
+  const yr = (l, m, y) => { const k = y / m; return l + ' yearly (pay 12 months' + (Number.isInteger(k) && k < 12 ? ', charged for ' + k : '') + ')'; };
+  const terms = (m) => (E.early ? 'early-bird NT$' + num(m) + ' per month (until ' + E.until + ')' : 'NT$' + num(m) + ' per month');
+  const termsYear = (m, y) => { const k = y / m; return 'pay 12 months up front' + (Number.isInteger(k) && k < 12 ? ' and be charged for only ' + k : '') + ', i.e. NT$' + num(y); };
+  return {
+    ...tokens(s, eff),
+    single_label: label(sm), multi_label: label(mm), single_label_html: labelHtml(sm), multi_label_html: labelHtml(mm),
+    single_year_phrase: yp(sm, sy, ', '), multi_year_phrase: yp(mm, my, ', '), single_year_phrase_sp: yp(sm, sy, ' '), multi_year_phrase_sp: yp(mm, my, ' '),
+    single_year_row: yr('One-page', sm, sy), multi_year_row: yr('Multi-page', mm, my),
+    terms_single: terms(sm), terms_multi: terms(mm), terms_single_year: termsYear(sm, sy), terms_multi_year: termsYear(mm, my),
+    terms_refund: 'For example, if you paid NT$' + num(sy) + ' for a one-page site for a year and used 3 months, the refund is ' + num(sy) + ' − 3 × ' + num(sm) + ' = NT$' + num(Math.max(0, sy - 3 * sm)),
+    terms_lock_note: E.early ? 'Early-bird price: sites that start renting during the early-bird period (first payment confirmed within the period) keep the early-bird price for later renewals, multi-page upgrades and add-ons.'
+      : 'Earlier promotional price: sites that started renting during an earlier promotion keep that price for later renewals, multi-page upgrades and add-ons.'
+  };
+}
+
 const TOKEN_RE = /\{\{yc:([a-z_]+)\}\}/g;
 export function render(text, tok) {
   return text.replace(TOKEN_RE, (m, k) => {

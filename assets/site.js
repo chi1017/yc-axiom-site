@@ -1,3 +1,8 @@
+/* 英文版（/en/）用的介面文字 */
+var YC_EN = /^en/i.test(document.documentElement.lang || '');
+var YC_TX = {"工具載入的時間比平常久，可能是網路比較慢。": "The tool is taking longer than usual to load; your connection may be slow.", "重新載入": "Reload", "直接開啟工具 ↗": "Open the tool directly ↗", "工具載入中…": "Loading tool…", "切換為深色模式": "Switch to dark mode", "切換為淺色模式": "Switch to light mode", "會員選單": "Member menu", "會員登入": "Sign in", "會員登入或註冊": "Sign in or sign up", "會員專區": "Member area", "會員專區選單": "Member area menu", "我的網站": "My website", "網站編輯器": "Website editor", "管理後台": "Admin", "切換 Google 帳號": "Switch Google account", "登出": "Sign out", "首頁": "Home", "服務": "Services", "網站租用": "Rental", "LINE 諮詢": "LINE", "選單": "Menu", "主要分頁": "Main tabs", "返回上一頁": "Back"};
+function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
+
 
     /* ── Heading entrance ──
        Previously a character-scramble "decode" effect — replaced with a
@@ -301,11 +306,11 @@
             setTimeout(function () {
                 if (box.classList.contains('loaded')) return;
                 var src = fr.getAttribute('src') || '';
-                ld.innerHTML = '<div class="seo-tool-slow"><p>工具載入的時間比平常久，可能是網路比較慢。</p>' +
-                    '<div class="seo-tool-slow-actions"><button type="button" class="btn-primary">重新載入</button>' +
-                    '<a class="btn-secondary" href="' + src.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">直接開啟工具 ↗</a></div></div>';
+                ld.innerHTML = '<div class="seo-tool-slow"><p>' + ycT('工具載入的時間比平常久，可能是網路比較慢。') + '</p>' +
+                    '<div class="seo-tool-slow-actions"><button type="button" class="btn-primary">' + ycT('重新載入') + '</button>' +
+                    '<a class="btn-secondary" href="' + src.replace(/"/g, '&quot;') + '" target="_blank" rel="noopener">' + ycT('直接開啟工具 ↗') + '</a></div></div>';
                 ld.querySelector('button').addEventListener('click', function () {
-                    ld.innerHTML = '<span class="seo-tool-spinner"></span>工具載入中…';
+                    ld.innerHTML = '<span class="seo-tool-spinner"></span>' + ycT('工具載入中…');
                     fr.src = src;
                 });
             }, 10000);
@@ -436,7 +441,7 @@
         var light = current() === 'light';
         var btn = document.getElementById('theme-toggle');
         if (btn) {
-            var label = light ? '切換為深色模式' : '切換為淺色模式';
+            var label = light ? ycT('切換為深色模式') : ycT('切換為淺色模式');
             btn.setAttribute('aria-label', label);
             btn.setAttribute('title', label);
         }
@@ -597,7 +602,7 @@
     var link = document.createElement('a');
     link.href = root + 'dashboard/';
     var menu = document.createElement('ul');
-    menu.className = 'nav-member-menu'; menu.setAttribute('aria-label', '會員選單');
+    menu.className = 'nav-member-menu'; menu.setAttribute('aria-label', ycT('會員選單'));
     wrap.appendChild(link); wrap.appendChild(menu);
     navRight.insertBefore(wrap, navRight.firstChild);
 
@@ -625,28 +630,28 @@
         menu.innerHTML = '';
         clearMobile();
         if (!s) {
-            link.textContent = '會員登入';
-            link.setAttribute('aria-label', '會員登入或註冊');
+            link.textContent = ycT('會員登入');
+            link.setAttribute('aria-label', ycT('會員登入或註冊'));
             wrap.classList.remove('has-menu');
-            addMobile('會員登入', root + 'dashboard/');
+            addMobile(ycT('會員登入'), root + 'dashboard/');
             return;
         }
-        link.textContent = '會員專區';
-        link.setAttribute('aria-label', '會員專區選單');
+        link.textContent = ycT('會員專區');
+        link.setAttribute('aria-label', ycT('會員專區選單'));
         wrap.classList.add('has-menu');
-        menu.appendChild(item('會員專區', root + 'dashboard/'));
-        menu.appendChild(item('我的網站', root + 'dashboard/#dash-site'));
-        menu.appendChild(item('網站編輯器', root + 'builder/'));
-        if (s.admin) menu.appendChild(item('管理後台', root + 'admin/'));
+        menu.appendChild(item(ycT('會員專區'), root + 'dashboard/'));
+        menu.appendChild(item(ycT('我的網站'), root + 'dashboard/#dash-site'));
+        menu.appendChild(item(ycT('網站編輯器'), root + 'builder/'));
+        if (s.admin) menu.appendChild(item(ycT('管理後台'), root + 'admin/'));
         var sep = document.createElement('li'); sep.className = 'sep'; sep.setAttribute('role', 'separator'); menu.appendChild(sep);
-        menu.appendChild(item('切換 Google 帳號', root + 'dashboard/?switch=1'));
+        menu.appendChild(item(ycT('切換 Google 帳號'), root + 'dashboard/?switch=1'));
         var lo = document.createElement('li'), b = document.createElement('button');
-        b.type = 'button'; b.textContent = '登出'; b.onclick = signOut; lo.appendChild(b); menu.appendChild(lo);
-        addMobile('會員專區', root + 'dashboard/');
-        addMobile('網站編輯器', root + 'builder/');
-        if (s.admin) addMobile('管理後台', root + 'admin/');
-        addMobile('切換 Google 帳號', root + 'dashboard/?switch=1');
-        addMobile('登出', '#', signOut);
+        b.type = 'button'; b.textContent = ycT('登出'); b.onclick = signOut; lo.appendChild(b); menu.appendChild(lo);
+        addMobile(ycT('會員專區'), root + 'dashboard/');
+        addMobile(ycT('網站編輯器'), root + 'builder/');
+        if (s.admin) addMobile(ycT('管理後台'), root + 'admin/');
+        addMobile(ycT('切換 Google 帳號'), root + 'dashboard/?switch=1');
+        addMobile(ycT('登出'), '#', signOut);
     }
     render();
     window.addEventListener('storage', render);
@@ -662,18 +667,19 @@
     var me = document.querySelector('script[src*="assets/site.js"], script[src*="assets/dist/site.min.js"]');
     var root = me ? new URL(me.src.indexOf('/assets/dist/') > -1 ? '../../' : '../', me.src).href : location.origin + '/';
     var rel = location.href.indexOf(root) === 0 ? location.href.slice(root.length).split(/[?#]/)[0] : '';
-    var cur = (rel === '' || rel === 'index.html') ? 'home' : /^services\//.test(rel) ? 'services' : /^rental\//.test(rel) ? 'rental' : '';
+    var rel0 = rel.replace(/^en\//, '');
+    var cur = (rel0 === '' || rel0 === 'index.html') ? 'home' : /^services\//.test(rel0) ? 'services' : /^rental\//.test(rel0) ? 'rental' : '';
     var lineA = document.querySelector('a.line-float');
     var ico = function (d) { return '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
     var tabs = [
-        { k: 'home', href: root, label: '首頁', icon: ico('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>') },
-        { k: 'services', href: root + 'services/', label: '服務', icon: ico('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/>') },
-        { k: 'rental', href: root + 'rental/', label: '網站租用', icon: ico('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>') },
-        { k: 'line', href: lineA ? lineA.getAttribute('href') : '', label: 'LINE 諮詢', icon: lineA && lineA.querySelector('svg') ? lineA.querySelector('svg').outerHTML.replace(/width="\d+"/, 'width="24"').replace(/height="\d+"/, 'height="24"') : '' },
-        { k: 'menu', label: '選單', icon: ico('<path d="M4 7h16M4 12h16M4 17h16"/>') }
+        { k: 'home', href: root + (YC_EN ? 'en/' : ''), label: ycT('首頁'), icon: ico('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>') },
+        { k: 'services', href: root + (YC_EN ? 'en/' : '') + 'services/', label: ycT('服務'), icon: ico('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/>') },
+        { k: 'rental', href: root + (YC_EN ? 'en/' : '') + 'rental/', label: ycT('網站租用'), icon: ico('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>') },
+        { k: 'line', href: lineA ? lineA.getAttribute('href') : '', label: ycT('LINE 諮詢'), icon: lineA && lineA.querySelector('svg') ? lineA.querySelector('svg').outerHTML.replace(/width="\d+"/, 'width="24"').replace(/height="\d+"/, 'height="24"') : '' },
+        { k: 'menu', label: ycT('選單'), icon: ico('<path d="M4 7h16M4 12h16M4 17h16"/>') }
     ];
     var nav = document.createElement('div');   // 不用 <nav>：網站樣式裡的 nav 規則是給上方導覽列的
-    nav.id = 'yc-tabbar'; nav.className = 'tabbar'; nav.setAttribute('role', 'navigation'); nav.setAttribute('aria-label', '主要分頁');
+    nav.id = 'yc-tabbar'; nav.className = 'tabbar'; nav.setAttribute('role', 'navigation'); nav.setAttribute('aria-label', ycT('主要分頁'));
     tabs.forEach(function (t) {
         if (t.k === 'line' && !t.href) return;
         var el;
@@ -684,7 +690,7 @@
             el.addEventListener('click', function () { if (typeof toggleMobileMenu === 'function') toggleMobileMenu(); });
         } else {
             el = document.createElement('a'); el.href = t.href;
-            if (t.k === 'line') { el.target = '_blank'; el.rel = 'noopener'; el.className = 'tab-line'; el.setAttribute('aria-label', lineA.getAttribute('aria-label') || 'LINE 諮詢'); }
+            if (t.k === 'line') { el.target = '_blank'; el.rel = 'noopener'; el.className = 'tab-line'; el.setAttribute('aria-label', lineA.getAttribute('aria-label') || ycT('LINE 諮詢')); }
             if (t.k === cur) el.setAttribute('aria-current', 'page');
         }
         el.dataset.k = t.k;
@@ -699,7 +705,7 @@
         var parts = rel.replace(/index\.html$/, '').split('/').filter(Boolean);
         var up = parts.length > 1 ? root + parts.slice(0, -1).join('/') + '/' : root;
         var back = document.createElement('button');
-        back.type = 'button'; back.id = 'yc-back'; back.className = 'nav-back'; back.setAttribute('aria-label', '返回上一頁');
+        back.type = 'button'; back.id = 'yc-back'; back.className = 'nav-back'; back.setAttribute('aria-label', ycT('返回上一頁'));
         back.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
         back.addEventListener('click', function () {
             var fromSite = false;
@@ -720,6 +726,14 @@
             sf.forEach(function (a) { var c = a.cloneNode(true); c.removeAttribute('data-tip'); c.className = 'mobile-social-a'; c.insertAdjacentHTML('beforeend', '<span>' + (a.classList.contains('sf-ig') ? 'Instagram' : 'Threads') + '</span>'); row.appendChild(c); });
             mm.appendChild(row);
         }
+        // 中英切換：手機上表頭放不下，放進選單
+        var lt = document.querySelector('.nav-right .lang-toggle');
+        if (lt && !mm.querySelector('.mobile-lang')) {
+            var la = lt.cloneNode(true); la.className = 'mobile-social-a mobile-lang';
+            la.textContent = YC_EN ? '中文版' : 'English';
+            var lr = document.createElement('div'); lr.className = 'mobile-social'; lr.appendChild(la);
+            mm.appendChild(lr);
+        }
     }
 })();
 
@@ -737,6 +751,7 @@
     function allowed(pages) {
         return (pages || []).some(function (p) { return p.slice(-1) === '*' ? path.indexOf(p.slice(0, -1)) === 0 : (path === p || path === p + 'index.html'); });
     }
+    if (YC_EN && !PV) return;
     (PV ? Promise.resolve(PV.cfg) : fetch('/assets/site-promo.json', { cache: 'no-cache' }).then(function (r) { return r.ok ? r.json() : null; })).then(function (cfg) {
         var c = cfg && cfg.card;
         if (!c || !c.show || !allowed(c.pages)) return;
