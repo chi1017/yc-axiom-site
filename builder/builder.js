@@ -5,7 +5,7 @@ const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 // 版型檔案由官網自己提供（部署官網時從 yc-axiom-sites 複製到 /tpl/）
 const DEFAULT_TPL_BASE = location.origin + '/tpl/';
-const SAVE_DELAY = 2000, RENDER_DELAY = 150;
+const SAVE_DELAY = 2000, RENDER_DELAY = 90;
 // 條款版本：由後台價格設定產生（assets/rental-plan.js 的 TERMS_VERSION）；價格改變時版本會變，客人下次發佈要重新同意
 const termsVersion = () => (S.plan && S.plan.TERMS_VERSION) || '2026-10-v8';
 const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
@@ -740,9 +740,7 @@ function card(id, anchor, title, sub, ...kids) {
 
 function buildPanel() {
   const L = S.lib, P = $('#panel'); P.replaceChildren();
-  P.append(h('div', { id: 'todo', class: 'todo', hidden: true }));
-  P.append(h('div', { id: 'exWarn', class: 'todo ex-warn', hidden: true }));
-  P.append(h('details', { id: 'tips', class: 'card', hidden: true }));
+  P.append(h('details', { id: 'checks', class: 'checks', hidden: true }));
   P.append(h('div', { id: 'links', class: 'card', hidden: true }));
 
   // 基本設定
@@ -1320,7 +1318,19 @@ function dupIn(arr, i, max, repaint) {
   if (arr.length >= max) { toast('已達上限（' + max + ' 項）'); return; }
   arr.splice(i + 1, 0, JSON.parse(JSON.stringify(arr[i]))); repaint(); touch();
 }
-function iconBtn(text, onclick, cls) { return h('button', { type: 'button', class: 'btn small ' + (cls || ''), onclick }, text); }
+// 常用的小按鈕（複製、刪除、上移、下移）改成圖示，文字放在提示與無障礙標籤；清單欄位不再被擠窄
+const ICON_SVG = {
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  del: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>',
+  up: '<path d="M12 19V5M6 11l6-6 6 6"/>', down: '<path d="M12 5v14M6 13l6 6 6-6"/>'
+};
+function iconBtn(text, onclick, cls) {
+  const k = /^複製/.test(text) ? 'copy' : /^(刪除|移除)/.test(text) ? 'del' : /^上移/.test(text) ? 'up' : /^下移/.test(text) ? 'down' : null;
+  if (!k) return h('button', { type: 'button', class: 'btn small ' + (cls || ''), onclick }, text);
+  const b = h('button', { type: 'button', class: 'btn small ibtn ' + (cls || ''), title: text, 'aria-label': text, onclick });
+  b.innerHTML = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICON_SVG[k] + '</svg>';
+  return b;
+}
 function paintMenu() {
   const L = S.lib, box = $('#menuBox'); box.replaceChildren();
   S.content.menu.forEach((m, i) => {
@@ -1982,22 +1992,31 @@ function goField(field) {
   openCard(id, () => (field === 'photos.hero' ? null : $('#' + id).querySelector('input:not([disabled]),textarea')));
 }
 function refreshTodo() {
-  const box = $('#todo'); if (!box) return;
+  const box = $('#checks'); if (!box) return;
   const v = validate();
   const bm = $('#bookMsg'); if (bm) { const e = v.errors.find((x) => x.field.startsWith('booking')); bm.textContent = e ? e.msg : ''; }
-  const tips = $('#tips');
   const sg = S.lib.suggestions(S.lib.normalizeContent(S.content), S.lib.normalizeSections(S.sections), S.site.template);
-  tips.hidden = !sg.length;
-  if (sg.length) tips.replaceChildren(h('summary', { style: 'cursor:pointer;font-weight:700', text: '讓網站更容易被搜尋與 AI 找到（建議，共 ' + sg.length + ' 項）' }),
-    h('ul', { style: 'margin:8px 0 0;padding-left:20px;font-size:14px;color:var(--muted)' }, sg.map((e) => h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); goField(e.field); }, text: e.msg })))));
   const need = v.errors.filter((e) => ['name', 'address', 'hours', 'photos.hero'].includes(e.field) || e.field === 'slug' || /^(booking|social)/.test(e.field));
-  const exBox = $('#exWarn');
-  if (exBox) exampleWarnings().then((w) => {
-    exBox.hidden = !w.length;
-    if (w.length) exBox.replaceChildren(h('strong', { text: '還沒換掉的範例內容：' }), h('ul', {}, w.map((e) => h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); goField(e.field); }, text: e.msg })))));
-  });
-  box.hidden = need.length === 0;
-  if (need.length) box.replaceChildren(h('strong', { text: '發佈前還需要完成：' }), h('ul', {}, need.map((e) => h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); goField(e.field); }, text: e.msg })))));
+  const seq = (refreshTodo.seq = (refreshTodo.seq || 0) + 1);
+  exampleWarnings().catch(() => []).then((ex) => { if (seq === refreshTodo.seq) paintChecks(box, need, ex, sg); });
+}
+// 發佈前檢查：必填、範例內容、搜尋建議合成一張可收合的卡片；收合時只佔一行，不把設定往下推
+function paintChecks(box, need, ex, sg) {
+  const link = (e) => h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); goField(e.field); }, text: e.msg }));
+  const sec = (cls, title, list) => (list.length ? h('div', { class: 'ck-sec ' + cls }, h('strong', { text: title }), h('ul', {}, list.map(link))) : null);
+  const chip = (cls, n, t) => (n ? h('span', { class: 'ck-chip ' + cls, text: t + ' ' + n }) : null);
+  const total = need.length + ex.length + sg.length;
+  const state = need.length ? 'need' : ex.length ? 'ex' : 'ok';
+  const title = need.length ? '發佈前還有 ' + need.length + ' 項要完成' : ex.length ? '可以發佈了，還有範例內容沒換' : '可以發佈了';
+  let open = box.open;
+  if (refreshTodo.first !== false) { refreshTodo.first = false; try { open = sessionStorage.getItem('yc-checks-open') === '1'; } catch (e) { open = false; } }
+  box.hidden = false; box.dataset.state = state;
+  box.replaceChildren(
+    h('summary', {}, h('span', { class: 'ck-dot', 'aria-hidden': 'true' }), h('span', { class: 'ck-title', text: title }),
+      h('span', { class: 'ck-chips' }, chip('need', need.length, '必填'), chip('ex', ex.length, '範例'), chip('sg', sg.length, '建議')), total ? h('span', { class: 'ck-more', 'aria-hidden': 'true' }) : null),
+    total ? h('div', { class: 'ck-body' }, sec('need', '發佈前必須完成', need), sec('ex', '還沒換掉的範例內容', ex), sec('sg', '讓網站更容易被搜尋與 AI 找到（建議）', sg)) : null);
+  box.open = !!open && total > 0;
+  if (!box.ckBound) { box.ckBound = true; box.addEventListener('toggle', () => { try { sessionStorage.setItem('yc-checks-open', box.open ? '1' : '0'); } catch (e) { /* ignore */ } }); }
 }
 
 // ── 發佈 ──
@@ -2191,7 +2210,7 @@ function paintTrialBar() {
   tb.hidden = false;
   const msg = $('#tbMsg'), btn = $('#trialLogin'), sv = $('#btnSave'), back = $('.bar-back');
   if (S.trial) {
-    msg.textContent = '目前是試用模式，登入後才能儲存與發布';
+    msg.replaceChildren(h('span', { class: 'tb-long', text: '目前是' }), '試用模式', h('span', { class: 'tb-long', text: '，' }), h('span', { class: 'tb-short', text: '・' }), '登入後才能儲存', h('span', { class: 'tb-long', text: '與發布' }));
     btn.hidden = false; btn.onclick = () => askLoginToKeep('儲存');
     if (sv) { sv.hidden = false; sv.onclick = () => askLoginToKeep('儲存'); }
     if (back) { back.href = '../rental/'; back.title = '回到網站租用'; back.setAttribute('aria-label', '回到網站租用'); back.innerHTML = '←<span class="bb-t"> 網站租用</span>'; }
@@ -2201,6 +2220,22 @@ function paintTrialBar() {
 }
 // 預覽裝置：電腦（1280）、平板（820）用真實寬度排版後等比縮小放進預覽區；手機（390）照原本的手機外框
 const DEVICES = { desk: 1280, tab: 820, mob: 390 };
+// 電腦版：拖曳中間的分隔線調整編輯欄寬度（記住；雙擊恢復預設）
+function bindSplitter() {
+  const sp = $('#splitter'), split = $('.split'); if (!sp || !split) return;
+  const DEF = 480, MIN = 360;
+  const max = () => Math.max(MIN, Math.min(820, window.innerWidth * 0.62));
+  const set = (w, keep) => { w = Math.round(Math.min(max(), Math.max(MIN, w))); split.style.setProperty('--panel-w', w + 'px'); sp.setAttribute('aria-valuenow', String(w)); if (keep) { try { localStorage.setItem('yc-builder-panel', String(w)); } catch (e) { /* ignore */ } } };
+  let w0 = DEF; try { const v = Number(localStorage.getItem('yc-builder-panel')); if (v) w0 = v; } catch (e) { /* ignore */ }
+  set(w0);
+  let drag = null;
+  sp.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, w: $('#panel').getBoundingClientRect().width }; sp.setPointerCapture(e.pointerId); document.body.classList.add('resizing'); });
+  sp.addEventListener('pointermove', (e) => { if (drag) set(drag.w + e.clientX - drag.x); });
+  const end = () => { if (!drag) return; drag = null; document.body.classList.remove('resizing'); set($('#panel').getBoundingClientRect().width, true); };
+  sp.addEventListener('pointerup', end); sp.addEventListener('pointercancel', end);
+  sp.addEventListener('dblclick', () => set(DEF, true));
+  sp.addEventListener('keydown', (e) => { const d = { ArrowLeft: -24, ArrowRight: 24 }[e.key]; if (!d) return; e.preventDefault(); set($('#panel').getBoundingClientRect().width + d, true); });
+}
 function bindDevice() {
   const stage = $('#stage'), box = $('#frameBox'), f = $('#frame');
   const btn = { desk: $('#devDesk'), tab: $('#devTab'), mob: $('#devMob') };
@@ -2231,7 +2266,7 @@ function bindChrome() {
   if (bindChrome.done) return; bindChrome.done = true;
   $('#btnPublish').addEventListener('click', publish);
   $('#btnFull').addEventListener('click', openFullPreview);
-  bindDevice();
+  bindDevice(); bindSplitter();
   setTab('edit');
   $('#tabEdit').addEventListener('click', () => setTab('edit'));
   $('#tabView').addEventListener('click', () => { setTab('view'); renderPreview(); });
