@@ -135,11 +135,11 @@ function colorWarningsLocal(pal) {
 // ── 載入共用版型模組 ──
 async function loadLib() {
   const base = tplBase();
-  let site, content, valid, slug, pal, hours, pages, ind, code = {};
+  let site, content, valid, slug, pal, hours, pages, ind, code = {}, i18n = {};
   try {
     // 一個打包好的檔案（templates/dist/builder-lib.js）就包含全部共用模組，只要下載一次
     const L = await import(base + 'templates/dist/builder-lib.js');
-    ({ site, content, valid, slug, pal, hours, pages, ind } = L); code = L.code || {};
+    ({ site, content, valid, slug, pal, hours, pages, ind } = L); code = L.code || {}; i18n = L.i18n || {};
   } catch (e) {
     // 備援：打包檔讀不到時，改成一個一個載入原始模組（舊做法）
     [site, content, valid, slug, pal, hours, pages, ind] = await Promise.all([
@@ -148,11 +148,12 @@ async function loadLib() {
       import(base + 'templates/shared/pages.js'), import(base + 'templates/shared/industries.js')
     ]);
     try { code = await import(base + 'templates/shared/code.js'); } catch (e2) { code = {}; }
+    try { i18n = await import(base + 'templates/shared/i18n.js'); } catch (e2) { i18n = {}; }
   }
   S.lib = { buildSite: site.buildSite, ...content, validateForPublish: valid.validateForPublish, suggestions: valid.suggestions, slugError: slug.slugError, PALETTES: pal.PALETTES, PALETTE_IDS: pal.PALETTE_IDS, getPalette: pal.getPalette, isCustomPalette: pal.isCustomPalette, customPaletteId: pal.customPaletteId, parseCustomPalette: pal.parseCustomPalette, derivePalette: pal.derivePalette, paletteFrom4: pal.paletteFrom4, colorWarnings: pal.colorWarnings || colorWarningsLocal(pal), luminance: pal.luminance, hours,
     pagesFor: pages.pagesFor, normalizeLayout: pages.normalizeLayout, normalizePages: pages.normalizePages, defaultPages: pages.defaultPages, pagesFromSections: pages.pagesFromSections, LAYOUT_LABELS: pages.LAYOUT_LABELS,
     INDUSTRIES: ind.INDUSTRIES, INDUSTRY_GROUPS: ind.INDUSTRY_GROUPS, getIndustry: ind.getIndustry,
-    codeHash: code.codeHash, hasCustomCode: code.hasCustomCode };
+    codeHash: code.codeHash, hasCustomCode: code.hasCustomCode, missingEn: i18n.missingEn };
   // 方案（價格）模組：載入失敗時不影響編輯，只是不開放選多頁版、不顯示價格
   try { S.plan = await import(YC.url('assets/rental-plan.js')); } catch (e) { S.plan = null; }
 }
@@ -370,12 +371,11 @@ function renderPreview(now) {
     const L = S.lib;
     let r;
     try {
-      r = L.buildSite({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
-        siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path),
+      const args = () => ({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
+        siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path), lang: EN_MODE() ? 'en' : '',
         ...previewFont() });
-      if (updateSubsetFont(r.html)) r = L.buildSite({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
-        siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path),
-        ...previewFont() });
+      r = L.buildSite(args());
+      if (updateSubsetFont(r.html)) r = L.buildSite(args());
     } catch (e) { console.error(e); return; }
     if (S.page === 'home') paintSeoHints(r);
     S.pageList = r.pages || [];
@@ -408,6 +408,8 @@ function renderPreview(now) {
         startReveal(f, replay); wireNav(f);
         d.addEventListener('click', (ev) => {
           const el = ev.target.closest && ev.target.closest('a'); if (!el) return;
+          // 預覽裡的中英切換：直接切換編輯語言
+          if (el.classList.contains('lang-link')) { ev.preventDefault(); setLang(EN_MODE() ? 'zh' : 'en'); return; }
           const href = el.getAttribute('href') || '';
           if (href.startsWith('#')) { ev.preventDefault(); const x = href.length > 1 ? d.querySelector(href) : null; if (x) x.scrollIntoView({ behavior: 'smooth' }); else f.contentWindow.scrollTo({ top: 0, behavior: 'smooth' }); return; }
           if (/^(https?:|mailto:|tel:)/i.test(href)) return;   // 外部連結照常開新視窗
@@ -557,23 +559,26 @@ const paraSplit = (v) => String(v || '').split(/\n{1,}/).map((t) => t.trim()).fi
 const paraSep = (v) => (/\n\s*\n/.test(String(v || '')) ? '\n\n' : '\n');
 function inlineFind(text) {
   if (!text || !S.content) return null;
-  const c = S.content, L = S.lib.LIMITS, I = IND();
+  const c = S.content, L0 = S.lib.LIMITS, I = IND();
+  const en = EN_MODE(), K = (k) => (en ? k + 'En' : k);
+  const L = en ? Object.fromEntries(Object.entries(L0).map(([k, v]) => [k, typeof v === 'number' ? Math.round(v * 2.5) : v])) : L0;
   const norm = (t) => String(t || '').replace(/\s+/g, ' ').trim();
   const noQ = (t) => norm(t).replace(/[？?]$/, '');
   const want = norm(text), wantQ = noQ(text);
   const hit = (v) => v && norm(v) === want;
   // 多段文字：找到是第幾段，改那一段
-  const para = (obj, key, max, label) => {
+  const para = (obj, key0, max, label) => {
+    const key = K(key0);
     const ps = paraSplit(obj[key]); const i = ps.findIndex((p) => norm(p) === want);
     if (i < 0) return null;
     return { max, label, set: (v) => { const cur = paraSplit(obj[key]); const sep = paraSep(obj[key]); cur[i] = v; obj[key] = cur.join(sep); } };
   };
-  const line = (obj, key, max, label) => (hit(obj[key]) ? { max, label, set: (v) => { obj[key] = v; } } : null);
+  const line = (obj, key0, max, label) => { const key = K(key0); return hit(obj[key]) ? { max, label, set: (v) => { obj[key] = v; } } : null; };
   let r = line(c, 'name', L.name, '店名') || line(c, 'tagline', L.tagline, '標語') || para(c, 'intro', L.intro, '介紹') || line(c, 'hoursNote', L.hoursNote, '營業時間備註');
   if (r) return r;
   for (const m of c.menu) if ((r = line(m, 'name', L.menuName, I.offer.item + '名稱'))) return r;
   for (const q of c.faq) {
-    if (q.q && noQ(q.q) === wantQ) return { max: L.faqQ, label: '常見問題', set: (v) => { q.q = v; } };
+    if (q[K('q')] && noQ(q[K('q')]) === wantQ) return { max: L.faqQ, label: '常見問題', set: (v) => { q[K('q')] = v; } };
     if ((r = line(q, 'a', L.faqA, '回答'))) return r;
   }
   for (const b of c.blocks) {
@@ -584,7 +589,7 @@ function inlineFind(text) {
   for (const v of c.reviews) if ((r = line(v, 'text', L.reviewText, '評價'))) return r;
   for (const n of c.news) if ((r = line(n, 'title', L.newsTitle, '消息標題'))) return r;
   for (const p of c.posts) if ((r = line(p, 'title', L.postTitle, '文章標題'))) return r;
-  for (const k of Object.keys(c.subs || {})) if ((r = line(c.subs, k, L.sub, '副標題'))) return r;
+  for (const k of Object.keys(c.subs || {}).filter((k) => !k.endsWith('En'))) if ((r = line(c.subs, k, L.sub, '副標題'))) return r;
   if (c.shop && c.shop.items) for (const it of c.shop.items) if ((r = line(it, 'name', L.shopName, '商品名稱') || line(it, 'desc', L.shopDesc, '商品說明'))) return r;
   return null;
 }
@@ -596,7 +601,8 @@ function cardForKey(k) {
   if (!k) return null;
   if (k.startsWith('b-')) return { card: 'c-blocks', focus: () => { const i = S.content.blocks.findIndex((b) => 'b-' + b.id === k); const items = $('#blockBox') ? $('#blockBox').children : []; return items[i] && items[i].querySelector('input,textarea'); } };
   const cal = S.content.bookingCal && S.content.bookingCal.enabled;
-  const M = { header: ['c-info', '#f-name'], top: ['c-info', '#f-name'], footer: ['c-info', '#f-name'], about: ['c-info', '#f-intro'], video: ['c-more', '#f-video'], menu: ['c-menu'], interior: ['c-photos'],
+  const M = { name: ['c-info', '#f-name'], tagline: ['c-info', '#f-tagline'], intro: ['c-info', '#f-intro'], address: ['c-info', '#f-address'], blocks: ['c-blocks'],
+    header: ['c-info', '#f-name'], top: ['c-info', '#f-name'], footer: ['c-info', '#f-name'], about: ['c-info', '#f-intro'], video: ['c-more', '#f-video'], menu: ['c-menu'], interior: ['c-photos'],
     shop: ['c-shop'], reviews: ['c-more', '#reviewBox textarea'], news: ['c-news'], posts: ['c-posts'], faq: ['c-faq'], booking: cal ? ['c-cal'] : ['c-more', '#f-bookingForm'],
     visit: ['c-hours'], info: ['c-hours'], contact: ['c-more', '#f-contactForm'] };
   const m = M[k]; if (!m) return null;
@@ -716,7 +722,27 @@ const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', templat
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
+// ── 英文版：「English」編輯模式下，文字欄位改成讀寫同一個物件的「欄位名＋En」（例如 name → nameEn）；
+// 中文內容放在提示文字裡對照。價格、日期、照片、電話這類不分語言的欄位兩邊共用。
+const EN_MODE = () => S.lang === 'en' && !!(S.content && S.content.en && S.content.en.enabled);
+const TX_PATHS = ['name', 'tagline', 'intro', 'address', 'hoursNote', 'booking.label', 'shop.note', 'seo.title', 'seo.description'];
+function tx(el, obj, key, after) {
+  const en = EN_MODE(), k = en ? key + 'En' : key;
+  el.value = obj[k] == null ? '' : obj[k];
+  if (en) {
+    el.lang = 'en'; el.classList.add('en-in');
+    const zh = String(obj[key] || '').replace(/\s+/g, ' ').trim();
+    el.placeholder = zh ? '中文：' + (zh.length > 40 ? zh.slice(0, 40) + '…' : zh) : 'English';
+    if (el.maxLength > 0) el.maxLength = Math.round(el.maxLength * 2.5);
+  }
+  el.addEventListener('input', () => { obj[k] = el.value; if (after) after(el.value); touch(); });
+  return el;
+}
 function bindInput(el, path, onChange) {
+  if (EN_MODE() && TX_PATHS.includes(path)) {
+    const ks = path.split('.'); const key = ks.pop();
+    return tx(el, ks.length ? getPath(S.content, ks.join('.')) : S.content, key, onChange ? () => onChange() : null);
+  }
   el.value = getPath(S.content, path) || '';
   el.addEventListener('input', () => { setPath(S.content, path, el.value); if (onChange) onChange(); touch(); });
   return el;
@@ -731,6 +757,13 @@ function field(label, path, o) {
   bindInput(el, path, upd); upd();
   return h('label', { class: 'field', for: id }, h('span', {}, h('em', { style: 'font-style:normal', text: label }), cnt), el, o.help ? h('div', { class: 'msg mute', text: o.help }) : null);
 }
+// 切換編輯語言：左邊欄位改成讀寫中文或英文，右邊預覽同步切換
+function setLang(lang) {
+  if (lang === 'en' && !(S.content.en && S.content.en.enabled)) return;
+  if (S.lang === lang) return;
+  S.lang = lang; syncPanel(); renderPreview(true);
+  toast(lang === 'en' ? '現在編輯英文版：欄位裡填英文，灰色提示是中文內容' : '回到中文編輯');
+}
 function card(id, anchor, title, sub, ...kids) {
   const c = h('section', { class: 'card', id, 'data-anchor': anchor }, h('h2', { text: title }), sub ? h('p', { class: 'sub', text: sub }) : null, ...kids);
   // 換到另一張卡片時才把預覽捲過去（同一張卡片裡換欄位不會一直跳）
@@ -740,6 +773,12 @@ function card(id, anchor, title, sub, ...kids) {
 
 function buildPanel() {
   const L = S.lib, P = $('#panel'); P.replaceChildren();
+  if (S.content.en && S.content.en.enabled) {
+    const b = (lang, text) => h('button', { type: 'button', 'aria-pressed': String((S.lang === 'en') === (lang === 'en')), onclick: () => setLang(lang) }, text);
+    P.append(h('div', { class: 'lang-bar' + (EN_MODE() ? ' is-en' : ''), role: 'group', 'aria-label': '編輯語言' }, h('span', { text: '編輯語言' }), b('zh', '中文'), b('en', 'English'),
+      EN_MODE() ? h('small', { text: '填英文；灰色提示是中文內容' }) : null));
+  }
+  P.classList.toggle('lang-en', EN_MODE());
   P.append(h('details', { id: 'checks', class: 'checks', hidden: true }));
   P.append(h('div', { id: 'links', class: 'card', hidden: true }));
 
@@ -1038,13 +1077,16 @@ function buildPanel() {
 
   // 英文版
   const enOn = h('input', { type: 'checkbox', id: 'f-en-enabled' }); enOn.checked = !!S.content.en.enabled;
-  enOn.addEventListener('change', () => { S.content.en.enabled = enOn.checked; touch(); });
-  P.append(card('c-en', 'top', '英文版（選填）', '開啟後網站會多一個英文頁（網址 /en/），給外國客人看，Google 也會知道這是同一家店的英文版。',
-    h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-en-enabled' }, enOn, h('strong', { text: '開啟英文頁' }))),
-    field('英文店名', 'en.name', { max: 60, ph: 'e.g. Afternoon Sun Coffee' }),
-    field('英文一句話介紹', 'en.tagline', { max: 100, ph: 'e.g. Pour-over coffee and home-baked desserts' }),
-    field('英文介紹', 'en.intro', { area: true, max: 1000, rows: 5, ph: 'Who you are, what you offer, what makes you special…' }),
-    field('英文地址（選填）', 'en.address', { max: 160, ph: 'e.g. No. 100, Siwei 3rd Rd., Lingya Dist., Kaohsiung', help: '沒填會用中文地址。價目會沿用中文品名與價格。' })));
+  enOn.addEventListener('change', () => { S.content.en.enabled = enOn.checked; if (!enOn.checked) S.lang = 'zh'; touch(); syncPanel(); renderPreview(true); });
+  const enKids = [h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-en-enabled' }, enOn, h('strong', { text: '開啟英文版' })))];
+  if (S.content.en.enabled) {
+    const miss = S.lib.missingEn ? S.lib.missingEn(S.content) : [];
+    enKids.push(h('p', { class: 'msg mute', text: '網站上的固定文字（營業時間、預約、頁名、按鈕）會自動換成英文；店名、介紹、價目這些內容由你填英文。沒填英文的品名會沿用中文；常見問題、消息、文章沒填英文的那一則，不會出現在英文版。' }),
+      h('div', { class: 'en-actions' }, h('button', { type: 'button', class: 'btn small' + (EN_MODE() ? '' : ' primary'), onclick: () => setLang(EN_MODE() ? 'zh' : 'en') }, EN_MODE() ? '回到中文編輯' : '切換到英文編輯（English）')),
+      miss.length ? h('div', { class: 'en-miss' }, h('strong', { text: '還沒填英文：' }), h('ul', {}, ...miss.map((m) => h('li', {}, h('button', { type: 'button', class: 'linkish', onclick: () => { setLang('en'); const c = cardForKey(m.key); if (c) openCard(c.card, c.focus); } }, m.label)))))
+        : h('p', { class: 'msg ok', text: '✓ 英文內容都填好了' }));
+  }
+  P.append(card('c-en', 'top', '英文版（選填）', '開啟後，網站每一頁都會有英文版（網址 /en/…），右上角可以切換中英文，Google 也會知道兩種語言是同一家店。', ...enKids));
   $('#reviewAdd').onclick = () => { if (S.content.reviews.length < L.LIMITS.reviews) { S.content.reviews.push({ name: '', text: '' }); paintReviews(); touch(); } };
   paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintItems(); paintBlocks(); paintOrder(); paintSlug(); paintLinks(); refreshTodo();
   paintFontBox(); paintCal(); paintCodeStatus();
@@ -1335,8 +1377,7 @@ function paintMenu() {
   const L = S.lib, box = $('#menuBox'); box.replaceChildren();
   S.content.menu.forEach((m, i) => {
     const n = h('input', { type: 'text', maxlength: '40', placeholder: IND().offer.item + '名稱', 'aria-label': IND().offer.item + '名稱 ' + (i + 1) }), p = h('input', { type: 'number', min: '0', max: '99999', step: '1', inputmode: 'numeric', placeholder: '價格', 'aria-label': '價格 ' + (i + 1) });
-    n.value = m.name; p.value = m.price == null ? '' : m.price;
-    n.addEventListener('input', () => { m.name = n.value; touch(); });
+    tx(n, m, 'name'); p.value = m.price == null ? '' : m.price;
     p.addEventListener('input', () => { m.price = p.value === '' ? null : Number(p.value); touch(); });
     box.append(h('div', { class: 'row2 row2-dup' }, n, p, h('span', { class: 'ord-btns' }, iconBtn('複製', () => dupIn(S.content.menu, i, L.LIMITS.menu, paintMenu)), iconBtn('刪除', () => { S.content.menu.splice(i, 1); paintMenu(); touch(); }, 'danger'))));
   });
@@ -1347,8 +1388,8 @@ function paintNews() {
   const L = S.lib, box = $('#newsBox'); box.replaceChildren();
   S.content.news.forEach((m, i) => {
     const d = h('input', { type: 'date', 'aria-label': '日期 ' + (i + 1) }), t = h('input', { type: 'text', maxlength: '60', placeholder: '消息標題', 'aria-label': '標題 ' + (i + 1) });
-    d.value = m.date; t.value = m.title;
-    d.addEventListener('input', () => { m.date = d.value; touch(); }); t.addEventListener('input', () => { m.title = t.value; touch(); });
+    d.value = m.date; tx(t, m, 'title');
+    d.addEventListener('input', () => { m.date = d.value; touch(); });
     box.append(h('div', { class: 'rowN' }, d, t, iconBtn('刪除', () => { S.content.news.splice(i, 1); paintNews(); touch(); }, 'danger')));
   });
   $('#newsAdd').disabled = S.content.news.length >= L.LIMITS.news; $('#newsCnt').textContent = S.content.news.length + '/' + L.LIMITS.news;
@@ -1361,10 +1402,10 @@ function paintPosts() {
     const d = h('input', { type: 'date', 'aria-label': '文章日期 ' + (i + 1) });
     const b = h('textarea', { maxlength: String(L.LIMITS.postBody), rows: '6', placeholder: '文章內容（空一行就是新段落）', 'aria-label': '文章內容 ' + (i + 1) });
     const cnt = h('div', { class: 'msg mute', style: 'text-align:right' });
-    t.value = p.title; d.value = p.date; b.value = p.body;
-    const upd = () => { cnt.textContent = [...b.value].length + '/' + L.LIMITS.postBody; };
-    t.addEventListener('input', () => { p.title = t.value; touch(); }); d.addEventListener('input', () => { p.date = d.value; touch(); });
-    b.addEventListener('input', () => { p.body = b.value; upd(); touch(); }); upd();
+    d.value = p.date;
+    const upd = () => { cnt.textContent = [...b.value].length + '/' + b.maxLength; };
+    tx(t, p, 'title'); d.addEventListener('input', () => { p.date = d.value; touch(); });
+    tx(b, p, 'body', upd); upd();
     box.append(h('div', { class: 'faq-item' }, h('div', { class: 'rowN' }, d, t), b, cnt,
       h('div', { class: 'msg mute', text: '網址：/posts/' + p.id + '/' }),
       h('div', { style: 'text-align:right' }, iconBtn('刪除這篇', () => { if (confirm('確定刪除這篇文章？')) { S.content.posts.splice(i, 1); paintPosts(); touch(); } }, 'danger'))));
@@ -1383,8 +1424,7 @@ function paintOrder() {
   const subIn = (k) => {
     if (!S.lib.SUB_KEYS.includes(k)) return null;
     const el = h('input', { type: 'text', class: 'ord-sub', maxlength: String(S.lib.LIMITS.sub), placeholder: '副標題（選填）', 'aria-label': orderLabel(k) + ' 副標題' });
-    el.value = S.content.subs[k] || '';
-    el.addEventListener('input', () => { if (el.value.trim()) S.content.subs[k] = el.value; else delete S.content.subs[k]; touch(); });
+    tx(el, S.content.subs, k);
     el.addEventListener('focus', () => scrollPreviewTo(k));
     return el;
   };
@@ -1404,8 +1444,7 @@ function paintBlocks() {
       const t2 = h('input', { type: 'text', maxlength: String(L.LIMITS.blockTitle), placeholder: '區塊標題（選填），例如：追蹤我們的 Instagram', 'aria-label': '嵌入區塊標題 ' + (i + 1) });
       const code = h('textarea', { class: 'code', maxlength: String(L.LIMITS.html || 20000), rows: '6', spellcheck: 'false', placeholder: '貼上嵌入碼，例如 <iframe src="https://…"></iframe>', 'aria-label': '嵌入程式碼 ' + (i + 1) });
       const hid2 = h('input', { type: 'checkbox' });
-      t2.value = b.title; code.value = b.html || ''; hid2.checked = b.hidden;
-      t2.addEventListener('input', () => { b.title = t2.value; paintOrder(); touch(); });
+      tx(t2, b, 'title', () => paintOrder()); code.value = b.html || ''; hid2.checked = b.hidden;
       code.addEventListener('input', () => { b.html = code.value; touch(); clearTimeout(S.timers.code); S.timers.code = setTimeout(paintCodeStatus, 800); });
       hid2.addEventListener('change', () => { b.hidden = hid2.checked; paintOrder(); touch(); });
       [t2, code].forEach((el) => el.addEventListener('focus', () => scrollPreviewTo('b-' + b.id)));
@@ -1420,11 +1459,8 @@ function paintBlocks() {
     const bu = h('input', { type: 'url', maxlength: '500', placeholder: '按鈕連結 https://（選填）', 'aria-label': '按鈕連結 ' + (i + 1) });
     const side = h('select', { class: 'sel', 'aria-label': '照片位置 ' + (i + 1) }, h('option', { value: 'right', text: '照片在右' }), h('option', { value: 'left', text: '照片在左' }));
     const hid = h('input', { type: 'checkbox' });
-    t.value = b.title; body.value = b.body; bl.value = b.btnLabel; bu.value = b.btnUrl; side.value = b.side; hid.checked = b.hidden;
+    tx(t, b, 'title', () => paintOrder()); tx(body, b, 'body'); tx(bl, b, 'btnLabel'); bu.value = b.btnUrl; side.value = b.side; hid.checked = b.hidden;
     const go = () => scrollPreviewTo('b-' + b.id);
-    t.addEventListener('input', () => { b.title = t.value; paintOrder(); touch(); });
-    body.addEventListener('input', () => { b.body = body.value; touch(); });
-    bl.addEventListener('input', () => { b.btnLabel = bl.value; touch(); });
     bu.addEventListener('input', () => { b.btnUrl = bu.value; touch(); });
     side.addEventListener('change', () => { b.side = side.value; touch(); go(); });
     hid.addEventListener('change', () => { b.hidden = hid.checked; paintOrder(); touch(); });
@@ -1461,9 +1497,7 @@ function richBlockEditor(b, i) {
   const label = (L.BLOCK_KIND_LABELS || {})[b.kind] || '區塊';
   const t = h('input', { type: 'text', maxlength: String(L.LIMITS.blockTitle), placeholder: '區塊標題，例如：' + label, 'aria-label': label + '標題 ' + (i + 1) });
   const body = h('textarea', { maxlength: String(L.LIMITS.blockBody), rows: '2', placeholder: '一句簡短說明（選填）', 'aria-label': label + '說明 ' + (i + 1) });
-  t.value = b.title; body.value = b.body;
-  t.addEventListener('input', () => { b.title = t.value; paintOrder(); touch(); });
-  body.addEventListener('input', () => { b.body = body.value; touch(); });
+  tx(t, b, 'title', () => paintOrder()); tx(body, b, 'body');
   [t, body].forEach((el) => el.addEventListener('focus', go));
   const parts = [h('div', { class: 'blk-kind' }, label), t, h('div', { style: 'height:8px' }), body];
   if (b.items) {
@@ -1474,8 +1508,7 @@ function richBlockEditor(b, i) {
         const row = h('div', { class: 'rb-item' });
         (ITEM_FIELDS[b.kind] || []).forEach(([k, ph, n, long]) => {
           const el = long ? h('textarea', { rows: '2', maxlength: String(n), placeholder: ph, 'aria-label': label + ' 第 ' + (j + 1) + ' 項：' + ph }) : h('input', { type: 'text', maxlength: String(n), placeholder: ph, 'aria-label': label + ' 第 ' + (j + 1) + ' 項：' + ph });
-          el.value = it[k] || '';
-          el.addEventListener('input', () => { it[k] = el.value; touch(); });
+          tx(el, it, k);
           el.addEventListener('focus', go);
           row.append(el);
         });
@@ -1505,7 +1538,7 @@ function richBlockEditor(b, i) {
       file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) { await uploadPhoto(sl, f, nm, up); paintBlocks(); go(); } });
       const del = b[key] ? iconBtn('移除照片', async () => { const old = b[key].path; b[key] = null; touch(); await trashPhoto(old); paintBlocks(); }, 'danger') : null;
       const capIn = h('input', { type: 'text', maxlength: '20', placeholder: '照片標籤，例如：' + def, 'aria-label': def + '照片標籤' });
-      capIn.value = b[cap] || ''; capIn.addEventListener('input', () => { b[cap] = capIn.value; touch(); });
+      tx(capIn, b, cap);
       return h('div', { class: 'photo', style: 'margin-top:8px' }, h('div', { class: 'th' }, b[key] ? h('img', { src: photoUrl(b[key].path), alt: def }) : def),
         h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del, focalBtn(() => b[key], (v) => { b[key] = v; }, def + '照片')), file, capIn));
     };
@@ -1514,8 +1547,7 @@ function richBlockEditor(b, i) {
   const bl = h('input', { type: 'text', maxlength: String(L.LIMITS.btnLabel), placeholder: '按鈕文字（選填），例如：免費估價', 'aria-label': '按鈕文字 ' + (i + 1) });
   const bu = h('input', { type: 'url', maxlength: '500', placeholder: '按鈕連結 https://（選填）', 'aria-label': '按鈕連結 ' + (i + 1) });
   const hid = h('input', { type: 'checkbox' });
-  bl.value = b.btnLabel; bu.value = b.btnUrl; hid.checked = b.hidden;
-  bl.addEventListener('input', () => { b.btnLabel = bl.value; touch(); });
+  tx(bl, b, 'btnLabel'); bu.value = b.btnUrl; hid.checked = b.hidden;
   bu.addEventListener('input', () => { b.btnUrl = bu.value; touch(); });
   hid.addEventListener('change', () => { b.hidden = hid.checked; paintOrder(); touch(); });
   parts.push(h('div', { class: 'row2', style: 'margin-top:8px' }, bl, bu),
@@ -1626,10 +1658,8 @@ function paintItems() {
     const n = h('input', { type: 'text', maxlength: String(L.LIMITS.shopName), placeholder: '商品名稱', 'aria-label': '商品名稱 ' + (i + 1) });
     const p = h('input', { type: 'number', min: '1', max: String(L.LIMITS.shopPrice), step: '1', inputmode: 'numeric', placeholder: '價格', 'aria-label': '商品價格 ' + (i + 1) });
     const d = h('textarea', { maxlength: String(L.LIMITS.shopDesc), rows: '2', placeholder: '簡短說明（選填），例如：六入禮盒、常溫可放 7 天', 'aria-label': '商品說明 ' + (i + 1) });
-    n.value = it.name; p.value = it.price == null ? '' : it.price; d.value = it.desc || '';
-    n.addEventListener('input', () => { it.name = n.value; touch(); });
+    tx(n, it, 'name'); p.value = it.price == null ? '' : it.price; tx(d, it, 'desc');
     p.addEventListener('input', () => { it.price = p.value === '' ? null : Number(p.value); touch(); });
-    d.addEventListener('input', () => { it.desc = d.value; touch(); });
     const sl = { key: 'item', label: '商品照片', get: () => it.photo, set: (v) => { it.photo = v; } };
     const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', hidden: true });
     const nm = h('div', { class: 'nm' });
@@ -1654,8 +1684,7 @@ function paintReviews() {
   S.content.reviews.forEach((r, i) => {
     const n = h('input', { type: 'text', maxlength: String(L.LIMITS.reviewName), placeholder: '稱呼，例如：林小姐', 'aria-label': '評價者 ' + (i + 1) });
     const t = h('textarea', { maxlength: String(L.LIMITS.reviewText), rows: '3', placeholder: '評價內容', 'aria-label': '評價內容 ' + (i + 1) });
-    n.value = r.name; t.value = r.text;
-    n.addEventListener('input', () => { r.name = n.value; touch(); }); t.addEventListener('input', () => { r.text = t.value; touch(); });
+    tx(n, r, 'name'); tx(t, r, 'text');
     box.append(h('div', { class: 'faq-item' }, n, h('div', { style: 'height:8px' }), t, h('div', { style: 'text-align:right' }, iconBtn('刪除這則', () => { S.content.reviews.splice(i, 1); paintReviews(); touch(); }, 'danger'))));
   });
   $('#reviewAdd').disabled = S.content.reviews.length >= L.LIMITS.reviews; $('#reviewCnt').textContent = S.content.reviews.length + '/' + L.LIMITS.reviews;
@@ -1666,9 +1695,8 @@ function paintFaq() {
   S.content.faq.forEach((f, i) => {
     const q = h('input', { type: 'text', maxlength: '60', placeholder: '問題，例如：需要' + bookWord() + '嗎？', 'aria-label': '問題 ' + (i + 1) }), a = h('textarea', { maxlength: '300', rows: '3', placeholder: '回答（建議 30–300 字）', 'aria-label': '回答 ' + (i + 1) });
     const cnt = h('div', { class: 'msg mute', style: 'text-align:right' });
-    q.value = f.q; a.value = f.a;
-    const upd = () => { const n = [...a.value].length; cnt.textContent = n + '/300' + (n && n < 30 ? '（建議至少 30 字）' : ''); };
-    q.addEventListener('input', () => { f.q = q.value; touch(); }); a.addEventListener('input', () => { f.a = a.value; upd(); touch(); }); upd();
+    const upd = () => { const n = [...a.value].length; cnt.textContent = n + '/' + a.maxLength + (n && n < 30 && !EN_MODE() ? '（建議至少 30 字）' : ''); };
+    tx(q, f, 'q'); tx(a, f, 'a', upd); upd();
     box.append(h('div', { class: 'faq-item' }, q, h('div', { style: 'height:8px' }), a, cnt, h('div', { style: 'text-align:right' }, iconBtn('複製這題', () => dupIn(S.content.faq, i, L.LIMITS.faq, paintFaq)), ' ', iconBtn('刪除這題', () => { S.content.faq.splice(i, 1); paintFaq(); touch(); }, 'danger'))));
   });
   $('#faqAdd').disabled = S.content.faq.length >= L.LIMITS.faq; $('#faqCnt').textContent = S.content.faq.length + '/' + L.LIMITS.faq;
