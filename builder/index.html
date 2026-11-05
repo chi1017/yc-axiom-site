@@ -14,7 +14,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="網站編輯器">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="stylesheet" href="dist/builder.min.css?v=ce15a032ae">
+<link rel="stylesheet" href="dist/builder.min.css?v=18df80e7bc">
 </head>
 <body>
 <div id="app" class="app" hidden>
@@ -44,14 +44,14 @@
     <section class="view" id="view" aria-label="網站預覽">
       <div class="view-bar">
         <div class="seg" role="group" aria-label="預覽裝置">
-          <button type="button" id="devDesk" aria-pressed="true">桌面版</button>
-          <button type="button" id="devMob" aria-pressed="false">手機版</button>
+          <button type="button" id="devDesk" aria-pressed="true">電腦</button><button type="button" id="devTab" aria-pressed="false">平板</button>
+          <button type="button" id="devMob" aria-pressed="false">手機</button>
         </div>
         <button type="button" class="btn small mob-only" id="btnFull2">全螢幕預覽</button>
         <div class="seg pages" id="pageTabs" role="group" aria-label="預覽頁面" hidden></div>
-        <span class="view-hint">這是預覽，灰色 [提示文字] 不會出現在正式網站上</span>
+        <span class="view-hint">點預覽裡的文字可以直接修改；灰色 [提示文字] 不會出現在正式網站上</span>
       </div>
-      <div class="stage" id="stage"><iframe id="frame" title="網站預覽" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div>
+      <div class="stage" id="stage"><div class="frame-box" id="frameBox"><iframe id="frame" title="網站預覽" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe></div></div>
     </section>
   </div>
   <nav class="mtabs" id="mtabs" aria-label="編輯分類">
@@ -69,6 +69,6 @@
 <script src="../assets/supabase-config.js"></script>
 <script src="../assets/vendor/supabase-2.117.2.min.js"></script>
 <script src="../assets/yc-auth.js?v=2026-10-28a"></script>
-<script type="module" src="dist/builder.min.js?v=fa9ef19092"></script>
+<script type="module" src="dist/builder.min.js?v=d4e21b0a71"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /* YC AXIOM 網站編輯器：左邊填內容、右邊即時預覽。
    預覽用的版型函式與「正式建置」是同一份程式（yc-axiom-sites 的 templates/shared/*），所以所見即所得。 */
-import { startReveal, wireNav, morphFrame, settleReveal, wireEditPills, flashSection, sectionKey } from './preview-fx.js';
+import { startReveal, wireNav, morphFrame, settleReveal, wireEditPills, wireInlineEdit, flashSection, sectionKey } from './preview-fx.js';
 const YC = window.YC;
 const $ = (s, r) => (r || document).querySelector(s);
 // 版型檔案由官網自己提供（部署官網時從 yc-axiom-sites 複製到 /tpl/）
@@ -12,9 +12,11 @@ const MAX_ORIGINAL = 5 * 1024 * 1024, MAX_EDGE = 1600;
 // 標題字型檔（預覽用完整的常用字版本；正式網站只放用到的字）
 const FONT_FILE = { serif: 'NotoSerifTC-Bold-common.woff2', sans: 'NotoSansTC-Bold-common.woff2', round: 'Huninn-common.woff2', kai: 'LXGWWenKaiTC-Bold-common.woff2' };
 
+// 載入時記住 ?tplbase=（之後網址會被整理掉）
+const TPL_Q = new URLSearchParams(location.search).get('tplbase');
 function tplBase() {
   // 只有本機測試（127.0.0.1／localhost）允許用 ?tplbase= 指定版型來源
-  const q = new URLSearchParams(location.search).get('tplbase');
+  const q = TPL_Q;
   if (q && /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && /^http:\/\/(127\.0\.0\.1|localhost):\d+\/$/.test(q)) return q;
   return DEFAULT_TPL_BASE;
 }
@@ -381,6 +383,8 @@ function renderPreview(now) {
     paintPageTabs();
     // 手機版在「編輯」分頁時看不到預覽：先不更新預覽框，切到「預覽」時再更新（打字更順）
     if (isMob() && $('.app').dataset.tab !== 'view') return;
+    // 正在預覽上直接改字：預覽的文字已經是使用者打的，先不更新（避免游標跳掉），改完再更新
+    if (S.inlineEdit) return;
     const f = $('#frame');
     // 同一頁的內容更新：只改有變的地方（不重新載入），預覽不閃、不跳
     if (frameState.ready && frameState.page === S.page && !S.replayMotion && morphFrame(f, r.html)) {
@@ -396,6 +400,7 @@ function renderPreview(now) {
       try {
         const d = f.contentDocument;
         wireEditPills(f, pickSection, (k) => { const c = cardForKey(k); const el = c && $('#' + c.card); const t = el && el.querySelector('h2'); return t ? '「' + t.textContent.replace(/（.*?）/g, '') + '」' : ''; });
+        wireInlineEdit(f, { find: inlineFind, onStart: () => { S.inlineEdit = true; }, onInput: () => touch(), onDone: () => { S.inlineEdit = false; touch(); syncPanel(); renderPreview(true); } });
         const a = pendingAnchor; pendingAnchor = null;
         const t = a && d.getElementById(a);
         if (t) t.scrollIntoView({ block: 'start' }); else f.contentWindow.scrollTo(0, a === null ? frameScroll : 0);
@@ -546,6 +551,46 @@ function scrollPreviewTo(anchor) {
     if (t) { t.scrollIntoView({ block: 'start' }); if (S.lastFlash !== anchor) { S.lastFlash = anchor; flashSection(f, t); } }
   } catch (e) { /* ignore */ }
 }
+// ── 預覽上直接改字：用預覽裡的文字找回是哪一個欄位 ──
+// 回傳 { set(新文字), max, label }；同一段文字在多個欄位出現時用第一個。
+const paraSplit = (v) => String(v || '').split(/\n{1,}/).map((t) => t.trim()).filter(Boolean);
+const paraSep = (v) => (/\n\s*\n/.test(String(v || '')) ? '\n\n' : '\n');
+function inlineFind(text) {
+  if (!text || !S.content) return null;
+  const c = S.content, L = S.lib.LIMITS, I = IND();
+  const norm = (t) => String(t || '').replace(/\s+/g, ' ').trim();
+  const noQ = (t) => norm(t).replace(/[？?]$/, '');
+  const want = norm(text), wantQ = noQ(text);
+  const hit = (v) => v && norm(v) === want;
+  // 多段文字：找到是第幾段，改那一段
+  const para = (obj, key, max, label) => {
+    const ps = paraSplit(obj[key]); const i = ps.findIndex((p) => norm(p) === want);
+    if (i < 0) return null;
+    return { max, label, set: (v) => { const cur = paraSplit(obj[key]); const sep = paraSep(obj[key]); cur[i] = v; obj[key] = cur.join(sep); } };
+  };
+  const line = (obj, key, max, label) => (hit(obj[key]) ? { max, label, set: (v) => { obj[key] = v; } } : null);
+  let r = line(c, 'name', L.name, '店名') || line(c, 'tagline', L.tagline, '標語') || para(c, 'intro', L.intro, '介紹') || line(c, 'hoursNote', L.hoursNote, '營業時間備註');
+  if (r) return r;
+  for (const m of c.menu) if ((r = line(m, 'name', L.menuName, I.offer.item + '名稱'))) return r;
+  for (const q of c.faq) {
+    if (q.q && noQ(q.q) === wantQ) return { max: L.faqQ, label: '常見問題', set: (v) => { q.q = v; } };
+    if ((r = line(q, 'a', L.faqA, '回答'))) return r;
+  }
+  for (const b of c.blocks) {
+    if ((r = line(b, 'title', L.blockTitle, '區塊標題') || para(b, 'body', L.blockBody, '區塊內容'))) return r;
+    for (const it of b.items || []) if ((r = line(it, 't', L.itemTitle, '項目') || line(it, 'v', 20, '數字或規格') || line(it, 'd', L.itemText, '說明'))) return r;
+    if (b.kind === 'compare' && ((r = line(b, 'cap1', 20, '照片標籤') || line(b, 'cap2', 20, '照片標籤')))) return r;
+  }
+  for (const v of c.reviews) if ((r = line(v, 'text', L.reviewText, '評價'))) return r;
+  for (const n of c.news) if ((r = line(n, 'title', L.newsTitle, '消息標題'))) return r;
+  for (const p of c.posts) if ((r = line(p, 'title', L.postTitle, '文章標題'))) return r;
+  for (const k of Object.keys(c.subs || {})) if ((r = line(c.subs, k, L.sub, '副標題'))) return r;
+  if (c.shop && c.shop.items) for (const it of c.shop.items) if ((r = line(it, 'name', L.shopName, '商品名稱') || line(it, 'desc', L.shopDesc, '商品說明'))) return r;
+  return null;
+}
+// 預覽上改完字：左邊的欄位換成新的內容（保留捲動位置）
+function syncPanel() { const P = $('#panel'); const sc = P.scrollTop; buildPanel(); P.scrollTop = sc; }
+
 // ── 預覽 → 左邊：點預覽上的「編輯」打開對應的設定卡片 ──
 function cardForKey(k) {
   if (!k) return null;
@@ -667,7 +712,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more', bookingCal: 'c-cal', code: 'c-code' };
+const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more', bookingCal: 'c-cal', code: 'c-code', order: 'c-order' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -696,6 +741,7 @@ function card(id, anchor, title, sub, ...kids) {
 function buildPanel() {
   const L = S.lib, P = $('#panel'); P.replaceChildren();
   P.append(h('div', { id: 'todo', class: 'todo', hidden: true }));
+  P.append(h('div', { id: 'exWarn', class: 'todo ex-warn', hidden: true }));
   P.append(h('details', { id: 'tips', class: 'card', hidden: true }));
   P.append(h('div', { id: 'links', class: 'card', hidden: true }));
 
@@ -791,6 +837,9 @@ function buildPanel() {
     h('div', { id: 'slugMsg', class: 'msg mute' }), h('div', { id: 'slugUrl', class: 'msg mute', style: 'margin-bottom:12px' }),
     h('div', { class: 'field' }, h('span', { text: '配色' }), h('div', { class: 'palettes' }, allPalBtns), customRow),
     styleBox,
+    h('div', { class: 'field' }, h('span', { text: '一鍵換風格' }),
+      h('button', { type: 'button', class: 'btn small', id: 'lookPick', onclick: () => openLookPicker() }, '從風格範例套用外觀…'),
+      h('div', { class: 'msg mute', text: '只換配色、字型、按鈕、版型與排列方式；你的文字、照片與價目都不會變。換了不喜歡可以按「復原」。' })),
     h('div', { id: 'layoutBox', class: 'field toggles' })));
   paintLayout();
 
@@ -926,7 +975,7 @@ function buildPanel() {
   };
   // 自訂區塊：標題、文字、照片、按鈕
   P.append(card('c-blocks', 'top', '自訂區塊（選填）', '最多 ' + L.LIMITS.blocks + ' 個。除了圖文，也可以加服務流程、數字亮點、合作客戶與認證、服務地區、設備與規格、施工前後對比。想放的內容沒有現成欄位時用這裡，例如：包場服務、品牌故事、合作夥伴、徵才。',
-    h('div', { id: 'blockBox' }), h('button', { type: 'button', class: 'btn small', id: 'blockAdd' }, '＋ 新增圖文區塊'), ' ',
+    h('div', { id: 'blockBox' }), h('button', { type: 'button', class: 'btn small primary', id: 'blockTpl' }, '＋ 從範本加入（附範例文字）'), ' ', h('button', { type: 'button', class: 'btn small', id: 'blockAdd' }, '＋ 新增圖文區塊'), ' ',
     h('select', { class: 'sel', id: 'blockKind', 'aria-label': '其他區塊類型', style: 'width:auto;display:inline-block;margin:4px 6px 4px 0' },
       h('option', { value: '', text: '＋ 新增其他區塊…' }),
       ['steps', 'stats', 'logos', 'areas', 'gear', 'compare'].map((k) => h('option', { value: k, text: (L.BLOCK_KIND_LABELS || {})[k] || k }))), ' ',
@@ -944,10 +993,11 @@ function buildPanel() {
     paintBlocks(); paintOrder(); touch(); setTimeout(() => scrollPreviewTo('b-' + id), 300);
   };
   $('#blockAdd').onclick = () => addBlock('text');
+  $('#blockTpl').onclick = () => openBlockTemplates();
   $('#blockAddHtml').onclick = () => addBlock('html');
   $('#blockKind').onchange = () => { const k = $('#blockKind').value; $('#blockKind').value = ''; if (k) addBlock(k); };
   // 首頁區塊順序
-  P.append(card('c-order', 'top', '首頁區塊順序與副標題', '用「上移／下移」調整首頁區塊的先後，也可以替每個區塊寫一句副標題。沒有內容或沒開啟的區塊不會出現在網站上。',
+  P.append(card('c-order', 'top', '首頁區塊順序與副標題', '拖曳左邊的 ⋮⋮ 或用「上移／下移」調整首頁區塊的先後，也可以替每個區塊寫一句副標題。沒有內容或沒開啟的區塊不會出現在網站上。',
     h('div', { id: 'orderNote', class: 'msg mute', style: 'margin:0 0 8px' }), h('ol', { id: 'orderBox', class: 'order-list' }),
     h('button', { type: 'button', class: 'btn small', id: 'orderReset' }, '恢復預設順序')));
   $('#orderReset').onclick = () => { S.content.order = L.normalizeOrder([], S.content.blocks); paintOrder(); touch(); };
@@ -1070,7 +1120,7 @@ function showGroup(key, scroll) {
 function openGuide() {
   const steps = [
     ['1　填內容', '左邊依分類填寫：先選外觀，再填店家資料與照片。不用一次填完，系統每 2 秒自動儲存。'],
-    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換桌面版與手機版，選單、捲動動畫都能直接試。灰色的 [提示文字] 不會出現在正式網站。'],
+    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換電腦、平板與手機，選單、捲動動畫都能直接試。電腦上可以直接點預覽裡的文字修改。灰色的 [提示文字] 不會出現在正式網站。'],
     ['3　按發佈', '必填項目完成後，按右上角「發佈」。之後每次修改再按一次發佈，網站約 1–2 分鐘更新。'],
     ['小技巧', '改錯了可以按「復原」；想回到以前發佈的版本，到「版面與紀錄」的版本紀錄還原。']
   ];
@@ -1206,6 +1256,70 @@ function paintLinks() {
     h('p', { class: 'sub', style: 'margin:0', text: '修改內容後按右上角「發佈」，約 1–2 分鐘更新到正式網站。' }));
 }
 
+// ── 拖曳排序：每一列左邊有「⋮⋮」把手，按住拖到想要的位置放開；鍵盤可用上下方向鍵 ──
+// 原本的「上移／下移」按鈕保留。arr＝要排序的資料，after＝排完後重畫並儲存。
+function dragSort(box, arr, after) {
+  if (!box) return;
+  box.classList.add('dsort');
+  const rows = () => [...box.children].filter((x) => !x.classList.contains('dsort-skip'));
+  rows().forEach((row, idx) => {
+    if (row.querySelector(':scope > .drag')) return;
+    const hd = h('button', { type: 'button', class: 'drag', title: '按住拖曳調整順序', 'aria-label': '調整順序：第 ' + (idx + 1) + ' 項（按上下方向鍵移動）' }, '⋮⋮');
+    row.prepend(hd);
+    let from = -1, moved = false;
+    // 拖曳中列會在 DOM 裡移動（會失去 pointer capture），所以移動與放開改在整個頁面上監聽
+    const onMove = (e) => {
+      if (from < 0) return;
+      const list = rows().filter((x) => x !== row);
+      const next = list.find((x) => { const r = x.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
+      if (next) { if (row.nextElementSibling !== next) { box.insertBefore(row, next); moved = true; } }
+      else if (list.length && list[list.length - 1].nextElementSibling !== row) { list[list.length - 1].after(row); moved = true; }
+      // 拖到邊緣時自動捲動設定面板
+      const P = $('#panel'), pr = P.getBoundingClientRect();
+      if (e.clientY < pr.top + 40) P.scrollTop -= 12; else if (e.clientY > pr.bottom - 40) P.scrollTop += 12;
+    };
+    const end = () => {
+      document.removeEventListener('pointermove', onMove); document.removeEventListener('pointerup', end); document.removeEventListener('pointercancel', end);
+      if (from < 0) return;
+      const to = rows().indexOf(row); row.classList.remove('dragging'); box.classList.remove('dsorting');
+      const f = from; from = -1;
+      if (moved && to !== f && to >= 0) { const [x] = arr.splice(f, 1); arr.splice(to, 0, x); }
+      after();
+    };
+    hd.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      from = rows().indexOf(row); moved = false; row.classList.add('dragging'); box.classList.add('dsorting');
+      document.addEventListener('pointermove', onMove); document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+    });
+    hd.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      const i = rows().indexOf(row), j = e.key === 'ArrowUp' ? i - 1 : i + 1;
+      if (j < 0 || j >= arr.length) return;
+      [arr[i], arr[j]] = [arr[j], arr[i]]; after();
+      const nr = rows()[j]; const nh = nr && nr.querySelector(':scope > .drag'); if (nh) nh.focus();
+    });
+  });
+}
+// ── 複製：區塊（照片不複製，避免刪掉一個時另一個也沒了）、價目、常見問題、區塊裡的項目 ──
+function dupBlock(i) {
+  const L = S.lib, b = S.content.blocks[i];
+  if (!b || S.content.blocks.length >= L.LIMITS.blocks) { toast('自訂區塊已達上限（' + L.LIMITS.blocks + ' 個）'); return; }
+  const id = 'k' + Math.random().toString(36).slice(2, 9).replace(/[^a-z0-9]/g, 'x');
+  const c = JSON.parse(JSON.stringify(b)); c.id = id; c.photo = null; if ('photo2' in c) c.photo2 = null;
+  if (c.title) c.title = [...(c.title + '（複本）')].slice(0, L.LIMITS.blockTitle).join('');
+  S.content.blocks.splice(i + 1, 0, c);
+  const o = S.content.order, at = o.indexOf('b:' + b.id);
+  if (at >= 0) o.splice(at + 1, 0, 'b:' + id);
+  S.content.order = L.normalizeOrder(o, S.content.blocks);
+  paintBlocks(); paintOrder(); touch(); setTimeout(() => scrollPreviewTo('b-' + id), 300);
+  toast('已複製區塊（照片沒有複製，可以另外上傳）', 2500);
+}
+function dupIn(arr, i, max, repaint) {
+  if (arr.length >= max) { toast('已達上限（' + max + ' 項）'); return; }
+  arr.splice(i + 1, 0, JSON.parse(JSON.stringify(arr[i]))); repaint(); touch();
+}
 function iconBtn(text, onclick, cls) { return h('button', { type: 'button', class: 'btn small ' + (cls || ''), onclick }, text); }
 function paintMenu() {
   const L = S.lib, box = $('#menuBox'); box.replaceChildren();
@@ -1214,9 +1328,10 @@ function paintMenu() {
     n.value = m.name; p.value = m.price == null ? '' : m.price;
     n.addEventListener('input', () => { m.name = n.value; touch(); });
     p.addEventListener('input', () => { m.price = p.value === '' ? null : Number(p.value); touch(); });
-    box.append(h('div', { class: 'row2' }, n, p, iconBtn('刪除', () => { S.content.menu.splice(i, 1); paintMenu(); touch(); }, 'danger')));
+    box.append(h('div', { class: 'row2 row2-dup' }, n, p, h('span', { class: 'ord-btns' }, iconBtn('複製', () => dupIn(S.content.menu, i, L.LIMITS.menu, paintMenu)), iconBtn('刪除', () => { S.content.menu.splice(i, 1); paintMenu(); touch(); }, 'danger'))));
   });
   $('#menuAdd').disabled = S.content.menu.length >= L.LIMITS.menu; $('#menuCnt').textContent = S.content.menu.length + '/' + L.LIMITS.menu;
+  dragSort(box, S.content.menu, () => { paintMenu(); touch(); scrollPreviewTo('menu'); });
 }
 function paintNews() {
   const L = S.lib, box = $('#newsBox'); box.replaceChildren();
@@ -1227,6 +1342,7 @@ function paintNews() {
     box.append(h('div', { class: 'rowN' }, d, t, iconBtn('刪除', () => { S.content.news.splice(i, 1); paintNews(); touch(); }, 'danger')));
   });
   $('#newsAdd').disabled = S.content.news.length >= L.LIMITS.news; $('#newsCnt').textContent = S.content.news.length + '/' + L.LIMITS.news;
+  dragSort(box, S.content.news, () => { paintNews(); touch(); });
 }
 function paintPosts() {
   const L = S.lib, box = $('#postBox'); if (!box) return; box.replaceChildren();
@@ -1267,6 +1383,7 @@ function paintOrder() {
       iconBtn('上移', () => { [o[i - 1], o[i]] = [o[i], o[i - 1]]; paintOrder(); touch(); scrollPreviewTo(k.startsWith('b:') ? 'b-' + k.slice(2) : k); }),
       iconBtn('下移', () => { [o[i + 1], o[i]] = [o[i], o[i + 1]]; paintOrder(); touch(); scrollPreviewTo(k.startsWith('b:') ? 'b-' + k.slice(2) : k); })))));
   box.querySelectorAll('li').forEach((li, i) => { const [u, d] = li.querySelectorAll('button'); u.disabled = i === 0; d.disabled = i === o.length - 1; });
+  dragSort(box, o, () => { paintOrder(); touch(); });
 }
 function paintBlocks() {
   const L = S.lib, box = $('#blockBox'); if (!box) return; box.replaceChildren();
@@ -1311,14 +1428,15 @@ function paintBlocks() {
     const del = b.photo ? iconBtn('移除照片', async () => { const old = b.photo.path; b.photo = null; touch(); await trashPhoto(old); paintBlocks(); }, 'danger') : null;
     box.append(h('div', { class: 'faq-item' }, t, h('div', { style: 'height:8px' }), body,
       h('div', { class: 'photo', style: 'margin-top:8px' }, h('div', { class: 'th' }, b.photo ? h('img', { src: photoUrl(b.photo.path), alt: b.title || '區塊照片' }) : '無照片'),
-        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del), file, side)),
+        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del, focalBtn(() => b.photo, (v) => { b.photo = v; }, b.title || '區塊照片')), file, side)),
       h('div', { class: 'row2', style: 'margin-top:8px' }, bl, bu),
-      h('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-top:8px' },
+      h('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px;flex-wrap:wrap' },
         h('label', { class: 'check' }, hid, '暫時隱藏'),
-        iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger'))));
+        h('span', { class: 'ord-btns' }, iconBtn('複製這個區塊', () => dupBlock(i)),
+        iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger')))));
   });
   $('#blockAddHtml').disabled = S.content.blocks.length >= L.LIMITS.blocks;
-  $('#blockAdd').disabled = S.content.blocks.length >= L.LIMITS.blocks; if ($('#blockKind')) $('#blockKind').disabled = S.content.blocks.length >= L.LIMITS.blocks; $('#blockCnt').textContent = S.content.blocks.length + '/' + L.LIMITS.blocks;
+  $('#blockAdd').disabled = S.content.blocks.length >= L.LIMITS.blocks; if ($('#blockTpl')) $('#blockTpl').disabled = S.content.blocks.length >= L.LIMITS.blocks; if ($('#blockKind')) $('#blockKind').disabled = S.content.blocks.length >= L.LIMITS.blocks; $('#blockCnt').textContent = S.content.blocks.length + '/' + L.LIMITS.blocks;
 }
 // 結構化區塊的編輯介面：服務流程、數字亮點、合作客戶與認證、服務地區、設備與規格、前後對比
 const ITEM_FIELDS = {
@@ -1354,10 +1472,12 @@ function richBlockEditor(b, i) {
         row.append(h('span', { class: 'ord-btns' },
           iconBtn('上移', () => { if (j > 0) { [b.items[j - 1], b.items[j]] = [b.items[j], b.items[j - 1]]; paint(); touch(); } }),
           iconBtn('下移', () => { if (j < b.items.length - 1) { [b.items[j + 1], b.items[j]] = [b.items[j], b.items[j + 1]]; paint(); touch(); } }),
+          iconBtn('複製', () => dupIn(b.items, j, max, paint)),
           iconBtn('刪除這一項', () => { b.items.splice(j, 1); paint(); touch(); }, 'danger')));
         return row;
       }));
       add.disabled = b.items.length >= max; cnt.textContent = b.items.length + '/' + max;
+      dragSort(list, b.items, () => { paint(); touch(); go(); });
     };
     const add = h('button', { type: 'button', class: 'btn small' }, '＋ 新增一項');
     const cnt = h('span', { class: 'msg mute', style: 'margin-left:8px' });
@@ -1377,7 +1497,7 @@ function richBlockEditor(b, i) {
       const capIn = h('input', { type: 'text', maxlength: '20', placeholder: '照片標籤，例如：' + def, 'aria-label': def + '照片標籤' });
       capIn.value = b[cap] || ''; capIn.addEventListener('input', () => { b[cap] = capIn.value; touch(); });
       return h('div', { class: 'photo', style: 'margin-top:8px' }, h('div', { class: 'th' }, b[key] ? h('img', { src: photoUrl(b[key].path), alt: def }) : def),
-        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del), file, capIn));
+        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del, focalBtn(() => b[key], (v) => { b[key] = v; }, def + '照片')), file, capIn));
     };
     parts.push(ph('photo', 'cap1', '施工前'), ph('photo2', 'cap2', '施工後'));
   }
@@ -1389,8 +1509,8 @@ function richBlockEditor(b, i) {
   bu.addEventListener('input', () => { b.btnUrl = bu.value; touch(); });
   hid.addEventListener('change', () => { b.hidden = hid.checked; paintOrder(); touch(); });
   parts.push(h('div', { class: 'row2', style: 'margin-top:8px' }, bl, bu),
-    h('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-top:8px' }, h('label', { class: 'check' }, hid, '暫時隱藏'),
-      iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger')));
+    h('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px;flex-wrap:wrap' }, h('label', { class: 'check' }, hid, '暫時隱藏'),
+      h('span', { class: 'ord-btns' }, iconBtn('複製這個區塊', () => dupBlock(i)), iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger'))));
   return h('div', { class: 'faq-item' }, ...parts);
 }
 function paintShare() {
@@ -1511,12 +1631,13 @@ function paintItems() {
       h('div', { class: 'row2' }, n, p),
       h('div', { style: 'height:8px' }), d,
       h('div', { class: 'photo', style: 'margin-top:8px' }, h('div', { class: 'th' }, it.photo ? h('img', { src: photoUrl(it.photo.path), alt: it.name || '商品照片' }) : '無照片'),
-        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del), file)),
+        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del, focalBtn(() => it.photo, (v) => { it.photo = v; }, it.name || '商品照片')), file)),
       h('div', { style: 'text-align:right' },
         i > 0 ? iconBtn('上移', () => { const a = S.content.shop.items; [a[i - 1], a[i]] = [a[i], a[i - 1]]; paintItems(); touch(); }) : null, ' ',
         iconBtn('刪除這項', () => { if (confirm('確定刪除這個商品？')) { S.content.shop.items.splice(i, 1); paintItems(); touch(); } }, 'danger'))));
   });
   $('#itemAdd').disabled = S.content.shop.items.length >= L.LIMITS.shopItems; $('#itemCnt').textContent = S.content.shop.items.length + '/' + L.LIMITS.shopItems;
+  dragSort(box, S.content.shop.items, () => { paintItems(); touch(); });
 }
 function paintReviews() {
   const L = S.lib, box = $('#reviewBox'); if (!box) return; box.replaceChildren();
@@ -1528,6 +1649,7 @@ function paintReviews() {
     box.append(h('div', { class: 'faq-item' }, n, h('div', { style: 'height:8px' }), t, h('div', { style: 'text-align:right' }, iconBtn('刪除這則', () => { S.content.reviews.splice(i, 1); paintReviews(); touch(); }, 'danger'))));
   });
   $('#reviewAdd').disabled = S.content.reviews.length >= L.LIMITS.reviews; $('#reviewCnt').textContent = S.content.reviews.length + '/' + L.LIMITS.reviews;
+  dragSort(box, S.content.reviews, () => { paintReviews(); touch(); scrollPreviewTo('reviews'); });
 }
 function paintFaq() {
   const L = S.lib, box = $('#faqBox'); box.replaceChildren();
@@ -1537,10 +1659,173 @@ function paintFaq() {
     q.value = f.q; a.value = f.a;
     const upd = () => { const n = [...a.value].length; cnt.textContent = n + '/300' + (n && n < 30 ? '（建議至少 30 字）' : ''); };
     q.addEventListener('input', () => { f.q = q.value; touch(); }); a.addEventListener('input', () => { f.a = a.value; upd(); touch(); }); upd();
-    box.append(h('div', { class: 'faq-item' }, q, h('div', { style: 'height:8px' }), a, cnt, h('div', { style: 'text-align:right' }, iconBtn('刪除這題', () => { S.content.faq.splice(i, 1); paintFaq(); touch(); }, 'danger'))));
+    box.append(h('div', { class: 'faq-item' }, q, h('div', { style: 'height:8px' }), a, cnt, h('div', { style: 'text-align:right' }, iconBtn('複製這題', () => dupIn(S.content.faq, i, L.LIMITS.faq, paintFaq)), ' ', iconBtn('刪除這題', () => { S.content.faq.splice(i, 1); paintFaq(); touch(); }, 'danger'))));
   });
   $('#faqAdd').disabled = S.content.faq.length >= L.LIMITS.faq; $('#faqCnt').textContent = S.content.faq.length + '/' + L.LIMITS.faq;
+  dragSort(box, S.content.faq, () => { paintFaq(); touch(); scrollPreviewTo('faq'); });
 }
+
+// ── 區塊範本：從風格範例挑區塊（服務流程、數字亮點、服務地區…），連同範例文字一起加入，再改成自己的 ──
+let SC_MOD = null;
+async function scModule() { if (!SC_MOD) SC_MOD = import(tplBase() + 'templates/gallery/showcases.mjs').catch(() => { SC_MOD = null; return null; }); return SC_MOD; }
+async function openBlockTemplates() {
+  const L = S.lib, M = await scModule();
+  if (!M) { toast('範本載入失敗，請稍後再試'); return; }
+  const mine = S.site.template, myGroup = (L.getIndustry(mine) || {}).group;
+  const rank = (x) => (x.k === mine ? 0 : (L.getIndustry(x.k) || {}).group === myGroup ? 1 : 2);
+  const seen = new Set(), all = [];
+  (M.SHOWCASES || []).slice().sort((a, b) => rank(a) - rank(b)).forEach((sc) => (sc.content.blocks || []).forEach((b) => {
+    if (b.kind === 'html' || b.kind === 'compare' || !((b.items && b.items.length) || b.body)) return;
+    const key = (b.kind || 'text') + '|' + b.title; if (seen.has(key)) return; seen.add(key);
+    all.push({ b, sc, r: rank(sc) });
+  }));
+  let kind = '', scope = all.some((x) => x.r < 2) ? 'near' : 'all';
+  const list = h('div', { class: 'tpl-list' });
+  const kindLabel = (k) => (!k || k === 'text' ? '圖文' : L.BLOCK_KIND_LABELS[k]);
+  const kinds = [['', '全部'], ...['steps', 'stats', 'areas', 'gear', 'logos', 'text'].map((k) => [k, kindLabel(k)])];
+  const kindBtns = kinds.map(([k, t]) => h('button', { type: 'button', class: 'btn small', 'aria-pressed': String(k === kind), onclick: (e) => { kind = k; kindBtns.forEach((x) => x.setAttribute('aria-pressed', String(x === e.currentTarget))); paint(); } }, t));
+  const scopeSel = h('select', { class: 'sel', 'aria-label': '範本來源', style: 'width:auto', onchange: (e) => { scope = e.target.value; paint(); } },
+    h('option', { value: 'near', text: '同行業與相近行業' }), h('option', { value: 'all', text: '所有行業' }));
+  scopeSel.value = scope;
+  function paint() {
+    const rows = all.filter((x) => (!kind || (x.b.kind || 'text') === kind) && (scope === 'all' || x.r < 2));
+    list.replaceChildren(...(rows.length ? rows.map(({ b, sc }) => {
+      const prev = b.items ? b.items.slice(0, 4).map((it) => [it.v, it.t].filter(Boolean).join(' ')).join('、') + (b.items.length > 4 ? '…' : '') : (b.body || '').slice(0, 60) + '…';
+      return h('button', { type: 'button', class: 'tpl-row', onclick: () => { insertTemplate(b); closeModal(); } },
+        h('span', { class: 'tpl-kind', text: kindLabel(b.kind) }),
+        h('strong', { text: b.title }), h('small', { text: prev }), h('em', { text: '來自：' + sc.label }));
+    }) : [h('p', { class: 'msg mute', text: '這個類型目前沒有範本，可以改看「所有行業」。' })]));
+  }
+  paint();
+  const left = L.LIMITS.blocks - S.content.blocks.length;
+  const mb = modal('從範本加入區塊', [h('p', { class: 'msg mute', text: '挑一個接近的區塊，會連同範例文字一起加入，再把文字改成你的。還可以加 ' + left + ' 個區塊。' }),
+    h('div', { class: 'seg-btns crop-tools' }, kindBtns, scopeSel), list], [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '取消')]);
+  mb.querySelector('.modal').classList.add('modal-wide');
+}
+function insertTemplate(src) {
+  const L = S.lib; if (S.content.blocks.length >= L.LIMITS.blocks) return;
+  recordHist();
+  const id = 'k' + Math.random().toString(36).slice(2, 9).replace(/[^a-z0-9]/g, 'x');
+  const b = JSON.parse(JSON.stringify(src)); b.id = id; b.photo = null; delete b.photo2; b.hidden = false; if (!b.kind) b.kind = 'text';
+  ['btnLabel', 'btnUrl'].forEach((k) => { if (b[k] == null) b[k] = ''; }); if (!b.side) b.side = 'right';
+  S.content.blocks.push(b);
+  S.content.order = L.normalizeOrder(S.content.order, S.content.blocks);
+  paintBlocks(); paintOrder(); touch(); setTimeout(() => scrollPreviewTo('b-' + id), 300);
+  toast('已加入「' + b.title + '」，記得把範例文字改成你的。', 3500);
+}
+// ── 範例內容檢查：從風格範例或行業範例開始的網站，提醒還沒換掉的示範地址、電話、評價與文字 ──
+let EX_TEXT = null;
+async function exampleTexts() {
+  if (EX_TEXT) return EX_TEXT;
+  const M = await scModule(); const set = new Set();
+  const add = (t) => { t = String(t || '').trim(); if (t.length >= 6) set.add(t); };
+  if (M) (M.SHOWCASES || []).concat(M.ONE_PAGE || []).forEach((sc) => {
+    const c = sc.content; add(c.tagline); add(c.intro);
+    (c.reviews || []).forEach((r) => add(r.text)); (c.faq || []).forEach((q) => add(q.a));
+    (c.blocks || []).forEach((b) => { add(b.body); (b.items || []).forEach((it) => add(it.d)); });
+    (c.posts || []).forEach((p) => add(p.body));
+  });
+  EX_TEXT = set; return set;
+}
+async function exampleWarnings() {
+  const c = S.content, ex = await exampleTexts(), out = [];
+  if (/示範路/.test(c.address || '')) out.push({ field: 'address', msg: '地址還是範例地址，請換成你的地址' });
+  if (/(^|\D)0\d{1,2}-0000-\d{4}/.test(c.phone || '')) out.push({ field: 'phone', msg: '電話還是範例號碼，請換成你的電話' });
+  const rv = (c.reviews || []).filter((r) => ex.has(String(r.text || '').trim()));
+  if (rv.length) out.push({ field: 'reviews', msg: '有 ' + rv.length + ' 則評價是範例內容，請換成客人的真實評價或刪除' });
+  if (Object.values(c.subs || {}).some((t) => /示範內容/.test(t || ''))) out.push({ field: 'order', msg: '區塊副標題還寫著「示範內容」，請修改' });
+  let n = 0; const chk = (t) => { if (ex.has(String(t || '').trim())) n++; };
+  chk(c.tagline); chk(c.intro); (c.faq || []).forEach((q) => chk(q.a)); (c.blocks || []).forEach((b) => { chk(b.body); (b.items || []).forEach((it) => chk(it.d)); }); (c.posts || []).forEach((p) => chk(p.body));
+  if (n) out.push({ field: 'intro', msg: '還有 ' + n + ' 段文字和範例一模一樣，建議改成你自己的說法' });
+  return out;
+}
+// ── 一鍵換風格：把風格範例的外觀（配色、字型、按鈕、紋理、標題樣式、動畫、版型）套到目前的網站，內容不變 ──
+const LOOK_KEYS = ['font', 'button', 'texture', 'motion', 'head', 'menuStyle', 'gallery', 'reviewStyle'];
+async function openLookPicker() {
+  let list = [];
+  try { const M = await import(tplBase() + 'templates/gallery/showcases.mjs'); list = M.SHOWCASES || []; } catch (e) { toast('風格範例載入失敗，請稍後再試'); return; }
+  if (!list.length) return;
+  const L = S.lib, mine = S.site.template, myGroup = (L.getIndustry(mine) || {}).group;
+  // 同行業、同類別的排前面
+  const rank = (x) => (x.k === mine ? 0 : (L.getIndustry(x.k) || {}).group === myGroup ? 1 : 2);
+  list = list.slice().sort((a, b) => rank(a) - rank(b));
+  const thumb = (id) => new URL('../rental/styles/' + id + '/thumb.webp', location.href).href;
+  const cards = list.map((x) => {
+    const pal = L.getPalette(x.palette);
+    const sw = h('i', { class: 'look-sw' }, [pal.bg, pal.surface, pal.accent, pal.text].map((c) => h('s', { style: 'background:' + c })));
+    const img = h('img', { src: thumb(x.id), alt: '', loading: 'lazy', onerror: (e) => { e.target.remove(); } });
+    return h('button', { type: 'button', class: 'look-card', onclick: () => { applyLook(x); closeModal(); } },
+      h('span', { class: 'look-th' }, img, sw), h('strong', { text: x.styleName }), h('small', { text: x.label }));
+  });
+  // 依行業分類篩選（範例變多了，預設先看同行業與相近行業）
+  const groups = [...new Set(list.map((x) => (L.getIndustry(x.k) || {}).group).filter(Boolean))];
+  const grid = h('div', { class: 'look-grid' }, cards);
+  const filter = (v) => cards.forEach((c, i) => { const g = (L.getIndustry(list[i].k) || {}).group; c.hidden = v === 'near' ? rank(list[i]) > 1 : v !== 'all' && g !== v; });
+  const sel = h('select', { class: 'sel', 'aria-label': '依行業分類篩選', style: 'width:auto', onchange: (e) => filter(e.target.value) },
+    h('option', { value: 'all', text: '全部風格（' + list.length + '）' }), h('option', { value: 'near', text: '同行業與相近行業' }), groups.map((g) => h('option', { value: g, text: g })));
+  if (list.some((x) => rank(x) <= 1)) { sel.value = 'near'; filter('near'); }
+  const mb = modal('一鍵換風格', [h('p', { class: 'msg mute', text: '點一個風格，外觀會馬上換成那個樣子；文字、照片與價目都保留。不喜歡可以按上方「復原」。' }), h('div', { style: 'margin:0 0 10px' }, sel), grid],
+    [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '取消')]);
+  mb.querySelector('.modal').classList.add('modal-wide');
+}
+function applyLook(x) {
+  recordHist();
+  const st = x.content.style || {};
+  LOOK_KEYS.forEach((k) => { if (st[k] != null) S.content.style[k] = st[k]; });
+  S.content.style.colors = null;
+  if (x.content.heroStyle) S.content.heroStyle = x.content.heroStyle;
+  if (x.content.homeStyle) S.content.homeStyle = x.content.homeStyle;
+  S.palette = x.palette;
+  S.replayMotion = true;
+  syncPanel(); touch();
+  toast('已套用「' + x.styleName + '」的外觀。不喜歡可以按「復原」。', 4000);
+}
+
+// ── 照片重點位置：點照片上想保留的地方（臉、商品、招牌），網站裁切成橫幅、方形或直式時都會保留那個點 ──
+function focalBtn(get, set, label) {
+  const p = get(); if (!p) return null;
+  return h('button', { type: 'button', class: 'btn small', title: '選照片的重點，手機版與各種版型裁切時不會切掉', onclick: () => openFocal(get, set, label) }, p.fx != null ? '重點位置 ✓' : '調整重點位置');
+}
+function openFocal(get, set, label) {
+  const p = get(); if (!p) return;
+  let fx = p.fx != null ? p.fx : 50, fy = p.fy != null ? p.fy : 50;
+  const src = photoUrl(p.path);
+  const dot = h('span', { class: 'focal-dot' });
+  const big = h('div', { class: 'focal-pick', role: 'slider', tabindex: '0', 'aria-label': '照片重點位置（方向鍵可微調）', 'aria-valuetext': '' }, h('img', { src, alt: label || '照片', draggable: 'false' }), dot);
+  const shapes = [['橫幅', '21/9'], ['橫式', '4/3'], ['方形', '1/1'], ['直式', '3/4']].map(([t, r]) => {
+    const im = h('img', { src, alt: '', style: 'aspect-ratio:' + r }); return { im, el: h('figure', { class: 'focal-shape' }, im, h('figcaption', { text: t })) };
+  });
+  const paint = () => {
+    dot.style.left = fx + '%'; dot.style.top = fy + '%';
+    shapes.forEach((x) => { x.im.style.objectPosition = fx + '% ' + fy + '%'; });
+    big.setAttribute('aria-valuetext', '水平 ' + fx + '%，垂直 ' + fy + '%');
+  };
+  const apply = () => {
+    const cur = get(); if (!cur) return;
+    const n = { ...cur }; delete n.fx; delete n.fy;
+    if (fx !== 50 || fy !== 50) { n.fx = fx; n.fy = fy; }
+    set(n); touch();
+  };
+  const at = (e) => { const img = big.querySelector('img'), r = img.getBoundingClientRect(); fx = Math.round(Math.min(100, Math.max(0, (e.clientX - r.left) / r.width * 100))); fy = Math.round(Math.min(100, Math.max(0, (e.clientY - r.top) / r.height * 100))); paint(); apply(); };
+  let down = false;
+  big.addEventListener('pointerdown', (e) => { down = true; big.setPointerCapture(e.pointerId); at(e); });
+  big.addEventListener('pointermove', (e) => { if (down) at(e); });
+  big.addEventListener('pointerup', () => { down = false; });
+  big.addEventListener('keydown', (e) => {
+    const d = { ArrowLeft: [-2, 0], ArrowRight: [2, 0], ArrowUp: [0, -2], ArrowDown: [0, 2] }[e.key]; if (!d) return;
+    e.preventDefault(); fx = Math.min(100, Math.max(0, fx + d[0])); fy = Math.min(100, Math.max(0, fy + d[1])); paint(); apply();
+  });
+  paint();
+  const mb = modal('照片重點位置' + (label ? '：' + label : ''), [
+    h('p', { class: 'msg mute', text: '點一下（或拖曳）照片上最重要的地方，例如人臉、商品或招牌。網站在電腦、手機與不同版型裁切照片時，都會保留這個點。右邊預覽會跟著變。' }),
+    h('div', { class: 'focal-wrap' }, big, h('div', { class: 'focal-shapes' }, shapes.map((x) => x.el)))
+  ], [
+    h('button', { type: 'button', class: 'btn', onclick: () => { fx = 50; fy = 50; paint(); apply(); } }, '回到置中'),
+    h('button', { type: 'button', class: 'btn primary', onclick: () => { closeModal(); repaintPhotoLists(); } }, '完成')
+  ]);
+  mb.querySelector('.modal').classList.add('modal-wide');
+}
+function repaintPhotoLists() { paintPhotos(); paintBlocks(); if ($('#itemBox')) paintItems(); }
 
 // ── 照片 ──
 function paintPhotos() {
@@ -1549,13 +1834,13 @@ function paintPhotos() {
     const cur = sl.get();
     const canAdd = sl.key === 'hero' || idx - 1 <= S.content.photos.room.length;   // 店內照片依序補位
     const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', hidden: true });
-    const th = h('div', { class: 'th' }, cur ? h('img', { src: photoUrl(cur.path), alt: sl.label }) : '未上傳');
+    const th = h('div', { class: 'th' }, cur ? h('img', { src: photoUrl(cur.path), alt: sl.label, style: cur.fx != null ? 'object-position:' + cur.fx + '% ' + cur.fy + '%' : '' }) : '未上傳');
     const nm = h('div', { class: 'nm', id: 'pm-' + sl.key });
     const up = h('button', { type: 'button', class: 'btn small', disabled: !canAdd }, cur ? '更換照片' : '上傳照片');
     up.addEventListener('click', () => file.click());
     file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) await uploadPhoto(sl, f, nm, up); });
     const del = cur ? iconBtn('移除', async () => { const old = cur.path; sl.set(null); touch(); await trashPhoto(old); paintPhotos(); }, 'danger') : null;
-    box.append(h('div', { class: 'photo' }, th, h('div', { class: 'ctl' }, h('strong', { text: sl.label }), nm, h('div', { style: 'display:flex;gap:8px' }, up, del), file)));
+    box.append(h('div', { class: 'photo' }, th, h('div', { class: 'ctl' }, h('strong', { text: sl.label }), nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del, focalBtn(() => sl.get(), (v) => sl.set(v), sl.label)), file)));
   });
 }
 async function trashPhoto(path) {
@@ -1579,14 +1864,88 @@ async function toBitmap(file) {
   const out = await window.heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
   return createImageBitmap(Array.isArray(out) ? out[0] : out);
 }
-async function compress(file) {
+// ── 上傳前裁切：選比例、拖曳框選、旋轉；也可以直接用原圖 ──
+const CROP_RATIOS = [['原始比例', 0], ['橫式 3:2', 3 / 2], ['寬幅 16:9', 16 / 9], ['方形', 1], ['直式 3:4', 3 / 4]];
+function bmpToCanvas(bmp, edge) {
+  const k = Math.min(1, edge / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(bmp.width * k)); cv.height = Math.max(1, Math.round(bmp.height * k));
+  cv.getContext('2d').drawImage(bmp, 0, 0, cv.width, cv.height); return cv;
+}
+function rotateCanvas(cv) {
+  const o = document.createElement('canvas'); o.width = cv.height; o.height = cv.width;
+  const g = o.getContext('2d'); g.translate(o.width, 0); g.rotate(Math.PI / 2); g.drawImage(cv, 0, 0); return o;
+}
+function cropDialog(src, label) {
+  return new Promise((done) => {
+    let cv = src, ratio = 0, box = { x: 0, y: 0, w: 1, h: 1 };
+    const view = h('div', { class: 'crop-view' });
+    const frame = h('div', { class: 'crop-box', tabindex: '0', role: 'group', 'aria-label': '裁切範圍：拖曳移動，右下角拖曳調整大小，方向鍵可微調' }, h('span', { class: 'crop-grip', 'aria-hidden': 'true' }));
+    const size = h('div', { class: 'msg mute crop-size' });
+    const fitRatio = () => {
+      if (!ratio) { box = { x: 0, y: 0, w: 1, h: 1 }; return; }
+      const img = cv.width / cv.height; let w = 1, hh = img / ratio; if (hh > 1) { hh = 1; w = ratio / img; }
+      box = { x: (1 - w) / 2, y: (1 - hh) / 2, w, h: hh };
+    };
+    const paint = () => {
+      frame.style.left = box.x * 100 + '%'; frame.style.top = box.y * 100 + '%'; frame.style.width = box.w * 100 + '%'; frame.style.height = box.h * 100 + '%';
+      const pw = Math.round(box.w * cv.width), ph = Math.round(box.h * cv.height);
+      size.textContent = '裁切後約 ' + pw + ' × ' + ph + ' 像素' + (Math.max(pw, ph) < 900 ? '（偏小，放大後可能不夠清楚）' : '');
+    };
+    const mount = () => { cv.className = 'crop-img'; view.replaceChildren(cv, frame); paint(); };
+    const clamp = () => { box.w = Math.min(1, Math.max(0.08, box.w)); box.h = Math.min(1, Math.max(0.08, box.h)); box.x = Math.min(1 - box.w, Math.max(0, box.x)); box.y = Math.min(1 - box.h, Math.max(0, box.y)); };
+    let drag = null;
+    frame.addEventListener('pointerdown', (e) => {
+      e.preventDefault(); frame.setPointerCapture(e.pointerId);
+      const r = view.getBoundingClientRect();
+      drag = { mode: e.target.classList.contains('crop-grip') ? 'size' : 'move', sx: e.clientX, sy: e.clientY, b: { ...box }, W: r.width, H: r.height };
+    });
+    frame.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = (e.clientX - drag.sx) / drag.W, dy = (e.clientY - drag.sy) / drag.H, b = drag.b;
+      if (drag.mode === 'move') box = { ...b, x: b.x + dx, y: b.y + dy };
+      else {
+        let w = Math.min(1 - b.x, Math.max(0.08, b.w + dx)), hh = Math.min(1 - b.y, Math.max(0.08, b.h + dy));
+        if (ratio) { const img = cv.width / cv.height; hh = w * img / ratio; if (b.y + hh > 1) { hh = 1 - b.y; w = hh * ratio / img; } }
+        box = { ...b, w, h: hh };
+      }
+      clamp(); paint();
+    });
+    frame.addEventListener('pointerup', () => { drag = null; });
+    frame.addEventListener('keydown', (e) => {
+      const d = { ArrowLeft: [-0.01, 0], ArrowRight: [0.01, 0], ArrowUp: [0, -0.01], ArrowDown: [0, 0.01] }[e.key]; if (!d) return;
+      e.preventDefault(); box.x += d[0]; box.y += d[1]; clamp(); paint();
+    });
+    const ratioBtns = CROP_RATIOS.map(([t, r]) => h('button', { type: 'button', class: 'btn small', 'aria-pressed': String(r === ratio), onclick: (ev) => {
+      ratio = r; fitRatio(); paint(); ratioBtns.forEach((b) => b.setAttribute('aria-pressed', String(b === ev.currentTarget)));
+    } }, t));
+    const rot = h('button', { type: 'button', class: 'btn small', onclick: () => { cv = rotateCanvas(cv); fitRatio(); mount(); } }, '↻ 旋轉');
+    const finish = (v) => { closeModal(); done(v); };
+    const mb = modal('裁切照片' + (label ? '：' + label : ''), [
+      h('p', { class: 'msg mute', text: '拖曳框框選要保留的範圍，右下角可以調整大小。不需要裁切的話，直接按「用原圖」。' }),
+      h('div', { class: 'seg-btns crop-tools' }, ratioBtns, rot), view, size
+    ], [
+      h('button', { type: 'button', class: 'btn', onclick: () => finish(null) }, '取消'),
+      h('button', { type: 'button', class: 'btn', onclick: () => finish({ cv, box: { x: 0, y: 0, w: 1, h: 1 } }) }, '用原圖'),
+      h('button', { type: 'button', class: 'btn primary', onclick: () => finish({ cv, box: { ...box } }) }, '裁切並上傳')
+    ]);
+    mb.querySelector('.modal').classList.add('modal-wide');
+    mb.addEventListener('click', (e) => { if (e.target === mb) done(null); });
+    mount();
+  });
+}
+async function compress(file, label) {
   if (file.size > MAX_ORIGINAL) throw new Error('照片超過 5MB，請先縮小再上傳');
   if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) throw new Error('只能上傳圖片檔');
   const bmp = await toBitmap(file);
-  const scale = Math.min(1, MAX_EDGE / Math.max(bmp.width, bmp.height));
-  const w = Math.max(1, Math.round(bmp.width * scale)), hh = Math.max(1, Math.round(bmp.height * scale));
+  const src = bmpToCanvas(bmp, 2400); if (bmp.close) bmp.close();
+  const pick = await cropDialog(src, label);
+  if (!pick) return null;
+  const { cv: c0, box } = pick;
+  const sx = Math.round(box.x * c0.width), sy = Math.round(box.y * c0.height), sw = Math.max(1, Math.round(box.w * c0.width)), sh = Math.max(1, Math.round(box.h * c0.height));
+  const scale = Math.min(1, MAX_EDGE / Math.max(sw, sh));
+  const w = Math.max(1, Math.round(sw * scale)), hh = Math.max(1, Math.round(sh * scale));
   const cv = document.createElement('canvas'); cv.width = w; cv.height = hh;
-  cv.getContext('2d').drawImage(bmp, 0, 0, w, hh); if (bmp.close) bmp.close();
+  cv.getContext('2d').drawImage(c0, sx, sy, sw, sh, 0, 0, w, hh);
   let blob = await new Promise((r) => cv.toBlob(r, 'image/webp', 0.82));
   let ext = 'webp';
   if (!blob || blob.type !== 'image/webp') { blob = await new Promise((r) => cv.toBlob(r, 'image/jpeg', 0.85)); ext = 'jpg'; }
@@ -1597,7 +1956,9 @@ async function uploadPhoto(sl, file, nm, btn) {
   if (S.trial) return askLoginToKeep('上傳照片');
   btn.disabled = true; nm.className = 'nm'; nm.textContent = '處理中…';
   try {
-    const { blob, ext, w, h: hh } = await compress(file);
+    const out = await compress(file, sl.label);
+    if (!out) { nm.textContent = ''; btn.disabled = false; return; }
+    const { blob, ext, w, h: hh } = out;
     const path = S.site.id + '/' + (['hero', 'item', 'block', 'share'].includes(sl.key) ? sl.key : 'room') + '-' + Date.now().toString(36) + '.' + ext;
     const r = await YC.client.storage.from('site-photos').upload(path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
     if (r.error) throw new Error('上傳失敗：' + r.error.message);
@@ -1630,6 +1991,11 @@ function refreshTodo() {
   if (sg.length) tips.replaceChildren(h('summary', { style: 'cursor:pointer;font-weight:700', text: '讓網站更容易被搜尋與 AI 找到（建議，共 ' + sg.length + ' 項）' }),
     h('ul', { style: 'margin:8px 0 0;padding-left:20px;font-size:14px;color:var(--muted)' }, sg.map((e) => h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); goField(e.field); }, text: e.msg })))));
   const need = v.errors.filter((e) => ['name', 'address', 'hours', 'photos.hero'].includes(e.field) || e.field === 'slug' || /^(booking|social)/.test(e.field));
+  const exBox = $('#exWarn');
+  if (exBox) exampleWarnings().then((w) => {
+    exBox.hidden = !w.length;
+    if (w.length) exBox.replaceChildren(h('strong', { text: '還沒換掉的範例內容：' }), h('ul', {}, w.map((e) => h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); goField(e.field); }, text: e.msg })))));
+  });
   box.hidden = need.length === 0;
   if (need.length) box.replaceChildren(h('strong', { text: '發佈前還需要完成：' }), h('ul', {}, need.map((e) => h('li', {}, h('a', { href: '#', onclick: (ev) => { ev.preventDefault(); goField(e.field); }, text: e.msg })))));
 }
@@ -1833,13 +2199,39 @@ function paintTrialBar() {
     msg.textContent = ''; btn.hidden = true; if (sv) sv.hidden = true;
   }
 }
+// 預覽裝置：電腦（1280）、平板（820）用真實寬度排版後等比縮小放進預覽區；手機（390）照原本的手機外框
+const DEVICES = { desk: 1280, tab: 820, mob: 390 };
+function bindDevice() {
+  const stage = $('#stage'), box = $('#frameBox'), f = $('#frame');
+  const btn = { desk: $('#devDesk'), tab: $('#devTab'), mob: $('#devMob') };
+  let dev = 'desk';
+  try { const v = localStorage.getItem('yc-builder-device'); if (DEVICES[v]) dev = v; } catch (e) { /* ignore */ }
+  const small = window.matchMedia('(max-width:860px)');
+  function fit() {
+    const clear = () => { stage.classList.remove('fit'); box.style.width = box.style.height = ''; f.style.width = f.style.height = f.style.transform = ''; };
+    if (small.matches || dev === 'mob') { clear(); stage.classList.toggle('mob', dev === 'mob' && !small.matches); return; }
+    stage.classList.remove('mob'); stage.classList.add('fit');
+    const cs = getComputedStyle(stage), W = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), H = stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    if (W <= 0 || H <= 0) return;
+    const T = DEVICES[dev], k = Math.min(1, W / T);
+    box.style.width = Math.floor(T * k) + 'px'; box.style.height = Math.floor(H) + 'px'; box.style.margin = '0 auto';
+    f.style.width = T + 'px'; f.style.height = Math.ceil(H / k) + 'px'; f.style.transform = k < 1 ? 'scale(' + k + ')' : '';
+  }
+  function set(v) {
+    dev = v; Object.entries(btn).forEach(([k, b]) => b && b.setAttribute('aria-pressed', String(k === v)));
+    try { localStorage.setItem('yc-builder-device', v); } catch (e) { /* ignore */ }
+    fit();
+  }
+  Object.entries(btn).forEach(([k, b]) => b && b.addEventListener('click', () => set(k)));
+  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage); else window.addEventListener('resize', fit);
+  if (small.addEventListener) small.addEventListener('change', fit);
+  set(dev);
+}
 function bindChrome() {
   if (bindChrome.done) return; bindChrome.done = true;
   $('#btnPublish').addEventListener('click', publish);
   $('#btnFull').addEventListener('click', openFullPreview);
-  const stage = $('#stage'), d = $('#devDesk'), m = $('#devMob');
-  d.addEventListener('click', () => { stage.classList.remove('mob'); d.setAttribute('aria-pressed', 'true'); m.setAttribute('aria-pressed', 'false'); });
-  m.addEventListener('click', () => { stage.classList.add('mob'); m.setAttribute('aria-pressed', 'true'); d.setAttribute('aria-pressed', 'false'); });
+  bindDevice();
   setTab('edit');
   $('#tabEdit').addEventListener('click', () => setTab('edit'));
   $('#tabView').addEventListener('click', () => { setTab('view'); renderPreview(); });

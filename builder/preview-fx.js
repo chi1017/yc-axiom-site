@@ -1,10 +1,11 @@
 /* 預覽框（iframe）的輔助程式，編輯器與全螢幕預覽共用。
    1. 預覽框為了安全不執行網站自己的程式，捲動動畫與手機選單由外層頁面代為處理（效果與正式網站相同）。
    2. morphFrame：內容改變時只更新有變的地方（不重新載入整頁），預覽不會閃、不會跳回頂端，照片也不會重新出現。
-   3. wireEditPills：滑鼠移到預覽的區塊上，出現「編輯這裡」按鈕，點了打開左邊對應的設定。 */
+   3. wireEditPills：滑鼠移到預覽的區塊上，出現「編輯這裡」按鈕，點了打開左邊對應的設定。
+   4. wireInlineEdit：電腦版可以直接在預覽上點文字修改（店名、標語、介紹、價目、問答、區塊文字等）。 */
 
 // 執行時加上的 class，更新內容時要保留（in＝已出現的捲動動畫、open＝手機選單打開、yc-*＝編輯器的提示）
-const KEEP_CLASS = /^(in|open|yc-hover|yc-flash)$/;
+const KEEP_CLASS = /^(in|open|yc-hover|yc-flash|yc-txt|yc-txt-on)$/;
 const KEEP_HTML_CLASS = /^(js-rv|js-nav)$/;
 
 function syncAttrs(a, b, keepClass) {
@@ -164,6 +165,89 @@ export function wireEditPills(f, onPick, labelOf) {
   });
   pill.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); onPick(pill.dataset.key); });
 }
+// 預覽上直接改字（電腦版）：滑鼠移到可以改的文字上會出現虛線，點一下就能直接打字；
+// Enter 或點別的地方完成，Esc 取消。find(文字) 回傳 { set(新文字), max, label } 或 null。
+const INLINE_CSS = '.yc-txt{outline:1px dashed rgba(47,127,112,.8);outline-offset:2px;cursor:text;border-radius:2px}' +
+  '.yc-txt-on{outline:2px solid #2f7f70!important;outline-offset:2px;background:rgba(47,127,112,.08);cursor:text}' +
+  '.yc-tip{position:absolute;z-index:2147483001;font:500 12px/1.4 -apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#1d2a33;color:#fff;padding:5px 9px;border-radius:6px;pointer-events:none;white-space:nowrap;display:none}';
+const normText = (t) => String(t || '').replace(/\s+/g, ' ').trim();
+export function wireInlineEdit(f, { find, onInput, onDone, onStart }) {
+  const d = f.contentDocument, w = f.contentWindow; if (!d) return;
+  if (!d.getElementById('yc-inline-css')) { const st = d.createElement('style'); st.id = 'yc-inline-css'; st.textContent = INLINE_CSS; d.documentElement.appendChild(st); }
+  if (d.__ycInline) return;
+  d.__ycInline = true;
+  const hoverable = () => w.matchMedia('(hover: hover)').matches && !(w.parent && w.parent.matchMedia && w.parent.matchMedia('(hover: none)').matches);
+  const tip = d.createElement('div'); tip.className = 'yc-tip'; d.documentElement.appendChild(tip);
+  let hot = null, hotT = null, edit = null;
+  const SKIP = 'a, button, input, select, textarea, label, nav, .yc-pill, .yc-tip, script, style';
+  const targetOf = (node) => {
+    let el = node && node.nodeType === 1 ? node : node && node.parentElement;
+    if (!el || !el.closest || el.closest(SKIP) || !el.closest('main, header.top, footer')) return null;
+    // 只有「整個元素就是一段文字」才可以直接改（不含其他元素），避免改到排版用的外框
+    if (el.children.length) return null;
+    const t = find(normText(el.textContent));
+    return t ? { el, t } : null;
+  };
+  const clearHot = () => { if (hot) hot.classList.remove('yc-txt'); hot = null; hotT = null; tip.style.display = 'none'; };
+  d.addEventListener('mousemove', (e) => {
+    if (edit || !hoverable()) return;
+    const x = targetOf(e.target);
+    if (!x) { clearHot(); return; }
+    if (x.el !== hot) { clearHot(); hot = x.el; hotT = x.t; hot.classList.add('yc-txt'); tip.textContent = '點一下直接修改' + (x.t.label ? '：' + x.t.label : ''); }
+    const r = hot.getBoundingClientRect();
+    tip.style.display = 'block';
+    tip.style.top = (w.scrollY + Math.max(r.top - 28, 4)) + 'px';
+    tip.style.left = Math.max(4, Math.min(w.scrollX + r.left, w.scrollX + w.innerWidth - tip.offsetWidth - 4)) + 'px';
+  });
+  d.addEventListener('mouseleave', () => { if (!edit) clearHot(); });
+  const finish = (cancel) => {
+    if (!edit) return;
+    const { el, t, orig } = edit; edit = null;
+    if (cancel) { el.textContent = orig; t.set(orig); }
+    el.removeAttribute('contenteditable'); el.classList.remove('yc-txt-on');
+    try { w.getSelection().removeAllRanges(); } catch (e) { /* ignore */ }
+    onDone(cancel);
+  };
+  // 在 mousedown 時就打開編輯，瀏覽器會把游標放在點的位置
+  d.addEventListener('mousedown', (e) => {
+    if (e.button !== 0 || !hoverable()) return;
+    if (edit && edit.el.contains(e.target)) return;
+    if (edit) finish(false);
+    const x = targetOf(e.target);
+    if (!x) return;
+    clearHot();
+    const orig = normText(x.el.textContent);
+    edit = { el: x.el, t: x.t, orig };
+    try { x.el.contentEditable = 'plaintext-only'; } catch (er) { x.el.contentEditable = 'true'; }
+    if (x.el.contentEditable !== 'plaintext-only') x.el.contentEditable = 'true';
+    x.el.classList.add('yc-txt-on');
+    x.el.spellcheck = false;
+    if (onStart) onStart();
+  }, true);
+  d.addEventListener('click', (e) => { if (edit && edit.el.contains(e.target)) { e.preventDefault(); e.stopPropagation(); } }, true);
+  d.addEventListener('input', (e) => {
+    if (!edit || e.target !== edit.el) return;
+    let v = edit.el.textContent.replace(/[\r\n]+/g, ' ');
+    if (edit.t.max && [...v].length > edit.t.max) { v = [...v].slice(0, edit.t.max).join(''); edit.el.textContent = v; const s = w.getSelection(), r = d.createRange(); r.selectNodeContents(edit.el); r.collapse(false); s.removeAllRanges(); s.addRange(r); }
+    edit.t.set(v.trim() ? v : edit.orig);
+    onInput();
+  });
+  d.addEventListener('keydown', (e) => {
+    if (!edit) return;
+    if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); finish(false); }
+    else if (e.key === 'Escape') { e.preventDefault(); finish(true); }
+  });
+  d.addEventListener('focusout', (e) => { if (edit && e.target === edit.el) finish(false); });
+  // 貼上時只保留純文字
+  d.addEventListener('paste', (e) => {
+    if (!edit) return;
+    e.preventDefault();
+    const t = (e.clipboardData && e.clipboardData.getData('text/plain') || '').replace(/[\r\n]+/g, ' ');
+    d.execCommand('insertText', false, t);
+  });
+  return { editing: () => !!edit };
+}
+
 // 左邊在改某個區塊時，預覽裡那個區塊閃一下
 export function flashSection(f, el) {
   if (!el) return;
