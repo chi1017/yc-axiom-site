@@ -925,20 +925,27 @@ function buildPanel() {
     paintPosts(); touch();
   };
   // 自訂區塊：標題、文字、照片、按鈕
-  P.append(card('c-blocks', 'top', '自訂區塊（選填）', '最多 ' + L.LIMITS.blocks + ' 個。想放的內容沒有現成欄位時用這裡，例如：包場服務、品牌故事、合作夥伴、徵才。',
+  P.append(card('c-blocks', 'top', '自訂區塊（選填）', '最多 ' + L.LIMITS.blocks + ' 個。除了圖文，也可以加服務流程、數字亮點、合作客戶與認證、服務地區、設備與規格、施工前後對比。想放的內容沒有現成欄位時用這裡，例如：包場服務、品牌故事、合作夥伴、徵才。',
     h('div', { id: 'blockBox' }), h('button', { type: 'button', class: 'btn small', id: 'blockAdd' }, '＋ 新增圖文區塊'), ' ',
+    h('select', { class: 'sel', id: 'blockKind', 'aria-label': '其他區塊類型', style: 'width:auto;display:inline-block;margin:4px 6px 4px 0' },
+      h('option', { value: '', text: '＋ 新增其他區塊…' }),
+      ['steps', 'stats', 'logos', 'areas', 'gear', 'compare'].map((k) => h('option', { value: k, text: (L.BLOCK_KIND_LABELS || {})[k] || k }))), ' ',
     h('button', { type: 'button', class: 'btn small', id: 'blockAddHtml' }, '＋ 嵌入程式碼（進階）'), h('span', { id: 'blockCnt', class: 'msg mute', style: 'margin-left:10px' }),
     h('div', { class: 'msg mute', style: 'margin-top:8px', text: '「嵌入程式碼」可以貼 Google 表單、Instagram、Google 日曆、訂位系統等提供的嵌入碼（進階方案，發佈後由我們審核才會出現在網站）。' })));
   const addBlock = (kind) => {
     if (S.content.blocks.length >= L.LIMITS.blocks) return;
     const id = 'k' + Math.random().toString(36).slice(2, 9).replace(/[^a-z0-9]/g, 'x');
-    S.content.blocks.push(kind === 'html' ? { id, kind: 'html', title: '', body: '', photo: null, btnLabel: '', btnUrl: '', side: 'right', hidden: false, html: '' }
-      : { id, kind: 'text', title: '', body: '', photo: null, btnLabel: '', btnUrl: '', side: 'right', hidden: false });
+    const base = { id, kind, title: '', body: '', photo: null, btnLabel: '', btnUrl: '', side: 'right', hidden: false };
+    if (kind === 'html') base.html = '';
+    if (['steps', 'stats', 'logos', 'areas', 'gear'].includes(kind)) { base.title = L.BLOCK_KIND_LABELS[kind]; base.items = [{ t: '', v: '', d: '' }]; }
+    if (kind === 'compare') { base.title = '施工前後對比'; base.photo2 = null; base.cap1 = '施工前'; base.cap2 = '施工後'; }
+    S.content.blocks.push(base);
     S.content.order = L.normalizeOrder(S.content.order, S.content.blocks);
     paintBlocks(); paintOrder(); touch(); setTimeout(() => scrollPreviewTo('b-' + id), 300);
   };
   $('#blockAdd').onclick = () => addBlock('text');
   $('#blockAddHtml').onclick = () => addBlock('html');
+  $('#blockKind').onchange = () => { const k = $('#blockKind').value; $('#blockKind').value = ''; if (k) addBlock(k); };
   // 首頁區塊順序
   P.append(card('c-order', 'top', '首頁區塊順序與副標題', '用「上移／下移」調整首頁區塊的先後，也可以替每個區塊寫一句副標題。沒有內容或沒開啟的區塊不會出現在網站上。',
     h('div', { id: 'orderNote', class: 'msg mute', style: 'margin:0 0 8px' }), h('ol', { id: 'orderBox', class: 'order-list' }),
@@ -1240,7 +1247,7 @@ function paintPosts() {
 }
 function orderLabel(k) {
   const I = IND();
-  if (k.startsWith('b:')) { const b = S.content.blocks.find((x) => x.id === k.slice(2)); return '自訂：' + ((b && b.title) || '（未命名區塊）') + (b && b.hidden ? '（隱藏中）' : ''); }
+  if (k.startsWith('b:')) { const b = S.content.blocks.find((x) => x.id === k.slice(2)); return ((b && b.kind && b.kind !== 'text' && (S.lib.BLOCK_KIND_LABELS || {})[b.kind]) || '自訂') + '：' + ((b && b.title) || '（未命名區塊）') + (b && b.hidden ? '（隱藏中）' : ''); }
   return ({ menu: I.offer.label, interior: I.space.label, visit: I.visit.label })[k] || S.lib.ORDER_LABELS[k] || k;
 }
 function paintOrder() {
@@ -1265,6 +1272,7 @@ function paintBlocks() {
   const L = S.lib, box = $('#blockBox'); if (!box) return; box.replaceChildren();
   S.content.blocks.forEach((b, i) => {
     const delBlock = () => iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger');
+    if (b.items || b.kind === 'compare') { box.append(richBlockEditor(b, i)); return; }
     if (b.kind === 'html') {
       const t2 = h('input', { type: 'text', maxlength: String(L.LIMITS.blockTitle), placeholder: '區塊標題（選填），例如：追蹤我們的 Instagram', 'aria-label': '嵌入區塊標題 ' + (i + 1) });
       const code = h('textarea', { class: 'code', maxlength: String(L.LIMITS.html || 20000), rows: '6', spellcheck: 'false', placeholder: '貼上嵌入碼，例如 <iframe src="https://…"></iframe>', 'aria-label': '嵌入程式碼 ' + (i + 1) });
@@ -1310,7 +1318,80 @@ function paintBlocks() {
         iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger'))));
   });
   $('#blockAddHtml').disabled = S.content.blocks.length >= L.LIMITS.blocks;
-  $('#blockAdd').disabled = S.content.blocks.length >= L.LIMITS.blocks; $('#blockCnt').textContent = S.content.blocks.length + '/' + L.LIMITS.blocks;
+  $('#blockAdd').disabled = S.content.blocks.length >= L.LIMITS.blocks; if ($('#blockKind')) $('#blockKind').disabled = S.content.blocks.length >= L.LIMITS.blocks; $('#blockCnt').textContent = S.content.blocks.length + '/' + L.LIMITS.blocks;
+}
+// 結構化區塊的編輯介面：服務流程、數字亮點、合作客戶與認證、服務地區、設備與規格、前後對比
+const ITEM_FIELDS = {
+  steps: [['t', '步驟名稱，例如：免費到府估價', 40], ['d', '說明（選填）', 200, true]],
+  stats: [['v', '數字，例如：28 年、1,200 家', 20], ['t', '說明，例如：在地經驗', 40]],
+  logos: [['t', '客戶或認證名稱，例如：ISO 9001', 40], ['d', '補充（選填），例如：品質管理認證', 200]],
+  areas: [['t', '地區，例如：台中市西屯區', 40], ['d', '備註（選填），例如：免車馬費', 200]],
+  gear: [['t', '設備名稱，例如：CNC 五軸加工機', 40], ['v', '規格或產地（選填）', 20], ['d', '說明（選填）', 200, true]]
+};
+function richBlockEditor(b, i) {
+  const L = S.lib, go = () => scrollPreviewTo('b-' + b.id);
+  const label = (L.BLOCK_KIND_LABELS || {})[b.kind] || '區塊';
+  const t = h('input', { type: 'text', maxlength: String(L.LIMITS.blockTitle), placeholder: '區塊標題，例如：' + label, 'aria-label': label + '標題 ' + (i + 1) });
+  const body = h('textarea', { maxlength: String(L.LIMITS.blockBody), rows: '2', placeholder: '一句簡短說明（選填）', 'aria-label': label + '說明 ' + (i + 1) });
+  t.value = b.title; body.value = b.body;
+  t.addEventListener('input', () => { b.title = t.value; paintOrder(); touch(); });
+  body.addEventListener('input', () => { b.body = body.value; touch(); });
+  [t, body].forEach((el) => el.addEventListener('focus', go));
+  const parts = [h('div', { class: 'blk-kind' }, label), t, h('div', { style: 'height:8px' }), body];
+  if (b.items) {
+    const max = b.kind === 'areas' ? L.LIMITS.areaItems : L.LIMITS.blockItems;
+    const list = h('div', { class: 'rb-items' });
+    const paint = () => {
+      list.replaceChildren(...b.items.map((it, j) => {
+        const row = h('div', { class: 'rb-item' });
+        (ITEM_FIELDS[b.kind] || []).forEach(([k, ph, n, long]) => {
+          const el = long ? h('textarea', { rows: '2', maxlength: String(n), placeholder: ph, 'aria-label': label + ' 第 ' + (j + 1) + ' 項：' + ph }) : h('input', { type: 'text', maxlength: String(n), placeholder: ph, 'aria-label': label + ' 第 ' + (j + 1) + ' 項：' + ph });
+          el.value = it[k] || '';
+          el.addEventListener('input', () => { it[k] = el.value; touch(); });
+          el.addEventListener('focus', go);
+          row.append(el);
+        });
+        row.append(h('span', { class: 'ord-btns' },
+          iconBtn('上移', () => { if (j > 0) { [b.items[j - 1], b.items[j]] = [b.items[j], b.items[j - 1]]; paint(); touch(); } }),
+          iconBtn('下移', () => { if (j < b.items.length - 1) { [b.items[j + 1], b.items[j]] = [b.items[j], b.items[j + 1]]; paint(); touch(); } }),
+          iconBtn('刪除這一項', () => { b.items.splice(j, 1); paint(); touch(); }, 'danger')));
+        return row;
+      }));
+      add.disabled = b.items.length >= max; cnt.textContent = b.items.length + '/' + max;
+    };
+    const add = h('button', { type: 'button', class: 'btn small' }, '＋ 新增一項');
+    const cnt = h('span', { class: 'msg mute', style: 'margin-left:8px' });
+    add.addEventListener('click', () => { if (b.items.length < max) { b.items.push({ t: '', v: '', d: '' }); paint(); touch(); const last = list.lastElementChild; if (last) last.querySelector('input,textarea').focus(); } });
+    paint();
+    parts.push(h('div', { style: 'height:8px' }), list, h('div', { style: 'margin-top:6px' }, add, cnt));
+  }
+  if (b.kind === 'compare') {
+    const ph = (key, cap, def) => {
+      const sl = { key: 'block', label: def + '照片', get: () => b[key], set: (v) => { b[key] = v; } };
+      const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', hidden: true });
+      const nm = h('div', { class: 'nm' });
+      const up = h('button', { type: 'button', class: 'btn small' }, b[key] ? '更換' + def + '照片' : '上傳' + def + '照片');
+      up.addEventListener('click', () => file.click());
+      file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) { await uploadPhoto(sl, f, nm, up); paintBlocks(); go(); } });
+      const del = b[key] ? iconBtn('移除照片', async () => { const old = b[key].path; b[key] = null; touch(); await trashPhoto(old); paintBlocks(); }, 'danger') : null;
+      const capIn = h('input', { type: 'text', maxlength: '20', placeholder: '照片標籤，例如：' + def, 'aria-label': def + '照片標籤' });
+      capIn.value = b[cap] || ''; capIn.addEventListener('input', () => { b[cap] = capIn.value; touch(); });
+      return h('div', { class: 'photo', style: 'margin-top:8px' }, h('div', { class: 'th' }, b[key] ? h('img', { src: photoUrl(b[key].path), alt: def }) : def),
+        h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del), file, capIn));
+    };
+    parts.push(ph('photo', 'cap1', '施工前'), ph('photo2', 'cap2', '施工後'));
+  }
+  const bl = h('input', { type: 'text', maxlength: String(L.LIMITS.btnLabel), placeholder: '按鈕文字（選填），例如：免費估價', 'aria-label': '按鈕文字 ' + (i + 1) });
+  const bu = h('input', { type: 'url', maxlength: '500', placeholder: '按鈕連結 https://（選填）', 'aria-label': '按鈕連結 ' + (i + 1) });
+  const hid = h('input', { type: 'checkbox' });
+  bl.value = b.btnLabel; bu.value = b.btnUrl; hid.checked = b.hidden;
+  bl.addEventListener('input', () => { b.btnLabel = bl.value; touch(); });
+  bu.addEventListener('input', () => { b.btnUrl = bu.value; touch(); });
+  hid.addEventListener('change', () => { b.hidden = hid.checked; paintOrder(); touch(); });
+  parts.push(h('div', { class: 'row2', style: 'margin-top:8px' }, bl, bu),
+    h('div', { style: 'display:flex;justify-content:space-between;align-items:center;margin-top:8px' }, h('label', { class: 'check' }, hid, '暫時隱藏'),
+      iconBtn('刪除這個區塊', () => { if (!confirm('確定刪除這個區塊？')) return; S.content.blocks.splice(i, 1); S.content.order = L.normalizeOrder(S.content.order, S.content.blocks); paintBlocks(); paintOrder(); touch(); }, 'danger')));
+  return h('div', { class: 'faq-item' }, ...parts);
 }
 function paintShare() {
   const box = $('#shareBox'), sl = S.shareSlot; if (!box) return;

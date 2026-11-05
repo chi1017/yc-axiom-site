@@ -275,3 +275,7 @@ body.is-trial .trial-bar{background:rgba(216,193,138,.08)}
  .tb-msg{text-align:left;white-space:normal;font-size:12.5px;line-height:1.4}
  body:not(.is-trial) .trial-bar{display:none}
 }
+.rb-items{display:grid;gap:8px}
+.rb-item{display:grid;grid-template-columns:1fr;gap:6px;padding:10px;border:1px solid var(--line,#ddd);border-radius:8px}
+.rb-item .ord-btns{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+@media(min-width:900px){.rb-item{grid-template-columns:1fr 1fr}.rb-item textarea,.rb-item .ord-btns{grid-column:1/-1}}
