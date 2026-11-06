@@ -405,8 +405,8 @@
         .cta-banner { background: var(--surface); border: 1px solid var(--border); padding: 64px 40px; text-align: center; margin-top: 60px; border-radius: 4px; position: relative; overflow: hidden; }
         .cta-banner::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%); pointer-events: none; }
         .cta-banner p { color: var(--text-dim); font-family: var(--f-ui); font-weight: 600; font-weight: 700; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 16px; }
-        .cta-banner h3 { font-size: clamp(20px, 2.5vw, 26px); font-weight: 300; color: var(--text); max-width: 640px; margin: 0 auto 36px; line-height: 1.8; }
-        .cta-banner h3 span { color: var(--accent); font-weight: 500; }
+        .cta-banner h2, .cta-banner h3 { font-size: clamp(20px, 2.5vw, 26px); font-weight: 300; color: var(--text); max-width: 640px; margin: 0 auto 36px; line-height: 1.8; }
+        .cta-banner h2 span, .cta-banner h3 span { color: var(--accent); font-weight: 500; }
         .btn-ghost { background: none; border: none; cursor: pointer; font-family: var(--f-ui); font-weight: 600; font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); border-bottom: 2px solid rgba(var(--accent-rgb), 0.4); padding-bottom: 6px; transition: all 0.25s; }
         .btn-ghost:hover { border-color: var(--accent); text-shadow: 0 0 12px var(--accent-glow); }
 
