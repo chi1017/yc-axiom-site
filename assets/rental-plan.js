@@ -22,8 +22,8 @@ export function pricesFor(lock) {
 }
 
 const BASE = {
-  single: { id: 'self', layout: 'single', name: '自架版' },
-  multi: { id: 'self-multi', layout: 'multi', name: '自架版（多頁）', selectable: true }
+  single: { id: 'self', layout: 'single', name: '一頁版' },
+  multi: { id: 'self-multi', layout: 'multi', name: '多頁版', selectable: true }
 };
 export function planFor(layout, lock) {
   const k = layout === 'multi' ? 'multi' : 'single', p = pricesFor(lock)[k];
