@@ -190,7 +190,7 @@ const UI_EN = (() => {
   const q = new URLSearchParams(location.search).get('lang');
   try { if (q === 'en' || q === 'zh') localStorage.setItem('yc-builder-ui', q); return localStorage.getItem('yc-builder-ui') === 'en'; } catch (e) { return q === 'en'; }
 })();
-if (UI_EN) import(new URL('./ui-en.min.js?v=1e37a8d171', import.meta.url).href).then((m) => m.install()).catch(() => {});
+if (UI_EN) import(new URL('./ui-en.min.js?v=5f1fb41b2b', import.meta.url).href).then((m) => m.install()).catch(() => {});
 function setUiLang(lang) {
   try { localStorage.setItem('yc-builder-ui', lang); } catch (e) { /* 無痕模式：只靠網址 */ }
   const u = new URL(location.href); u.searchParams.set('lang', lang); location.href = u.href;
@@ -1446,9 +1446,11 @@ function paintMenu() {
   const L = S.lib, box = $('#menuBox'); box.replaceChildren();
   S.content.menu.forEach((m, i) => {
     const n = h('input', { type: 'text', maxlength: '40', placeholder: IND().offer.item + '名稱', 'aria-label': IND().offer.item + '名稱 ' + (i + 1) }), p = h('input', { type: 'number', min: '0', max: '99999', step: '1', inputmode: 'numeric', placeholder: '價格', 'aria-label': '價格 ' + (i + 1) });
-    tx(n, m, 'name'); p.value = m.price == null ? '' : m.price;
+    // 一句說明（選填），例如份量、口味、限量；顯示在品名下方
+    const ds = h('input', { type: 'text', class: 'm-desc-in', maxlength: String(L.LIMITS.menuDesc || 80), placeholder: '一句說明（選填），例如：每日限量 20 杯、可做冰的', 'aria-label': IND().offer.item + '說明 ' + (i + 1) });
+    tx(n, m, 'name'); tx(ds, m, 'desc'); p.value = m.price == null ? '' : m.price;
     p.addEventListener('input', () => { m.price = p.value === '' ? null : Number(p.value); touch(); });
-    box.append(h('div', { class: 'row2 row2-dup' }, n, p, h('span', { class: 'ord-btns' }, soldBtn(m, paintMenu, 'menu'), iconBtn('複製', () => dupIn(S.content.menu, i, L.LIMITS.menu, paintMenu)), iconBtn('刪除', () => { S.content.menu.splice(i, 1); paintMenu(); touch(); }, 'danger'))));
+    box.append(h('div', { class: 'row2 row2-dup' }, n, p, ds, h('span', { class: 'ord-btns' }, soldBtn(m, paintMenu, 'menu'), iconBtn('複製', () => dupIn(S.content.menu, i, L.LIMITS.menu, paintMenu)), iconBtn('刪除', () => { S.content.menu.splice(i, 1); paintMenu(); touch(); }, 'danger'))));
   });
   $('#menuAdd').disabled = S.content.menu.length >= L.LIMITS.menu; $('#menuCnt').textContent = S.content.menu.length + '/' + L.LIMITS.menu;
   dragSort(box, S.content.menu, () => { paintMenu(); touch(); scrollPreviewTo('menu'); });
