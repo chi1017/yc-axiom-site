@@ -1291,6 +1291,7 @@ nav { background: rgba(14, 12, 10, 0.55); border-bottom: 1px solid rgba(255, 255
 .rh-case-img img { margin-top: 0; }
 .rh-case-body { padding: 0 8px 8px; }
 .rh-pill { border-radius: 2px; background: rgba(var(--accent-rgb), 0.12); }
+.rh-pill.rh-pill--demo { color: var(--text-dim); border-color: var(--border); background: transparent; }
 
 /* Services: one glass panel, mono index numbers */
 .rh-band { background: transparent; border-top: 0; }
