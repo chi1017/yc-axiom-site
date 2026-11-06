@@ -30,10 +30,11 @@
       '.yq-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:0 0 12px}.yq-h b{font:700 15px var(--f-ui);color:var(--text-bright)}.yq-h span{font-size:12.5px;color:var(--text-dim)}' +
       '.yq-now{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 12px;padding:10px 12px;border-radius:6px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--border));font-size:14px;line-height:1.6}' +
       '.yq-now em{font-style:normal;font-size:12px;font-weight:700;padding:1px 8px;border-radius:4px;background:var(--accent);color:#0b0a09}.yq-now span{flex:1 1 180px}' +
-      '.yq-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}' +
+      '.yq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}' +
       '.yq-t{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-height:64px;padding:12px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-bright);font:600 14.5px var(--f-ui);text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation}' +
       '.yq-t small{font:400 12px/1.45 var(--f-ui);color:var(--text-dim)}.yq-t:hover,.yq-t:focus-visible{border-color:var(--accent)}.yq-t:active{transform:scale(.98)}' +
       '.yq-share{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0}.yq-share .m-btn{flex:1 1 auto;min-height:42px}' +
+      '.yq-inst{margin:10px 0 0}.yq-link{padding:0;border:0;background:none;color:var(--accent);font:600 13.5px var(--f-ui);text-decoration:underline;text-underline-offset:3px;cursor:pointer;text-align:left}' +
       '.yq-line{background:#06c755!important;border-color:#06c755!important;color:#fff!important}' +
       '@media (max-width:640px){.yq{padding:14px 12px}.yq-grid{grid-template-columns:1fr 1fr}.yq-share .m-btn{flex:1 1 40%}}' +
       // 表單：手機是從下方滑出的面板，電腦是置中的視窗
@@ -52,6 +53,19 @@
       '.yq-act{position:sticky;bottom:-18px;display:flex;gap:8px;justify-content:flex-end;margin:18px -20px -18px;padding:12px 20px 18px;background:var(--surface);border-top:1px solid var(--border)}.yq-act .m-btn{min-height:44px}' +
       '.yq-note{margin:6px 0 0;font-size:12.5px;color:var(--text-dim);line-height:1.6}' +
       '@media (max-width:640px){.yq-bg{align-items:flex-end;padding:0}.yq-sh{width:100%;max-height:92dvh;border-radius:14px 14px 0 0;padding:18px 16px calc(16px + env(safe-area-inset-bottom));animation:yqUp .22s ease-out}.yq-act{margin:18px -16px calc(-16px - env(safe-area-inset-bottom));padding:12px 16px calc(14px + env(safe-area-inset-bottom))}.yq-act .m-btn{flex:1}}' +
+      // 價目與售完
+      '.yq-it{display:grid;grid-template-columns:1fr 92px auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}.yq-it b{font-weight:600;font-size:14.5px;line-height:1.4}.yq-it input[type=number]{margin:0;padding:9px 8px;text-align:right}' +
+      '.yq-so{padding:9px 12px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--text);font:600 13px var(--f-ui);cursor:pointer;white-space:nowrap}.yq-so[aria-pressed=true]{background:#f0776b;border-color:#f0776b;color:#fff}' +
+      '.yq-grp{margin:16px 0 4px;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:var(--accent)}' +
+      // 消息照片
+      '.yq-ph{display:flex;gap:10px;align-items:center;margin:12px 0 0}.yq-ph img{width:72px;height:72px;object-fit:cover;border-radius:8px}.yq-ph .m-btn{min-height:42px}' +
+      // 待處理、預約、留言
+      '.dq-todo{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 2px}.dq-todo a{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:rgba(240,119,107,.12);border:1px solid rgba(240,119,107,.45);color:var(--text-bright);font-size:14px;text-decoration:none}.dq-todo b{color:#f0776b;font-size:16px}' +
+      '.dq-sec{margin:12px 0 0}.dq-sec>summary{cursor:pointer;font-size:14px;padding:6px 0}.dq-new{color:#f0776b;font-weight:700}' +
+      '.dq-list{margin:6px 0 0;padding:0;list-style:none;font-size:14px;line-height:1.65}.dq-list>li{padding:10px 0;border-bottom:1px solid var(--border)}.dq-list>li.bk-cancelled{opacity:.55}.dq-list>li.bk-pending{box-shadow:inset 3px 0 0 #e0b05a;padding-left:10px}.dq-list>li.is-new{box-shadow:inset 3px 0 0 #f0776b;padding-left:10px}' +
+      '.dq-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.dq-mute{color:var(--text-dim);font-size:13px}.dq-ok{color:#6cc08b;font-size:12px}.dq-tag{display:inline-block;padding:0 8px;border:1px solid #e0b05a;color:#e0b05a;border-radius:999px;font-size:12px}.dq-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#f0776b}' +
+      '.dq-msg{white-space:pre-wrap;margin:4px 0 0}.dq-acts{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0}.dq-acts:empty{display:none}' +
+      '@media (max-width:640px){.dq-acts .m-btn{flex:1 1 30%;min-height:42px}}' +
       '@keyframes yqUp{from{transform:translateY(30px);opacity:.4}to{transform:none;opacity:1}}@media (prefers-reduced-motion:reduce){.yq-sh{animation:none}}';
     document.head.appendChild(st);
   }
@@ -64,6 +78,16 @@
     if (h.closed) return '今天公休';
     return h.open && h.close ? '今天 ' + h.open + '–' + h.close : '還沒設定';
   }
+  function dayLine(c) {
+    var d = c && c.dayHours;
+    if (d && d.date && d.date >= twDay()) return (d.date === twDay() ? '今天 ' : md(d.date) + ' ') + d.open + '–' + d.close;
+    return '只改今天或明天';
+  }
+  var items = function (c) { return [].concat(((c && c.menu) || []).filter(function (m) { return m && m.name; }), ((c && c.shop && c.shop.enabled && c.shop.items) || []).filter(function (m) { return m && m.name; })); };
+  function priceLine(c) {
+    var n = items(c).filter(function (m) { return m.soldOut === twDay(); }).length;
+    return n ? '今天 ' + n + ' 項售完' : items(c).length ? '改價格、標今日售完' : '還沒有品項';
+  }
   function inner(s) {
     var c = s.content || {}, n = liveNotice(c), url = s.public_url;
     return '<div class="yq-h"><b>快速更新</b><span>不用打開編輯器，按一下就更新網站</span></div>' +
@@ -71,13 +95,16 @@
         '<button type="button" class="m-btn sm" data-yq="cancel">取消公告</button></div>' : '') +
       '<div class="yq-grid">' +
       '<button type="button" class="yq-t" data-yq="closed">臨時公休<small>選日期，期間過了自動消失</small></button>' +
+      '<button type="button" class="yq-t" data-yq="day">提早打烊／晚開<small>' + esc(dayLine(c)) + '</small></button>' +
+      '<button type="button" class="yq-t" data-yq="news">拍照發消息<small>一張照片加一句話</small></button>' +
+      '<button type="button" class="yq-t" data-yq="price">價目與售完<small>' + esc(priceLine(c)) + '</small></button>' +
       '<button type="button" class="yq-t" data-yq="hours">營業時間<small>' + esc(hoursLine(c)) + '</small></button>' +
-      '<button type="button" class="yq-t" data-yq="news">發一則消息<small>放在最新消息最上面</small></button>' +
       '<button type="button" class="yq-t" data-yq="notice">網站公告<small>活動、優惠、提醒</small></button></div>' +
       (url ? '<div class="yq-share"><a class="m-btn sm" href="' + esc(url) + '" target="_blank" rel="noopener">看網站</a>' +
         '<a class="m-btn sm yq-line" href="' + esc('https://line.me/R/share?text=' + encodeURIComponent((c.name ? c.name + '\n' : '') + url)) + '" target="_blank" rel="noopener">分享到 LINE</a>' +
         '<button type="button" class="m-btn sm" data-yq="copy">複製網址</button>' +
-        (navigator.share ? '<button type="button" class="m-btn sm" data-yq="share">其他分享</button>' : '') + '</div>' : '');
+        (navigator.share ? '<button type="button" class="m-btn sm" data-yq="share">其他分享</button>' : '') + '</div>' : '') +
+      (standalone() ? '' : '<p class="yq-inst"><button type="button" class="yq-link" data-yq="install">把會員專區加到手機主畫面，像 App 一樣一按就打開</button></p>');
   }
   function html(s) {
     if (!s || !s.public_url || !(s.status === 'live' || s.status === 'overdue')) return '';
@@ -188,22 +215,130 @@
     pendingCheck(s, form);
   }
 
-  // 發一則消息
+  // 拍照發消息：一張照片（選填）加一句話，放在最新消息最上面
   function newsForm(s) {
     var list = ((s.content && s.content.news) || []).filter(function (x) { return x && x.title; });
     var full = list.length >= 6 ? list[list.length - 1] : null;
-    var form = sheet('發一則消息', '會放在網站「最新消息」的最上面。', '<label>標題<input type="text" name="title" maxlength="60" placeholder="例如：秋季新品上市，栗子蒙布朗開賣" enterkeyhint="done" required></label>' +
+    var form = sheet('拍照發消息', '會放在網站「最新消息」的最上面，照片選填。',
+      '<div class="yq-ph"><span data-thumb></span><button type="button" class="m-btn sm" data-cam>拍照</button><button type="button" class="m-btn sm" data-pick>選照片</button><button type="button" class="m-btn sm" data-rm hidden>拿掉照片</button>' +
+      '<input type="file" accept="image/*" capture="environment" data-f1 hidden><input type="file" accept="image/*" data-f2 hidden></div>' +
+      '<label>一句話<input type="text" name="title" maxlength="60" placeholder="例如：秋季新品上市，栗子蒙布朗開賣" enterkeyhint="done" required></label>' +
       enField(s, 'titleEn', '空白＝英文版不顯示這則', 150) +
       '<label>日期<input type="date" name="date" value="' + twDay() + '"></label>' +
       (full ? '<p class="yq-note">最新消息最多 6 則，最舊的「' + esc(full.title) + '」會被換下來（之後可以在編輯器的版本紀錄找回）。</p>' : ''));
-    form.addEventListener('submit', function (e) {
+    var file = null, url = null;
+    var thumb = form.querySelector('[data-thumb]'), rm = form.querySelector('[data-rm]');
+    var show = function () { if (url) URL.revokeObjectURL(url); url = file ? URL.createObjectURL(file) : null; thumb.innerHTML = url ? '<img src="' + url + '" alt="">' : ''; rm.hidden = !file; };
+    ['[data-f1]', '[data-f2]'].forEach(function (q) { var inp = form.querySelector(q); inp.addEventListener('change', function () { if (inp.files[0]) { file = inp.files[0]; show(); } inp.value = ''; }); });
+    form.addEventListener('click', function (e) {
+      if (e.target.closest('[data-cam]')) form.querySelector('[data-f1]').click();
+      else if (e.target.closest('[data-pick]')) form.querySelector('[data-f2]').click();
+      else if (e.target.closest('[data-rm]')) { file = null; show(); }
+    });
+    form.addEventListener('submit', async function (e) {
       e.preventDefault();
       var t = val(form, 'title'), d = val(form, 'date'), en = val(form, 'titleEn');
-      if (!t) return bad(form, '請寫標題');
+      if (!t) return bad(form, '請寫一句話');
       var item = { date: DATE_RE.test(d) ? d : twDay(), title: t }; if (en) item.titleEn = en;
+      if (file) {
+        var msg = form.querySelector('.yq-msg'), btn = form.querySelector('[type=submit]');
+        msg.className = 'yq-msg'; msg.textContent = '照片上傳中…'; btn.disabled = true;
+        try {
+          var out = await shrink(file);
+          var path = s.id + '/news-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5) + '.' + out.ext;
+          var up = await YC.client.storage.from('site-photos').upload(path, out.blob, { contentType: out.blob.type, cacheControl: '3600', upsert: false });
+          if (up.error) throw new Error('照片上傳失敗，請稍後再試');
+          item.photo = { path: path, w: out.w, h: out.h, alt: t.slice(0, 60) };
+        } catch (er) { msg.className = 'yq-msg err'; msg.textContent = String(er.message || er); btn.disabled = false; return; }
+      }
       apply(s, form, function (c) { c.news = [item].concat((c.news || []).filter(function (x) { return x && x.title; })).slice(0, 6); });
     });
     pendingCheck(s, form);
+  }
+
+  // 今天提早打烊／晚開：只改一天，隔天自動恢復
+  function dayForm(s) {
+    var c = s.content || {}, cur = c.dayHours && c.dayHours.date >= twDay() ? c.dayHours : null;
+    var base = function (date) { var k = DAYS[(new Date(date + 'T00:00:00Z').getUTCDay() + 6) % 7], h = (c.hours || {})[k] || {}; return h; };
+    var date = cur ? cur.date : twDay(), h0 = base(date);
+    var form = sheet('提早打烊／晚開', '只調整這一天的營業時間，網站上方會顯示調整後的時間，線上預約也只開放這段時間。隔天自動恢復平常的時間。',
+      '<div class="yq-chips" role="group" aria-label="哪一天">' + [['今天', 0], ['明天', 1]].map(function (x) { return '<button type="button" class="yq-chip" data-day="' + twDay(x[1]) + '">' + x[0] + '</button>'; }).join('') + '</div>' +
+      '<label>日期<input type="date" name="date" value="' + date + '" min="' + twDay() + '" max="' + twDay(30) + '"></label>' +
+      '<div class="yq-2"><label>開門<input type="time" name="open" step="300" value="' + esc(cur ? cur.open : h0.open || '') + '"></label><label>打烊<input type="time" name="close" step="300" value="' + esc(cur ? cur.close : h0.close || '') + '"></label></div>' +
+      '<p class="yq-note" data-base></p>' + (cur ? '<p style="margin:10px 0 0"><button type="button" class="m-btn sm" data-clear>取消調整，恢復平常時間</button></p>' : ''));
+    var paint = function () {
+      var d = val(form, 'date'), h = DATE_RE.test(d) ? base(d) : {};
+      form.querySelector('[data-base]').textContent = !DATE_RE.test(d) ? '' : h.closed ? '平常這天是公休；整天不開請改用「臨時公休」。' : h.open ? '平常這天：' + h.open + '–' + h.close : '平常這天沒有設定營業時間。';
+      form.querySelectorAll('.yq-chip').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-day') === d)); });
+    };
+    form.addEventListener('click', function (e) {
+      var b = e.target.closest('.yq-chip');
+      if (b) { var d = b.getAttribute('data-day'), h = base(d); form.querySelector('[name=date]').value = d; if (!cur || cur.date !== d) { form.querySelector('[name=open]').value = h.open || ''; form.querySelector('[name=close]').value = h.close || ''; } paint(); return; }
+      if (e.target.closest('[data-clear]')) apply(s, form, function (c2) { c2.dayHours = { date: '', open: '', close: '' }; });
+    });
+    form.addEventListener('input', paint); paint();
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var d = val(form, 'date'), o = val(form, 'open'), cl = val(form, 'close');
+      if (!DATE_RE.test(d) || d < twDay()) return bad(form, '請選今天或之後的日期');
+      if (!TIME_RE.test(o) || !TIME_RE.test(cl)) return bad(form, '請填開門和打烊時間');
+      if (o >= cl) return bad(form, '打烊時間要晚於開門時間');
+      apply(s, form, function (c2) { c2.dayHours = { date: d, open: o, close: cl }; });
+    });
+    pendingCheck(s, form);
+  }
+
+  // 價目與售完：改價格、標「今日售完」（明天自動恢復）
+  function priceForm(s) {
+    var c = s.content || {}, menu = (c.menu || []), shop = (c.shop && c.shop.enabled && c.shop.items) || [];
+    var row = function (m, k, i) {
+      if (!m || !m.name) return '';
+      var on = m.soldOut === twDay();
+      return '<div class="yq-it"><b>' + esc(m.name) + '</b><input type="number" inputmode="numeric" min="' + (k === 's' ? 1 : 0) + '" step="1" name="p-' + k + i + '" value="' + (m.price == null ? '' : esc(m.price)) + '" aria-label="' + esc(m.name) + ' 價格" placeholder="價格">' +
+        '<button type="button" class="yq-so" data-so="' + k + i + '" aria-pressed="' + on + '">' + (on ? '今日售完' : '售完') + '</button></div>';
+    };
+    var body = (menu.some(function (m) { return m && m.name; }) ? '<p class="yq-grp">價目</p>' + menu.map(function (m, i) { return row(m, 'm', i); }).join('') : '') +
+      (shop.some(function (m) { return m && m.name; }) ? '<p class="yq-grp">線上購買的商品</p>' + shop.map(function (m, i) { return row(m, 's', i); }).join('') : '');
+    if (!body) body = '<p class="yq-note">還沒有任何品項，請先到編輯器新增。</p>';
+    var form = sheet('價目與售完', '按「售完」網站會顯示「今日售完」，線上購買也不能下單；明天自動恢復，不用回來改。', body);
+    var sold = {};
+    form.querySelectorAll('[data-so]').forEach(function (b) { sold[b.getAttribute('data-so')] = b.getAttribute('aria-pressed') === 'true'; });
+    form.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-so]'); if (!b) return;
+      var k = b.getAttribute('data-so'); sold[k] = !sold[k];
+      b.setAttribute('aria-pressed', String(sold[k])); b.textContent = sold[k] ? '今日售完' : '售完';
+    });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var prices = {};
+      var inputs = form.querySelectorAll('input[name^="p-"]');
+      for (var i = 0; i < inputs.length; i++) {
+        var v = inputs[i].value.trim(), k = inputs[i].name.slice(2);
+        if (v !== '' && (!/^\d+$/.test(v) || Number(v) > (k[0] === 's' ? 200000 : 99999))) return bad(form, '價格只能填數字');
+        if (k[0] === 's' && (v === '' || Number(v) < 1)) return bad(form, '線上購買的商品一定要有價格');
+        prices[k] = v === '' ? null : Number(v);
+      }
+      apply(s, form, function (c2) {
+        var set = function (list, k) { (list || []).forEach(function (m, i) { var key = k + i; if (!m || !(key in prices)) return; m.price = prices[key]; if (sold[key]) m.soldOut = twDay(); else delete m.soldOut; }); };
+        set(c2.menu, 'm'); if (c2.shop) set(c2.shop.items, 's');
+      });
+    });
+    pendingCheck(s, form);
+  }
+
+  // 照片：縮小後轉成網頁格式再上傳（手機拍的照片很大）
+  async function shrink(file) {
+    if (file.size > 25 * 1024 * 1024) throw new Error('照片太大了，請換一張');
+    var bmp;
+    try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+    catch (e) { bmp = await new Promise(function (ok, no) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = function () { no(new Error('這張照片讀不出來，請改用 JPG 或 PNG')); }; im.src = URL.createObjectURL(file); }); }
+    var W = bmp.width, H = bmp.height, k = Math.min(1, 1600 / Math.max(W, H)), w = Math.round(W * k), h = Math.round(H * k);
+    var cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(bmp, 0, 0, w, h);
+    if (bmp.close) bmp.close();
+    var blob = await new Promise(function (r) { cv.toBlob(r, 'image/webp', 0.82); }), ext = 'webp';
+    if (!blob || blob.type !== 'image/webp') { blob = await new Promise(function (r) { cv.toBlob(r, 'image/jpeg', 0.85); }); ext = 'jpg'; }
+    if (!blob) throw new Error('照片轉檔失敗，請換一張');
+    return { blob: blob, ext: ext, w: w, h: h };
   }
 
   // 營業時間
@@ -253,9 +388,29 @@
     else if (k === 'cancel') cancelForm(s);
     else if (k === 'news') newsForm(s);
     else if (k === 'hours') hoursForm(s);
+    else if (k === 'day') dayForm(s);
+    else if (k === 'price') priceForm(s);
+    else if (k === 'install') installHelp();
     else if (k === 'copy') copy(s, b);
     else if (k === 'share') navigator.share({ title: (s.content && s.content.name) || '', url: s.public_url }).catch(function () { /* 取消 */ });
   });
 
+  // 加到手機主畫面（Android 的 Chrome 可以直接安裝；iPhone 用 Safari 的分享選單）
+  var standalone = function () { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; };
+  var deferred = null;
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; });
+  function installHelp() {
+    var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    var steps = ios ? ['用 Safari 打開這一頁（在 LINE 裡打開的話，先點右下角選「用 Safari 開啟」）', '點下方的「分享」按鈕', '選「加入主畫面」，再按「新增」']
+      : ['用 Chrome 打開這一頁', '點右上角的「⋮」', '選「加到主畫面」或「安裝應用程式」'];
+    var form = sheet('加到手機主畫面', '加好之後，桌面會出現「我的網站」圖示，一按就打開會員專區，不用再找網址。',
+      (deferred ? '<p style="margin:4px 0 0"><button type="button" class="m-btn primary" data-inst>直接安裝</button></p><p class="yq-note">或照下面的步驟：</p>' : '') +
+      '<ol style="margin:10px 0 0;padding-left:20px;line-height:1.9;font-size:14.5px">' + steps.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ol>' +
+      '<p class="yq-note">第一次從主畫面打開時，可能要重新登入一次。</p>', '知道了');
+    form.addEventListener('click', function (e) { if (e.target.closest('[data-inst]') && deferred) { deferred.prompt(); deferred.userChoice.finally(function () { deferred = null; close(); }); } });
+    form.addEventListener('submit', function (e) { e.preventDefault(); close(); });
+  }
+
   window.YCQuick = { html: html };
+  css();
 })();
