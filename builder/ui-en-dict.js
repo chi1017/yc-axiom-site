@@ -1088,5 +1088,11 @@ export default {
 "在上方顯示網站預覽，邊改邊看": "Show a live preview of your site above the settings",
 "往前移": "Move earlier",
 "拍照": "Take photo",
-"沒有上傳成功": "Nothing was uploaded"
+"沒有上傳成功": "Nothing was uploaded",
+"售完": "Sold out",
+"今日售完 ✓": "Sold out today ✓",
+"今天賣完了就按一下，網站顯示「今日售完」，明天自動恢復": "Tap when it's sold out today; the site shows “Sold out today” and goes back to normal tomorrow",
+"加照片": "Add photo",
+"換照片": "Change photo",
+"消息照片": "News photo"
 };

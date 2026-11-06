@@ -185,7 +185,7 @@ const UI_EN = (() => {
   const q = new URLSearchParams(location.search).get('lang');
   try { if (q === 'en' || q === 'zh') localStorage.setItem('yc-builder-ui', q); return localStorage.getItem('yc-builder-ui') === 'en'; } catch (e) { return q === 'en'; }
 })();
-if (UI_EN) import(new URL('./ui-en.min.js?v=c43d91c0c2', import.meta.url).href).then((m) => m.install()).catch(() => {});
+if (UI_EN) import(new URL('./ui-en.min.js?v=c48e5bf966', import.meta.url).href).then((m) => m.install()).catch(() => {});
 function setUiLang(lang) {
   try { localStorage.setItem('yc-builder-ui', lang); } catch (e) { /* 無痕模式：只靠網址 */ }
   const u = new URL(location.href); u.searchParams.set('lang', lang); location.href = u.href;
@@ -1419,10 +1419,17 @@ function paintMenu() {
     const n = h('input', { type: 'text', maxlength: '40', placeholder: IND().offer.item + '名稱', 'aria-label': IND().offer.item + '名稱 ' + (i + 1) }), p = h('input', { type: 'number', min: '0', max: '99999', step: '1', inputmode: 'numeric', placeholder: '價格', 'aria-label': '價格 ' + (i + 1) });
     tx(n, m, 'name'); p.value = m.price == null ? '' : m.price;
     p.addEventListener('input', () => { m.price = p.value === '' ? null : Number(p.value); touch(); });
-    box.append(h('div', { class: 'row2 row2-dup' }, n, p, h('span', { class: 'ord-btns' }, iconBtn('複製', () => dupIn(S.content.menu, i, L.LIMITS.menu, paintMenu)), iconBtn('刪除', () => { S.content.menu.splice(i, 1); paintMenu(); touch(); }, 'danger'))));
+    box.append(h('div', { class: 'row2 row2-dup' }, n, p, h('span', { class: 'ord-btns' }, soldBtn(m, paintMenu, 'menu'), iconBtn('複製', () => dupIn(S.content.menu, i, L.LIMITS.menu, paintMenu)), iconBtn('刪除', () => { S.content.menu.splice(i, 1); paintMenu(); touch(); }, 'danger'))));
   });
   $('#menuAdd').disabled = S.content.menu.length >= L.LIMITS.menu; $('#menuCnt').textContent = S.content.menu.length + '/' + L.LIMITS.menu;
   dragSort(box, S.content.menu, () => { paintMenu(); touch(); scrollPreviewTo('menu'); });
+}
+// 今日售完：只對今天有效，隔天網站自動恢復
+const twToday = () => new Date(Date.now() + 288e5).toISOString().slice(0, 10);
+function soldBtn(item, repaint, anchor) {
+  const on = item.soldOut === twToday();
+  return h('button', { type: 'button', class: 'btn small so-btn', 'aria-pressed': String(on), title: '今天賣完了就按一下，網站顯示「今日售完」，明天自動恢復',
+    onclick: () => { if (on) delete item.soldOut; else item.soldOut = twToday(); touch(); repaint(); scrollPreviewTo(anchor); } }, on ? '今日售完 ✓' : '售完');
 }
 function paintNews() {
   const L = S.lib, box = $('#newsBox'); box.replaceChildren();
@@ -1430,7 +1437,16 @@ function paintNews() {
     const d = h('input', { type: 'date', 'aria-label': '日期 ' + (i + 1) }), t = h('input', { type: 'text', maxlength: '60', placeholder: '消息標題', 'aria-label': '標題 ' + (i + 1) });
     d.value = m.date; tx(t, m, 'title');
     d.addEventListener('input', () => { m.date = d.value; touch(); });
-    box.append(h('div', { class: 'rowN' }, d, t, iconBtn('刪除', () => { S.content.news.splice(i, 1); paintNews(); touch(); }, 'danger')));
+    // 消息照片（選填）
+    const sl = { key: 'news', label: '消息照片', get: () => m.photo || null, set: (v) => { if (v) m.photo = v; else delete m.photo; } };
+    const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', hidden: true });
+    const nm = h('div', { class: 'nm' });
+    const up = h('button', { type: 'button', class: 'btn small' }, m.photo ? '換照片' : '加照片');
+    up.addEventListener('click', () => file.click());
+    file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) { await uploadPhoto(sl, f, nm, up); paintNews(); scrollPreviewTo('news'); } });
+    const rm = m.photo ? iconBtn('移除照片', async () => { const old = m.photo.path; delete m.photo; touch(); await trashPhoto(old); paintNews(); }, 'danger') : null;
+    box.append(h('div', { class: 'news-item' }, h('div', { class: 'rowN' }, d, t, iconBtn('刪除', () => { S.content.news.splice(i, 1); paintNews(); touch(); }, 'danger')),
+      h('div', { class: 'news-ph' }, m.photo ? h('img', { src: photoUrl(m.photo.path), alt: m.title || '消息照片' }) : null, up, rm, nm, file)));
   });
   $('#newsAdd').disabled = S.content.news.length >= L.LIMITS.news; $('#newsCnt').textContent = S.content.news.length + '/' + L.LIMITS.news;
   dragSort(box, S.content.news, () => { paintNews(); touch(); });
@@ -1708,7 +1724,7 @@ function paintItems() {
     file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) { await uploadPhoto(sl, f, nm, up); paintItems(); } });
     const del = it.photo ? iconBtn('移除照片', async () => { const old = it.photo.path; it.photo = null; touch(); await trashPhoto(old); paintItems(); }, 'danger') : null;
     box.append(h('div', { class: 'faq-item' },
-      h('div', { class: 'row2' }, n, p),
+      h('div', { class: 'row2' }, n, p, soldBtn(it, paintItems, 'shop')),
       h('div', { style: 'height:8px' }), d,
       h('div', { class: 'photo', style: 'margin-top:8px' }, h('div', { class: 'th' }, it.photo ? h('img', { src: photoUrl(it.photo.path), alt: it.name || '商品照片' }) : '無照片'),
         h('div', { class: 'ctl' }, nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del, focalBtn(() => it.photo, (v) => { it.photo = v; }, it.name || '商品照片')), file)),
@@ -2075,7 +2091,7 @@ async function uploadPhoto(sl, file, nm, btn) {
     const out = await compress(file, sl.label);
     if (!out) { nm.textContent = ''; btn.disabled = false; return; }
     const { blob, ext, w, h: hh } = out;
-    const path = S.site.id + '/' + (['hero', 'item', 'block', 'share'].includes(sl.key) ? sl.key : 'room') + '-' + Date.now().toString(36) + '.' + ext;
+    const path = S.site.id + '/' + (['hero', 'item', 'block', 'share', 'news'].includes(sl.key) ? sl.key : 'room') + '-' + Date.now().toString(36) + '.' + ext;
     const r = await YC.client.storage.from('site-photos').upload(path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
     if (r.error) throw new Error('上傳失敗：' + r.error.message);
     S.fresh.add(path);

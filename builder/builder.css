@@ -438,3 +438,10 @@ input:hover:not(:focus),textarea:hover:not(:focus){border-color:color-mix(in srg
  .mback.sheet.txt-sheet .modal{box-shadow:0 -8px 30px rgba(0,0,0,.35)}
  .mback.sheet.txt-sheet .modal input,.mback.sheet.txt-sheet .modal textarea{width:100%}
 }
+/* 售完、消息照片 */
+.so-btn[aria-pressed=true]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.news-item{padding:6px 0 10px;border-bottom:1px dashed var(--line);margin-bottom:8px}
+.news-item .rowN{margin-bottom:6px}
+.news-ph{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.news-ph img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+.news-ph .nm{font-size:12.5px;color:var(--muted)}

@@ -98,14 +98,38 @@
         : '<p style="margin:4px 0 0;font-size:13px;color:#9a8f80">網站上線並重新發佈後開始統計，不使用 Cookie、不記錄訪客個人資料。</p>') + '</div>';
   }
   // 聯絡表單留言
-  function msgsHtml(rows, count) {
+  // 聯絡客人：電話（打電話、傳簡訊）或 Email（寄信），手機一按就開
+  function contactBtns(contact, email, subject) {
+    var c = String(contact || '').trim(), out = '';
+    var tel = c.replace(/[^\d+]/g, '');
+    if (/^\+?\d{8,15}$/.test(tel)) out += '<a class="m-btn sm dq-c" href="tel:' + esc(tel) + '">打電話</a><a class="m-btn sm dq-c" href="sms:' + esc(tel) + '">傳簡訊</a>';
+    var mail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c) ? c : (email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '');
+    if (mail) out += '<a class="m-btn sm dq-c" href="mailto:' + esc(mail) + (subject ? '?subject=' + encodeURIComponent(subject) : '') + '">寄信</a>';
+    return out;
+  }
+  // 留言：上次看過之後的新留言標「新」、排最前面（記在這台裝置，不動資料庫）
+  var seenKey = function (sid) { return 'yc-msg-seen-' + sid; };
+  function lastSeen(sid) { try { return Number(localStorage.getItem(seenKey(sid))) || 0; } catch (e) { return 0; } }
+  function msgsHtml(rows, count, s) {
     if (!rows || !rows.length) return '';
     var d = function (t) { var x = new Date(t); return (x.getMonth() + 1) + '/' + x.getDate() + ' ' + String(x.getHours()).padStart(2, '0') + ':' + String(x.getMinutes()).padStart(2, '0'); };
-    return '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">網站留言與預約（共 ' + (count || rows.length) + ' 則，顯示最新 ' + rows.length + ' 則）</summary>' +
-      '<ul style="margin:6px 0 0;padding-left:0;list-style:none;font-size:14px;line-height:1.7">' + rows.map(function (m) {
-        return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)">' + (m.kind === 'booking' ? '<span style="display:inline-block;padding:0 8px;margin-right:6px;border:1px solid #e0b05a;color:#e0b05a;border-radius:999px;font-size:12px">預約</span>' : '') + (m.meta && m.meta.deposit ? (m.meta.deposit_paid ? '<span style="color:#6cc08b;font-size:12px;margin-right:6px">訂金已付</span>' : '<span style="color:#9a8f80;font-size:12px;margin-right:6px">訂金未付</span>') : '') + '<b>' + esc(m.name) + '</b>　<span style="color:#9a8f80">' + esc(m.contact) + '・' + esc(d(m.created_at)) + '</span>' +
-          '<div style="white-space:pre-wrap">' + esc(m.message) + '</div></li>';
-      }).join('') + '</ul></details>';
+    var seen = lastSeen(s.id), fresh = rows.filter(function (m) { return Date.parse(m.created_at) > seen; }).length;
+    var name = (s.content && s.content.name) || '';
+    return '<details class="dq-sec" id="msgs-' + esc(s.id) + '"' + (fresh ? ' open' : '') + '><summary><b>網站留言與預約申請</b>（共 ' + (count || rows.length) + ' 則' + (fresh ? '，<span class="dq-new">' + fresh + ' 則新的</span>' : '') + '）</summary>' +
+      '<ul class="dq-list">' + rows.map(function (m) {
+        var isNew = Date.parse(m.created_at) > seen, mt = m.meta || {};
+        return '<li' + (isNew ? ' class="is-new"' : '') + '><div class="dq-top">' + (isNew ? '<i class="dq-dot" aria-label="新"></i>' : '') + (m.kind === 'booking' ? '<span class="dq-tag">預約</span>' : '') +
+          (mt.deposit ? (mt.deposit_paid ? '<span class="dq-ok">訂金已付</span>' : '<span class="dq-mute">訂金未付</span>') : '') +
+          '<b>' + esc(m.name) + '</b><span class="dq-mute">' + esc(m.contact) + '・' + esc(d(m.created_at)) + '</span></div>' +
+          '<div class="dq-msg">' + esc(m.message) + '</div><div class="dq-acts">' + contactBtns(m.contact, mt.email, name ? '回覆：' + name + ' 網站留言' : '') + '</div></li>';
+      }).join('') + '</ul>' + (fresh ? '<p style="margin:8px 0 0"><button class="m-btn sm" data-seen="' + esc(s.id) + '" data-at="' + esc(Date.parse(rows[0].created_at)) + '">都看過了</button></p>' : '') + '</details>';
+  }
+  // 卡片最上方：今天要處理的事（待確認的預約、新留言），一眼看到
+  function todoHtml(s, bks, msgs) {
+    var pend = (bks || []).filter(function (m) { return m.slot_status === 'pending'; }).length;
+    var seen = lastSeen(s.id), fresh = (msgs || []).filter(function (m) { return Date.parse(m.created_at) > seen; }).length;
+    if (!pend && !fresh) return '';
+    return '<div class="dq-todo">' + (pend ? '<a href="#bk-' + esc(s.id) + '"><b>' + pend + '</b> 筆預約待確認</a>' : '') + (fresh ? '<a href="#msgs-' + esc(s.id) + '"><b>' + fresh + '</b> 則新留言</a>' : '') + '</div>';
   }
   // 自訂網域：上線中的網站可以自己設定
   function domainHtml(s) {
@@ -244,14 +268,20 @@
   function bookingsHtml(s, rows) {
     if (!rows || !rows.length) return '';
     var stl = { pending: ['待確認', '#e0b05a'], confirmed: ['已確認', '#34d399'], cancelled: ['已取消', '#9a8f80'] };
-    return '<details open style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px"><b>預約行事曆</b>（接下來 ' + rows.filter(function (m) { return m.slot_status !== 'cancelled'; }).length + ' 筆）</summary>' +
-      '<ul style="margin:8px 0 0;padding-left:0;list-style:none;font-size:14px;line-height:1.7">' + rows.map(function (m) {
+    // 待確認的排最前面，其次依日期
+    var rank = { pending: 0, confirmed: 1, cancelled: 2 };
+    rows = rows.slice().sort(function (x, y) { return (rank[x.slot_status] || 0) - (rank[y.slot_status] || 0) || String(x.slot_date + x.slot_time).localeCompare(String(y.slot_date + y.slot_time)); });
+    var pend = rows.filter(function (m) { return m.slot_status === 'pending'; }).length;
+    var wd = ['日', '一', '二', '三', '四', '五', '六'], tw = new Date(Date.now() + 288e5).toISOString().slice(0, 10);
+    var day = function (d) { return d === tw ? '今天' : String(d).slice(5).replace('-', '/') + '（' + wd[new Date(d + 'T00:00:00Z').getUTCDay()] + '）'; };
+    return '<details open class="dq-sec" id="bk-' + esc(s.id) + '"><summary><b>預約行事曆</b>（接下來 ' + rows.filter(function (m) { return m.slot_status !== 'cancelled'; }).length + ' 筆' + (pend ? '，<span class="dq-new">' + pend + ' 筆待確認</span>' : '') + '）</summary>' +
+      '<ul class="dq-list">' + rows.map(function (m) {
         var st = stl[m.slot_status] || stl.pending, mt = m.meta || {};
-        var btns = m.slot_status === 'cancelled' ? '' : (m.slot_status === 'pending' ? '<button class="m-btn sm" data-bk="confirmed" data-id="' + esc(m.id) + '" data-site="' + esc(s.id) + '">確認</button> ' : '') +
+        var btns = m.slot_status === 'cancelled' ? '' : (m.slot_status === 'pending' ? '<button class="m-btn sm primary" data-bk="confirmed" data-id="' + esc(m.id) + '" data-site="' + esc(s.id) + '">確認</button>' : '') +
           '<button class="m-btn sm" data-bk="cancelled" data-id="' + esc(m.id) + '" data-site="' + esc(s.id) + '">取消</button>';
-        return '<li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)"><b>' + esc(String(m.slot_date).slice(5).replace('-', '/')) + ' ' + esc(m.slot_time) + '</b>　' + esc(m.name) + '　' + esc(m.contact) +
-          (mt.people ? '・' + esc(mt.people) + ' 人' : '') + (mt.item ? '・' + esc(mt.item) : '') + (mt.email ? '・' + esc(mt.email) : '') +
-          ' <span style="color:' + st[1] + ';font-size:13px">' + st[0] + '</span>' + (btns ? '<div style="margin-top:4px">' + btns + '</div>' : '') + '</li>';
+        return '<li class="bk-' + esc(m.slot_status || 'pending') + '"><div class="dq-top"><b>' + esc(day(String(m.slot_date))) + ' ' + esc(m.slot_time) + '</b><span style="color:' + st[1] + ';font-size:13px">' + st[0] + '</span></div>' +
+          '<div>' + esc(m.name) + '　<span class="dq-mute">' + esc(m.contact) + (mt.people ? '・' + esc(mt.people) + ' 人' : '') + (mt.item ? '・' + esc(mt.item) : '') + (mt.email ? '・' + esc(mt.email) : '') + '</span></div>' +
+          '<div class="dq-acts">' + btns + contactBtns(m.contact, mt.email) + '</div></li>';
       }).join('') + '</ul><p id="bkout-' + esc(s.id) + '" style="margin:6px 0 0;font-size:13px;color:#9a8f80"></p></details>';
   }
   // ── 多人協作（進階方案，只有擁有者看得到）──
@@ -268,6 +298,8 @@
       '<button class="m-btn sm" data-collab="invite" data-site="' + id + '">邀請</button></div><p id="collabout-' + id + '" style="margin:6px 0 0;font-size:13px;color:#9a8f80"></p></details>';
   }
   box.addEventListener('click', async function (ev) {
+    var sb = ev.target.closest && ev.target.closest('[data-seen]');
+    if (sb) { try { localStorage.setItem(seenKey(sb.getAttribute('data-seen')), sb.getAttribute('data-at')); } catch (e0) { /* ignore */ } draw(); return; }
     var b = ev.target.closest && ev.target.closest('[data-bk],[data-collab]'); if (!b) return;
     var sid = b.getAttribute('data-site');
     if (b.hasAttribute('data-bk')) {
@@ -301,7 +333,7 @@
         var live0 = s.public_url && (s.status === 'live' || s.status === 'overdue');
         return '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">' + esc(name0) + ' <span style="font-size:13px;font-weight:400;color:#9a8f80">協作中</span></h2>' +
           (live0 ? '<p style="margin:6px 0">網址：<a href="' + esc(s.public_url) + '" target="_blank" rel="noopener">' + esc(s.public_url) + '</a></p>' : '') +
-          quick(s) +
+          todoHtml(s, bks && !bks.error ? bks.data : null, null) + quick(s) +
           '<p style="margin:6px 0;font-size:13px;color:#9a8f80">你被邀請一起編輯這個網站。收款、網域與續約由網站擁有者管理。</p>' + bkHtml +
           '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(s.id)) + '">編輯網站</a></p></div>';
       }
@@ -333,7 +365,7 @@
       return '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">' + (many ? esc(name) : '我的網站') + '</h2>' +
         '<p style="margin:0 0 6px"><span style="display:inline-block;padding:2px 12px;border:1px solid ' + st.color + ';color:' + st.color + ';border-radius:999px;font-size:13px">' + esc(st.text) + '</span></p>' +
         (live ? '<p style="margin:6px 0">網址：<a href="' + esc(s.public_url) + '" target="_blank" rel="noopener">' + esc(s.public_url) + '</a></p>' : '') +
-        quick(s) +
+        todoHtml(s, bks && !bks.error ? bks.data : null, msgs && !msgs.error ? msgs.data : null) + quick(s) +
         (s.paid_until ? '<p style="margin:6px 0;font-size:14px">服務到期日：' + esc(s.paid_until) + (dl == null ? '' : dl >= 0 ? '（還有 ' + dl + ' 天）' : '（已過期 ' + (-dl) + ' 天）') + '</p>' : '') +
         (s.status === 'suspended' && s.suspend_reason ? '<p style="margin:6px 0;font-size:14px;color:#f0776b">暫停原因：' + esc(s.suspend_reason) + '</p>' : '') +
         reportHtml(rep && !rep.error ? rep.data : []) +
@@ -344,7 +376,7 @@
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
           pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +
         statsHtml(hits && !hits.error ? hits.data : null) +
-        bkHtml + msgsHtml(msgs && !msgs.error ? msgs.data : null, msgs && msgs.count) +
+        bkHtml + msgsHtml(msgs && !msgs.error ? msgs.data : null, msgs && msgs.count, s) +
         shopHtml(s, pay && !pay.error ? pay.data : null, orders && !orders.error ? orders.data : null) +
         domainHtml(s) + collabHtml(s, mem && !mem.error ? mem.data : null) +
         '<p style="margin:6px 0 0;font-size:13px"><a href="' + esc(YC.url('terms/rental/')) + '" target="_blank" rel="noopener">網站租用條款</a>' + (s.terms_accepted_at ? '<span style="color:#9a8f80">（你已於 ' + esc(String(s.terms_accepted_at).slice(0, 10)) + ' 同意）</span>' : '') + '</p>' +
