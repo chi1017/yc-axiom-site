@@ -1113,5 +1113,6 @@ export default {
 "左邊依分類填寫：先選外觀，再填店家資料與照片。": "Fill in by category on the left: start with the look, then your business details and photos. ",
 "右邊會即時顯示網站的樣子，可以切換電腦、平板與手機，選單、捲動動畫都能直接試。點預覽裡的文字可以直接修改。灰色的 [提示文字] 不會出現在正式網站。": "The right side shows your site live. Switch between desktop, tablet and phone, and try the menu and scroll animations. Click text in the preview to edit it. Grey [hint text] won’t appear on the live site.",
 "必填項目完成後，按右上角「發佈」。": "Once the required items are done, press “Publish” at the top right. ",
-"登入後會把你剛剛編輯的內容帶進帳號，建立你自己的網站。登入免費，不用設定密碼。": "After you sign in, what you just edited is brought into your account to create your own website. Signing in is free and needs no password."
+"登入後會把你剛剛編輯的內容帶進帳號，建立你自己的網站。登入免費，不用設定密碼。": "After you sign in, what you just edited is brought into your account to create your own website. Signing in is free and needs no password.",
+"一句說明（選填），例如：每日限量 20 杯、可做冰的": "A short note (optional), e.g. Limited to 20 a day; can be iced"
 };
