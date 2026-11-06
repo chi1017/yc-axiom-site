@@ -19,6 +19,8 @@ const TARGETS = [
   { in: 'assets/seo-tool.js', out: 'assets/dist/seo-tool.min.js', type: 'script' },
   { in: 'assets/seo-tool.css', out: 'assets/dist/seo-tool.min.css', type: 'css' },
   // 編輯器：builder.js 與它 import 的 preview-fx.js 打包成一個檔（共用版型模組另外從 yc-axiom-sites 的 templates/dist 載入）
+  // 編輯器英文介面（選英文介面才載入）；要排在 builder.js 前面，讓 builder.js 裡的版本號先更新
+  { in: 'builder/ui-en.js', out: 'builder/dist/ui-en.min.js', type: 'bundle', refsIn: ['builder/builder.js'] },
   { in: 'builder/builder.js', out: 'builder/dist/builder.min.js', type: 'bundle' },
   { in: 'builder/preview/preview.js', out: 'builder/dist/preview.min.js', type: 'bundle' },
   { in: 'builder/builder.css', out: 'builder/dist/builder.min.css', type: 'css' },
