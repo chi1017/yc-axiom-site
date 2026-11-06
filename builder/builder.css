@@ -34,6 +34,7 @@ a{color:var(--accent2)}
 .stage.mob iframe{width:390px;max-width:100%;border-radius:28px;border:8px solid #111}
 .frame-box{display:flex;justify-content:center;width:100%;height:100%;flex:none}
 /* 電腦、平板：用真實寬度排版，再等比縮小放進預覽區，看到的就是客人看到的樣子 */
+.stage.fit{overflow:hidden}   /* 縮放模式不需要捲軸；出現捲軸會讓寬度變動、縮放來回跳 */
 .stage.fit .frame-box{display:block;position:relative;overflow:hidden;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
 .stage.fit iframe{position:absolute;left:0;top:0;transform-origin:0 0;border-radius:0;box-shadow:none}
 .dev-size{font-size:12px;color:var(--muted);white-space:nowrap}

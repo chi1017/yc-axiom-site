@@ -2293,12 +2293,15 @@ function bindDevice() {
     f.style.width = T + 'px'; f.style.height = Math.ceil(H / k) + 'px'; f.style.transform = k < 1 ? 'scale(' + k + ')' : '';
   }
   function set(v) {
-    dev = v; Object.entries(btn).forEach(([k, b]) => b && b.setAttribute('aria-pressed', String(k === v)));
+    dev = v; last = ''; Object.entries(btn).forEach(([k, b]) => b && b.setAttribute('aria-pressed', String(k === v)));
     try { localStorage.setItem('yc-builder-device', v); } catch (e) { /* ignore */ }
     fit();
   }
   Object.entries(btn).forEach(([k, b]) => b && b.addEventListener('click', () => set(k)));
-  if (window.ResizeObserver) new ResizeObserver(fit).observe(stage); else window.addEventListener('resize', fit);
+  // 尺寸變動只在下一個畫面重算一次，且差不到 2px 不重算（避免捲軸出現／消失造成來回閃動）
+  let raf = 0, last = '';
+  const later = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { const key = Math.round(stage.clientWidth / 2) + 'x' + Math.round(stage.clientHeight / 2) + dev; if (key !== last) { last = key; fit(); } }); };
+  if (window.ResizeObserver) new ResizeObserver(later).observe(stage); else window.addEventListener('resize', later);
   if (small.addEventListener) small.addEventListener('change', fit);
   set(dev);
 }
