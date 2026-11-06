@@ -185,7 +185,7 @@ const UI_EN = (() => {
   const q = new URLSearchParams(location.search).get('lang');
   try { if (q === 'en' || q === 'zh') localStorage.setItem('yc-builder-ui', q); return localStorage.getItem('yc-builder-ui') === 'en'; } catch (e) { return q === 'en'; }
 })();
-if (UI_EN) import(new URL('./ui-en.min.js?v=fb22d1c6fb', import.meta.url).href).then((m) => m.install()).catch(() => {});
+if (UI_EN) import(new URL('./ui-en.min.js?v=7f7524e3a9', import.meta.url).href).then((m) => m.install()).catch(() => {});
 function setUiLang(lang) {
   try { localStorage.setItem('yc-builder-ui', lang); } catch (e) { /* 無痕模式：只靠網址 */ }
   const u = new URL(location.href); u.searchParams.set('lang', lang); location.href = u.href;
