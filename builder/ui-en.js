@@ -25,6 +25,10 @@ const RULES = [
   [/^發佈後就會顯示，到 (\S+) 為止。(這段期間線上預約也不開放。)?$/, (m, d, b) => 'Shows once you publish, until ' + d + '.' + (b ? ' Online booking is unavailable during these dates.' : '')],
   [/^發佈後顯示到 (\S+) 為止，之後自動消失。(這段期間線上預約也不開放。)?$/, (m, d, b) => 'Shows after you publish until ' + d + ', then disappears automatically.' + (b ? ' Online booking is unavailable during these dates.' : '')],
   [/^上傳中 (\d+)\/(\d+)…$/, 'Uploading $1/$2…'],
+  [/^(.{2,10})（進階功能・每月加 NT\$([\d,]+)）$/, (m, x, n) => T(x) + ' (advanced feature, +NT$' + n + '/month)'],
+  [/^進階 \+NT\$([\d,]+)／月$/, (m, n) => 'Advanced +NT$' + n + '/mo'],
+  [/^已套用到 (\d+) 天，公休的日子沒有改$/, 'Applied to $1 day(s); closed days were left unchanged'],
+  [/^登入免費，不用設定密碼；你剛剛編輯的內容會帶進帳號。發佈後我們確認付款，網站才會正式上線(?:（每月 NT\$([\d,]+) 起）)?。$/, (m, n) => 'Signing in is free and needs no password; what you just edited is brought into your account. After you publish, your site goes live once payment is confirmed' + (n ? ' (from NT$' + n + '/month)' : '') + '.'],
   [/^已上傳 (\d+) 張照片$/, 'Uploaded $1 photo(s)'],
   [/^一次選多張(.{1,8})照片（還可以放 (\d+) 張）$/, (m, x, n) => 'Choose several ' + low(T(x)) + ' photos (' + n + ' more allowed)']
 ];
@@ -50,9 +54,10 @@ export function t(s) {
   if (!s || !CJK.test(s)) return s;
   if (has(s)) return DICT[s];
   const tr = s.trim();
-  if (has(tr)) return s.replace(tr, DICT[tr]);
-  for (const [re, to] of RULES) if (re.test(tr)) return s.replace(tr, tr.replace(re, to));
-  for (const [re, fn] of COMBO) { const m = tr.match(re); if (m) { const r = fn(...m); if (r !== tr) return s.replace(tr, r); } }
+  // 用函式取代，替換後的文字裡有 $ 符號（例如 NT$400）時才不會被當成特殊符號
+  if (has(tr)) return s.replace(tr, () => DICT[tr]);
+  for (const [re, to] of RULES) if (re.test(tr)) { const r = tr.replace(re, to); return s.replace(tr, () => r); }
+  for (const [re, fn] of COMBO) { const m = tr.match(re); if (m) { const r = fn(...m); if (r !== tr) return s.replace(tr, () => r); } }
   // 片段替換後，剩下單獨成詞的短詞（前後是空白或標點）整詞比對
   return s.replace(RE, (m) => DICT[m]).replace(/[\u4e00-\u9fff]+/g, (w) => T(w));
 }

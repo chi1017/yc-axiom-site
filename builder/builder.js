@@ -45,7 +45,7 @@ function modal(title, bodyNodes, actions) {
     h('div', { class: 'modal' }, h('h3', { text: title }), ...[].concat(bodyNodes), h('div', { class: 'acts' }, actions)));
   back.addEventListener('click', (e) => { if (e.target === back) closeModal(); });
   document.body.append(back);
-  const first = back.querySelector('button.primary') || back.querySelector('button'); if (first) first.focus();
+  const first = back.querySelector('button.primary') || back.querySelector('button'); if (first) first.focus({ preventScroll: true });
   return back;
 }
 function closeModal() { const m = $('#modal'); if (m) m.remove(); }
@@ -118,7 +118,12 @@ async function startTrial() {
 function askLoginToKeep(what) {
   save(); writeTrial({ pending: true });
   if (!YC.enabled) { toast('會員功能即將開放，你編輯的內容已暫存在這個瀏覽器。', 5000); return; }
-  YC.openLogin({ title: '登入後' + what, reason: '登入後會把你剛剛編輯的內容帶進帳號，建立你自己的網站。免費，不用設定密碼。' });
+  // 發佈不是免費上線：登入免費，確認付款後才正式上線（價格從方案設定讀，避免寫死）
+  const PM = S.plan, mo = PM && PM.planFor && PM.hasPrice && PM.hasPrice(PM.planFor('single')) ? PM.planFor('single').monthly : 0;
+  const reason = what === '發佈'
+    ? '登入免費，不用設定密碼；你剛剛編輯的內容會帶進帳號。發佈後我們確認付款，網站才會正式上線' + (mo ? '（每月 NT$' + mo.toLocaleString('en-US') + ' 起）' : '') + '。'
+    : '登入後會把你剛剛編輯的內容帶進帳號，建立你自己的網站。登入免費，不用設定密碼。';
+  YC.openLogin({ title: '登入後' + what, reason });
 }
 
 // 版型模組可能還是瀏覽器快取的舊版（GitHub Pages 約 10 分鐘更新），缺新函式時用本機版本，編輯器不會因此打不開
@@ -185,7 +190,7 @@ const UI_EN = (() => {
   const q = new URLSearchParams(location.search).get('lang');
   try { if (q === 'en' || q === 'zh') localStorage.setItem('yc-builder-ui', q); return localStorage.getItem('yc-builder-ui') === 'en'; } catch (e) { return q === 'en'; }
 })();
-if (UI_EN) import(new URL('./ui-en.min.js?v=c48e5bf966', import.meta.url).href).then((m) => m.install()).catch(() => {});
+if (UI_EN) import(new URL('./ui-en.min.js?v=1e37a8d171', import.meta.url).href).then((m) => m.install()).catch(() => {});
 function setUiLang(lang) {
   try { localStorage.setItem('yc-builder-ui', lang); } catch (e) { /* 無痕模式：只靠網址 */ }
   const u = new URL(location.href); u.searchParams.set('lang', lang); location.href = u.href;
@@ -530,6 +535,10 @@ function paintFontBox() {
   box.replaceChildren(h('div', { class: 'font-up' }, h('span', { text: cf ? '目前：' + cf.name : '還沒上傳字型' }), up, file), msg,
     h('div', { class: 'msg mute', text: 'TTF、OTF、WOFF、WOFF2 都可以，最大 20MB。請確認你有這個字型的網頁使用授權。字型檔不會公開，網站只會放標題用到的字。' }));
 }
+// 進階功能的價格（每月加多少）；標在卡片標題與手機設定清單上，開之前就看得到要加錢
+const proAdd = () => (S.plan && S.plan.proFor && S.site ? S.plan.proFor(S.site.price_lock).monthly : 400);
+const proTitle = () => (S.isPro ? '（進階功能）' : '（進階功能・每月加 NT$' + Number(proAdd()).toLocaleString('en-US') + '）');
+const PRO_CARDS = ['c-cal', 'c-code'];
 // 進階方案功能的說明（一般方案可以先設定、在預覽看效果，升級後才會出現在正式網站）
 function proNote() {
   if (S.isPro) return h('div', { class: 'msg ok', text: '你的網站是進階方案，這個功能已開放。' });
@@ -614,7 +623,7 @@ function cardForKey(k) {
   if (!k) return null;
   if (k.startsWith('b-')) return { card: 'c-blocks', focus: () => { const i = S.content.blocks.findIndex((b) => 'b-' + b.id === k); const items = $('#blockBox') ? $('#blockBox').children : []; return items[i] && items[i].querySelector('input,textarea'); } };
   const cal = S.content.bookingCal && S.content.bookingCal.enabled;
-  const M = { name: ['c-info', '#f-name'], tagline: ['c-info', '#f-tagline'], intro: ['c-info', '#f-intro'], address: ['c-info', '#f-address'], blocks: ['c-blocks'],
+  const M = { heroPhoto: ['c-photos'], name: ['c-info', '#f-name'], tagline: ['c-info', '#f-tagline'], intro: ['c-info', '#f-intro'], address: ['c-info', '#f-address'], blocks: ['c-blocks'],
     header: ['c-info', '#f-name'], top: ['c-info', '#f-name'], footer: ['c-info', '#f-name'], about: ['c-info', '#f-intro'], video: ['c-more', '#f-video'], menu: ['c-menu'], interior: ['c-photos'],
     shop: ['c-shop'], reviews: ['c-more', '#reviewBox textarea'], news: ['c-news'], posts: ['c-posts'], faq: ['c-faq'], booking: cal ? ['c-cal'] : ['c-more', '#f-bookingForm'],
     visit: ['c-hours'], info: ['c-hours'], contact: ['c-more', '#f-contactForm'] };
@@ -982,14 +991,26 @@ function buildPanel() {
     cl.addEventListener('change', () => { S.content.hours[d].closed = cl.checked; if (cl.checked) { S.content.hours[d].open = ''; S.content.hours[d].close = ''; o.value = c.value = ''; } sync(); touch(); });
     return { d, o, c, cl, refresh, el: h('div', { class: 'hours-row' }, h('strong', { text: DAYL[d] }), o, c, h('label', { class: 'closed' }, cl, '公休'), rd) };
   });
-  const copyBtn = h('button', { type: 'button', class: 'btn small' }, '把週一的時間套用到全部');
+  // 把某一天的時間套用到其他「有營業」的日子；公休的日子不動。來源預設是第一個有營業的日子
+  const srcSel = h('select', { class: 'sel', 'aria-label': '要套用哪一天的時間', style: 'width:auto;display:inline-block;margin:0 6px' });
+  const paintSrc = () => {
+    const open = DAYS.filter((d) => !S.content.hours[d].closed && S.content.hours[d].open && S.content.hours[d].close);
+    const cur = open.includes(srcSel.value) ? srcSel.value : open[0] || '';
+    srcSel.replaceChildren(...open.map((d) => h('option', { value: d, text: DAYL[d] })));
+    srcSel.value = cur; copyWrap.hidden = open.length === 0;
+  };
+  const copyBtn = h('button', { type: 'button', class: 'btn small' }, '套用到其他營業日');
+  const copyWrap = h('div', { style: 'margin:4px 0 12px;display:flex;align-items:center;flex-wrap:wrap;gap:6px' }, h('span', { class: 'msg mute', style: 'margin:0', text: '把' }), srcSel, h('span', { class: 'msg mute', style: 'margin:0', text: '的時間' }), copyBtn);
   copyBtn.addEventListener('click', () => {
-    const src = S.content.hours.mon;
-    rows.forEach((r) => { if (r.d === 'mon') return; Object.assign(S.content.hours[r.d], { open: src.open, close: src.close, closed: src.closed }); r.o.value = src.open; r.c.value = src.close; r.cl.checked = src.closed; r.o.disabled = r.c.disabled = src.closed; r.refresh(); });
-    touch();
+    const k = srcSel.value, src = S.content.hours[k]; if (!k || !src) return;
+    let n = 0;
+    rows.forEach((r) => { if (r.d === k || S.content.hours[r.d].closed) return; Object.assign(S.content.hours[r.d], { open: src.open, close: src.close }); r.o.value = src.open; r.c.value = src.close; r.refresh(); n++; });
+    touch(); toast(n ? '已套用到 ' + n + ' 天，公休的日子沒有改' : '其他日子都是公休，沒有可以套用的', 3000);
   });
+  rows.forEach((r) => { [r.o, r.c].forEach((x) => x.addEventListener('change', paintSrc)); r.cl.addEventListener('change', paintSrc); });
+  paintSrc();
   P.append(card('c-hours', 'visit', '營業時間', '每天填開始與結束時間；沒營業的那天勾「公休」。',
-    rows.map((r) => r.el), h('div', { style: 'margin:4px 0 12px' }, copyBtn), field('備註（選填）', 'hoursNote', { max: 80, ph: '例如：國定假日營業時間以粉絲專頁公告為準' })));
+    rows.map((r) => r.el), copyWrap, field('備註（選填）', 'hoursNote', { max: 80, ph: '例如：國定假日營業時間以粉絲專頁公告為準' })));
 
   P.append(noticeCard());
 
@@ -1094,7 +1115,7 @@ function buildPanel() {
     if (calOn.checked && !S.content.bookingForm) { S.content.bookingForm = true; const b = $('#f-bookingForm'); if (b) b.checked = true; }
     touch(); scrollPreviewTo('booking');
   });
-  P.append(card('c-cal', 'booking', '預約行事曆（進階方案）', '客人在網站上直接選日期與時段，每個時段有名額上限，額滿就不能再選。你在會員專區確認或取消，客人有留 Email 會收到通知。',
+  P.append(card('c-cal', 'booking', '預約行事曆' + proTitle(), '客人在網站上直接選日期與時段，每個時段有名額上限，額滿就不能再選。你在會員專區確認或取消，客人有留 Email 會收到通知。',
     proNote(),
     h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-cal-enabled' }, calOn, h('strong', { text: '使用預約行事曆（取代原本的預約申請表）' }))),
     h('div', { id: 'calBox' })));
@@ -1104,7 +1125,7 @@ function buildPanel() {
     bindInput(el, path, () => { clearTimeout(S.timers.code); S.timers.code = setTimeout(paintCodeStatus, 800); });
     return h('label', { class: 'field', for: el.id }, h('span', { text: label }), el);
   };
-  P.append(card('c-code', 'top', '自訂程式碼（進階方案）', '放 Meta Pixel、LINE Tag、聊天外掛、網站驗證碼等第三方提供的程式碼。預覽不會執行；發佈後由我們審核，核准才會放進正式網站（同一段程式碼只審一次）。',
+  P.append(card('c-code', 'top', '自訂程式碼' + proTitle(), '放 Meta Pixel、LINE Tag、聊天外掛、網站驗證碼等第三方提供的程式碼。預覽不會執行；發佈後由我們審核，核准才會放進正式網站（同一段程式碼只審一次）。',
     proNote(),
     codeArea('code.head', '放在 <head> 裡（追蹤碼、驗證碼）', '<script>…</script> 或 <meta …>'),
     codeArea('code.body', '放在頁面最後（聊天外掛等）', '<script src="https://…"></script>'),
@@ -1198,10 +1219,18 @@ function showGroup(key, scroll) {
 }
 // 第一次進編輯器的簡短引導（之後可按「？ 教學」再看）
 function openGuide() {
-  const steps = [
-    ['1　填內容', '左邊依分類填寫：先選外觀，再填店家資料與照片。不用一次填完，系統每 2 秒自動儲存。'],
-    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換電腦、平板與手機，選單、捲動動畫都能直接試。點預覽裡的文字可以直接修改（手機上點一下再按「改這段字」）。灰色的 [提示文字] 不會出現在正式網站。'],
-    ['3　按發佈', '必填項目完成後，按右上角「發佈」。之後每次修改再按一次發佈，網站約 1–2 分鐘更新。'],
+  // 手機與電腦的畫面不同（手機是下方分頁、沒有左右兩欄）；試用中還不會存到帳號
+  const mob = isMob();
+  const save = S.trial ? (mob ? '試用中的內容會暫存在這支手機，登入後才會存到你的帳號。' : '試用中的內容會暫存在這個瀏覽器，登入後才會存到你的帳號。') : '不用一次填完，系統每 2 秒自動儲存。';
+  const steps = mob ? [
+    ['1　填內容', '用下方的分頁切換「外觀、店家、內容、功能」，點一項就能填寫。' + save],
+    ['2　看預覽', '點下方的「預覽」看網站的樣子；在設定頁也可以按右下角「邊改邊看」，上面顯示網站、下面改設定。點預覽上的文字，再按「改這段字」就能直接修改。灰色的 [提示文字] 不會出現在正式網站。'],
+    ['3　按發佈', '必填項目完成後，按右上角「發佈」。' + (S.trial ? '登入、確認付款後網站才會正式上線。' : '之後每次修改再按一次發佈，網站約 1–2 分鐘更新。')],
+    ['小技巧', '改錯了可以按上方的「↶ 復原」；想回到以前發佈的版本，到右上角「⋯」裡的版本紀錄還原。']
+  ] : [
+    ['1　填內容', '左邊依分類填寫：先選外觀，再填店家資料與照片。' + save],
+    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換電腦、平板與手機，選單、捲動動畫都能直接試。點預覽裡的文字可以直接修改。灰色的 [提示文字] 不會出現在正式網站。'],
+    ['3　按發佈', '必填項目完成後，按右上角「發佈」。' + (S.trial ? '登入、確認付款後網站才會正式上線。' : '之後每次修改再按一次發佈，網站約 1–2 分鐘更新。')],
     ['小技巧', '改錯了可以按「復原」；想回到以前發佈的版本，到「版面與紀錄」的版本紀錄還原。']
   ];
   modal('三步驟做好你的網站', [h('ol', { class: 'guide' }, steps.map(([t, d]) => h('li', {}, h('strong', { text: t }), h('p', { text: d }))))],
@@ -2109,9 +2138,25 @@ function validate() {
   if (!S.slugState.ok && !r.errors.some((e) => e.field === 'slug') && S.site.status === 'draft') r.errors.push({ field: 'slug', msg: S.slugState.msg || '網址代稱尚未確認可用' });
   r.ok = r.errors.length === 0; return r;
 }
+// 檢查清單的項目：打開那張設定卡片，捲到那個欄位並閃一下（照片類只捲過去、不開鍵盤）
+const FIELD_EL = { name: '#f-name', tagline: '#f-tagline', intro: '#f-intro', address: '#f-address', phone: '#f-phone', 'booking.url': '#f-booking-url', 'booking.label': '#f-booking-label', hoursNote: '#f-hoursNote', video: '#f-video', ga4: '#f-ga4' };
 function goField(field) {
   const id = FIELD_CARD[field.split('.')[0]]; if (!id) return;
-  openCard(id, () => (field === 'photos.hero' ? null : $('#' + id).querySelector('input:not([disabled]),textarea')));
+  const card = $('#' + id);
+  const target = () => {
+    if (FIELD_EL[field] && $(FIELD_EL[field])) return $(FIELD_EL[field]);
+    if (field.startsWith('photos')) return card.querySelector('.photo');
+    if (field.startsWith('hours')) return card.querySelector('.hours-row');
+    return card.querySelector('input:not([disabled]):not([type=checkbox]),textarea');
+  };
+  const isPhoto = field.startsWith('photos') || field === 'order';
+  openCard(id, () => (isPhoto ? null : target()));
+  setTimeout(() => {
+    const el = target(); if (!el) return;
+    const box = el.closest('.field, .photo, .hours-row, .faq-item') || el;
+    box.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    box.classList.remove('field-flash'); void box.offsetWidth; box.classList.add('field-flash');
+  }, 420);
 }
 function refreshTodo() {
   const box = $('#checks'); if (!box) return;
@@ -2337,8 +2382,9 @@ function paintMobList() {
   rows.replaceChildren(...[...P.querySelectorAll('section.card')].filter((c) => !c.hidden).map((c) => {
     const t = c.querySelector('h2'), sub = c.querySelector('.sub');
     const title = t ? t.textContent.replace(/（.*?）/g, '').trim() : c.id;
+    const pro = PRO_CARDS.includes(c.id) ? h('em', { class: 'pro-badge', text: S.isPro ? '進階・已開通' : '進階 +NT$' + Number(proAdd()).toLocaleString('en-US') + '／月' }) : null;
     return h('button', { type: 'button', class: 'mrow', role: 'listitem', onclick: () => openCard(c.id) },
-      h('span', { class: 'mrow-t' }, h('strong', { text: title }), sub ? h('small', { text: sub.textContent.trim() }) : ''),
+      h('span', { class: 'mrow-t' }, h('strong', {}, title, pro), sub ? h('small', { text: sub.textContent.trim() }) : ''),
       h('span', { class: 'mrow-go', 'aria-hidden': 'true', text: '›' }));
   }));
   if (searching && !rows.children.length) rows.append(h('p', { class: 'msg mute', text: '找不到相關的設定，換個說法試試看' }));

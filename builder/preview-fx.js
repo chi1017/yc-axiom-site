@@ -118,6 +118,8 @@ export function sectionKey(el) {
   if (el.classList.contains('page-head')) return 'top';
   return '';
 }
+// 點到主視覺（或頁首大圖）的照片：跳到「照片」設定，不是店家資訊
+const photoKey = (t, key) => ((key === 'top') && t && t.closest && t.closest('figure, picture, img, .ph-img, .hero-img') ? 'heroPhoto' : key);
 export function wireEditPills(f, onPick, labelOf) {
   const d = f.contentDocument, w = f.contentWindow; if (!d) return;
   if (!d.getElementById('yc-pill-css')) { const st = d.createElement('style'); st.id = 'yc-pill-css'; st.textContent = PILL_CSS; d.documentElement.appendChild(st); }
@@ -130,9 +132,9 @@ export function wireEditPills(f, onPick, labelOf) {
   d.addEventListener('mousemove', (e) => {
     if (e.target === pill) return;
     const el = e.target.closest && e.target.closest('main > section, header.top, footer');
-    const key = sectionKey(el);
+    const key = photoKey(e.target, sectionKey(el));
     if (!el || !key) { hide(); return; }
-    if (el !== curEl) {
+    if (el !== curEl || pill.dataset.key !== key) {
       if (curEl) curEl.classList.remove('yc-hover');
       curEl = el; el.classList.add('yc-hover');
       pill.textContent = '✎ 編輯' + (labelOf ? labelOf(key) : '');
@@ -158,7 +160,7 @@ export function wireEditPills(f, onPick, labelOf) {
     if (!touchy() || e.target === pill || e.target === pill2) return;
     if (e.target.closest && e.target.closest('a, button, input, select, textarea, label, summary, iframe, video')) return;
     const el = e.target.closest && e.target.closest('main > section, header.top, footer');
-    const key = sectionKey(el);
+    const key = photoKey(e.target, sectionKey(el));
     clearTxt();
     if (!el || !key) { hideAll(); return; }
     if (curEl) curEl.classList.remove('yc-hover');
