@@ -180,6 +180,18 @@ const photoUrl = (path) => YC_CONFIG.supabaseUrl.replace(/\/$/, '') + '/storage/
 
 // ── 進入點 ──
 let booted = false;
+// ── 編輯器介面語言：?lang=en 或之前選過英文（記在這台瀏覽器）。英文介面的字典另外載入，中文使用者不會下載 ──
+const UI_EN = (() => {
+  const q = new URLSearchParams(location.search).get('lang');
+  try { if (q === 'en' || q === 'zh') localStorage.setItem('yc-builder-ui', q); return localStorage.getItem('yc-builder-ui') === 'en'; } catch (e) { return q === 'en'; }
+})();
+if (UI_EN) import(new URL('./ui-en.min.js?v=fb22d1c6fb', import.meta.url).href).then((m) => m.install()).catch(() => {});
+function setUiLang(lang) {
+  try { localStorage.setItem('yc-builder-ui', lang); } catch (e) { /* 無痕模式：只靠網址 */ }
+  const u = new URL(location.href); u.searchParams.set('lang', lang); location.href = u.href;
+}
+const uiLangBtn = () => h('button', { type: 'button', class: 'btn', 'data-no-tr': '', onclick: () => { closeModal(); setUiLang(UI_EN ? 'zh' : 'en'); } }, UI_EN ? '介面改成中文' : 'English interface');
+
 async function boot() {
   if (booted) return;
   if (!YC.enabled || !YC.loggedIn()) return startTrial();
@@ -319,7 +331,7 @@ function askDeleteSite() {
   const inp = h('input', { type: 'text', placeholder: '請輸入：刪除', 'aria-label': '確認刪除' });
   const msg = h('div', { class: 'msg bad' });
   const go = h('button', { type: 'button', class: 'btn primary', disabled: true }, '確定刪除');
-  inp.addEventListener('input', () => { go.disabled = inp.value.trim() !== '刪除'; });
+  inp.addEventListener('input', () => { const v = inp.value.trim(); go.disabled = v !== '刪除' && !(UI_EN && v.toLowerCase() === 'delete'); });
   go.addEventListener('click', async () => {
     go.disabled = true; msg.textContent = '刪除中…';
     clearTimeout(S.timers.save); S.dirty = false;
@@ -2212,7 +2224,7 @@ function openMoreSheet() {
         h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openGuide(); } }, '使用教學'),
         h('a', { class: 'btn', href: '../rental/' }, '網站租用說明'),
         h('a', { class: 'btn', href: '../' }, '回官網首頁'),
-        h('button', { type: 'button', class: 'btn', onclick: async () => { closeModal(); clearTrial(); location.reload(); } }, '清除試用內容，重新開始'))],
+        h('button', { type: 'button', class: 'btn', onclick: async () => { closeModal(); clearTrial(); location.reload(); } }, '清除試用內容，重新開始'), uiLangBtn())],
       [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '關閉')]);
     m.classList.add('sheet'); return;
   }
@@ -2227,7 +2239,7 @@ function openMoreSheet() {
       h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openInstallHelp(); } }, '加到手機主畫面'),
       h('button', { type: 'button', class: 'btn', onclick: () => { closeModal(); openGuide(); } }, '使用教學'),
       h('a', { class: 'btn', href: '../dashboard/' }, '回到會員專區'),
-      h('button', { type: 'button', class: 'btn', onclick: async () => { closeModal(); if (S.dirty || S.saving) await save(); S.dirty = false; YC.switchAccount().catch((e) => toast('無法切換帳號：' + (e.message || e))); } }, '切換 Google 帳號')),
+      h('button', { type: 'button', class: 'btn', onclick: async () => { closeModal(); if (S.dirty || S.saving) await save(); S.dirty = false; YC.switchAccount().catch((e) => toast('無法切換帳號：' + (e.message || e))); } }, '切換 Google 帳號'), uiLangBtn()),
     h('div', { class: 'field', style: 'margin-top:14px' }, h('span', { text: '切換網站' }), sw)],
     [h('button', { type: 'button', class: 'btn', onclick: closeModal }, '關閉')]);
   m.classList.add('sheet');
@@ -2294,6 +2306,7 @@ function bindChrome() {
   if (bindChrome.done) return; bindChrome.done = true;
   $('#btnPublish').addEventListener('click', publish);
   $('#btnFull').addEventListener('click', openFullPreview);
+  const bu = $('#btnUi'); if (bu) { if (UI_EN) { bu.textContent = '中文'; bu.lang = 'zh-Hant'; bu.title = '把編輯器介面改成中文'; } bu.addEventListener('click', () => setUiLang(UI_EN ? 'zh' : 'en')); }
   bindDevice(); bindSplitter();
   setTab('edit');
   $('#tabEdit').addEventListener('click', () => setTab('edit'));

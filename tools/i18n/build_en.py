@@ -263,6 +263,12 @@ def main():
             m['content'] = 'en_US'
         out = str(soup)
         out = re.sub(r'<a [^>]*class="lang-toggle"[^>]*>[^<]*</a>', TOGGLE_EN.format(href=path), out)
+        # 從英文版官網打開編輯器：介面用英文
+        def _ui(m):
+            u = m.group(1)
+            if 'lang=' in u: return m.group(0)
+            return 'href="' + u + ('&' if '?' in u else '?') + 'lang=en"'
+        out = re.sub(r'href="(/builder/[^"]*)"', _ui, out)
         # 手機表頭空間小：諮詢按鈕用短字
         out = re.sub(r'(<a [^>]*class="nav-cta[^"]*"[^>]*>)Free Consultation(</a>)', r'\1<span class="cta-l">Free Consultation</span><span class="cta-s">Contact</span>\2', out)
         dest = os.path.join(ROOT, 'en', f)
