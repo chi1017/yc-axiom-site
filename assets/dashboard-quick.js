@@ -349,13 +349,18 @@
       '<input type="time" name="c-' + d + '" value="' + esc(x.close || '') + '" step="300" aria-label="' + DL[d] + '結束"' + (x.closed ? ' disabled' : '') + '>' +
       '<label><input type="checkbox" name="x-' + d + '"' + (x.closed ? ' checked' : '') + '>休</label></div>'; };
     var form = sheet('營業時間', '改完會更新網站上的營業時間，以及 Google 看到的營業資訊。只是哪幾天臨時不開，用「臨時公休」比較方便。',
-      DAYS.map(row).join('') + '<p style="margin:8px 0 0"><button type="button" class="m-btn sm" data-all>週一的時間套用到每天</button></p>' +
+      DAYS.map(row).join('') + '<p style="margin:8px 0 0"><button type="button" class="m-btn sm" data-all>第一個營業日的時間套用到其他營業日</button></p>' +
       '<label>備註（選填）<input type="text" name="note" maxlength="80" value="' + esc((s.content && s.content.hoursNote) || '') + '" placeholder="例如：國定假日照常營業" enterkeyhint="done"></label>');
     form.addEventListener('change', function (e) { var cb = e.target; if (cb.type !== 'checkbox') return; var r = cb.closest('.yq-hr'); r.classList.toggle('off', cb.checked); r.querySelectorAll('input[type=time]').forEach(function (i) { i.disabled = cb.checked; }); });
     form.addEventListener('click', function (e) {
       if (!e.target.closest('[data-all]')) return;
-      var o = form.querySelector('[name=o-mon]').value, c = form.querySelector('[name=c-mon]').value, x = form.querySelector('[name=x-mon]').checked;
-      DAYS.slice(1).forEach(function (d) { form.querySelector('[name=o-' + d + ']').value = o; form.querySelector('[name=c-' + d + ']').value = c; var cb = form.querySelector('[name=x-' + d + ']'); cb.checked = x; cb.dispatchEvent(new Event('change', { bubbles: true })); });
+      // 來源＝第一個有營業（沒勾休、有填時間）的日子；勾了「休」的日子不動
+      var on = function (d) { return !form.querySelector('[name=x-' + d + ']').checked; };
+      var src = DAYS.filter(function (d) { return on(d) && val(form, 'o-' + d) && val(form, 'c-' + d); })[0];
+      if (!src) return bad(form, '先填好一天的營業時間，再套用到其他天');
+      var o = val(form, 'o-' + src), c = val(form, 'c-' + src), n = 0;
+      DAYS.forEach(function (d) { if (d === src || !on(d)) return; form.querySelector('[name=o-' + d + ']').value = o; form.querySelector('[name=c-' + d + ']').value = c; n++; });
+      var m = form.querySelector('.yq-msg'); m.className = 'yq-msg'; m.textContent = n ? '已把' + DL[src] + '的時間套用到 ' + n + ' 天，勾「休」的日子沒有改。' : '其他日子都勾了休，沒有可以套用的。';
     });
     form.addEventListener('submit', function (e) {
       e.preventDefault();
