@@ -73,7 +73,7 @@ async function sampleContent(key) {
     const M = await import(tplBase() + 'templates/gallery/samples.mjs');
     const sm = M.SAMPLES.find((x) => x.k === key) || M.SAMPLES.find((x) => x.k === 'cafe');
     Object.assign(c, { name: sm.name, tagline: sm.tag, intro: sm.intro, address: sm.area + (sm.area.endsWith('全區') ? '' : '示範路 100 號'), phone: '04-0000-0000',
-      menu: sm.items.map(([name, price]) => ({ name, price: price || null })), faq: sm.faq.map(([q, a]) => ({ q, a })) });
+      menu: sm.items.map(([name, price, desc]) => ({ name, price: price || null, ...(desc ? { desc } : {}) })), faq: sm.faq.map(([q, a]) => ({ q, a })) });
     if (M.HOURS && M.HOURS[sm.h]) c.hours = M.HOURS[sm.h];
     return { content: L.normalizeContent(c), palette: sm.pal || 'forest' };
   } catch (e) { c.name = '我的店'; return { content: L.normalizeContent(c), palette: 'forest' }; }
@@ -2547,6 +2547,8 @@ function bindChrome() {
   $('#mBack').addEventListener('click', backToList);
   document.querySelectorAll('#mtabs button').forEach((b) => b.addEventListener('click', () => {
     const k = b.dataset.k, P = $('#panel');
+    // 換分頁時把「發佈前還有 N 項」清單收起來，新的分頁從最上面乾淨開始
+    const ck = $('#checks'); if (ck && ck.open) ck.open = false;
     if (k === 'view') { setTab('view'); renderPreview(); return; }
     const wasCard = P.dataset.mode === 'card';
     leaveCard(); S.mListScroll = 0;
