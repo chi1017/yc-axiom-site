@@ -185,7 +185,7 @@ const UI_EN = (() => {
   const q = new URLSearchParams(location.search).get('lang');
   try { if (q === 'en' || q === 'zh') localStorage.setItem('yc-builder-ui', q); return localStorage.getItem('yc-builder-ui') === 'en'; } catch (e) { return q === 'en'; }
 })();
-if (UI_EN) import(new URL('./ui-en.min.js?v=7f7524e3a9', import.meta.url).href).then((m) => m.install()).catch(() => {});
+if (UI_EN) import(new URL('./ui-en.min.js?v=c43d91c0c2', import.meta.url).href).then((m) => m.install()).catch(() => {});
 function setUiLang(lang) {
   try { localStorage.setItem('yc-builder-ui', lang); } catch (e) { /* 無痕模式：只靠網址 */ }
   const u = new URL(location.href); u.searchParams.set('lang', lang); location.href = u.href;
@@ -373,6 +373,7 @@ function mount(site) {
   renderPreview();
   refreshStatus();
   bindChrome();
+  if (!S.trial) setTimeout(offerBackup, 300);
 }
 
 let frameScroll = 0, pendingAnchor = null;
@@ -394,7 +395,7 @@ function renderPreview(now) {
     if (!S.pageList.some((p) => p.key === S.page)) S.page = 'home';
     paintPageTabs();
     // 手機版在「編輯」分頁時看不到預覽：先不更新預覽框，切到「預覽」時再更新（打字更順）
-    if (isMob() && $('.app').dataset.tab !== 'view') return;
+    if (isMob() && $('.app').dataset.tab !== 'view' && !peekOn()) return;
     // 正在預覽上直接改字：預覽的文字已經是使用者打的，先不更新（避免游標跳掉），改完再更新
     if (S.inlineEdit) return;
     const f = $('#frame');
@@ -412,7 +413,7 @@ function renderPreview(now) {
       try {
         const d = f.contentDocument;
         wireEditPills(f, pickSection, (k) => { const c = cardForKey(k); const el = c && $('#' + c.card); const t = el && el.querySelector('h2'); return t ? '「' + t.textContent.replace(/（.*?）/g, '') + '」' : ''; });
-        wireInlineEdit(f, { find: inlineFind, onStart: () => { S.inlineEdit = true; }, onInput: () => touch(), onDone: () => { S.inlineEdit = false; touch(); syncPanel(); renderPreview(true); } });
+        wireInlineEdit(f, { find: inlineFind, onStart: () => { S.inlineEdit = true; }, onInput: () => touch(), onDone: () => { S.inlineEdit = false; touch(); syncPanel(); renderPreview(true); }, onTouchEdit: openTextSheet });
         const a = pendingAnchor; pendingAnchor = null;
         const t = a && d.getElementById(a);
         if (t) t.scrollIntoView({ block: 'start' }); else f.contentWindow.scrollTo(0, a === null ? frameScroll : 0);
@@ -666,7 +667,8 @@ function touch() {
 function setSaveText() {
   const e = $('#saveState'); e.classList.toggle('err', S.saveErr);
   if (S.trial) { e.textContent = S.dirty ? '試用中・尚未暫存' : '試用中・已暫存在這個瀏覽器'; return; }
-  if (S.saveErr) e.textContent = '儲存失敗，稍後自動重試';
+  if ((S.saveErr || S.dirty) && navigator.onLine === false) { e.classList.add('err'); e.textContent = '沒有網路・修改先存在這台裝置'; }
+  else if (S.saveErr) e.textContent = '還沒存上去，稍後自動重試（修改先存在這台裝置）';
   else if (S.saving) e.textContent = '儲存中…';
   else if (S.dirty) e.textContent = '尚未儲存（2 秒後自動儲存）';
   else e.textContent = S.lastSaved ? '已儲存 ' + pad(S.lastSaved.getHours()) + ':' + pad(S.lastSaved.getMinutes()) + ':' + pad(S.lastSaved.getSeconds()) : '已儲存';
@@ -680,6 +682,7 @@ async function save() {
   const snapshot = clone({ content: S.content, palette: S.palette, sections: S.sections, pages: S.pages });
   const payload = { content: snapshot.content, palette: snapshot.palette, sections: snapshot.sections };
   if (isMulti()) payload.pages = snapshot.pages;   // 一頁版不存 pages（升級時才寫入）
+  writeBackup(snapshot);
   const wantSlug = S.slug;
   if (S.site.status === 'draft' && wantSlug !== S.site.slug && S.slugState.ok && !S.lib.slugError(wantSlug)) payload.slug = wantSlug;
   const r = await YC.client.from('rental_sites').update(payload).eq('id', S.site.id).select('slug').single();
@@ -694,10 +697,33 @@ async function save() {
   if (isMulti()) S.site.pages = snapshot.pages;
   S.dirty = JSON.stringify({ content: S.content, palette: S.palette, sections: S.sections, pages: S.pages }) !== JSON.stringify(snapshot);
   S.lastSaved = new Date(); setSaveText();
-  if (S.dirty) S.timers.save = setTimeout(save, 300);
+  if (S.dirty) S.timers.save = setTimeout(save, 300); else clearBackup();
   return true;
 }
-window.addEventListener('beforeunload', (e) => { if (S.trial) { if (S.dirty) save(); return; } if (S.dirty || S.saving) { e.preventDefault(); e.returnValue = ''; } });
+// ── 網路不穩：每次存檔前先把內容存在這台裝置；存上去了才刪掉。下次打開時如果還在，問要不要還原 ──
+const backupKey = () => 'yc-builder-unsaved-' + (S.site && S.site.id);
+function writeBackup(snap) { if (S.trial || !S.site) return; try { localStorage.setItem(backupKey(), JSON.stringify({ at: Date.now(), ...snap })); } catch (e) { /* 空間不足等：略過 */ } }
+function clearBackup() { try { localStorage.removeItem(backupKey()); } catch (e) { /* ignore */ } }
+function readBackup() { try { const v = JSON.parse(localStorage.getItem(backupKey()) || 'null'); return v && v.content ? v : null; } catch (e) { return null; } }
+function offerBackup() {
+  const b = readBackup(); if (!b) return;
+  const L = S.lib, same = JSON.stringify(L.normalizeContent(b.content)) === JSON.stringify(S.content) && b.palette === S.palette;
+  if (same) { clearBackup(); return; }
+  const t = new Date(b.at);
+  modal('有修改還沒存上去', [h('p', { text: '上次在這台裝置 ' + (t.getMonth() + 1) + '/' + t.getDate() + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) + ' 的修改，因為網路不穩沒有存上去。要還原這些修改嗎？' }),
+    h('p', { class: 'msg mute', text: '還原後會自動存檔。如果之後在別的裝置或會員專區改過，選「不用」保留現在的內容。' })],
+  [h('button', { type: 'button', class: 'btn', onclick: () => { clearBackup(); closeModal(); } }, '不用'),
+    h('button', { type: 'button', class: 'btn primary', onclick: () => {
+      closeModal();
+      S.content = L.normalizeContent(b.content); if (b.palette) S.palette = L.normalizePalette(b.palette); if (b.sections) S.sections = L.normalizeSections(b.sections); if (b.pages && isMulti()) S.pages = L.normalizePages(b.pages);
+      syncPanel(); touch(); toast('已還原，正在存檔', 2500);
+    } }, '還原修改')]);
+}
+window.addEventListener('online', () => { if (S.dirty || S.saveErr) { clearTimeout(S.timers.save); save(); } });
+window.addEventListener('offline', () => setSaveText());
+window.addEventListener('beforeunload', (e) => { if (S.trial) { if (S.dirty) save(); return; } if (S.dirty || S.saving) { writeBackup(clone({ content: S.content, palette: S.palette, sections: S.sections, pages: S.pages })); e.preventDefault(); e.returnValue = ''; } });
+// 手機切到別的 App 時（不一定會觸發 beforeunload）也先存一份在裝置上，並試著存檔
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && !S.trial && S.site && (S.dirty || S.saving)) { writeBackup(clone({ content: S.content, palette: S.palette, sections: S.sections, pages: S.pages })); save(); } });
 
 // ── 狀態 ──
 function deriveStatus() {
@@ -730,7 +756,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more', bookingCal: 'c-cal', code: 'c-code', order: 'c-order' };
+const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', notice: 'c-notice', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more', bookingCal: 'c-cal', code: 'c-code', order: 'c-order' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -965,6 +991,8 @@ function buildPanel() {
   P.append(card('c-hours', 'visit', '營業時間', '每天填開始與結束時間；沒營業的那天勾「公休」。',
     rows.map((r) => r.el), h('div', { style: 'margin:4px 0 12px' }, copyBtn), field('備註（選填）', 'hoursNote', { max: 80, ph: '例如：國定假日營業時間以粉絲專頁公告為準' })));
 
+  P.append(noticeCard());
+
   P.append(card('c-booking', 'top', bookWord() + '按鈕', '填了才會出現在網站首頁。連結必須是 https:// 開頭（例如你的' + bookWord() + '系統或 LINE 預約頁）。',
     field('按鈕文字', 'booking.label', { max: 12, ph: '例如：線上' + bookWord() }), field('連結', 'booking.url', { max: 500, type: 'url', ph: 'https://' }), h('div', { id: 'bookMsg', class: 'msg bad' })));
 
@@ -1109,7 +1137,7 @@ function buildPanel() {
 // ── 編輯面板分組：上方的分組按鈕只顯示該組的卡片，不用一直往下捲 ──
 const GROUPS = [
   { key: 'look', label: '外觀', cards: ['c-basic', 'c-style'] },
-  { key: 'info', label: '店家資料', cards: ['c-info', 'c-hours', 'c-booking', 'c-photos'] },
+  { key: 'info', label: '店家資料', cards: ['c-info', 'c-hours', 'c-notice', 'c-booking', 'c-photos'] },
   { key: 'content', label: '內容', cards: ['c-menu', 'c-news', 'c-faq', 'c-more', 'c-posts', 'c-blocks'] },
   { key: 'feature', label: '收款與功能', cards: ['c-shop', 'c-cal', 'c-en', 'c-seo', 'c-code'] },
   { key: 'layout', label: '版面與紀錄', cards: ['c-order', 'c-history'] },
@@ -1136,7 +1164,7 @@ function buildGroupNav() {
   if (!seen) setTimeout(openGuide, 600);
 }
 // 搜尋設定：依卡片標題、說明與欄位名稱比對，只顯示符合的卡片
-const SYN = { 電話: '電話', 顏色: '配色 顏色 主色', 配色: '配色 顏色', 字: '字型 字體', 字型: '字型 字體 上傳', 預約: '預約 訂位 行事曆 時段', 訂位: '訂位 預約', 照片: '照片 圖片 主視覺', 圖片: '照片 圖片', 地址: '地址 地圖', 時間: '營業時間 時段', 價格: '價目 菜單 價格 商品', 網址: '網址 代稱 網域', 程式: '程式碼 嵌入', 追蹤: '程式碼 Analytics', 分享: '分享 搜尋', 英文: '英文' };
+const SYN = { 電話: '電話', 顏色: '配色 顏色 主色', 配色: '配色 顏色', 字: '字型 字體', 字型: '字型 字體 上傳', 預約: '預約 訂位 行事曆 時段', 訂位: '訂位 預約', 照片: '照片 圖片 主視覺', 圖片: '照片 圖片', 地址: '地址 地圖', 時間: '營業時間 時段 公休 公告', 公休: '公休 公告 營業時間', 公告: '公告 公休', 價格: '價目 菜單 價格 商品', 網址: '網址 代稱 網域', 程式: '程式碼 嵌入', 追蹤: '程式碼 Analytics', 分享: '分享 搜尋', 英文: '英文' };
 let searchPrev = null;
 function clearSearch() { const s = $('#setSearch'); if (s && s.value) { s.value = ''; runSearch(''); } }
 function runSearch(q) {
@@ -1172,7 +1200,7 @@ function showGroup(key, scroll) {
 function openGuide() {
   const steps = [
     ['1　填內容', '左邊依分類填寫：先選外觀，再填店家資料與照片。不用一次填完，系統每 2 秒自動儲存。'],
-    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換電腦、平板與手機，選單、捲動動畫都能直接試。電腦上可以直接點預覽裡的文字修改。灰色的 [提示文字] 不會出現在正式網站。'],
+    ['2　看預覽', '右邊會即時顯示網站的樣子，可以切換電腦、平板與手機，選單、捲動動畫都能直接試。點預覽裡的文字可以直接修改（手機上點一下再按「改這段字」）。灰色的 [提示文字] 不會出現在正式網站。'],
     ['3　按發佈', '必填項目完成後，按右上角「發佈」。之後每次修改再按一次發佈，網站約 1–2 分鐘更新。'],
     ['小技巧', '改錯了可以按「復原」；想回到以前發佈的版本，到「版面與紀錄」的版本紀錄還原。']
   ];
@@ -1890,8 +1918,46 @@ function paintPhotos() {
     up.addEventListener('click', () => file.click());
     file.addEventListener('change', async () => { const f = file.files[0]; file.value = ''; if (f) await uploadPhoto(sl, f, nm, up); });
     const del = cur ? iconBtn('移除', async () => { const old = cur.path; sl.set(null); touch(); await trashPhoto(old); paintPhotos(); }, 'danger') : null;
-    box.append(h('div', { class: 'photo' }, th, h('div', { class: 'ctl' }, h('strong', { text: sl.label }), nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del, focalBtn(() => sl.get(), (v) => sl.set(v), sl.label)), file)));
+    // 店內照片往前移（調整網站上的順序）
+    const ri = sl.key === 'hero' ? -1 : idx - 1;
+    const mv = cur && ri > 0 ? iconBtn('往前移', () => { const r = S.content.photos.room; [r[ri - 1], r[ri]] = [r[ri], r[ri - 1]]; touch(); paintPhotos(); scrollPreviewTo('interior'); }) : null;
+    box.append(h('div', { class: 'photo' }, th, h('div', { class: 'ctl' }, h('strong', { text: sl.label }), nm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, up, del, mv, focalBtn(() => sl.get(), (v) => sl.set(v), sl.label)), file)));
   });
+  // 一次選多張（直接放進空的照片位置，不逐張裁切；之後可以個別「調整重點位置」）；手機另有「拍照」
+  const free = S.lib.LIMITS.room - S.content.photos.room.length;
+  if (free > 0 && !S.trial) {
+    const many = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', multiple: true, hidden: true });
+    const cam = h('input', { type: 'file', accept: 'image/*', capture: 'environment', hidden: true });
+    const st = h('div', { class: 'nm' });
+    const bm = h('button', { type: 'button', class: 'btn small' }, '一次選多張' + IND().space.label + '照片（還可以放 ' + free + ' 張）');
+    const bc = h('button', { type: 'button', class: 'btn small mob-only' }, '拍照');
+    bm.addEventListener('click', () => many.click()); bc.addEventListener('click', () => cam.click());
+    const run = async (files) => {
+      files = [...files].slice(0, free); if (!files.length) return;
+      bm.disabled = bc.disabled = true;
+      let ok = 0;
+      for (let i = 0; i < files.length; i++) {
+        st.textContent = '上傳中 ' + (i + 1) + '/' + files.length + '…';
+        const at = S.content.photos.room.length; if (at >= S.lib.LIMITS.room) break;
+        const sl = { key: 'room', label: IND().space.label + '照片', get: () => S.content.photos.room[at] || null, set: (v) => { if (v) S.content.photos.room[at] = v; } };
+        try { await uploadPhotoQuick(sl, files[i]); ok++; } catch (e) { st.textContent = String(e.message || e); }
+      }
+      paintPhotos(); scrollPreviewTo('interior');
+      toast(ok ? '已上傳 ' + ok + ' 張照片' : '沒有上傳成功', 2600);
+    };
+    many.addEventListener('change', () => { const f = many.files; run(f).finally(() => { many.value = ''; }); });
+    cam.addEventListener('change', () => { const f = cam.files; run(f).finally(() => { cam.value = ''; }); });
+    box.append(h('div', { class: 'photo-many' }, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, bm, bc), st, many, cam));
+  }
+}
+// 多張上傳：不跳出裁切視窗，整張縮小後上傳
+async function uploadPhotoQuick(sl, file) {
+  const out = await compress(file, sl.label, true);
+  const { blob, ext, w, h: hh } = out;
+  const path = S.site.id + '/room-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5) + '.' + ext;
+  const r = await YC.client.storage.from('site-photos').upload(path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
+  if (r.error) throw new Error('上傳失敗：' + r.error.message);
+  S.fresh.add(path); sl.set({ path, w, h: hh }); touch();
 }
 async function trashPhoto(path) {
   if (!path || !S.fresh.has(path)) return;     // 已發佈過的照片可能還被舊版本使用，不刪
@@ -1983,12 +2049,12 @@ function cropDialog(src, label) {
     mount();
   });
 }
-async function compress(file, label) {
+async function compress(file, label, noCrop) {
   if (file.size > MAX_ORIGINAL) throw new Error('照片超過 5MB，請先縮小再上傳');
   if (!/^image\//.test(file.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name)) throw new Error('只能上傳圖片檔');
   const bmp = await toBitmap(file);
   const src = bmpToCanvas(bmp, 2400); if (bmp.close) bmp.close();
-  const pick = await cropDialog(src, label);
+  const pick = noCrop ? { cv: src, box: { x: 0, y: 0, w: 1, h: 1 } } : await cropDialog(src, label);
   if (!pick) return null;
   const { cv: c0, box } = pick;
   const sx = Math.round(box.x * c0.width), sy = Math.round(box.y * c0.height), sw = Math.max(1, Math.round(box.w * c0.width)), sh = Math.max(1, Math.round(box.h * c0.height));
@@ -2086,8 +2152,9 @@ async function publish() {
         throw new Error((body && body.message) || '發佈失敗，請稍後再試');
       }
       S.fresh.clear();
-      toast(r.data.message || '已送出', 5000);
       await refreshStatus(); paintSlug();
+      if (S.site.public_url && ['live', 'overdue'].includes(S.site.status) && st !== 'draft') publishedSheet(r.data.message || '已送出');
+      else toast(r.data.message || '已送出', 5000);
     } catch (e) { toast(String(e.message || e), 5000); }
     finally { S.publishing = false; btn.disabled = false; btn.textContent = '發佈'; }
   };
@@ -2137,6 +2204,102 @@ async function publish() {
 // 是否需要（重新）同意條款：從沒同意過，或同意的不是目前版本
 function needTerms() { return !S.site.terms_accepted_at || (S.site.terms_version || '') !== termsVersion(); }
 
+// 網站公告／臨時公休：期間內每一頁上方顯示，過了自動消失（會員專區也能一鍵設定）
+function noticeCard() {
+  const n = S.content.notice || (S.content.notice = { text: '', from: '', to: '', closed: false });
+  const today = new Date(Date.now() + 288e5).toISOString().slice(0, 10);
+  const txt = h('input', { type: 'text', id: 'f-notice-text', maxlength: '80', placeholder: '例如：員工旅遊，11/12 恢復營業', autocomplete: 'off' });
+  const from = h('input', { type: 'date', id: 'f-notice-from', 'aria-label': '開始日期' }), to = h('input', { type: 'date', id: 'f-notice-to', 'aria-label': '結束日期' });
+  const closed = h('input', { type: 'checkbox', id: 'f-notice-closed' });
+  const msg = h('div', { class: 'msg mute' });
+  from.value = n.from || ''; to.value = n.to || ''; closed.checked = !!n.closed;
+  const paint = () => {
+    const live = n.text && n.from && (n.to || n.from) >= today;
+    msg.className = 'msg ' + (n.text && n.to && n.to < today ? 'bad' : 'mute');
+    msg.textContent = !n.text ? '沒有填內容就不會顯示。' : !n.from ? '請選開始日期。' : n.to && n.to < today ? '結束日期已經過了，網站上不會顯示。' : live ? (n.from > today ? '發佈後就會顯示，到 ' + (n.to || n.from) + ' 為止。' : '發佈後顯示到 ' + (n.to || n.from) + ' 為止，之後自動消失。') + (n.closed ? '這段期間線上預約也不開放。' : '') : '';
+  };
+  tx(txt, n, 'text', paint);
+  const date = () => { n.from = from.value; if (to.value && from.value && to.value < from.value) to.value = from.value; n.to = to.value || from.value; to.min = from.value || ''; paint(); touch(); scrollPreviewTo('top'); };
+  from.addEventListener('change', date); to.addEventListener('change', date);
+  closed.addEventListener('change', () => { n.closed = closed.checked; paint(); touch(); });
+  const quick = (label, a, b) => h('button', { type: 'button', class: 'btn small', onclick: () => { const d = (k) => new Date(Date.now() + 288e5 + k * 864e5).toISOString().slice(0, 10); from.value = d(a); to.value = d(b); date(); } }, label);
+  const clear = h('button', { type: 'button', class: 'btn small', onclick: () => { n.text = ''; n.textEn = ''; n.from = ''; n.to = ''; n.closed = false; txt.value = ''; from.value = ''; to.value = ''; closed.checked = false; paint(); touch(); } }, '清除公告');
+  paint();
+  return card('c-notice', 'top', '網站公告／臨時公休', '例如臨時公休、活動、優惠。期間內每一頁上方都會顯示，過了日期自動消失，不用回來改。',
+    h('label', { class: 'field', for: 'f-notice-text' }, h('span', { text: '公告內容' }), txt),
+    h('div', { class: 'field' }, h('span', { text: '顯示期間' }), h('div', { style: 'display:grid;grid-template-columns:1fr 1fr;gap:8px' }, from, to),
+      h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin-top:6px' }, quick('今天', 0, 0), quick('明天', 1, 1), quick('一週', 0, 6))),
+    h('label', { class: 'check' }, closed, '這是公休（期間內不營業，線上預約也不開放）'), msg, h('div', { style: 'margin-top:8px' }, clear));
+}
+
+// 發佈後：看網站、分享到 LINE、複製網址
+function publishedSheet(msg) {
+  const url = S.site.public_url, name = (S.content && S.content.name) || '';
+  const copy = h('button', { type: 'button', class: 'btn' }, '複製網址');
+  copy.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(url); } catch (e) { const t = h('textarea', {}); t.value = url; document.body.append(t); t.select(); try { document.execCommand('copy'); } catch (e2) { /* ignore */ } t.remove(); }
+    copy.textContent = '已複製'; setTimeout(() => { copy.textContent = '複製網址'; }, 1600);
+  });
+  const m = modal('已送出更新', [h('p', { text: msg }),
+    h('div', { class: 'more-list' },
+      h('a', { class: 'btn', href: url, target: '_blank', rel: 'noopener' }, '看網站'),
+      h('a', { class: 'btn line-share', href: 'https://line.me/R/share?text=' + encodeURIComponent((name ? name + '\n' : '') + url), target: '_blank', rel: 'noopener' }, '分享到 LINE'),
+      copy,
+      navigator.share ? h('button', { type: 'button', class: 'btn', onclick: () => navigator.share({ title: name, url }).catch(() => {}) }, '其他分享方式') : null)],
+  [h('button', { type: 'button', class: 'btn primary', onclick: closeModal }, '好')]);
+  m.classList.add('sheet');
+}
+
+// 手機：點預覽上的文字 →「改這段字」→ 下方面板直接改，上面的預覽同步顯示
+function openTextSheet(x) {
+  const { el, t, win } = x, orig = x.text;
+  const L = S.lib, many = t.max && t.max > 80;
+  const inp = many ? h('textarea', { rows: '3', maxlength: t.max ? String(t.max) : null, enterkeyhint: 'done' }) : h('input', { type: 'text', maxlength: t.max ? String(t.max) : null, enterkeyhint: 'done', autocomplete: 'off' });
+  inp.value = orig;
+  const cnt = h('div', { class: 'msg mute', style: 'text-align:right' });
+  const upd = () => { if (t.max) cnt.textContent = [...inp.value].length + '/' + t.max; };
+  let done = false;
+  const finish = (cancel) => {
+    if (done) return; done = true;
+    if (cancel) { t.set(orig); el.textContent = orig; }
+    el.classList.remove('yc-txt-on'); closeModal();
+    S.inlineEdit = false; touch(); syncPanel(); renderPreview(true);
+  };
+  inp.addEventListener('input', () => {
+    let v = inp.value.replace(/[\r\n]+/g, ' ');
+    if (v !== inp.value) inp.value = v;
+    t.set(v.trim() ? v : orig); el.textContent = v.trim() ? v : orig; upd(); touch();
+  });
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); finish(false); } });
+  S.inlineEdit = true; $('#toast').classList.remove('show');
+  el.classList.add('yc-txt-on');
+  // 改的那段字移到預覽上方看得到的地方
+  try { const r = el.getBoundingClientRect(); win.scrollTo({ top: Math.max(0, win.scrollY + r.top - 70) }); } catch (e) { /* ignore */ }
+  const m = modal(t.label ? '修改：' + t.label : '修改文字', [inp, cnt, h('p', { class: 'msg mute', text: '上面的預覽會跟著變。改完按「完成」，會自動存檔。' })],
+    [h('button', { type: 'button', class: 'btn', onclick: () => finish(true) }, '取消'), h('button', { type: 'button', class: 'btn primary', onclick: () => finish(false) }, '完成')]);
+  m.classList.add('sheet', 'txt-sheet');
+  m.addEventListener('click', (e) => { if (e.target === m) finish(false); }, true);
+  upd();
+  setTimeout(() => { inp.focus(); try { inp.setSelectionRange(inp.value.length, inp.value.length); } catch (e) { /* ignore */ } }, 60);
+  void L;
+}
+
+// 手機：在設定頁打開「邊改邊看」的小預覽（上方顯示網站，下方是設定）
+const CARD_ANCHOR = { 'c-info': 'about', 'c-hours': 'visit', 'c-notice': 'top', 'c-menu': 'menu', 'c-photos': 'interior', 'c-news': 'news', 'c-faq': 'faq', 'c-shop': 'shop', 'c-posts': 'posts', 'c-cal': 'booking', 'c-booking': 'top', 'c-basic': 'top', 'c-style': 'about', 'c-more': 'reviews', 'c-blocks': 'top' };
+const peekOn = () => { const a = $('.app'); return !!(a && a.classList.contains('peek') && a.dataset.mode === 'card'); };
+function setPeek(on) {
+  const app = $('.app'); if (!app) return;
+  app.classList.toggle('peek', on);
+  try { localStorage.setItem('yc-builder-peek', on ? '1' : '0'); } catch (e) { /* ignore */ }
+  const b = $('#peekBtn'); if (b) { b.setAttribute('aria-pressed', String(on)); b.querySelector('span').textContent = on ? '收起預覽' : '邊改邊看'; }
+  if (on) { renderPreview(true); peekFollow(); }
+}
+function peekFollow() {
+  if (!peekOn() || !S.mCardId) return;
+  const a = CARD_ANCHOR[S.mCardId];
+  setTimeout(() => { if (a === 'top') { try { $('#frame').contentWindow.scrollTo(0, 0); } catch (e) { /* ignore */ } } else if (a) scrollPreviewTo(a); }, 120);
+}
+
 // ── 手機版（像 App 一樣）：下方分頁 → 設定清單 → 點一項進入那一頁設定，左上「‹」或手機的返回鍵回清單 ──
 const isMob = () => matchMedia('(max-width:860px)').matches;
 function buildMobList() {
@@ -2180,6 +2343,7 @@ function enterCard(c, keepScroll) {
   const t = c.querySelector('h2'); $('#mCardTitle').textContent = t ? t.textContent.replace(/（.*?）/g, '').trim() : '';
   P.scrollTop = 0;
   if (!(history.state && history.state.mcard)) history.pushState({ mcard: c.id }, '');
+  if (peekOn() && !keepScroll) { renderPreview(true); peekFollow(); }
 }
 function leaveCard() {
   const P = $('#panel'), app = $('.app'); if (!P || P.dataset.mode !== 'card') return;
@@ -2211,7 +2375,7 @@ function setTab(t) {
   paintMobTabs();
   if (changed && matchMedia('(max-width:860px)').matches) {
     window.scrollTo(0, 0);
-    if (t === 'view' && !setTab.tipped) { setTab.tipped = true; toast('點預覽上的區塊，就能跳到那裡的設定', 3200); }
+    if (t === 'view' && !setTab.tipped) { setTab.tipped = true; toast('點預覽上的文字可以直接改；點區塊可以跳到那裡的設定', 3600); }
   }
 }
 // 手機版的「更多」：全螢幕預覽、切換網站、刪除、教學、回會員專區
@@ -2326,8 +2490,41 @@ function bindChrome() {
     setTab('edit'); clearSearch(); const ms = P.querySelector('.m-search'); if (ms) ms.value = '';
     showGroup(k, false); P.scrollTop = 0;
   }));
-  // 手機：打字時（鍵盤打開）先收起下方的工具列，避免擋住正在輸入的欄位
+  // 手機：設定頁右下角「邊改邊看」按鈕
   const app = $('.app');
+  const pb = h('button', { type: 'button', id: 'peekBtn', class: 'peek-btn', 'aria-pressed': 'false', title: '在上方顯示網站預覽，邊改邊看' });
+  pb.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg>';
+  pb.append(h('span', { text: '邊改邊看' }));
+  pb.addEventListener('click', () => setPeek(!app.classList.contains('peek')));
+  app.append(pb);
+  let peek0 = false; try { peek0 = localStorage.getItem('yc-builder-peek') === '1'; } catch (e) { /* ignore */ }
+  if (peek0) setPeek(true);
+  // 手機鍵盤：單行欄位的 Enter 跳到下一格（鍵盤上顯示「下一項」），最後一格收起鍵盤；正在打字的欄位保持在畫面中間
+  const FIELD = 'input[type=text],input[type=tel],input[type=url],input[type=email],input[type=number],input:not([type])';
+  const nextOf = (el) => {
+    const scope = el.closest('section.card') || $('#panel');
+    const list = [...scope.querySelectorAll(FIELD + ',textarea,select')].filter((x) => !x.disabled && x.offsetParent !== null && !x.closest('[hidden]'));
+    return list[list.indexOf(el) + 1] || null;
+  };
+  document.addEventListener('focusin', (e) => {
+    const el = e.target; if (!isMob() || !el.matches || !el.closest('#panel section.card')) return;
+    if (el.matches(FIELD) && !el.hasAttribute('enterkeyhint')) el.setAttribute('enterkeyhint', nextOf(el) ? 'next' : 'done');
+  });
+  document.addEventListener('keydown', (e) => {
+    const el = e.target;
+    if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229 || !isMob() || !el.matches || !el.matches(FIELD) || !el.closest('#panel section.card')) return;
+    e.preventDefault();
+    const n = nextOf(el); if (n && n.tagName !== 'SELECT') n.focus(); else el.blur();
+  });
+  const keepVisible = () => {
+    const a = document.activeElement;
+    if (!isMob() || !a || !a.closest || !a.closest('#panel')) return;
+    const vv = window.visualViewport, r = a.getBoundingClientRect(), bottom = vv ? vv.height + vv.offsetTop : window.innerHeight;
+    if (r.bottom > bottom - 12 || r.top < 60) a.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  };
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { clearTimeout(keepVisible.t); keepVisible.t = setTimeout(keepVisible, 120); });
+  document.addEventListener('focusin', () => { clearTimeout(keepVisible.t); keepVisible.t = setTimeout(keepVisible, 350); });
+  // 手機：打字時（鍵盤打開）先收起下方的工具列，避免擋住正在輸入的欄位
   document.addEventListener('focusin', (e) => { if (e.target.matches && e.target.matches('#panel input:not([type=checkbox]):not([type=radio]):not([type=color]), #panel textarea, #panel select')) app.classList.add('typing'); });
   document.addEventListener('focusout', () => setTimeout(() => { const a = document.activeElement; if (!(a && a.matches && a.matches('#panel input, #panel textarea, #panel select'))) app.classList.remove('typing'); }, 80));
   document.addEventListener('keydown', (e) => {

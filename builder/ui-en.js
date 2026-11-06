@@ -20,7 +20,13 @@ const RULES = [
   [/^(\d+) 項商品的英文名稱$/, '$1 products need English names'],
   [/^(\d+) 個自訂區塊$/, '$1 custom sections'],
   [/^有 (\d+) 則評價是範例內容，請換成客人的真實評價或刪除$/, '$1 review(s) are sample content; replace them with real customer reviews or delete them'],
-  [/^還有 (\d+) 段文字和範例一模一樣，建議改成你自己的說法$/, '$1 passage(s) are identical to the sample text; consider rewriting them in your own words']
+  [/^還有 (\d+) 段文字和範例一模一樣，建議改成你自己的說法$/, '$1 passage(s) are identical to the sample text; consider rewriting them in your own words'],
+  [/^上次在這台裝置 (\S+ \S+) 的修改，因為網路不穩沒有存上去。要還原這些修改嗎？$/, 'Changes made on this device at $1 weren\u2019t saved because the connection dropped. Restore them?'],
+  [/^發佈後就會顯示，到 (\S+) 為止。(這段期間線上預約也不開放。)?$/, (m, d, b) => 'Shows once you publish, until ' + d + '.' + (b ? ' Online booking is unavailable during these dates.' : '')],
+  [/^發佈後顯示到 (\S+) 為止，之後自動消失。(這段期間線上預約也不開放。)?$/, (m, d, b) => 'Shows after you publish until ' + d + ', then disappears automatically.' + (b ? ' Online booking is unavailable during these dates.' : '')],
+  [/^上傳中 (\d+)\/(\d+)…$/, 'Uploading $1/$2…'],
+  [/^已上傳 (\d+) 張照片$/, 'Uploaded $1 photo(s)'],
+  [/^一次選多張(.{1,8})照片（還可以放 (\d+) 張）$/, (m, x, n) => 'Choose several ' + low(T(x)) + ' photos (' + n + ' more allowed)']
 ];
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const RE = new RegExp(frag.map(esc).join('|'), 'g');
@@ -37,6 +43,7 @@ const COMBO = [
   [/^(.{1,8})名稱$/, (m, x) => (has(x) ? T(x) + ' name' : m)],
   [/^(.{1,8}) 副標題$/, (m, x) => T(x) + ' subheading'],
   [/^(必填|範例|建議) (\d+)$/, (m, x, n) => T(x) + ' ' + n],
+  [/^修改：(.{1,20})$/, (m, x) => 'Edit: ' + low(T(x))],
   [/^登入後(.{2,10})$/, (m, x) => (has(x) ? 'Sign in to ' + low(T(x)) : m)]
 ];
 export function t(s) {

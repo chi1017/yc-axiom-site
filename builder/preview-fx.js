@@ -108,7 +108,7 @@ export function wireNav(f) {
 const PILL_CSS = '.yc-hover{outline:2px dashed rgba(47,127,112,.75)!important;outline-offset:-2px}' +
   '.yc-flash{animation:ycflash 1.2s ease}@keyframes ycflash{0%,40%{box-shadow:inset 0 0 0 3px rgba(47,127,112,.9)}100%{box-shadow:inset 0 0 0 3px rgba(47,127,112,0)}}' +
   '.yc-pill{position:absolute;z-index:2147483000;display:none;font:600 13px/1 -apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;padding:8px 12px;border-radius:999px;border:0;background:#2f7f70;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25)}' +
-  '.yc-pill:hover{background:#25695c}@media(hover:none){.yc-pill{font-size:15px;padding:12px 18px}}';
+  '.yc-pill:hover{background:#25695c}.yc-pill2{background:#fff;color:#1d2a33;box-shadow:0 4px 14px rgba(0,0,0,.25),inset 0 0 0 1px rgba(0,0,0,.12)}.yc-pill2:hover{background:#f2f2f2}@media(hover:none){.yc-pill{font-size:15px;padding:12px 18px}}';
 export function sectionKey(el) {
   if (!el) return '';
   if (el.matches('header.top')) return 'header';
@@ -147,23 +147,44 @@ export function wireEditPills(f, onPick, labelOf) {
   d.addEventListener('mouseleave', hide);
   // 手機與平板（沒有滑鼠）：點一下區塊顯示「編輯」按鈕，再點按鈕跳到設定；點連結、按鈕照常
   const touchy = () => w.matchMedia('(hover: none)').matches || (w.parent && w.parent.matchMedia && w.parent.matchMedia('(hover: none)').matches);
+  // 手機：點到可以直接改的文字時，按鈕改成「改這段字」，旁邊另有「這一區的設定」
+  const pill2 = d.createElement('button'); pill2.type = 'button'; pill2.className = 'yc-pill yc-pill2'; pill2.textContent = '這一區的設定';
+  d.documentElement.appendChild(pill2);
+  let txtEl = null, txt = null;
+  const clearTxt = () => { if (txtEl) txtEl.classList.remove('yc-txt'); txtEl = null; txt = null; pill2.style.display = 'none'; pill.dataset.mode = ''; };
+  const hide0 = hide;
+  const hideAll = () => { hide0(); clearTxt(); };
   d.addEventListener('click', (e) => {
-    if (!touchy() || e.target === pill) return;
+    if (!touchy() || e.target === pill || e.target === pill2) return;
     if (e.target.closest && e.target.closest('a, button, input, select, textarea, label, summary, iframe, video')) return;
     const el = e.target.closest && e.target.closest('main > section, header.top, footer');
     const key = sectionKey(el);
-    if (!el || !key) { hide(); return; }
+    clearTxt();
+    if (!el || !key) { hideAll(); return; }
     if (curEl) curEl.classList.remove('yc-hover');
     curEl = el; el.classList.add('yc-hover');
-    pill.textContent = '✎ 編輯' + (labelOf ? labelOf(key) : '');
+    const x = d.__ycTextAt ? d.__ycTextAt(e.target) : null;
+    if (x) { txt = x; txtEl = x.el; txtEl.classList.add('yc-txt'); pill.dataset.mode = 'text'; pill.textContent = '✎ 改這段字'; }
+    else pill.textContent = '✎ 編輯' + (labelOf ? labelOf(key) : '');
     pill.dataset.key = key;
     pill.style.display = 'block';
     const r = el.getBoundingClientRect();
     const y = key === 'header' ? r.bottom + 6 : Math.min(Math.max(e.clientY - 56, Math.max(r.top, 0) + 10), r.bottom - 50);
     pill.style.top = (w.scrollY + y) + 'px';
     pill.style.left = Math.max(8, Math.min(w.scrollX + e.clientX - pill.offsetWidth / 2, w.scrollX + w.innerWidth - pill.offsetWidth - 8)) + 'px';
+    if (x) {
+      pill2.style.display = 'block'; pill2.style.top = pill.style.top;
+      const l = parseFloat(pill.style.left), room = w.scrollX + w.innerWidth - (l + pill.offsetWidth + 8);
+      if (room >= pill2.offsetWidth + 8) pill2.style.left = (l + pill.offsetWidth + 8) + 'px';
+      else { pill.style.left = Math.max(8, w.scrollX + w.innerWidth - pill.offsetWidth - pill2.offsetWidth - 24) + 'px'; pill2.style.left = (parseFloat(pill.style.left) + pill.offsetWidth + 8) + 'px'; }
+    }
   });
-  pill.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); onPick(pill.dataset.key); });
+  pill.addEventListener('click', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (pill.dataset.mode === 'text' && txt && d.__ycTextEdit) { const x = txt; hideAll(); d.__ycTextEdit(x); return; }
+    hideAll(); onPick(pill.dataset.key);
+  });
+  pill2.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const k = pill.dataset.key; hideAll(); onPick(k); });
 }
 // 預覽上直接改字（電腦版）：滑鼠移到可以改的文字上會出現虛線，點一下就能直接打字；
 // Enter 或點別的地方完成，Esc 取消。find(文字) 回傳 { set(新文字), max, label } 或 null。
@@ -171,7 +192,7 @@ const INLINE_CSS = '.yc-txt{outline:1px dashed rgba(47,127,112,.8);outline-offse
   '.yc-txt-on{outline:2px solid #2f7f70!important;outline-offset:2px;background:rgba(47,127,112,.08);cursor:text}' +
   '.yc-tip{position:absolute;z-index:2147483001;font:500 12px/1.4 -apple-system,BlinkMacSystemFont,"Noto Sans TC",sans-serif;background:#1d2a33;color:#fff;padding:5px 9px;border-radius:6px;pointer-events:none;white-space:nowrap;display:none}';
 const normText = (t) => String(t || '').replace(/\s+/g, ' ').trim();
-export function wireInlineEdit(f, { find, onInput, onDone, onStart }) {
+export function wireInlineEdit(f, { find, onInput, onDone, onStart, onTouchEdit }) {
   const d = f.contentDocument, w = f.contentWindow; if (!d) return;
   if (!d.getElementById('yc-inline-css')) { const st = d.createElement('style'); st.id = 'yc-inline-css'; st.textContent = INLINE_CSS; d.documentElement.appendChild(st); }
   if (d.__ycInline) return;
@@ -188,6 +209,8 @@ export function wireInlineEdit(f, { find, onInput, onDone, onStart }) {
     const t = find(normText(el.textContent));
     return t ? { el, t } : null;
   };
+  // 手機與平板：點文字後由「改這段字」按鈕交給編輯器開輸入面板（不在預覽裡直接打字，鍵盤與捲動較穩）
+  if (onTouchEdit) { d.__ycTextAt = (node) => (hoverable() ? null : targetOf(node)); d.__ycTextEdit = (x) => onTouchEdit({ el: x.el, t: x.t, text: normText(x.el.textContent), win: w }); }
   const clearHot = () => { if (hot) hot.classList.remove('yc-txt'); hot = null; hotT = null; tip.style.display = 'none'; };
   d.addEventListener('mousemove', (e) => {
     if (edit || !hoverable()) return;
