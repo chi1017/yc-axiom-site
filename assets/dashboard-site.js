@@ -289,6 +289,8 @@
     b.disabled = false;
   });
 
+  // 快速更新（臨時公休、營業時間、消息、分享）：assets/dashboard-quick.js
+  var quick = function (s) { try { return window.YCQuick ? window.YCQuick.html(s) : ''; } catch (e) { return ''; } };
   async function siteCard(s, bank, plan, PM, many) {
       var today = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
       var bks = await YC.client.from('site_messages').select('id,name,contact,slot_date,slot_time,slot_status,meta').eq('site_id', s.id).gte('slot_date', today).order('slot_date').order('slot_time').limit(50);
@@ -299,6 +301,7 @@
         var live0 = s.public_url && (s.status === 'live' || s.status === 'overdue');
         return '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">' + esc(name0) + ' <span style="font-size:13px;font-weight:400;color:#9a8f80">協作中</span></h2>' +
           (live0 ? '<p style="margin:6px 0">網址：<a href="' + esc(s.public_url) + '" target="_blank" rel="noopener">' + esc(s.public_url) + '</a></p>' : '') +
+          quick(s) +
           '<p style="margin:6px 0;font-size:13px;color:#9a8f80">你被邀請一起編輯這個網站。收款、網域與續約由網站擁有者管理。</p>' + bkHtml +
           '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(s.id)) + '">編輯網站</a></p></div>';
       }
@@ -330,6 +333,7 @@
       return '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">' + (many ? esc(name) : '我的網站') + '</h2>' +
         '<p style="margin:0 0 6px"><span style="display:inline-block;padding:2px 12px;border:1px solid ' + st.color + ';color:' + st.color + ';border-radius:999px;font-size:13px">' + esc(st.text) + '</span></p>' +
         (live ? '<p style="margin:6px 0">網址：<a href="' + esc(s.public_url) + '" target="_blank" rel="noopener">' + esc(s.public_url) + '</a></p>' : '') +
+        quick(s) +
         (s.paid_until ? '<p style="margin:6px 0;font-size:14px">服務到期日：' + esc(s.paid_until) + (dl == null ? '' : dl >= 0 ? '（還有 ' + dl + ' 天）' : '（已過期 ' + (-dl) + ' 天）') + '</p>' : '') +
         (s.status === 'suspended' && s.suspend_reason ? '<p style="margin:6px 0;font-size:14px;color:#f0776b">暫停原因：' + esc(s.suspend_reason) + '</p>' : '') +
         reportHtml(rep && !rep.error ? rep.data : []) +

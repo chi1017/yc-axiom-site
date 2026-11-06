@@ -418,3 +418,23 @@ input:hover:not(:focus),textarea:hover:not(:focus){border-color:color-mix(in srg
 
 /* 介面語言切換（電腦版表頭；手機版在「更多」選單） */
 .ui-lang{white-space:nowrap}
+
+/* 手機好用（2026-11）：邊改邊看、改字面板、多張照片、發佈後分享 */
+.peek-btn{display:none}
+.photo-many{margin:4px 0 6px;padding:10px 0 0;border-top:1px dashed var(--line)}
+.photo-many .nm{font-size:13px;color:var(--muted);margin-top:6px}
+.btn.line-share{background:#06c755;border-color:#06c755;color:#fff}
+@media(max-width:860px){
+ .app[data-mode=card][data-tab=edit] .peek-btn{display:inline-flex;align-items:center;gap:6px;position:fixed;right:12px;bottom:calc(70px + env(safe-area-inset-bottom));z-index:41;min-height:42px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--bg2) 94%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:var(--text);font:inherit;font-size:13.5px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.28);cursor:pointer}
+ .app[data-mode=card][data-tab=edit] .peek-btn[aria-pressed=true]{color:var(--accent2);border-color:var(--accent2)}
+ .app.typing .peek-btn{display:none!important}
+ .app.peek[data-mode=card][data-tab=edit] .split{display:flex;flex-direction:column}
+ .app.peek[data-mode=card][data-tab=edit] .view{display:flex;flex:0 0 40%;height:auto;min-height:0;border-bottom:2px solid var(--accent2)}
+ .app.peek[data-mode=card][data-tab=edit] .view-bar{display:none}
+ .app.peek[data-mode=card][data-tab=edit] .panel{flex:1;height:auto;min-height:0}
+ .app.peek.typing[data-mode=card][data-tab=edit] .view{flex-basis:28%}
+ /* 改字面板：背景不變暗，上方的預覽看得到 */
+ .mback.sheet.txt-sheet{background:transparent}
+ .mback.sheet.txt-sheet .modal{box-shadow:0 -8px 30px rgba(0,0,0,.35)}
+ .mback.sheet.txt-sheet .modal input,.mback.sheet.txt-sheet .modal textarea{width:100%}
+}
