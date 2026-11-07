@@ -3357,6 +3357,39 @@ window._analyzeContentGap = function(kwList, bodyText){
 // ═══════════════════════════════════════════════════════
 //  v13: PAGESPEED INSIGHTS INTEGRATION
 // ═══════════════════════════════════════════════════════
+// Google 四項分數：顯示在分數卡最上方（手機版測試，和 F12 Lighthouse／PageSpeed 同一套分類）
+const G4_CATS=[['performance','效能'],['accessibility','無障礙'],['best-practices','最佳做法'],['seo','SEO']];
+function g4Render(state, data, msg){
+  const box=document.getElementById('g4'), row=document.getElementById('g4Row'), st=document.getElementById('g4St');
+  if(!box||!row) return;
+  box.hidden=false;
+  const C=2*Math.PI*31;
+  const ring=(cls,val,frac)=>`<div class="g4-ring"><svg viewBox="0 0 76 76"><circle cx="38" cy="38" r="31" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/><circle class="arc" cx="38" cy="38" r="31" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(C*frac).toFixed(1)} ${C.toFixed(1)}"/></svg><b>${val}</b></div>`;
+  if(state==='upload'){ st.textContent=''; row.innerHTML='<div class="g4-msg">上傳檔案無法讓 Google 測試，輸入網址檢測才會出現這四項分數。</div>'; return; }
+  if(state==='error'){ st.textContent=''; row.innerHTML=`<div class="g4-msg">${escHtml(msg||'Google 測試暫時無法取得，下方的 SEO 檢測不受影響。')}</div>`; return; }
+  const cats=(data&&data.lighthouseResult&&data.lighthouseResult.categories)||{};
+  row.innerHTML=G4_CATS.map(([k,l])=>{
+    if(state==='loading') return `<div class="g4-i g4-wait" style="color:var(--text3)">${ring('',  '…', .25)}<span class="g4-l">${l}</span></div>`;
+    const sc=cats[k]&&cats[k].score;
+    if(sc==null) return `<div class="g4-i g4-wait" style="color:var(--text3)">${ring('','—',0)}<span class="g4-l">${l}</span></div>`;
+    const v=Math.round(sc*100), cls=v>=90?'g4-good':v>=50?'g4-mid':'g4-bad', col=v>=90?'#10b981':v>=50?'#f59e0b':'#ef4444';
+    return `<div class="g4-i ${cls}" style="color:${col}">${ring(cls,v,v/100)}<span class="g4-l">${l}</span></div>`;
+  }).join('');
+  st.textContent= state==='loading' ? 'Google 測試中，約 20–30 秒' : '來源：Google PageSpeed，每次測試效能分數可能差幾分';
+}
+
+// 分析完成後呼叫：輸入網址才向 Google 測試；上傳檔案時顯示說明
+function g4Start(){
+  const url = document.getElementById('t1Url')?.value?.trim();
+  if(url && /^https?:\/\//i.test(url) && tabState.t1.mode==='url'){
+    g4Render('loading');
+    setTimeout(()=>fetchPageSpeed(url), 600);
+  } else if(document.getElementById('results')?.style.display!=='none'){
+    g4Render('upload');
+  }
+}
+window.g4Start = g4Start;
+
 async function fetchPageSpeed(url){
   const sec = document.getElementById('psiSection');
   const el = document.getElementById('psiResult');
@@ -3369,7 +3402,7 @@ async function fetchPageSpeed(url){
   const apiKey = document.getElementById('psiApiKey')?.value?.trim() || '';
   const own = (() => { const c = window.YC_CONFIG; return c && c.supabaseUrl ? String(c.supabaseUrl).replace(/\/$/, '') + '/functions/v1/pagespeed' : null; })();
   const psiUrl = (strategy) => (apiKey || !own)
-    ? `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${strategy}${apiKey?'&key='+encodeURIComponent(apiKey):''}`
+    ? `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=${strategy}&category=performance&category=accessibility&category=best-practices&category=seo${apiKey?'&key='+encodeURIComponent(apiKey):''}`
     : `${own}?url=${encodeURIComponent(url)}&strategy=${strategy}`;
   const PSI_MSG = {
     quota: '今天的 PageSpeed 檢測次數已經用完，請明天再試。其他 SEO 檢測項目不受影響。',
@@ -3385,7 +3418,7 @@ async function fetchPageSpeed(url){
     if(/failed_document_request|errored_document_request|dns|not_html|invalid url|"code":400/.test(t)) return PSI_MSG.unreachable;
     return PSI_MSG.failed;
   }
-  function psiFail(msg){ el.innerHTML=`<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>${escHtml(msg)}</span></div></div>`; if(badge) badge.textContent=''; }
+  function psiFail(msg){ g4Render('error',null,msg); el.innerHTML=`<div class="ci"><div class="cb cb-warn">!</div><div class="cc"><span>${escHtml(msg)}</span></div></div>`; if(badge) badge.textContent=''; }
   const getJson = (u) => fetch(u).then(async r => { let j = null; try { j = await r.json(); } catch(e) { j = null; } if(!j) j = { error: { code: r.status === 429 ? 'quota' : 'failed' } }; else if(!r.ok && !j.error) j.error = { code: r.status === 429 ? 'quota' : 'failed' }; return j; });
 
   let mobileData=null, desktopData=null;
@@ -3398,6 +3431,7 @@ async function fetchPageSpeed(url){
   }
 
   if(mobileData.error){ psiFail(psiError(mobileData.error)); return; }
+  g4Render('done', mobileData);
 
   function cat(score){return score>=0.9?'good':score>=0.5?'needs':'poor';}
   function label(score){return score>=0.9?'良好':score>=0.5?'待改善':'較差';}
@@ -3753,10 +3787,7 @@ document.addEventListener('DOMContentLoaded', function(){
     analyzeBtn.onclick = async function(){
       // Call original runAnalysis (defined above)
       await runAnalysis();
-      const url = document.getElementById('t1Url')?.value?.trim();
-      if(url && /^https?:\/\//i.test(url) && tabState.t1.mode==='url'){
-        setTimeout(()=>fetchPageSpeed(url), 600);
-      }
+      g4Start();
     };
   }
 });
