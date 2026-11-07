@@ -16,7 +16,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2314120F'/%3E%3Ccircle cx='13' cy='13' r='6' fill='none' stroke='%23B59B6A' stroke-width='2.5'/%3E%3Cline x1='17.5' y1='17.5' x2='24' y2='24' stroke='%23D8C18A' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='13' cy='13' r='2.5' fill='%23B59B6A' opacity='0.6'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/dist/seo-tool.min.css?v=371815a6bf">
+<link rel="stylesheet" href="assets/dist/seo-tool.min.css?v=f30e886485">
 <style id="quick-start">
 /* 快速開始與進階設定（2026-11） */
 .qs-card{background:var(--bg2);border:1px solid var(--border);border-top:2px solid var(--accent);border-radius:var(--radius);padding:18px 18px 14px;margin:0 0 14px}
@@ -413,6 +413,10 @@ window.ycScrollToScore = function () {
     </div>
 
     <div class="score-hero">
+      <div class="g4" id="g4" hidden>
+        <div class="g4-head"><span class="g4-t">Google 測試分數（手機）</span><span class="g4-st" id="g4St"></span></div>
+        <div class="g4-row" id="g4Row"></div>
+      </div>
       <div class="score-circle">
         <svg viewBox="0 0 110 110">
           <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/>
@@ -725,7 +729,7 @@ window.ycScrollToScore = function () {
   </div>
 </div>
 
-<script src="assets/dist/seo-tool.min.js?v=3ca1750d90"></script>
+<script src="assets/dist/seo-tool.min.js?v=79a39df20d"></script>
 
 <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="回到頂部">↑</button>
 <div id="toast"></div>
@@ -757,7 +761,7 @@ if(p){window.supabase=p;}else{document.write('<script src="assets/vendor/supabas
       if(typeof switchSource==='function') switchSource('t1','url');
       var t1=document.getElementById('t1Url'); t1.value=v;
       await fetchUrl('t1');
-      if(tabState.t1.html){ say(''); runAnalysis(); }
+      if(tabState.t1.html){ say(''); await runAnalysis(); if(typeof g4Start==='function') g4Start(); }
       else { var s=document.getElementById('t1UrlStatus'); say((s&&s.textContent)||'無法讀取這個網址，請確認網址是否正確。',true); }
     }catch(err){ say('檢測失敗，請稍後再試。',true); }
     btn.disabled=false;
