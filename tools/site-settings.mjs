@@ -8,7 +8,7 @@ export const DEFAULTS = {
   prices: { single_month: 700, single_year: 7000, multi_month: 1000, multi_year: 10000, pro_month: 400, pro_year: 4000 },
   early: { enabled: true, single_month: 599, single_year: 5990, multi_month: 899, multi_year: 8990, deadline: '2027-02-03T23:59:00+08:00', quota: null },
   bar: { enabled: true, follow_early: true, text: '中小企業月租網站早鳥價 {早鳥價}／月，至 {截止日}', text_mobile: '早鳥價 {早鳥價}／月', button: '看方案 →', link: '/rental/', start: null, end: null, dismiss_days: 7 },
-  display: { hide_prices: false },
+  display: { hide_prices: false, hide_contact: false },
   card: { enabled: true, follow_early: true, title: '早鳥價 {早鳥價}／月', body: '中小企業專屬月租網站，自己填內容就能上線', b1_text: '看方案', b1_link: '/rental/', b2_text: 'LINE 詢問', b2_link: 'https://line.me/R/ti/p/%40788cblaq', scroll_pct: 40, delay_sec: 10, pages: ['/', '/rental/', '/services/', '/pricing/', '/articles/*'], dismiss_days: 7, start: null, end: null }
 };
 
@@ -166,6 +166,60 @@ export function hidePriceText(text, en) {
   return t;
 }
 
+// ── 關閉聯絡方式（後台開關）──
+// 開啟時，建置官網會隱藏所有聯絡管道：選單「免費諮詢」、右側 LINE／IG／Threads 浮動按鈕、各頁「加 LINE」按鈕與諮詢區塊、
+// 頁尾與內文的聯絡連結、聯絡頁的表單與聯絡資訊，並從結構化資料與 llms.txt 拿掉 Email、LINE、IG、Threads。
+// 隱私權政策與條款（法規需要的聯絡窗口）、編輯器、會員專區、後台不處理。
+export const CONTACT_EXEMPT = /^(en\/)?(privacy|terms|builder|dashboard|admin|demo|rental\/styles)\//;
+export const contactHidden = (s) => !!normalize(s).display.hide_contact;
+const CONTACT_A = 'a[href*="line.me"],a[href^="mailto:"],a[href^="tel:"],a[href*="instagram.com"],a[href*="threads.com"],a[href*="threads.net"],a[href*="/contact/"]:not(.lang-toggle),a[href$="/contact"]:not(.lang-toggle)';
+const CONTACT_CSS = '<style id="yc-no-contact">.nav-cta,.mobile-cta,.line-float,.social-float,.contact-grid,.footer-status,.seo-cta,.geo-cta,#cta.cta,' + CONTACT_A +
+  ',.cta-banner:has(' + CONTACT_A + '),li:has(>' + CONTACT_A.split(',').join('),li:has(>') + '),.contact-info-item{display:none!important}' +
+  '.yc-nc-note{margin:48px 0 0;font-size:17px;line-height:1.8;opacity:.85}</style>';
+const CONTACT_WORDS = /788cblaq|ycaxiom@gmail\.com|axiomyc2026|@ycaxiom|line\.me|threads\.(com|net)|instagram\.com/i;
+function stripLd(o) {
+  if (Array.isArray(o)) return o.map(stripLd).filter((x) => !(typeof x === 'string' && CONTACT_WORDS.test(x)));
+  if (!o || typeof o !== 'object') return o;
+  const r = {};
+  for (const [k, v] of Object.entries(o)) {
+    if (k === 'email' || k === 'telephone' || k === 'contactPoint') continue;
+    if (typeof v === 'string' && CONTACT_WORDS.test(v) && /^(url|sameAs)$/.test(k)) continue;
+    r[k] = stripLd(v);
+  }
+  return r;
+}
+export function hideContactHtml(html, en) {
+  let s = String(html).replace(/(<script type="application\/ld\+json">)([\s\S]*?)(<\/script>)/g, (m, a, b, c) => {
+    try { return a + JSON.stringify(stripLd(JSON.parse(b)), null, 2) + c; } catch (e) { return m; }
+  });
+  if (/<\/head>/i.test(s) && !s.includes('id="yc-no-contact"')) s = s.replace(/<\/head>/i, CONTACT_CSS + '\n</head>');
+  s = scrubInvites(s, en);
+  // 聯絡頁：表單與聯絡資訊隱藏，改放一段說明
+  if (s.includes('<div class="contact-grid"')) {
+    const h = en ? 'Inquiries are paused for now.' : '目前暫停接受諮詢.';
+    s = s.replace(/<h1([^>]*)>[\s\S]*?<\/h1>/, (m, at) => '<h1' + at.replace(/\s*data-original="[^"]*"/g, '') + ' data-original="' + h + '">' + h + '</h1>')
+      .replace(/(<div class="contact-grid")/, '<p class="yc-nc-note">' + (en ? 'Feel free to browse our work and articles.' : '歡迎先參考作品集與文章。') + '</p>\n$1');
+  }
+  return s;
+}
+// 內文裡「用 LINE 問我們」「聯絡我們協助」這類邀請聯絡的句子整句拿掉（只處理標籤之間的文字，不動程式與結構化資料）
+const INVITE_ZH = /(用|加|傳|透過|先|直接)\s*LINE.{0,10}(我們|問|聊|說明|聯絡|告訴|進行|詢問)|LINE\s*(傳|問|聊|聯絡)|聯絡我們|免費諮詢|免費評估|歡迎.{0,6}(詢問|來信|聯絡)/;
+const INVITE_EN = /\b(message|contact|reach|ask|tell|email) us\b|\b(via|on|over) LINE\b|\badd (us on )?LINE\b|free (consultation|assessment|quote)/i;
+function dropInvites(text, en) {
+  const re = en ? INVITE_EN : INVITE_ZH;
+  if (!re.test(text)) return text;
+  const parts = en ? text.split(/(?<=[.!?])(\s+)/) : text.match(/[^。！？]*[。！？]?/g) || [text];
+  return parts.filter((x) => !re.test(x)).join('');
+}
+function scrubInvites(html, en) {
+  // 「歡迎先用 LINE 或<a>聯絡表單</a>詢問。」這種句子中間夾連結
+  html = html.replace(/[^。>]*(用|加)\s*LINE\s*或\s*<a[^>]*>[^<]*<\/a>[^。<]*。/g, '');
+  return html.split(/(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->|<[^>]+>)/).map((t, i) => (i % 2 ? t : dropInvites(t, en))).join('');
+}
+export function hideContactText(text) {
+  return String(text).split('\n').filter((l) => !CONTACT_WORDS.test(l)).join('\n');
+}
+
 const fill = (t, v) => String(t || '').replace(/\{[^{}]+\}/g, (m) => (m in v ? v[m] : m));
 
 // 建置時寫成 assets/site-promo.json 的內容；前端顯示前再檢查一次開始與結束時間
@@ -175,7 +229,8 @@ export function promo(s, eff, now = new Date()) {
   const live = (x) => !n.display.hide_prices && !!x.enabled && (!x.follow_early || eff.early) && !(x.end && now.getTime() > ms(x.end));
   const id = (x) => { const k = JSON.stringify(x); let h = 5381; for (let i = 0; i < k.length; i++) h = (Math.imul(h, 33) ^ k.charCodeAt(i)) >>> 0; return h.toString(36); };
   const bar = { show: live(n.bar), text: fill(n.bar.text, v), text_mobile: fill(n.bar.text_mobile || n.bar.text, v), button: fill(n.bar.button, v), link: n.bar.link || '', start: n.bar.start || null, end: n.bar.end || null, dismiss_days: Number(n.bar.dismiss_days) || 0 };
-  const card = { show: live(n.card), title: fill(n.card.title, v), body: fill(n.card.body, v), b1_text: fill(n.card.b1_text, v), b1_link: n.card.b1_link || '', b2_text: fill(n.card.b2_text, v), b2_link: n.card.b2_link || '', scroll_pct: Number(n.card.scroll_pct) || 0, delay_sec: Number(n.card.delay_sec) || 0, pages: n.card.pages, start: n.card.start || null, end: n.card.end || null, dismiss_days: Number(n.card.dismiss_days) || 0 };
+  const noC = !!n.display.hide_contact && CONTACT_WORDS.test(String(n.card.b2_link || ''));
+  const card = { show: live(n.card), title: fill(n.card.title, v), body: fill(n.card.body, v), b1_text: fill(n.card.b1_text, v), b1_link: n.card.b1_link || '', b2_text: noC ? '' : fill(n.card.b2_text, v), b2_link: noC ? '' : n.card.b2_link || '', scroll_pct: Number(n.card.scroll_pct) || 0, delay_sec: Number(n.card.delay_sec) || 0, pages: n.card.pages, start: n.card.start || null, end: n.card.end || null, dismiss_days: Number(n.card.dismiss_days) || 0 };
   bar.id = id(bar); card.id = id(card);   // 內容改變時 id 會變，客人之前的「關閉」只對舊內容有效
   return { bar, card };
 }
