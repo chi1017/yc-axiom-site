@@ -66,6 +66,12 @@
         : await YC.client.from('rental_sites').select(cols).eq('member_id', uid).order('created_at');
       if (my !== token || r.error || !r.data) return;
       if (r.data) r.data = r.data.filter(function (x) { return !(x.status === "cancelled" && !x.first_published_at); });   // 自己刪除的草稿不顯示
+      // 管理員個別開關的功能（site_events 最新一筆 features_set）
+      if (r.data && r.data.length) {
+        var fe = await YC.client.from('site_events').select('site_id,detail,created_at').in('site_id', r.data.map(function (x) { return x.id; })).eq('type', 'features_set').order('created_at', { ascending: false }).limit(200);
+        var fm = {}; (fe.data || []).forEach(function (x) { if (!fm[x.site_id]) fm[x.site_id] = (x.detail && x.detail.flags) || {}; });
+        r.data.forEach(function (x) { x.flags = fm[x.id] || {}; });
+      }
       if (!r.data.length) {   // 還沒有網站：顯示入口
         box.innerHTML = '<div class="mem-card" style="margin-bottom:22px"><h2 style="margin:0 0 6px;font-size:18px">網站租用</h2>' +
           '<p style="margin:6px 0 0;font-size:14px;line-height:1.7">自己填寫店家資訊，我們負責發佈上線與維護，並每月自動檢測 SEO 與 AI 可見度。</p>' +
@@ -284,10 +290,12 @@
           '<div class="dq-acts">' + btns + contactBtns(m.contact, mt.email) + '</div></li>';
       }).join('') + '</ul><p id="bkout-' + esc(s.id) + '" style="margin:6px 0 0;font-size:13px;color:#9a8f80"></p></details>';
   }
+  // 多人協作是否開放：進階方案預設有，管理員也可以個別開啟或關閉
+  function teamOn(s) { var f = s.flags || {}; return f.team === true || f.team === false ? f.team : s.tier === 'pro'; }
   // ── 多人協作（進階方案，只有擁有者看得到）──
   function collabHtml(s, rows) {
     var id = esc(s.id);
-    if (s.tier !== 'pro') return '';
+    if (!teamOn(s)) return '';
     var list = (rows || []).filter(function (m) { return m.status !== 'removed'; });
     return '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px"><b>一起編輯的人</b>（' + list.length + '／5）</summary>' +
       '<p style="margin:8px 0 0;font-size:13px;color:#9a8f80">輸入對方的 Email 邀請；對方用這個 Email 登入會員專區後就能編輯內容、發佈與處理預約。收款、網域、刪除網站只有你能操作。</p>' +
@@ -337,7 +345,7 @@
           '<p style="margin:6px 0;font-size:13px;color:#9a8f80">你被邀請一起編輯這個網站。收款、網域與續約由網站擁有者管理。</p>' + bkHtml +
           '<p style="margin:14px 0 0"><a class="m-btn primary sm" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(s.id)) + '">編輯網站</a></p></div>';
       }
-      var mem = s.tier === 'pro' ? await YC.client.from('site_members').select('email,status').eq('site_id', s.id) : null;
+      var mem = teamOn(s) ? await YC.client.from('site_members').select('email,status').eq('site_id', s.id) : null;
       var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
       var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);

@@ -16,7 +16,7 @@
     republish_queued: '重新發佈', version_restore_queued: '還原版本', domain_set: '設定網域', domain_checked: '檢查網域', domain_active: '網域生效', domain_failed: '網域設定失敗', domain_cleared: '移除網域',
     reminder_sent: '系統：寄出到期提醒', auto_overdue: '系統：到期，自動改為逾期', auto_live: '系統：到期日已延後，改回上線中', long_suspend_notified: '系統：暫停滿 30 天，已通知管理員', cron_anomaly: '系統：資料異常',
     monthly_report: '月報檢測完成', report_failed: '月報檢測失敗', photos_cleaned: '清理沒被引用的舊照片',
-    tier_changed: '變更方案等級', layout_upgraded: '客戶升級成多頁版', upgrade_paid: '確認收到升級差額', pro_requested: '客戶申請進階功能', pro_paid: '確認收到進階差額', next_plan_set: '設定下一期方案', plan_downgraded: '續約時套用降級', code_review_requested: '自訂程式碼送審', code_approved: '核准自訂程式碼', code_rejected: '退回自訂程式碼', collab_invited: '邀請協作者', collab_joined: '協作者加入', collab_removed: '移除協作者'
+    tier_changed: '變更方案等級', features_set: '變更功能開關', layout_upgraded: '客戶升級成多頁版', upgrade_paid: '確認收到升級差額', pro_requested: '客戶申請進階功能', pro_paid: '確認收到進階差額', next_plan_set: '設定下一期方案', plan_downgraded: '續約時套用降級', code_review_requested: '自訂程式碼送審', code_approved: '核准自訂程式碼', code_rejected: '退回自訂程式碼', collab_invited: '邀請協作者', collab_joined: '協作者加入', collab_removed: '移除協作者'
   };
   var MAIL_LABEL = { adminFirstPublish: '管理員通知', customerGoLive: '網站上線通知（客戶）', customerReceipt: '收款通知（客戶）',
     customerReminder: '即將到期提醒（客戶）', customerOverdue: '已到期通知（客戶）', customerSuspended: '已暫停通知（客戶）', customerMonthlyReport: '月報（客戶）', adminAutoSuspended: '自動暫停通知（管理員）', adminLongSuspended: '暫停滿 30 天通知（管理員）' };
@@ -50,6 +50,27 @@
     if (!el) { el = document.createElement('div'); el.id = 'adm-toast'; document.body.appendChild(el); }
     el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, 4200);
   }
+  // ── 個別功能開關（沒設定的照方案：進階功能只有進階方案有，一般功能預設開啟）──
+  var FEATURES = [['booking', '預約行事曆', true], ['code', '自訂程式碼與嵌入', true], ['team', '多人共同編輯', true], ['shop', '線上購買', false], ['works', '作品集', false], ['posts', '文章', false], ['en', '英文版', false]];
+  function flagText(f) { var t = FEATURES.filter(function (x) { return f[x[0]] === true || f[x[0]] === false; }).map(function (x) { return x[1] + (f[x[0]] ? '開' : '關'); }); return t.length ? t.join('、') : '全部照方案'; }
+  function featuresHtml(r, flags) {
+    var pro = r.tier === 'pro';
+    return '<h3 class="rn-h" id="rn-feat-h">功能開關</h3><p class="rn-note">沒特別設定的功能照方案：進階功能只有進階方案有，一般功能預設開啟。可以單獨送某個客戶進階功能，或關掉不需要的功能。儲存後上線中的網站會重新部署。</p>' +
+      '<table class="rn-feat"><thead><tr><th>功能</th><th>方案預設</th><th>這個網站</th></tr></thead><tbody>' + FEATURES.map(function (x) {
+        var def = x[2] ? pro : true, v = flags[x[0]] === true ? 'on' : flags[x[0]] === false ? 'off' : '';
+        return '<tr><td>' + esc(x[1]) + (x[2] ? ' <span class="rn-sub" style="display:inline">進階</span>' : '') + '</td><td class="' + (def ? 'rn-ok' : 'rn-dim') + '">' + (def ? '開' : '關') + '</td>' +
+          '<td><select data-feat="' + x[0] + '" aria-label="' + esc(x[1]) + '"><option value=""' + (v === '' ? ' selected' : '') + '>照方案（' + (def ? '開' : '關') + '）</option><option value="on"' + (v === 'on' ? ' selected' : '') + '>開啟</option><option value="off"' + (v === 'off' ? ' selected' : '') + '>關閉</option></select></td></tr>';
+      }).join('') + '</tbody></table><p style="margin:10px 0 0"><button class="m-btn sm primary" id="rn-featsave">儲存功能設定</button> <span class="rn-sub" id="rn-featout" style="display:inline"></span></p>';
+  }
+  function bindFeatures(r) {
+    var b = document.getElementById('rn-featsave'); if (!b) return;
+    b.onclick = async function () {
+      var f = {}; Array.prototype.forEach.call(document.querySelectorAll('[data-feat]'), function (sel) { if (sel.value) f[sel.getAttribute('data-feat')] = sel.value === 'on'; });
+      var out = document.getElementById('rn-featout'); b.disabled = true; out.textContent = '儲存中…';
+      try { var res = await call('set_features', r.id, { features: f }); toast(res.message || '已儲存'); await refreshAfter(r.id, /部署/.test(res.message || '')); }
+      catch (e) { out.innerHTML = '<span class="rn-err">' + esc(e.message || e) + '</span>'; b.disabled = false; }
+    };
+  }
   function findRow(id) { return state.rows.filter(function (r) { return r.id === id; })[0]; }
 
   // ── 樣式（只影響本分頁） ──
@@ -74,6 +95,7 @@
     '.rn-sim .rn-srow label{display:grid;gap:4px;font-size:13px;color:var(--text-dim)}.rn-sim input,.rn-sim select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;font:14px var(--f-ui);padding:8px 10px;min-height:38px}' +
     '.rn-sim table{width:100%;border-collapse:collapse;font-size:13.5px}.rn-sim th,.rn-sim td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top}.rn-sim th{color:var(--text-dim);font-weight:600;font-size:12.5px}' +
     '.rn-sim .rn-runs{list-style:none;margin:0;padding:0;font-size:13px;color:var(--text-dim);display:grid;gap:3px}.rn-mode{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;border:1px solid var(--accent);color:var(--accent)}' +
+    '.rn-feat{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}.rn-feat th,.rn-feat td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}.rn-feat th{color:var(--text-dim);font-weight:500}.rn-feat select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:4px 6px}' +
     '@media (max-width:640px){.rn-kv{grid-template-columns:90px 1fr}.rn-drawer{padding:16px 14px 60px}}';
   document.head.appendChild(css);
 
@@ -114,7 +136,8 @@
       c.from('site_versions').select('id,created_at').eq('site_id', id).order('created_at', { ascending: false }).limit(20),
       c.from('payments').select('id,amount,months,method,paid_on,period_from,period_to,reference,confirmed_by,created_at').eq('site_id', id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(50),
       c.from('site_reports').select('month,status,seo_score,geo_score,error,emailed_at').eq('site_id', id).order('month', { ascending: false }).limit(3),
-      c.from('site_code_reviews').select('hash,status,note,version_id,created_at,reviewed_at,reviewed_by').eq('site_id', id).order('created_at', { ascending: false }).limit(10)
+      c.from('site_code_reviews').select('hash,status,note,version_id,created_at,reviewed_at,reviewed_by').eq('site_id', id).order('created_at', { ascending: false }).limit(10),
+      c.from('site_events').select('detail').eq('site_id', id).eq('type', 'features_set').order('created_at', { ascending: false }).limit(1)
     ]);
     rs.slice(0, 3).forEach(function (x) { if (x.error) throw x.error; });
     var reviews = rs[4].error ? [] : (rs[4].data || []);
@@ -123,7 +146,8 @@
     var vers = vids.length ? await c.from('site_versions').select('id,content').in('id', vids) : { data: [] };
     var byV = {}; (vers.data || []).forEach(function (v) { byV[v.id] = v.content || {}; });
     reviews.forEach(function (x) { var ct = byV[x.version_id] || {}; x.code = { head: (ct.code && ct.code.head) || '', body: (ct.code && ct.code.body) || '', blocks: (ct.blocks || []).filter(function (b) { return b.kind === 'html' && b.html && !b.hidden; }).map(function (b) { return { title: b.title, html: b.html }; }) }; });
-    return { events: rs[0].data || [], versions: rs[1].data || [], payments: rs[2].data || [], reports: rs[3].error ? [] : (rs[3].data || []), reviews: reviews };
+    var fx = !rs[5].error && rs[5].data && rs[5].data[0] && rs[5].data[0].detail ? rs[5].data[0].detail.flags || {} : {};
+    return { events: rs[0].data || [], versions: rs[1].data || [], payments: rs[2].data || [], reports: rs[3].error ? [] : (rs[3].data || []), reviews: reviews, flags: fx };
   }
   async function call(action, siteId, params) {
     var r = await YC.client.functions.invoke('admin-site', { body: Object.assign({ action: action, site_id: siteId }, params || {}) });
@@ -310,6 +334,8 @@
     clearTimeout(watchTimer); state.sel = null; state.det = null;
     var d = document.getElementById('rn-drawer'), b = document.getElementById('rn-dback'); if (d) d.remove(); if (b) b.remove();
   }
+  // 全域搜尋用：切到租用網站分頁並打開某個網站（可帶 anchor 捲到某一段）
+  document.addEventListener('yc-admin-open-site', function (e) { var dt = e.detail || {}; setTab('rental'); var n = 0, go = async function () { if (!findRow(dt.id)) { if (n++ < 40) setTimeout(go, 300); return; } await openDetail(dt.id); if (dt.anchor) { var a = document.getElementById(dt.anchor); if (a) a.scrollIntoView({ block: 'start' }); } }; go(); });
   async function openDetail(id) {
     var r = findRow(id); if (!r) return;
     closeDrawer(); state.sel = id; state.domMsg = '';
@@ -328,6 +354,7 @@
     else if (e.type === 'terminated') bits.push(d.status_from ? '原狀態：' + (STATUS[d.status_from] || d.status_from) : '', d.reason ? '原因：' + d.reason : '');
     else if (e.type === 'reminder_sent') bits.push('到期日 ' + (d.paid_until || '') + '，剩 ' + (d.days_left == null ? '?' : d.days_left) + ' 天');
     else if (e.type === 'auto_overdue') bits.push('到期日 ' + (d.paid_until || ''));
+    else if (e.type === 'features_set') bits.push(flagText(d.flags || {}));
     else if (e.type === 'long_suspend_notified') bits.push('自 ' + (d.since || '') + '，共 ' + (d.days || '') + ' 天');
     else if (e.type === 'monthly_report') bits.push((d.month || '').slice(0, 7) + '　SEO ' + d.seo + '／GEO ' + d.geo);
     else if (e.type === 'report_failed') bits.push((d.month || '').slice(0, 7), d.error || '');
@@ -386,6 +413,7 @@
       '<div class="rn-acts">' + acts.join('') + '</div>' +
       '<dl class="rn-kv">' + kv.map(function (x) { return '<dt>' + x[0] + '</dt><dd>' + x[1] + '</dd>'; }).join('') + '</dl>' +
       reviewHtml(det.reviews || []) +
+      featuresHtml(r, det.flags || {}) +
       '<h3 class="rn-h">自訂網域</h3><div id="rn-dom">' + domainHtml(r) + '</div>' +
       '<h3 class="rn-h">版本（最近 ' + det.versions.length + ' 版）</h3>' + (det.versions.length ? '<ul class="rn-vers">' + det.versions.map(function (v) {
         var isLive = v.id === r.live_version_id;
@@ -398,6 +426,7 @@
       '<h3 class="rn-h">事件時間軸</h3>' + (tl ? '<ul class="rn-tl">' + tl + '</ul>' : '<p class="rn-note">沒有事件。</p>');
     document.getElementById('rn-x').onclick = closeDrawer;
     Array.prototype.forEach.call(d.querySelectorAll('[data-act]'), function (b) { b.onclick = function () { doAction(b.getAttribute('data-act'), r); }; });
+    bindFeatures(r);
     Array.prototype.forEach.call(d.querySelectorAll('[data-rv]'), function (b) { b.onclick = function () { askReview(r, b.getAttribute('data-rv'), b.getAttribute('data-ok') === '1'); }; });
     Array.prototype.forEach.call(d.querySelectorAll('[data-ver]'), function (b) { b.onclick = function () { askRestoreVersion(r, b.getAttribute('data-ver'), b.getAttribute('data-vt')); }; });
     bindDomain(r);

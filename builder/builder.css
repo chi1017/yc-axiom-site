@@ -491,3 +491,5 @@ input:hover:not(:focus),textarea:hover:not(:focus){border-color:color-mix(in srg
 .pp-item{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:start}
 .pp-item img{width:72px;height:72px;object-fit:cover;border-radius:6px}
 .pp-ctl{display:grid;gap:6px}
+/* 管理員關閉的功能：說明之外的設定變淡、不能操作 */
+.card.is-off > *:not(h2):not(.feat-off):not(.sub){opacity:.45;pointer-events:none}
