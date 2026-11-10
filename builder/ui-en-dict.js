@@ -177,6 +177,7 @@ export default {
 "錯落排列": "Staggered",
 "整齊方格": "Even grid",
 "橫向滑動": "Side scroll",
+"輪播（自動播放）": "Slideshow (autoplay)",
 "照片排列": "Photo layout",
 "大字引言": "Large quote",
 "評價樣式": "Review style",

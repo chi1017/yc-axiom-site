@@ -190,7 +190,7 @@ const UI_EN = (() => {
   const q = new URLSearchParams(location.search).get('lang');
   try { if (q === 'en' || q === 'zh') localStorage.setItem('yc-builder-ui', q); return localStorage.getItem('yc-builder-ui') === 'en'; } catch (e) { return q === 'en'; }
 })();
-if (UI_EN) import(new URL('./ui-en.min.js?v=5f1fb41b2b', import.meta.url).href).then((m) => m.install()).catch(() => {});
+if (UI_EN) import(new URL('./ui-en.min.js?v=951a822e9e', import.meta.url).href).then((m) => m.install()).catch(() => {});
 function setUiLang(lang) {
   try { localStorage.setItem('yc-builder-ui', lang); } catch (e) { /* 無痕模式：只靠網址 */ }
   const u = new URL(location.href); u.searchParams.set('lang', lang); location.href = u.href;
@@ -960,7 +960,7 @@ function buildPanel() {
     h('div', { class: 'msg mute', style: 'margin:-4px 0 12px', text: '背景紋理會套用在有底色的區塊上。換了捲動動畫，預覽會自動播放一次，往下捲也看得到。' }),
     h('div', { class: 'style-row' },
       styleSel('menuStyle', L.MENU_STYLES, { list: '列表', cards: '卡片' }, '價目樣式', 'menu'),
-      styleSel('gallery', L.GALLERY_STYLES, { masonry: '錯落排列', grid: '整齊方格', slide: '橫向滑動' }, '照片排列', 'interior'),
+      styleSel('gallery', L.GALLERY_STYLES, { masonry: '錯落排列', grid: '整齊方格', slide: '橫向滑動', carousel: '輪播（自動播放）' }, '照片排列', 'interior'),
       styleSel('reviewStyle', L.REVIEW_STYLES, { cards: '卡片', quote: '大字引言' }, '評價樣式', 'reviews')),
     h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-style-floatLine' }, flOn, h('strong', { text: '在畫面右下角顯示「LINE 聯絡」按鈕' })),
       h('div', { class: 'msg mute', text: '需要先在「店家資訊」填 LINE 連結。手機上客人隨時一按就能加你的 LINE。' }))));
