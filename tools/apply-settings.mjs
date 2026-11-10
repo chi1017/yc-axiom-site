@@ -9,7 +9,7 @@
 // 測試：SITE_SETTINGS_FILE=設定.json SETTINGS_USED=0 SETTINGS_NOW=2027-03-01T00:00:00Z node tools/apply-settings.mjs <資料夾>
 import { readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, copyFileSync, existsSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
-import { normalize, effective, tokens, render, hasTokens, promo, planSettings, stateOf, barHead, barBody, tokensEn } from './site-settings.mjs';
+import { normalize, effective, tokens, render, hasTokens, promo, planSettings, stateOf, barHead, barBody, tokensEn, pricesHidden, hidePriceText, HIDE_EXEMPT } from './site-settings.mjs';
 
 const OUT = process.argv[2];
 if (!OUT || !existsSync(OUT)) { console.log('::error::缺少要部署的資料夾'); process.exit(1); }
@@ -50,20 +50,25 @@ const now = process.env.SETTINGS_NOW ? new Date(process.env.SETTINGS_NOW) : new 
 const eff = effective(data, now, S.used);
 const tok = tokens(data, eff), tokEn = tokensEn(data, eff);
 const pr = promo(data, eff, now);
-console.log('價格設定 v' + S.version + '：早鳥' + (eff.early ? '進行中（至 ' + eff.until + '）' : '未進行') + '，一頁版 ' + tok.from + '／月、多頁版 ' + tok.multi_from + '／月；公告列' + (pr.bar.show ? '顯示' : '不顯示') + '、卡片' + (pr.card.show ? '顯示' : '不顯示'));
+const HIDE = pricesHidden(data);
+console.log('價格設定 v' + S.version + '：早鳥' + (eff.early ? '進行中（至 ' + eff.until + '）' : '未進行') + '，一頁版 ' + tok.from + '／月、多頁版 ' + tok.multi_from + '／月；公告列' + (pr.bar.show ? '顯示' : '不顯示') + '、卡片' + (pr.card.show ? '顯示' : '不顯示') + (HIDE ? '；官網價錢隱藏中' : ''));
 
 // 預覽用範本（套用前）
 const PREVIEW = { 'index.html': 'home.html', 'rental/index.html': 'rental.html', 'pricing/index.html': 'pricing.html' };
 mkdirSync(join(OUT, 'admin/preview-src'), { recursive: true });
 for (const [src, dst] of Object.entries(PREVIEW)) if (existsSync(join(OUT, src))) copyFileSync(join(OUT, src), join(OUT, 'admin/preview-src', dst));
 
-let changed = 0, bars = 0;
+let changed = 0, bars = 0, hidden = 0;
 for (const f of walk(OUT)) {
   const rel = relative(OUT, f).split('\\').join('/');
   if (rel.startsWith('admin/preview-src/')) continue;
   if (!/\.(html|txt|xml|json|webmanifest)$/.test(rel)) continue;
   let s = readFileSync(f, 'utf8'), o = s;
   if (hasTokens(s)) s = render(s, rel.startsWith('en/') ? tokEn : tok);
+  if (HIDE && !HIDE_EXEMPT.test(rel) && !rel.startsWith('assets/')) {
+    s = hidePriceText(s, rel.startsWith('en/'));
+    hidden += s !== o ? 1 : 0;
+  }
   if (rel.endsWith('.html') && pr.bar.show && !NO_BAR.test(rel) && /<\/head>/i.test(s) && /<body[^>]*>/i.test(s) && !s.includes('id="yc-bar"')) {
     s = s.replace(/<\/head>/i, barHead(pr.bar) + '\n</head>').replace(/<body([^>]*)>/i, (m) => m + '\n' + barBody(pr.bar));
     bars++;
@@ -86,4 +91,16 @@ writeFileSync(join(OUT, 'settings-state.json'), JSON.stringify({ version: S.vers
 // 最後檢查：不能留下沒換掉的標記
 const left = walk(OUT).filter((f) => /\.(html|txt|xml|js|json)$/.test(f) && !relative(OUT, f).startsWith('admin/preview-src') && !relative(OUT, f).startsWith('tools/') && hasTokens(readFileSync(f, 'utf8')));
 if (left.length) fail('還有沒換掉的價格標記：' + left.map((f) => relative(OUT, f)).join('、'));
-console.log('已套用：' + changed + ' 個檔案，公告列 ' + bars + ' 頁');
+// 隱藏價錢時：結構化資料必須仍是合法 JSON，公開頁面不能留下價格
+if (HIDE) {
+  const leak = [];
+  for (const f of walk(OUT)) {
+    const rel = relative(OUT, f).split('\\').join('/');
+    if (!rel.endsWith('.html') || HIDE_EXEMPT.test(rel) || rel.startsWith('admin/')) continue;
+    const s = readFileSync(f, 'utf8');
+    for (const m of s.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) { try { JSON.parse(m[1]); } catch (e) { fail(rel + ' 的結構化資料在隱藏價錢後格式錯誤'); } }
+    if (/NT\$\s?[1-9]/.test(s.replace(/<script[\s\S]*?<\/script>/g, ''))) leak.push(rel);
+  }
+  if (leak.length) fail('隱藏價錢後仍有價格：' + leak.join('、'));
+}
+console.log('已套用：' + changed + ' 個檔案，公告列 ' + bars + ' 頁' + (HIDE ? '，隱藏價錢 ' + hidden + ' 個檔案' : ''));
