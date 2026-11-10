@@ -361,6 +361,8 @@ function mount(site) {
   S.site = site; S.slug = site.slug;
   S.isOwner = S.trial || site.member_id === YC.session.user.id;   // 協作者不能改網址代稱、行業、版型，也不能刪除網站
   S.isPro = site.tier === 'pro';
+  S.flags = {};
+  if (!S.trial) loadFlags(site);
   if (!S.trial) { try { localStorage.setItem('yc-builder-site', site.id); } catch (e) { /* ignore */ } }
   paintSiteSwitch();
   paintTrialBar();
@@ -389,7 +391,7 @@ function renderPreview(now) {
     const L = S.lib;
     let r;
     try {
-      const args = () => ({ template: S.site.template, content: S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
+      const args = () => ({ template: S.site.template, content: S.lib.code && S.lib.code.stripOff ? S.lib.code.stripOff(S.content, S.site.tier, S.flags || {}) : S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
         siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path), lang: EN_MODE() ? 'en' : '',
         ...previewFont() });
       r = L.buildSite(args());
@@ -539,9 +541,35 @@ function paintFontBox() {
 const proAdd = () => (S.plan && S.plan.proFor && S.site ? S.plan.proFor(S.site.price_lock).monthly : 400);
 const proTitle = () => (S.isPro ? '（進階功能）' : '（進階功能・每月加 NT$' + Number(proAdd()).toLocaleString('en-US') + '）');
 const PRO_CARDS = ['c-cal', 'c-code'];
+const CARD_FEATURE = { 'c-cal': 'booking', 'c-code': 'code', 'c-shop': 'shop', 'c-works': 'works', 'c-posts': 'posts', 'c-en': 'en' };
+// 功能是否開放：照方案，管理員可以在後台個別開啟或關閉（site_events 的 features_set）
+const featOn = (k) => S.lib && S.lib.code && S.lib.code.featureOn ? S.lib.code.featureOn(k, S.site && S.site.tier, S.flags) : (S.isPro || !['booking', 'code', 'team'].includes(k));
+async function loadFlags(site) {
+  try {
+    const r = await YC.client.from('site_events').select('detail').eq('site_id', site.id).eq('type', 'features_set').order('created_at', { ascending: false }).limit(1);
+    const f = r.data && r.data[0] && r.data[0].detail ? S.lib.code.normalizeFlags(r.data[0].detail.flags) : {};
+    if (S.site !== site) return;
+    S.flags = f;
+    applyFlags();
+  } catch (e) { /* 讀不到就照方案 */ }
+}
+// 管理員關閉的一般功能：卡片改成說明；進階功能被個別開啟時，卡片顯示已開放
+function applyFlags() {
+  Object.entries(CARD_FEATURE).forEach(([id, k]) => {
+    const el = document.getElementById(id); if (!el) return;
+    const pro = PRO_CARDS.includes(id), on = featOn(k);
+    let note = el.querySelector('.feat-off');
+    if (!pro && !on) {
+      if (!note) { note = h('div', { class: 'msg feat-off', text: '這個功能目前沒有開放給你的網站，有需要請聯絡 YC AXIOM。' }); el.insertBefore(note, el.children[2] || null); }
+      el.classList.add('is-off');
+    } else { if (note) note.remove(); el.classList.remove('is-off'); }
+    if (pro) { const pn = el.querySelector('.pro-note-slot'); if (pn) pn.replaceChildren(proNote(k)); }
+  });
+  try { renderPreview(); } catch (e) { /* ignore */ }
+}
 // 進階方案功能的說明（一般方案可以先設定、在預覽看效果，升級後才會出現在正式網站）
-function proNote() {
-  if (S.isPro) return h('div', { class: 'msg ok', text: '你的網站是進階方案，這個功能已開放。' });
+function proNote(k) {
+  if (k ? featOn(k) : S.isPro) return h('div', { class: 'msg ok', text: S.isPro ? '你的網站是進階方案，這個功能已開放。' : '這個功能已為你的網站開放。' });
   const add = S.plan && S.plan.proFor ? S.plan.proFor(S.site.price_lock).monthly : 400;
   const msg = S.site.pro_pending ? '進階功能已申請，確認收到差額後就會開通。現在可以先設定、在預覽看效果。'
     : '這是進階功能（每月加 NT$' + Number(add).toLocaleString('en-US') + '）。可以先設定、在預覽看效果；到會員專區「我的網站」按「加購進階功能」開通後，才會出現在正式網站。';
@@ -1122,7 +1150,7 @@ function buildPanel() {
     touch(); scrollPreviewTo('booking');
   });
   P.append(card('c-cal', 'booking', '預約行事曆' + proTitle(), '客人在網站上直接選日期與時段，每個時段有名額上限，額滿就不能再選。你在會員專區確認或取消，客人有留 Email 會收到通知。',
-    proNote(),
+    h('div', { class: 'pro-note-slot' }, proNote('booking')),
     h('div', { class: 'field' }, h('label', { class: 'check', for: 'f-cal-enabled' }, calOn, h('strong', { text: '使用預約行事曆（取代原本的預約申請表）' }))),
     h('div', { id: 'calBox' })));
   // 自訂程式碼（進階方案）
@@ -1132,7 +1160,7 @@ function buildPanel() {
     return h('label', { class: 'field', for: el.id }, h('span', { text: label }), el);
   };
   P.append(card('c-code', 'top', '自訂程式碼' + proTitle(), '放 Meta Pixel、LINE Tag、聊天外掛、網站驗證碼等第三方提供的程式碼。預覽不會執行；發佈後由我們審核，核准才會放進正式網站（同一段程式碼只審一次）。',
-    proNote(),
+    h('div', { class: 'pro-note-slot' }, proNote('code')),
     codeArea('code.head', '放在 <head> 裡（追蹤碼、驗證碼）', '<script>…</script> 或 <meta …>'),
     codeArea('code.body', '放在頁面最後（聊天外掛等）', '<script src="https://…"></script>'),
     h('div', { id: 'codeStatus', class: 'msg mute' }),
@@ -1869,7 +1897,7 @@ async function paintCodeStatus() {
   const r = await YC.client.from('site_code_reviews').select('status,note').eq('site_id', S.site.id).eq('hash', hash).maybeSingle();
   const rv = r.data;
   const t = !rv ? ['mute', '這段程式碼還沒送審：按「發佈」後會送給我們審核。'] : rv.status === 'approved' ? ['ok', '這段程式碼已核准，會放進正式網站。'] : rv.status === 'pending' ? ['mute', '審核中：核准後網站會自動更新。'] : ['bad', '這段程式碼沒有通過審核' + (rv.note ? '：' + rv.note : '') + '。修改後重新發佈會再審一次。'];
-  el.className = 'msg ' + t[0]; el.textContent = (S.isPro ? '' : '（升級進階方案後才會放進網站）') + t[1];
+  el.className = 'msg ' + t[0]; el.textContent = (featOn('code') ? '' : '（升級進階方案後才會放進網站）') + t[1];
 }
 // 自訂標題／描述空白時，提示自動產生的內容
 function paintSeoHints(r) {
@@ -2543,7 +2571,7 @@ function paintMobList() {
   rows.replaceChildren(...[...P.querySelectorAll('section.card')].filter((c) => !c.hidden).map((c) => {
     const t = c.querySelector('h2'), sub = c.querySelector('.sub');
     const title = t ? t.textContent.replace(/（.*?）/g, '').trim() : c.id;
-    const pro = PRO_CARDS.includes(c.id) ? h('em', { class: 'pro-badge', text: S.isPro ? '進階・已開通' : '進階 +NT$' + Number(proAdd()).toLocaleString('en-US') + '／月' }) : null;
+    const pro = PRO_CARDS.includes(c.id) ? h('em', { class: 'pro-badge', text: featOn(CARD_FEATURE[c.id]) ? '進階・已開通' : '進階 +NT$' + Number(proAdd()).toLocaleString('en-US') + '／月' }) : null;
     return h('button', { type: 'button', class: 'mrow', role: 'listitem', onclick: () => openCard(c.id) },
       h('span', { class: 'mrow-t' }, h('strong', {}, title, pro), sub ? h('small', { text: sub.textContent.trim() }) : ''),
       h('span', { class: 'mrow-go', 'aria-hidden': 'true', text: '›' }));
