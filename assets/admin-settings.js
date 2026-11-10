@@ -1,7 +1,7 @@
 /* 管理後台「價格與活動」分頁：方案價格、早鳥活動、頂部公告列、滑出卡片。
    儲存：資料庫函式 save_site_settings（資料庫層只允許管理員）；發布：Edge Function site-settings 觸發 GitHub Actions 重新建置官網。
    預覽：用建置時留下的 /admin/preview-src/ 範本，套用表單裡的設定，顯示公告列與卡片。 */
-import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText, hideContactHtml } from '../tools/site-settings.mjs?v=2026-11-10b';
+import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText, hideContactHtml } from '../tools/site-settings.mjs?v=2026-11-10c';
 
 const YC = window.YC;
 const box = document.getElementById('adm-prices');
@@ -62,7 +62,8 @@ function init() {
   ${chk('display', 'hide_prices', '隱藏官網所有價錢')}
   <p class="ps-hint">打開後，官網所有頁面（首頁、網站租用、價格、服務、關於、文章，含英文版）的價錢都會換成「價格請洽詢」，頂部公告列與滑出卡片也不顯示。服務條款、編輯器、會員專區的價格與實際收費不變。按「儲存並發布」後約 2–3 分鐘生效；關掉再發布一次就恢復。</p>
   ${chk('display', 'hide_contact', '關閉官網所有聯絡方式')}
-  <p class="ps-hint">打開後，官網會隱藏「免費諮詢」按鈕、右側 LINE／IG／Threads 浮動按鈕、各頁的 LINE 與諮詢區塊、頁尾聯絡連結，聯絡頁的表單與聯絡資訊也會關閉並改顯示「目前暫停接受諮詢」。隱私權政策、服務條款、會員專區的聯絡窗口保留。同樣按「儲存並發布」生效。</p>
+  ${chk('display', 'hide_contact_privacy', '隱私權政策裡的聯絡方式也關閉（要先勾上一項）')}
+  <p class="ps-hint">打開後，官網會隱藏「免費諮詢」按鈕、右側 LINE／IG／Threads 浮動按鈕、各頁的 LINE 與諮詢區塊、頁尾聯絡連結，聯絡頁的表單與聯絡資訊也會關閉並改顯示「目前暫停接受諮詢」。隱私權政策、服務條款這兩頁只關掉選單與浮動按鈕；隱私權政策內文的 Email／LINE 要另外勾上面第二項才會拿掉，改顯示「目前暫停開放聯絡管道」。會員專區不受影響。同樣按「儲存並發布」生效。</p>
 </section>
 <section class="ps-sec" aria-labelledby="ps-h1"><h3 id="ps-h1">方案價格（一般價格）</h3>
   <div class="ps-row">${num('prices', 'single_month', '一頁版月租')}${num('prices', 'single_year', '一頁版年繳')}${num('prices', 'multi_month', '多頁版月租')}${num('prices', 'multi_year', '多頁版年繳')}</div>
@@ -197,7 +198,7 @@ function init() {
       const eff = effective(f, now, st.used), pr = promo(f, eff, now), path = PREVIEW_PATH[st.page];
       html = render(srcCache[st.page], tokens(f, eff));
       if (f.display && f.display.hide_prices) html = hidePriceText(html, false);
-      if (f.display && f.display.hide_contact) html = hideContactHtml(html, false);
+      if (f.display && f.display.hide_contact) html = hideContactHtml(html, false, '', false);
       html = html.replace('id="page-loader"', 'id="page-loader-off" hidden').replace(/<script[^>]*googletagmanager[\s\S]*?<\/script>/gi, '').replace(/<script>\s*window\.dataLayer[\s\S]*?<\/script>/gi, '');
       const base = `<base href="${location.origin}${path}">`;
       const pv = `<script>window.YC_PROMO_PREVIEW=${JSON.stringify({ path, cfg: { card: pr.card } }).replace(/</g, '\\u003c')};</script>`;
