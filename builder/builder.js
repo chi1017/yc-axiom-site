@@ -396,7 +396,7 @@ function renderPreview(now) {
       if (updateSubsetFont(r.html)) r = L.buildSite(args());
     } catch (e) { console.error(e); return; }
     if (S.page === 'home') paintSeoHints(r);
-    S.pageList = r.pages || [];
+    S.pageList = r.previewPages || r.pages || [];
     if (!S.pageList.some((p) => p.key === S.page)) S.page = 'home';
     paintPageTabs();
     // 手機版在「編輯」分頁時看不到預覽：先不更新預覽框，切到「預覽」時再更新（打字更順）
@@ -555,8 +555,9 @@ function goPage(key, anchor) {
 // 多頁版：預覽上方的分頁切換
 function paintPageTabs() {
   const box = $('#pageTabs'); if (!box) return;
-  box.hidden = !isMulti();
-  if (!isMulti()) return;
+  // 多頁版，或一頁版有作品集頁時，預覽上方顯示頁面切換
+  box.hidden = S.pageList.length < 2;
+  if (box.hidden) return;
   box.replaceChildren(...S.pageList.map((p) => {
     const b = h('button', { type: 'button', 'aria-pressed': String(p.key === S.page) }, p.label);
     b.addEventListener('click', () => goPage(p.key));
@@ -1062,8 +1063,11 @@ function buildPanel() {
     if (!S.content.shop.enabled) { S.content.shop.enabled = true; shopOn.checked = true; }
     paintItems(); touch(); scrollPreviewTo('shop');
   };
+  // 作品集：分類相簿，最多 100 張；網站有自己的作品集頁（works/），首頁放輪播
+  P.append(card('c-works', 'works', '作品集', '最多 ' + L.LIMITS.works + ' 張，可以分類（例如婚紗、寫真，或客廳、廚房）。網站會多一個「作品集」頁，客人可以按分類看、點照片放大；首頁放前 8 張輪播。照片只在客人捲到時才載入，不會拖慢網站。',
+    h('div', { id: 'worksBox' })));
   // 文章：每篇一個網頁（posts/<代碼>/），代碼建立時產生、之後不變
-  P.append(card('c-posts', 'posts', '文章', '最多 ' + L.LIMITS.posts + ' 篇。寫店裡的故事、新品、活動或常見問題的完整說明，每篇都會有自己的網頁，容易被搜尋與 AI 找到。',
+  P.append(card('c-posts', 'posts', '文章', '最多 ' + L.LIMITS.posts + ' 篇。寫店裡的故事、新品、活動或常見問題的完整說明，每篇都會有自己的網頁，容易被搜尋與 AI 找到。可以放封面、內文照片，用工具列加粗體、小標題與清單。',
     h('div', { id: 'postBox' }), h('button', { type: 'button', class: 'btn small', id: 'postAdd' }, '＋ 新增文章'), h('span', { id: 'postCnt', class: 'msg mute', style: 'margin-left:10px' })));
   $('#postAdd').onclick = () => {
     if (S.content.posts.length >= L.LIMITS.posts) return;
@@ -1149,7 +1153,7 @@ function buildPanel() {
   }
   P.append(card('c-en', 'top', '英文版（選填）', '開啟後，網站每一頁都會有英文版（網址 /en/…），右上角可以切換中英文，Google 也會知道兩種語言是同一家店。', ...enKids));
   $('#reviewAdd').onclick = () => { if (S.content.reviews.length < L.LIMITS.reviews) { S.content.reviews.push({ name: '', text: '' }); paintReviews(); touch(); } };
-  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintItems(); paintBlocks(); paintOrder(); paintSlug(); paintLinks(); refreshTodo();
+  paintMenu(); paintNews(); paintFaq(); paintReviews(); paintPosts(); paintWorks(); paintItems(); paintBlocks(); paintOrder(); paintSlug(); paintLinks(); refreshTodo();
   paintFontBox(); paintCal(); paintCodeStatus();
   if (!S.isOwner) { const ind = $('#f-industry'); if (ind) { ind.disabled = true; ind.title = '只有網站擁有者能更改行業'; } }
   buildGroupNav();
@@ -1159,7 +1163,7 @@ function buildPanel() {
 const GROUPS = [
   { key: 'look', label: '外觀', cards: ['c-basic', 'c-style'] },
   { key: 'info', label: '店家資料', cards: ['c-info', 'c-hours', 'c-notice', 'c-booking', 'c-photos'] },
-  { key: 'content', label: '內容', cards: ['c-menu', 'c-news', 'c-faq', 'c-more', 'c-posts', 'c-blocks'] },
+  { key: 'content', label: '內容', cards: ['c-menu', 'c-news', 'c-faq', 'c-more', 'c-works', 'c-posts', 'c-blocks'] },
   { key: 'feature', label: '收款與功能', cards: ['c-shop', 'c-cal', 'c-en', 'c-seo', 'c-code'] },
   { key: 'layout', label: '版面與紀錄', cards: ['c-order', 'c-history'] },
   { key: 'all', label: '全部', cards: null }
@@ -1482,22 +1486,164 @@ function paintNews() {
   $('#newsAdd').disabled = S.content.news.length >= L.LIMITS.news; $('#newsCnt').textContent = S.content.news.length + '/' + L.LIMITS.news;
   dragSort(box, S.content.news, () => { paintNews(); touch(); });
 }
+// 文章內文工具列：在游標處加粗體、小標題、清單、照片標記
+function insertAround(ta, before, after, ph) {
+  const a = ta.selectionStart, b = ta.selectionEnd, v = ta.value, sel = v.slice(a, b) || ph;
+  ta.value = v.slice(0, a) + before + sel + after + v.slice(b);
+  ta.focus(); ta.setSelectionRange(a + before.length, a + before.length + sel.length);
+  ta.dispatchEvent(new Event('input'));
+}
+function prefixLines(ta, mk) {
+  const v = ta.value, a = v.lastIndexOf('\n', ta.selectionStart - 1) + 1;
+  let b = v.indexOf('\n', Math.max(ta.selectionEnd, a)); if (b < 0) b = v.length;
+  const lines = v.slice(a, b).split('\n').map((l, i) => (typeof mk === 'function' ? mk(i) : mk) + l.replace(/^(#{2,3}\s+|[-•・*]\s+|\d+[.、]\s*)/, ''));
+  ta.value = v.slice(0, a) + lines.join('\n') + v.slice(b);
+  ta.focus(); ta.dispatchEvent(new Event('input'));
+}
+function insertLine(ta, text) {
+  const a = ta.selectionStart, v = ta.value;
+  const pre = a > 0 && v[a - 1] !== '\n' ? '\n' : '', post = v[a] && v[a] !== '\n' ? '\n' : '';
+  ta.value = v.slice(0, a) + pre + text + post + v.slice(a);
+  ta.focus(); ta.setSelectionRange(a + pre.length + text.length, a + pre.length + text.length);
+  ta.dispatchEvent(new Event('input'));
+}
 function paintPosts() {
   const L = S.lib, box = $('#postBox'); if (!box) return; box.replaceChildren();
+  const accept = 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif';
   S.content.posts.forEach((p, i) => {
     const t = h('input', { type: 'text', maxlength: String(L.LIMITS.postTitle), placeholder: '文章標題', 'aria-label': '文章標題 ' + (i + 1) });
     const d = h('input', { type: 'date', 'aria-label': '文章日期 ' + (i + 1) });
-    const b = h('textarea', { maxlength: String(L.LIMITS.postBody), rows: '6', placeholder: '文章內容（空一行就是新段落）', 'aria-label': '文章內容 ' + (i + 1) });
+    const b = h('textarea', { maxlength: String(L.LIMITS.postBody), rows: '10', placeholder: '文章內容（空一行就是新段落）', 'aria-label': '文章內容 ' + (i + 1) });
     const cnt = h('div', { class: 'msg mute', style: 'text-align:right' });
     d.value = p.date;
     const upd = () => { cnt.textContent = [...b.value].length + '/' + b.maxLength; };
     tx(t, p, 'title'); d.addEventListener('input', () => { p.date = d.value; touch(); });
     tx(b, p, 'body', upd); upd();
-    box.append(h('div', { class: 'faq-item' }, h('div', { class: 'rowN' }, d, t), b, cnt,
+    // 工具列
+    const tb = (label, fn, aria) => { const x = h('button', { type: 'button', class: 'btn small', 'aria-label': aria || label }, label); x.addEventListener('mousedown', (e) => e.preventDefault()); x.addEventListener('click', fn); return x; };
+    const bar = h('div', { class: 'post-tools', role: 'toolbar', 'aria-label': '文章格式' },
+      tb('B 粗體', () => insertAround(b, '**', '**', '要加粗的字'), '粗體'), tb('小標題', () => prefixLines(b, '## ')), tb('• 清單', () => prefixLines(b, '- '), '項目清單'), tb('1. 編號', () => prefixLines(b, (k) => (k + 1) + '. '), '編號清單'));
+    // 封面
+    const csl = { key: 'news', label: '文章封面', get: () => p.cover || null, set: (v) => { if (v) p.cover = v; else delete p.cover; } };
+    const cf = h('input', { type: 'file', accept, hidden: true }), cnm = h('div', { class: 'nm' });
+    const cup = h('button', { type: 'button', class: 'btn small' }, p.cover ? '更換封面' : '上傳封面');
+    cup.addEventListener('click', () => cf.click());
+    cf.addEventListener('change', async () => { const f = cf.files[0]; cf.value = ''; if (f) { await uploadPhoto(csl, f, cnm, cup); paintPosts(); } });
+    const cdel = p.cover ? iconBtn('移除封面', async () => { const old = p.cover.path; delete p.cover; touch(); await trashPhoto(old); paintPosts(); }, 'danger') : null;
+    const cover = h('div', { class: 'photo', style: 'margin:8px 0' }, h('div', { class: 'th' }, p.cover ? h('img', { src: photoUrl(p.cover.path), alt: '文章封面', loading: 'lazy' }) : '無封面'),
+      h('div', { class: 'ctl' }, h('strong', { text: '封面照片（選填）' }), cnm, h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, cup, cdel), cf));
+    // 內文照片
+    const photos = p.photos || [];
+    const pbox = h('div', { class: 'post-photos' });
+    photos.forEach((ph, k) => {
+      const alt = h('input', { type: 'text', maxlength: String(L.LIMITS.alt), placeholder: '照片說明（選填）', 'aria-label': '照片 ' + (k + 1) + ' 說明' });
+      tx(alt, ph, 'alt');
+      pbox.append(h('div', { class: 'pp-item' }, h('img', { src: photoUrl(ph.path), alt: '照片 ' + (k + 1), loading: 'lazy' }),
+        h('div', { class: 'pp-ctl' }, h('strong', { text: '[照片' + (k + 1) + ']' }), alt,
+          h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap' }, tb('插入到內文', () => insertLine(b, '[照片' + (k + 1) + ']'), '把照片 ' + (k + 1) + ' 插入到內文游標位置'),
+            iconBtn('移除', async () => { const old = ph.path; photos.splice(k, 1); if (!photos.length) delete p.photos; touch(); await trashPhoto(old); paintPosts(); }, 'danger')))));
+    });
+    const free = L.LIMITS.postPhotos - photos.length;
+    let addPh = null;
+    if (free > 0) {
+      const mf = h('input', { type: 'file', accept, multiple: true, hidden: true }), st = h('span', { class: 'nm' });
+      const mb = h('button', { type: 'button', class: 'btn small' }, '＋ 加內文照片（還可以放 ' + free + ' 張）');
+      mb.addEventListener('click', () => { if (S.trial) return askLoginToKeep('上傳照片'); mf.click(); });
+      mf.addEventListener('change', async () => {
+        const files = [...mf.files].slice(0, free); mf.value = ''; if (!files.length) return;
+        mb.disabled = true;
+        for (let k = 0; k < files.length; k++) {
+          st.textContent = '上傳中 ' + (k + 1) + '/' + files.length + '…';
+          const sl = { label: '文章照片', set: (v) => { if (v) { p.photos = p.photos || []; p.photos.push(v); } } };
+          try { await uploadPhotoQuick(sl, files[k]); } catch (e) { st.textContent = String(e.message || e); }
+        }
+        paintPosts();
+      });
+      addPh = h('div', { style: 'display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px' }, mb, st, mf);
+    }
+    box.append(h('div', { class: 'faq-item' }, h('div', { class: 'rowN' }, d, t), cover, bar, b, cnt,
+      h('div', { class: 'msg mute', text: '格式：**粗體**、開頭打「## 」是小標題、「- 」是清單、「1. 」是編號；[照片1] 放在單獨一行就會顯示那張照片，沒插入的照片會放在文章最後。' }),
+      h('div', { style: 'margin-top:8px' }, h('strong', { text: '內文照片（最多 ' + L.LIMITS.postPhotos + ' 張）' }), pbox, addPh),
       h('div', { class: 'msg mute', text: '網址：/posts/' + p.id + '/' }),
       h('div', { style: 'text-align:right' }, iconBtn('刪除這篇', () => { if (confirm('確定刪除這篇文章？')) { S.content.posts.splice(i, 1); paintPosts(); touch(); } }, 'danger'))));
   });
   $('#postAdd').disabled = S.content.posts.length >= L.LIMITS.posts; $('#postCnt').textContent = S.content.posts.length + '/' + L.LIMITS.posts;
+}
+// 作品集：分類管理、一次上傳多張、每張可寫說明、換分類、調整順序
+const rid = () => Math.random().toString(36).slice(2, 10).replace(/[^a-z0-9]/g, 'x').padEnd(8, '0');
+function paintWorks() {
+  const L = S.lib, box = $('#worksBox'); if (!box) return;
+  const W = S.content.works || (S.content.works = { albums: [], items: [] });
+  W.albums = W.albums || []; W.items = W.items || [];
+  if (S.worksView && S.worksView !== '-' && !W.albums.some((a) => a.id === S.worksView)) S.worksView = '';
+  box.replaceChildren();
+  // 分類
+  const alb = h('div', { class: 'wk-albums' });
+  W.albums.forEach((a) => {
+    const n = h('input', { type: 'text', maxlength: String(L.LIMITS.albumName), placeholder: '分類名稱', 'aria-label': '分類名稱' });
+    tx(n, a, 'name', () => { const sel = box.querySelectorAll('select.wk-alb-sel option[value="' + a.id + '"]'); sel.forEach((o) => { o.textContent = a.name || '（未命名）'; }); });
+    alb.append(h('span', { class: 'wk-alb' }, n, iconBtn('刪除', () => {
+      const n2 = W.items.filter((w) => w.album === a.id).length;
+      if (n2 && !confirm('刪除「' + (a.name || '這個分類') + '」？裡面的 ' + n2 + ' 張照片會移到「未分類」，照片不會刪掉。')) return;
+      W.items.forEach((w) => { if (w.album === a.id) w.album = ''; });
+      W.albums = W.albums.filter((x) => x !== a); touch(); paintWorks();
+    }, 'danger')));
+  });
+  const addA = h('button', { type: 'button', class: 'btn small' }, '＋ 新增分類');
+  addA.disabled = W.albums.length >= L.LIMITS.albums;
+  addA.addEventListener('click', () => { W.albums.push({ id: rid(), name: '' }); touch(); paintWorks(); const ins = box.querySelectorAll('.wk-alb input'); if (ins.length) ins[ins.length - 1].focus(); });
+  box.append(h('div', { class: 'msg mute', text: '分類（選填，最多 ' + L.LIMITS.albums + ' 個）：沒分類的照片都會出現在「全部」。' }), alb, addA);
+  // 上傳
+  const albSel = (val) => { const sel = h('select', { class: 'wk-alb-sel' }); [['', '未分類']].concat(W.albums.map((a) => [a.id, a.name || '（未命名）'])).forEach(([v, t]) => { const o = h('option', { value: v }, t); if (v === val) o.selected = true; sel.append(o); }); return sel; };
+  const free = L.LIMITS.works - W.items.length;
+  const upAlb = albSel(S.worksUpAlbum && W.albums.some((a) => a.id === S.worksUpAlbum) ? S.worksUpAlbum : '');
+  upAlb.setAttribute('aria-label', '上傳到哪個分類');
+  upAlb.addEventListener('change', () => { S.worksUpAlbum = upAlb.value; });
+  const st = h('div', { class: 'nm' });
+  const accept = 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif';
+  const many = h('input', { type: 'file', accept, multiple: true, hidden: true }), cam = h('input', { type: 'file', accept: 'image/*', capture: 'environment', hidden: true });
+  const bm = h('button', { type: 'button', class: 'btn small primary' }, free > 0 ? '一次選多張作品照片（還可以放 ' + free + ' 張）' : '已經放滿 ' + L.LIMITS.works + ' 張');
+  const bc = h('button', { type: 'button', class: 'btn small mob-only' }, '拍照');
+  bm.disabled = bc.disabled = free <= 0;
+  const pick = (inp) => { if (S.trial) return askLoginToKeep('上傳作品照片'); inp.click(); };
+  bm.addEventListener('click', () => pick(many)); bc.addEventListener('click', () => pick(cam));
+  const run = async (files) => {
+    files = [...files].slice(0, L.LIMITS.works - W.items.length); if (!files.length) return;
+    bm.disabled = bc.disabled = true;
+    let ok = 0; const album = upAlb.value;
+    for (let i = 0; i < files.length; i++) {
+      st.textContent = '上傳中 ' + (i + 1) + '/' + files.length + '…（可以繼續編輯其他地方）';
+      const sl = { label: '作品照片', set: (v) => { if (v) W.items.push({ id: rid(), photo: v, album }); } };
+      try { await uploadPhotoQuick(sl, files[i]); ok++; } catch (e) { st.textContent = String(e.message || e); }
+    }
+    paintWorks(); scrollPreviewTo('works');
+    toast(ok ? '已上傳 ' + ok + ' 張作品照片' : '沒有上傳成功', 2600);
+  };
+  many.addEventListener('change', () => { const f = many.files; run(f).finally(() => { many.value = ''; }); });
+  cam.addEventListener('change', () => { const f = cam.files; run(f).finally(() => { cam.value = ''; }); });
+  box.append(h('div', { class: 'wk-up' }, h('label', { class: 'msg mute' }, '上傳到：'), upAlb, bm, bc, many, cam), st);
+  if (!W.items.length) { box.append(h('p', { class: 'msg mute', text: '還沒有作品照片。' })); return; }
+  // 檢視篩選
+  const view = S.worksView || '';
+  const vsel = h('select', { 'aria-label': '只看某個分類' });
+  [['', '全部（' + W.items.length + '）'], ['-', '未分類（' + W.items.filter((w) => !w.album).length + '）']].concat(W.albums.map((a) => [a.id, (a.name || '（未命名）') + '（' + W.items.filter((w) => w.album === a.id).length + '）'])).forEach(([v, t]) => { const o = h('option', { value: v }, t); if (v === view) o.selected = true; vsel.append(o); });
+  vsel.addEventListener('change', () => { S.worksView = vsel.value; paintWorks(); });
+  box.append(h('div', { class: 'wk-view' }, h('span', { class: 'msg mute', text: '顯示：' }), vsel, h('span', { class: 'msg mute', text: '排在前面的 8 張會出現在首頁輪播。' })));
+  const grid = h('div', { class: 'wk-ed-grid' });
+  W.items.forEach((w, i) => {
+    if (view === '-' ? w.album : view && w.album !== view) return;
+    const cap = h('input', { type: 'text', maxlength: String(L.LIMITS.workCap), placeholder: '說明（選填）', 'aria-label': '作品 ' + (i + 1) + ' 說明' });
+    tx(cap, w, 'cap');
+    const sel = albSel(w.album); sel.setAttribute('aria-label', '作品 ' + (i + 1) + ' 分類');
+    sel.addEventListener('change', () => { w.album = sel.value; touch(); if (view) paintWorks(); });
+    const mv = (d) => { const j = i + d; if (j < 0 || j >= W.items.length) return; [W.items[i], W.items[j]] = [W.items[j], W.items[i]]; touch(); paintWorks(); };
+    grid.append(h('div', { class: 'wk-ed' },
+      h('div', { class: 'wk-th' }, h('img', { src: photoUrl(w.photo.path), alt: '作品 ' + (i + 1), loading: 'lazy', decoding: 'async' }), h('span', { class: 'wk-no', text: String(i + 1) })),
+      cap, sel,
+      h('div', { class: 'wk-btns' }, iconBtn('←', () => mv(-1)), iconBtn('→', () => mv(1)),
+        iconBtn('刪除', async () => { const old = w.photo.path; W.items.splice(i, 1); touch(); await trashPhoto(old); paintWorks(); }, 'danger'))));
+  });
+  box.append(grid);
 }
 function orderLabel(k) {
   const I = IND();
@@ -2228,7 +2374,7 @@ async function publish() {
     if (PM && PM.planFor) {
       const lock = S.site.price_lock;
       const P = PM.planFor(S.layout, lock);
-      const pages = isMulti() ? S.pageList.filter((p) => p.key !== 'home').map((p) => p.label).join('、') : '';
+      const pages = isMulti() ? S.pageList.filter((p) => p.key !== 'home' && p.key !== 'works').map((p) => p.label).join('、') : '';
       const box = (...kids) => h('div', { style: 'margin:12px 0 0;padding:12px 14px;border:1px solid var(--line,#3a342c);border-radius:10px;font-size:14px;line-height:1.7' }, ...kids);
       const pay = h('div', { style: 'color:var(--muted,#9a8f80)', text: '送出後請到會員專區付款，付款確認後網站就會開通。' });
       if (PM.hasPrice(P)) {
