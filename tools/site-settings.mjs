@@ -8,7 +8,7 @@ export const DEFAULTS = {
   prices: { single_month: 700, single_year: 7000, multi_month: 1000, multi_year: 10000, pro_month: 400, pro_year: 4000 },
   early: { enabled: true, single_month: 599, single_year: 5990, multi_month: 899, multi_year: 8990, deadline: '2027-02-03T23:59:00+08:00', quota: null },
   bar: { enabled: true, follow_early: true, text: '中小企業月租網站早鳥價 {早鳥價}／月，至 {截止日}', text_mobile: '早鳥價 {早鳥價}／月', button: '看方案 →', link: '/rental/', start: null, end: null, dismiss_days: 7 },
-  display: { hide_prices: false, hide_contact: false },
+  display: { hide_prices: false, hide_contact: false, hide_contact_privacy: false },
   card: { enabled: true, follow_early: true, title: '早鳥價 {早鳥價}／月', body: '中小企業專屬月租網站，自己填內容就能上線', b1_text: '看方案', b1_link: '/rental/', b2_text: 'LINE 詢問', b2_link: 'https://line.me/R/ti/p/%40788cblaq', scroll_pct: 40, delay_sec: 10, pages: ['/', '/rental/', '/services/', '/pricing/', '/articles/*'], dismiss_days: 7, start: null, end: null }
 };
 
@@ -170,7 +170,11 @@ export function hidePriceText(text, en) {
 // 開啟時，建置官網會隱藏所有聯絡管道：選單「免費諮詢」、右側 LINE／IG／Threads 浮動按鈕、各頁「加 LINE」按鈕與諮詢區塊、
 // 頁尾與內文的聯絡連結、聯絡頁的表單與聯絡資訊，並從結構化資料與 llms.txt 拿掉 Email、LINE、IG、Threads。
 // 隱私權政策與條款（法規需要的聯絡窗口）、編輯器、會員專區、後台不處理。
-export const CONTACT_EXEMPT = /^(en\/)?(privacy|terms|builder|dashboard|admin|demo|rental\/styles)\//;
+export const CONTACT_EXEMPT = /^(en\/)?(builder|dashboard|admin|demo|rental\/styles)\//;
+// 隱私權政策與條款：只關掉選單、浮動按鈕、頁尾等站務元件；政策內文的聯絡方式另由「隱私權政策的聯絡方式也關閉」控制
+export const CONTACT_LEGAL = /^(en\/)?(privacy|terms)\//;
+export const privacyContactHidden = (s) => { const d = normalize(s).display; return !!(d.hide_contact && d.hide_contact_privacy); };
+const CHROME_CSS = '<style id="yc-no-contact">.nav-cta,.mobile-cta,.mobile-social-a,.line-float,.social-float,.footer-status,.tab-line,.footer-nav a[href*="/contact"]{display:none!important}</style>';
 export const contactHidden = (s) => !!normalize(s).display.hide_contact;
 const CONTACT_A = 'a[href*="line.me"],a[href^="mailto:"],a[href^="tel:"],a[href*="instagram.com"],a[href*="threads.com"],a[href*="threads.net"],a[href*="/contact/"]:not(.lang-toggle),a[href$="/contact"]:not(.lang-toggle)';
 const CONTACT_CSS = '<style id="yc-no-contact">.nav-cta,.mobile-cta,.line-float,.social-float,.contact-grid,.footer-status,.seo-cta,.geo-cta,#cta.cta,' + CONTACT_A +
@@ -188,7 +192,17 @@ function stripLd(o) {
   }
   return r;
 }
-export function hideContactHtml(html, en) {
+export function hideContactHtml(html, en, mode, privacyToo) {
+  if (mode === 'legal') {
+    let t = String(html);
+    if (/<\/head>/i.test(t) && !t.includes('id="yc-no-contact"')) t = t.replace(/<\/head>/i, CHROME_CSS + '\n</head>');
+    if (privacyToo) {
+      t = t.replace(/<li>(?:(?!<\/li>)[\s\S])*?(mailto:|line\.me)(?:(?!<\/li>)[\s\S])*?<\/li>/g, '')
+        .replace(/<p>(?:(?!<\/p>)[\s\S])*?(mailto:|line\.me)(?:(?!<\/p>)[\s\S])*?<\/p>/g, '<p>' + (en ? 'Our contact channels are paused for now. They will be listed here again once they reopen.' : '目前暫停開放聯絡管道，恢復後會在這裡公布。') + '</p>')
+        .replace(/(<script type="application\/ld\+json">)([\s\S]*?)(<\/script>)/g, (m, a, b, c) => { try { return a + JSON.stringify(stripLd(JSON.parse(b)), null, 2) + c; } catch (e) { return m; } });
+    }
+    return t;
+  }
   let s = String(html).replace(/(<script type="application\/ld\+json">)([\s\S]*?)(<\/script>)/g, (m, a, b, c) => {
     try { return a + JSON.stringify(stripLd(JSON.parse(b)), null, 2) + c; } catch (e) { return m; }
   });
