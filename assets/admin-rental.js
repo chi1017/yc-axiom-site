@@ -51,14 +51,15 @@
     el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('show'); }, 4200);
   }
   // ── 個別功能開關（沒設定的照方案：進階功能只有進階方案有，一般功能預設開啟）──
-  var FEATURES = [['booking', '預約行事曆', true], ['code', '自訂程式碼與嵌入', true], ['team', '多人共同編輯', true], ['shop', '線上購買', false], ['works', '作品集', false], ['posts', '文章', false], ['en', '英文版', false]];
+  var FEATURES = [['booking', '預約行事曆', true], ['code', '自訂程式碼與嵌入', true], ['team', '多人共同編輯', true], ['shop', '線上購買', false], ['works', '作品集', false], ['posts', '文章', false], ['en', '英文版', false],
+    ['menu', '價目／菜單', false], ['interior', '環境照片', false], ['news', '最新消息', false], ['faq', '常見問題', false], ['video', '影片', false], ['reviews', '客人評價', false], ['blocks', '自訂區塊', false], ['bookingForm', '預約表單', false], ['contactForm', '聯絡表單', false], ['map', '地圖', false]];
   function flagText(f) { var t = FEATURES.filter(function (x) { return f[x[0]] === true || f[x[0]] === false; }).map(function (x) { return x[1] + (f[x[0]] ? '開' : '關'); }); return t.length ? t.join('、') : '全部照方案'; }
   function featuresHtml(r, flags) {
     var pro = r.tier === 'pro';
     return '<h3 class="rn-h" id="rn-feat-h">功能開關</h3><p class="rn-note">沒特別設定的功能照方案：進階功能只有進階方案有，一般功能預設開啟。可以單獨送某個客戶進階功能，或關掉不需要的功能。儲存後上線中的網站會重新部署。</p>' +
-      '<table class="rn-feat"><thead><tr><th>功能</th><th>方案預設</th><th>這個網站</th></tr></thead><tbody>' + FEATURES.map(function (x) {
+      '<table class="rn-feat"><thead><tr><th>功能</th><th>方案預設</th><th>這個網站</th></tr></thead><tbody>' + FEATURES.map(function (x, i) {
         var def = x[2] ? pro : true, v = flags[x[0]] === true ? 'on' : flags[x[0]] === false ? 'off' : '';
-        return '<tr><td>' + esc(x[1]) + (x[2] ? ' <span class="rn-sub" style="display:inline">進階</span>' : '') + '</td><td class="' + (def ? 'rn-ok' : 'rn-dim') + '">' + (def ? '開' : '關') + '</td>' +
+        return (i === 0 ? '<tr><td colspan="3" class="rn-sub" style="padding-top:10px">進階功能</td></tr>' : i === 3 ? '<tr><td colspan="3" class="rn-sub" style="padding-top:14px">網站內容與功能</td></tr>' : '') + '<tr><td>' + esc(x[1]) + (x[2] ? ' <span class="rn-sub" style="display:inline">進階</span>' : '') + '</td><td class="' + (def ? 'rn-ok' : 'rn-dim') + '">' + (def ? '開' : '關') + '</td>' +
           '<td><select data-feat="' + x[0] + '" aria-label="' + esc(x[1]) + '"><option value=""' + (v === '' ? ' selected' : '') + '>照方案（' + (def ? '開' : '關') + '）</option><option value="on"' + (v === 'on' ? ' selected' : '') + '>開啟</option><option value="off"' + (v === 'off' ? ' selected' : '') + '>關閉</option></select></td></tr>';
       }).join('') + '</tbody></table><p style="margin:10px 0 0"><button class="m-btn sm primary" id="rn-featsave">儲存功能設定</button> <span class="rn-sub" id="rn-featout" style="display:inline"></span></p>';
   }

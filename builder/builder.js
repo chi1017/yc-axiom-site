@@ -391,7 +391,7 @@ function renderPreview(now) {
     const L = S.lib;
     let r;
     try {
-      const args = () => ({ template: S.site.template, content: S.lib.code && S.lib.code.stripOff ? S.lib.code.stripOff(S.content, S.site.tier, S.flags || {}) : S.content, palette: S.palette, sections: S.sections, layout: S.layout, pages: S.pages, page: S.page,
+      const args = () => ({ template: S.site.template, content: S.lib.code && S.lib.code.stripOff ? S.lib.code.stripOff(S.content, S.site.tier, S.flags || {}) : S.content, palette: S.palette, ...effLayout(), layout: S.layout, page: S.page,
         siteUrl: 'https://' + (S.slug || 'your-shop') + '.pages.dev/', preview: true, imageSrc: (role, p) => photoUrl(p.path), lang: EN_MODE() ? 'en' : '',
         ...previewFont() });
       r = L.buildSite(args());
@@ -541,8 +541,10 @@ function paintFontBox() {
 const proAdd = () => (S.plan && S.plan.proFor && S.site ? S.plan.proFor(S.site.price_lock).monthly : 400);
 const proTitle = () => (S.isPro ? '（進階功能）' : '（進階功能・每月加 NT$' + Number(proAdd()).toLocaleString('en-US') + '）');
 const PRO_CARDS = ['c-cal', 'c-code'];
-const CARD_FEATURE = { 'c-cal': 'booking', 'c-code': 'code', 'c-shop': 'shop', 'c-works': 'works', 'c-posts': 'posts', 'c-en': 'en' };
+const CARD_FEATURE = { 'c-cal': 'booking', 'c-code': 'code', 'c-shop': 'shop', 'c-works': 'works', 'c-posts': 'posts', 'c-en': 'en', 'c-menu': 'menu', 'c-news': 'news', 'c-faq': 'faq', 'c-blocks': 'blocks' };
 // 功能是否開放：照方案，管理員可以在後台個別開啟或關閉（site_events 的 features_set）
+// 預覽也套用功能開關的區塊／頁面（被關掉的功能不出現）
+const effLayout = () => (S.lib.code && S.lib.code.effectiveLayout && S.site ? S.lib.code.effectiveLayout({ sections: S.sections, pages: S.pages }, S.site.tier, S.flags || {}) : { sections: S.sections, pages: S.pages });
 const featOn = (k) => S.lib && S.lib.code && S.lib.code.featureOn ? S.lib.code.featureOn(k, S.site && S.site.tier, S.flags) : (S.isPro || !['booking', 'code', 'team'].includes(k));
 async function loadFlags(site) {
   try {
