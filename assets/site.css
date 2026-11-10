@@ -1192,7 +1192,8 @@ nav { background: rgba(11, 10, 9, 0.9); }
     .rh-svc-name { grid-column: 1; font-size: 23px; }
     .rh-svc-desc { grid-column: 1; grid-row: 2; font-size: 15px; }
     .rh-svc-arrow { grid-column: 2; grid-row: 1 / span 2; }
-    .rh-cap { font-size: 12px; padding: 4px 10px; left: 10px; bottom: 9px; }
+    .rh-cap { font-size: 12px; padding: 4px 10px; left: 10px; bottom: 9px; max-width: calc(100% - 20px); }
+    .rh-cap b { display: block; margin-right: 0; }
 }
 
 /* Light theme keeps the same warmth */
