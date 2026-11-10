@@ -700,6 +700,8 @@ async function save() {
   if (r.error) {
     S.saveErr = true; setSaveText(); console.warn('save', r.error);
     if (/duplicate|unique/i.test(r.error.message)) { S.slugState = { ok: false, msg: '這個名稱剛被使用了' }; paintSlug(); }
+    // 資料庫限制網站文字內容約 100KB：超過時提示縮短，不要一直重試
+    if (r.error.code === '23514' || /check constraint/i.test(r.error.message)) { toast('網站文字太多，存不下來：請縮短或刪掉幾篇文章（照片數量不受影響）', 9000); paintCap(); return false; }
     S.timers.save = setTimeout(save, 5000);
     return false;
   }
@@ -1068,7 +1070,7 @@ function buildPanel() {
     h('div', { id: 'worksBox' })));
   // 文章：每篇一個網頁（posts/<代碼>/），代碼建立時產生、之後不變
   P.append(card('c-posts', 'posts', '文章', '最多 ' + L.LIMITS.posts + ' 篇。寫店裡的故事、新品、活動或常見問題的完整說明，每篇都會有自己的網頁，容易被搜尋與 AI 找到。可以放封面、內文照片，用工具列加粗體、小標題與清單。',
-    h('div', { id: 'postBox' }), h('button', { type: 'button', class: 'btn small', id: 'postAdd' }, '＋ 新增文章'), h('span', { id: 'postCnt', class: 'msg mute', style: 'margin-left:10px' })));
+    h('div', { id: 'postBox' }), h('button', { type: 'button', class: 'btn small', id: 'postAdd' }, '＋ 新增文章'), h('span', { id: 'postCnt', class: 'msg mute', style: 'margin-left:10px' }), h('div', { id: 'postCap', class: 'msg mute', style: 'margin-top:8px' })));
   $('#postAdd').onclick = () => {
     if (S.content.posts.length >= L.LIMITS.posts) return;
     const d = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
@@ -1516,7 +1518,7 @@ function paintPosts() {
     const b = h('textarea', { maxlength: String(L.LIMITS.postBody), rows: '10', placeholder: '文章內容（空一行就是新段落）', 'aria-label': '文章內容 ' + (i + 1) });
     const cnt = h('div', { class: 'msg mute', style: 'text-align:right' });
     d.value = p.date;
-    const upd = () => { cnt.textContent = [...b.value].length + '/' + b.maxLength; };
+    const upd = () => { cnt.textContent = [...b.value].length + '/' + b.maxLength; clearTimeout(S.capT); S.capT = setTimeout(paintCap, 400); };
     tx(t, p, 'title'); d.addEventListener('input', () => { p.date = d.value; touch(); });
     tx(b, p, 'body', upd); upd();
     // 工具列
@@ -1568,6 +1570,16 @@ function paintPosts() {
       h('div', { style: 'text-align:right' }, iconBtn('刪除這篇', () => { if (confirm('確定刪除這篇文章？')) { S.content.posts.splice(i, 1); paintPosts(); touch(); } }, 'danger'))));
   });
   $('#postAdd').disabled = S.content.posts.length >= L.LIMITS.posts; $('#postCnt').textContent = S.content.posts.length + '/' + L.LIMITS.posts;
+  paintCap();
+}
+// 網站文字容量（資料庫上限約 100KB，文章最佔空間）：超過 80% 提醒
+const CAP_BYTES = 100000;
+function paintCap() {
+  const el = $('#postCap'); if (!el) return;
+  let n = 0; try { n = new TextEncoder().encode(JSON.stringify(S.content)).length; } catch (e) { return; }
+  const pct = Math.min(100, Math.round(n / CAP_BYTES * 100));
+  el.textContent = '網站文字容量：已用 ' + pct + '%' + (pct >= 95 ? '，快滿了，請縮短文章，否則會存不下來' : pct >= 80 ? '，文章再多可能會存不下來' : '');
+  el.className = 'msg ' + (pct >= 95 ? 'bad' : pct >= 80 ? 'warn' : 'mute');
 }
 // 作品集：分類管理、一次上傳多張、每張可寫說明、換分類、調整順序
 const rid = () => Math.random().toString(36).slice(2, 10).replace(/[^a-z0-9]/g, 'x').padEnd(8, '0');
