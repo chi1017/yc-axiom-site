@@ -1,7 +1,7 @@
 /* 管理後台「價格與活動」分頁：方案價格、早鳥活動、頂部公告列、滑出卡片。
    儲存：資料庫函式 save_site_settings（資料庫層只允許管理員）；發布：Edge Function site-settings 觸發 GitHub Actions 重新建置官網。
    預覽：用建置時留下的 /admin/preview-src/ 範本，套用表單裡的設定，顯示公告列與卡片。 */
-import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money } from '../tools/site-settings.mjs';
+import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText } from '../tools/site-settings.mjs?v=2026-11-10a';
 
 const YC = window.YC;
 const box = document.getElementById('adm-prices');
@@ -58,6 +58,10 @@ function init() {
   function formHtml() {
     const f = st.form;
     return `
+<section class="ps-sec" aria-labelledby="ps-h0"><h3 id="ps-h0">官網價錢顯示</h3>
+  ${chk('display', 'hide_prices', '隱藏官網所有價錢')}
+  <p class="ps-hint">打開後，官網所有頁面（首頁、網站租用、價格、服務、關於、文章，含英文版）的價錢都會換成「價格請洽詢」，頂部公告列與滑出卡片也不顯示。服務條款、編輯器、會員專區的價格與實際收費不變。按「儲存並發布」後約 2–3 分鐘生效；關掉再發布一次就恢復。</p>
+</section>
 <section class="ps-sec" aria-labelledby="ps-h1"><h3 id="ps-h1">方案價格（一般價格）</h3>
   <div class="ps-row">${num('prices', 'single_month', '一頁版月租')}${num('prices', 'single_year', '一頁版年繳')}${num('prices', 'multi_month', '多頁版月租')}${num('prices', 'multi_year', '多頁版年繳')}</div>
   <div class="ps-row">${num('prices', 'pro_month', '進階功能月加購')}${num('prices', 'pro_year', '進階功能年加購')}</div>
@@ -155,6 +159,7 @@ function init() {
     return `<div class="ps-status" role="status">
   <span>早鳥：<b class="${eff.early ? 'rn-ok' : 'rn-dim'}">${eff.early ? '進行中' : '已結束'}</b>${eff.early ? '，距離截止還有 <b>' + Math.max(0, days) + '</b> 天（' + esc(eff.until) + '）' : ''}</span>
   <span>新客人價格：一頁版 <b>${money(eff.single.month)}</b>／月、多頁版 <b>${money(eff.multi.month)}</b>／月</span>
+  ${normalize(r.data).display.hide_prices ? '<span>官網價錢：<b class="rn-warn">隱藏中</b></span>' : ''}
   <span>公告列：<b>${pr.bar.show ? '顯示' : '不顯示'}</b>　卡片：<b>${pr.card.show ? '顯示' : '不顯示'}</b></span>
   <span>設定版本：<b>第 ${r.version} 版</b>（${esc(fmtDT(r.updated_at))}，${esc(r.updated_by || '')}）</span>
   <span>最後發布：<b>${esc(fmtDT(r.published_at))}</b>${r.published_by ? '（' + esc(r.published_by) + '）' : ''}</span>
@@ -166,7 +171,7 @@ function init() {
     if (!st.hist.length) return '<p class="rn-note">還沒有修改紀錄。</p>';
     return '<ul class="ps-hist">' + st.hist.map((h) => {
       const n = normalize(h.data);
-      const sum = '一般 ' + money(n.prices.single_month) + '／' + money(n.prices.multi_month) + '；早鳥' + (n.early.enabled ? ' ' + money(n.early.single_month) + '／' + money(n.early.multi_month) + '，至 ' + taipeiDate(n.early.deadline) : '關閉') + '；公告列' + (n.bar.enabled ? '開' : '關') + '、卡片' + (n.card.enabled ? '開' : '關');
+      const sum = '一般 ' + money(n.prices.single_month) + '／' + money(n.prices.multi_month) + '；早鳥' + (n.early.enabled ? ' ' + money(n.early.single_month) + '／' + money(n.early.multi_month) + '，至 ' + taipeiDate(n.early.deadline) : '關閉') + '；公告列' + (n.bar.enabled ? '開' : '關') + '、卡片' + (n.card.enabled ? '開' : '關') + (n.display.hide_prices ? '；價錢隱藏' : '');
       const cur = h.version === st.row.version;
       return `<li><span><b>第 ${h.version} 版</b>　${esc(fmtDT(h.changed_at))}　${esc(h.changed_by || '')}${h.note ? '　「' + esc(h.note) + '」' : ''}<div class="rn-sub">${esc(sum)}</div></span>${cur ? '<span class="rn-dim">目前版本</span>' : `<button type="button" class="m-btn" data-restore="${h.id}" data-ver="${h.version}">還原到這一版</button>`}</li>`;
     }).join('') + '</ul>';
@@ -188,6 +193,7 @@ function init() {
       }
       const eff = effective(f, now, st.used), pr = promo(f, eff, now), path = PREVIEW_PATH[st.page];
       html = render(srcCache[st.page], tokens(f, eff));
+      if (f.display && f.display.hide_prices) html = hidePriceText(html, false);
       html = html.replace('id="page-loader"', 'id="page-loader-off" hidden').replace(/<script[^>]*googletagmanager[\s\S]*?<\/script>/gi, '').replace(/<script>\s*window\.dataLayer[\s\S]*?<\/script>/gi, '');
       const base = `<base href="${location.origin}${path}">`;
       const pv = `<script>window.YC_PROMO_PREVIEW=${JSON.stringify({ path, cfg: { card: pr.card } }).replace(/</g, '\\u003c')};</script>`;
@@ -195,6 +201,7 @@ function init() {
       html = html.replace(/<head([^>]*)>/i, (m) => m + base + pv);
       if (pr.bar.show) html = html.replace(/<\/head>/i, barHead(pr.bar) + force + '</head>').replace(/<body([^>]*)>/i, (m) => m + barBody(pr.bar));
       const why = [];
+      if (f.display && f.display.hide_prices) why.push('官網價錢隱藏中');
       why.push(eff.early ? '早鳥進行中（至 ' + eff.until + '）' : '早鳥未進行，只顯示一般價格');
       why.push(pr.bar.show ? '公告列顯示' : '公告列不顯示');
       why.push(!pr.card.show ? '卡片不顯示' : cardAllowed(pr.card.pages, path) ? '卡片顯示（預覽中立即滑出，正式網站依捲動或停留時間）' : '卡片在這一頁不顯示');

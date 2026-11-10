@@ -8,6 +8,7 @@ export const DEFAULTS = {
   prices: { single_month: 700, single_year: 7000, multi_month: 1000, multi_year: 10000, pro_month: 400, pro_year: 4000 },
   early: { enabled: true, single_month: 599, single_year: 5990, multi_month: 899, multi_year: 8990, deadline: '2027-02-03T23:59:00+08:00', quota: null },
   bar: { enabled: true, follow_early: true, text: '中小企業月租網站早鳥價 {早鳥價}／月，至 {截止日}', text_mobile: '早鳥價 {早鳥價}／月', button: '看方案 →', link: '/rental/', start: null, end: null, dismiss_days: 7 },
+  display: { hide_prices: false },
   card: { enabled: true, follow_early: true, title: '早鳥價 {早鳥價}／月', body: '中小企業專屬月租網站，自己填內容就能上線', b1_text: '看方案', b1_link: '/rental/', b2_text: 'LINE 詢問', b2_link: 'https://line.me/R/ti/p/%40788cblaq', scroll_pct: 40, delay_sec: 10, pages: ['/', '/rental/', '/services/', '/pricing/', '/articles/*'], dismiss_days: 7, start: null, end: null }
 };
 
@@ -32,7 +33,8 @@ export function normalize(s) {
     prices: { ...DEFAULTS.prices, ...(o.prices || {}) },
     early: { ...DEFAULTS.early, ...(o.early || {}) },
     bar: { ...DEFAULTS.bar, ...(o.bar || {}) },
-    card: { ...DEFAULTS.card, ...(o.card || {}), pages: Array.isArray(o.card && o.card.pages) ? o.card.pages : DEFAULTS.card.pages }
+    card: { ...DEFAULTS.card, ...(o.card || {}), pages: Array.isArray(o.card && o.card.pages) ? o.card.pages : DEFAULTS.card.pages },
+    display: { ...DEFAULTS.display, ...(o.display || {}) }
   };
 }
 
@@ -139,12 +141,38 @@ export function promoVars(s, eff) {
   const n = normalize(s);
   return { '{早鳥價}': money(n.early.single_month), '{多頁早鳥價}': money(n.early.multi_month), '{截止日}': taipeiDate(n.early.deadline), '{一頁版價}': money(eff.single.month), '{多頁版價}': money(eff.multi.month) };
 }
+// ── 隱藏所有價錢（後台開關）──
+// 開啟時，建置官網會把頁面上的價格（含後台設定的租用價格與頁面寫死的客製報價）換成「價格請洽詢」，
+// 並拿掉結構化資料裡的價格。條款、編輯器、會員專區、後台與範例頁不處理（付款與條款仍需要實際價格）。
+export const PRICE_NOTE = '價格請洽詢';
+export const PRICE_NOTE_EN = 'Price on request';
+export const HIDE_EXEMPT = /^(en\/)?(terms|builder|dashboard|admin|demo|showcase|rental\/styles|tools\/website-check|learn\/ai-friendly-content)\//;
+export const pricesHidden = (s) => !!normalize(s).display.hide_prices;
+const AMT = 'NT\\$\\s?\\d[\\d,]*(?:\\s*[–\\-~]\\s*(?:NT\\$\\s?)?\\d[\\d,]*)?\\+?';
+const ZH_RE = new RegExp('(?:(?:從|約)\\s*)?(?:一次付 ?12 ?個月(?:只收 ?\\d+ ?個月|加)?[，,]?\\s*)?(?:早鳥價\\s*)?(?:每月加?\\s*)?' + AMT + '(?:\\s*起)?(?:\\s*[／/]\\s*[月年])?(?:\\s*起)?', 'g');
+const EN_RE = new RegExp('(?:pay 12 months up front(?: for the price of \\d+)?,?\\s*)?(?:(?:from|starting at|starts? at|about|around|add|for)(?:\\s|&nbsp;)+)?(?:early-bird\\s+)?\\+?' + AMT + '(?:\\s*\\/\\s*(?:month|year|mo|yr))?(?:\\s+(?:a|per)\\s+(?:month|year))?', 'gi');
+export function hidePriceText(text, en) {
+  const N = en ? PRICE_NOTE_EN : PRICE_NOTE;
+  let t = String(text)
+    // 結構化資料：拿掉非 0 的價格（免費工具的 0 元保留）
+    .replace(/"price":\s*"[1-9]\d*",\s*"priceCurrency":\s*"TWD",?\s*/g, '')
+    .replace(en ? EN_RE : ZH_RE, N);
+  const q = N.replace(/[$]/g, '');
+  const until = en ? new RegExp('(' + q + '(?:</strong>)?)\\s*\\(until [\\d/]+\\)', 'g') : new RegExp('(' + q + '(?:</strong>)?)\\s*（至\\s*[\\d/]+）', 'g');
+  const dup1 = en ? new RegExp(q + '\\s*\\((?:or\\s*)?' + q + '[^)]*\\)', 'g') : new RegExp(q + '[；，、\\s]{0,3}（' + q + '）', 'g');
+  const dup2 = new RegExp(q + '([；;，,、\\s]{1,3}|\\s*and\\s*)' + q, 'g');
+  for (let i = 0; i < 3; i++) t = t.replace(until, '$1').replace(dup1, N).replace(dup2, N);
+  if (!en) t = t.replace(/價格請洽詢的/g, '');   // 「另有每月 NT$499 起的網站租用」→「另有網站租用」
+  return t;
+}
+
 const fill = (t, v) => String(t || '').replace(/\{[^{}]+\}/g, (m) => (m in v ? v[m] : m));
 
 // 建置時寫成 assets/site-promo.json 的內容；前端顯示前再檢查一次開始與結束時間
 export function promo(s, eff, now = new Date()) {
   const n = normalize(s), v = promoVars(n, eff);
-  const live = (x) => !!x.enabled && (!x.follow_early || eff.early) && !(x.end && now.getTime() > ms(x.end));
+  // 隱藏價錢時，公告列與卡片（內容多半是價格）一併不顯示
+  const live = (x) => !n.display.hide_prices && !!x.enabled && (!x.follow_early || eff.early) && !(x.end && now.getTime() > ms(x.end));
   const id = (x) => { const k = JSON.stringify(x); let h = 5381; for (let i = 0; i < k.length; i++) h = (Math.imul(h, 33) ^ k.charCodeAt(i)) >>> 0; return h.toString(36); };
   const bar = { show: live(n.bar), text: fill(n.bar.text, v), text_mobile: fill(n.bar.text_mobile || n.bar.text, v), button: fill(n.bar.button, v), link: n.bar.link || '', start: n.bar.start || null, end: n.bar.end || null, dismiss_days: Number(n.bar.dismiss_days) || 0 };
   const card = { show: live(n.card), title: fill(n.card.title, v), body: fill(n.card.body, v), b1_text: fill(n.card.b1_text, v), b1_link: n.card.b1_link || '', b2_text: fill(n.card.b2_text, v), b2_link: n.card.b2_link || '', scroll_pct: Number(n.card.scroll_pct) || 0, delay_sec: Number(n.card.delay_sec) || 0, pages: n.card.pages, start: n.card.start || null, end: n.card.end || null, dismiss_days: Number(n.card.dismiss_days) || 0 };
