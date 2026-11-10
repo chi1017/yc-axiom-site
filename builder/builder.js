@@ -1958,6 +1958,7 @@ function paintPhotos() {
   S.slots.forEach((sl, idx) => {
     const cur = sl.get();
     const canAdd = sl.key === 'hero' || idx - 1 <= S.content.photos.room.length;   // 店內照片依序補位
+    if (!canAdd) return;   // 只顯示已上傳的照片加一個空位，其餘用「一次選多張」補
     const file = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif', hidden: true });
     const th = h('div', { class: 'th' }, cur ? h('img', { src: photoUrl(cur.path), alt: sl.label, style: cur.fx != null ? 'object-position:' + cur.fx + '% ' + cur.fy + '%' : '' }) : '未上傳');
     const nm = h('div', { class: 'nm', id: 'pm-' + sl.key });
