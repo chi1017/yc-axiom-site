@@ -52,7 +52,7 @@
   }
   // ── 個別功能開關（沒設定的照方案：進階功能只有進階方案有，一般功能預設開啟）──
   var FEATURES = [['booking', '預約行事曆', true], ['code', '自訂程式碼與嵌入', true], ['team', '多人共同編輯', true], ['shop', '線上購買', false], ['works', '作品集', false], ['posts', '文章', false], ['en', '英文版', false],
-    ['menu', '價目／菜單', false], ['interior', '環境照片', false], ['news', '最新消息', false], ['faq', '常見問題', false], ['video', '影片', false], ['reviews', '客人評價', false], ['blocks', '自訂區塊', false], ['bookingForm', '預約表單', false], ['contactForm', '聯絡表單', false], ['map', '地圖', false]];
+    ['menu', '價目／菜單', false], ['interior', '環境照片', false], ['news', '最新消息', false], ['faq', '常見問題', false], ['video', '影片', false], ['reviews', '客人評價', false], ['blocks', '自訂區塊', false], ['bookingForm', '預約表單', false], ['contactForm', '聯絡表單', false], ['map', '地圖', false], ['credit', '頁尾製作標示', false]];
   function flagText(f) { var t = FEATURES.filter(function (x) { return f[x[0]] === true || f[x[0]] === false; }).map(function (x) { return x[1] + (f[x[0]] ? '開' : '關'); }); return t.length ? t.join('、') : '全部照方案'; }
   function featuresHtml(r, flags) {
     var pro = r.tier === 'pro';

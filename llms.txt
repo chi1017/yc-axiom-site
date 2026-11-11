@@ -46,5 +46,12 @@
 
 - [關於我們](https://yc-axiom.pages.dev/about/)
 - [台中網頁設計](https://yc-axiom.pages.dev/taichung-web-design/)
+- [行業網站](https://yc-axiom.pages.dev/industries/)：依行業整理網站該放什麼、常見錯誤與範例網站
+- [咖啡廳網站](https://yc-axiom.pages.dev/industries/cafe-website/)：咖啡店、烘焙坊、甜點店
+- [美髮美甲網站](https://yc-axiom.pages.dev/industries/hair-salon-website/)：髮廊、美甲、美睫工作室
+- [按摩 SPA 網站](https://yc-axiom.pages.dev/industries/massage-spa-website/)：按摩、SPA、芳療工作室
+- [補習班教室網站](https://yc-axiom.pages.dev/industries/tutoring-school-website/)：補習班、才藝教室、教學品牌
+- [診所網站](https://yc-axiom.pages.dev/industries/clinic-website/)：診所、牙醫、中醫、物理治療所
+- [合作轉介](https://yc-axiom.pages.dev/partners/)：記帳士、設計師、開店顧問等合作夥伴轉介客戶
 - [聯絡我們](https://yc-axiom.pages.dev/contact/)
 - [隱私權政策](https://yc-axiom.pages.dev/privacy/)
