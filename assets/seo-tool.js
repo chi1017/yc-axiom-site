@@ -3881,7 +3881,17 @@ window.renderResults = function(r) {
     if (jw) jw.classList.toggle('show', !!js);
     if (jsg) jsg.style.display = js ? 'block' : 'none';
     // JavaScript 網站的分數可能不準，不顯示「找 YC 幫你修」，改建議上傳 HTML／Search Console
-    if (cta) cta.classList.toggle('show', Number(r.score) < 80 && !js);
+    if (cta) {
+      // 依分數給不同的下一步：低分強調「這些問題租用版型已內建處理」，高分改推 GEO 檢測
+      const sc = Number(r.score) || 0, bad = (r.fail || 0) + (r.warn || 0);
+      const T = document.getElementById('seoCtaTitle'), B = document.getElementById('seoCtaBody'), A = document.getElementById('seoCtaAlt');
+      if (T && B && A) {
+        if (sc < 60) { T.textContent = '這個網站有 ' + bad + ' 個地方需要處理'; B.textContent = '多數是網站結構的基本問題：標題與描述、結構化資料、圖片大小、手機速度。這些在網站租用的版型裡都已經內建處理好，填好內容就能上線；想保留現在的網站，也可以 LINE 找我們幫你修。'; A.textContent = '看網站租用'; A.href = '/rental/'; }
+        else if (sc < 80) { T.textContent = '還有 ' + bad + ' 個地方可以補強'; B.textContent = '基本架構有了，補上缺少的項目，被搜尋到的機會會更好。照著下面的建議自己改，或 LINE 找我們幫你看哪些最值得先做。'; A.textContent = '看網站租用'; A.href = '/rental/'; }
+        else { T.textContent = 'SEO 體質不錯，下一步看 AI 搜尋'; B.textContent = '越來越多客人直接問 ChatGPT、Gemini 推薦店家。用 GEO 檢測看看 AI 讀不讀得懂你的網站。'; A.textContent = '免費 GEO 檢測'; A.href = '/geo/'; }
+      }
+      cta.classList.toggle('show', !js);
+    }
   } catch(e) {}
   
   // Add score breakdown bars
