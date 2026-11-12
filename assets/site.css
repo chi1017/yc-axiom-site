@@ -2004,8 +2004,8 @@ html.yc-s-open { overflow: hidden; }
   #mobile-menu .yc-search-m { display: flex; align-items: center; gap: 10px; width: 100%; font: inherit; cursor: pointer; text-align: left; }
 }
 
-/* ── 頁面最上方的標題區：不等程式捲動偵測，畫面一出來就用 CSS 淡入（主要內容更快出現） ── */
-@keyframes ycHeroIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+/* ── 頁面最上方的標題區：不等程式捲動偵測，畫面一出來就用 CSS 淡入（主要內容更快出現）。起點用 0.01 而不是 0：完全透明的元素不算「已顯示」，會讓測速以為內容很晚才出現 ── */
+@keyframes ycHeroIn { from { opacity: 0.01; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 .section-pad > .breadcrumb.reveal, .section-pad > .section-eyebrow.reveal, .section-pad > .section-title.reveal,
 .section-pad > .sp-lede.reveal, .section-pad > .article-meta.reveal, .section-pad > .sp-actions.reveal, .section-pad > .article-body.reveal {
   opacity: 1; transform: none; animation: ycHeroIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
