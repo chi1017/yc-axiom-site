@@ -2007,8 +2007,11 @@ html.yc-s-open { overflow: hidden; }
 /* ── 頁面最上方的標題區：不等程式捲動偵測，畫面一出來就用 CSS 淡入（主要內容更快出現）。起點用 0.01 而不是 0：完全透明的元素不算「已顯示」，會讓測速以為內容很晚才出現 ── */
 @keyframes ycHeroIn { from { opacity: 0.01; transform: translateY(24px); } to { opacity: 1; transform: none; } }
 .section-pad > .breadcrumb.reveal, .section-pad > .section-eyebrow.reveal, .section-pad > .section-title.reveal,
-.section-pad > .sp-lede.reveal, .section-pad > .article-meta.reveal, .section-pad > .sp-actions.reveal, .section-pad > .article-body.reveal {
-  opacity: 1; transform: none; animation: ycHeroIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+.section-pad > .sp-lede.reveal, .section-pad > .article-meta.reveal, .section-pad > .sp-actions.reveal, .section-pad > .article-body.reveal,
+.section-pad > .works-note.reveal, .section-pad > .works-filter-bar.reveal, .section-pad > .reveal:not([class*=" "]):nth-child(-n+5),
+.works-list > .work-item.reveal:nth-child(-n+2), .articles-list > .article-card.reveal:nth-child(-n+2), .about-grid > .reveal:first-child,
+.contact-grid > .reveal, .section-pad > .contact-cta-box.reveal, .section-pad > .contact-sidebar.reveal, #page-contact .reveal {
+  opacity: 1; transform: none; animation: ycHeroIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards;  /* backwards：播完後回到一般樣式，滑鼠立體傾斜效果才不會被蓋掉 */
 }
 .section-pad > .section-eyebrow.reveal { animation-delay: 0.04s; }
 .section-pad > .section-title.reveal { animation-delay: 0.08s; }
