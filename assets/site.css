@@ -2003,15 +2003,3 @@ html.yc-s-open { overflow: hidden; }
   .has-tabbar .yc-search-btn { display: none; }
   #mobile-menu .yc-search-m { display: flex; align-items: center; gap: 10px; width: 100%; font: inherit; cursor: pointer; text-align: left; }
 }
-
-/* ── 頁面最上方的標題區：不等程式捲動偵測，畫面一出來就用 CSS 淡入（主要內容更快出現） ── */
-@keyframes ycHeroIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
-.section-pad > .breadcrumb.reveal, .section-pad > .section-eyebrow.reveal, .section-pad > .section-title.reveal,
-.section-pad > .sp-lede.reveal, .section-pad > .article-meta.reveal, .section-pad > .sp-actions.reveal, .section-pad > .article-body.reveal {
-  opacity: 1; transform: none; animation: ycHeroIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-.section-pad > .section-eyebrow.reveal { animation-delay: 0.04s; }
-.section-pad > .section-title.reveal { animation-delay: 0.08s; }
-.section-pad > .sp-lede.reveal, .section-pad > .article-meta.reveal { animation-delay: 0.14s; }
-.section-pad > .sp-actions.reveal, .section-pad > .article-body.reveal { animation-delay: 0.2s; }
-@media (prefers-reduced-motion: reduce) { .section-pad > .reveal { animation: none; } }
