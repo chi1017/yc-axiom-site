@@ -19,7 +19,7 @@
             --text-dim: #9C9686;
             --text-bright: #F5F2EA;
             --f-display: 'Fraunces', 'Noto Serif TC', 'Songti TC', 'PMingLiU', serif;
-            --f-ui: 'Instrument Sans', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            --f-ui: 'Instrument Sans', 'PingFang TC', 'Noto Sans TC', 'Noto Sans CJK TC', 'Microsoft JhengHei', sans-serif;  /* 中文用裝置內建字體（iPhone／Mac 蘋方、Android 思源黑體、Windows 微軟正黑），不另外下載，頁面更快 */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
