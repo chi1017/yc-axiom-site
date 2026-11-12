@@ -180,7 +180,7 @@ const CONTACT_A = 'a[href*="line.me"],a[href^="mailto:"],a[href^="tel:"],a[href*
 const CONTACT_CSS = '<style id="yc-no-contact">body .nav-right .nav-cta,.nav-cta,.mobile-cta,.line-float,.social-float,.contact-grid,.footer-status,.seo-cta,.geo-cta,#cta.cta,' + CONTACT_A +
   ',.cta-banner:has(' + CONTACT_A + '),li:has(>' + CONTACT_A.split(',').join('),li:has(>') + '),.contact-info-item{display:none!important}' +
   '.yc-nc-note{margin:48px 0 0;font-size:17px;line-height:1.8;opacity:.85}</style>';
-const CONTACT_WORDS = /788cblaq|ycaxiom@gmail\.com|axiomyc2026|@ycaxiom|line\.me|threads\.(com|net)|instagram\.com/i;
+const CONTACT_WORDS = /788cblaq|ycaxiom@gmail\.com|axiomyc2026|axiom_yc|@ycaxiom|line\.me|threads\.(com|net)|instagram\.com/i;
 function stripLd(o) {
   if (Array.isArray(o)) return o.map(stripLd).filter((x) => !(typeof x === 'string' && CONTACT_WORDS.test(x)));
   if (!o || typeof o !== 'object') return o;
