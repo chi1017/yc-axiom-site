@@ -215,9 +215,11 @@
 (function () {
     var root = document.documentElement, loader = document.getElementById('page-loader');
     if (!loader) return;
+    /* 開場動畫只在首頁播放：從搜尋或分享連結直接進到其他頁面的人，不用等動畫 */
+    if (!/^\/(en\/)?(index\.html)?$/.test(location.pathname)) { loader.parentNode.removeChild(loader); return; }
     try { if (sessionStorage.getItem('yc-loader-seen')) { loader.parentNode.removeChild(loader); return; } sessionStorage.setItem('yc-loader-seen', '1'); } catch (e) {}
     root.classList.add('is-loading');
-    var start = Date.now(), MIN = 3200, MAX = 6500, closed = false;
+    var start = Date.now(), MIN = 3200, MAX = 4500, closed = false;  /* 3.2 秒剛好播完標誌與標語動畫 */
     function close() {
         if (closed) return; closed = true;
         loader.classList.add('is-done');
@@ -225,7 +227,8 @@
         setTimeout(function () { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 1300);
     }
     function ready() { setTimeout(close, Math.max(0, MIN - (Date.now() - start))); }
-    if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
+    /* 不等圖片和字型全部下載完：頁面內容準備好就收起 */
+    if (document.readyState !== 'loading') ready(); else document.addEventListener('DOMContentLoaded', ready);
     setTimeout(close, MAX); /* failsafe: never block the site if something loads slowly */
     loader.addEventListener('click', close); /* 點一下就能略過 */
 })();
