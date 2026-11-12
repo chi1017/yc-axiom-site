@@ -781,7 +781,19 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://yc-axiom.pages.dev/en/industries/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://yc-axiom.pages.dev/industries/cafe-website/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://yc-axiom.pages.dev/en/industries/cafe-website/</loc>
     <lastmod>2026-11-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -793,7 +805,19 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://yc-axiom.pages.dev/en/industries/hair-salon-website/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://yc-axiom.pages.dev/industries/massage-spa-website/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://yc-axiom.pages.dev/en/industries/massage-spa-website/</loc>
     <lastmod>2026-11-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -805,13 +829,31 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://yc-axiom.pages.dev/en/industries/tutoring-school-website/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://yc-axiom.pages.dev/industries/clinic-website/</loc>
     <lastmod>2026-11-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://yc-axiom.pages.dev/en/industries/clinic-website/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://yc-axiom.pages.dev/partners/</loc>
+    <lastmod>2026-11-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://yc-axiom.pages.dev/en/partners/</loc>
     <lastmod>2026-11-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
