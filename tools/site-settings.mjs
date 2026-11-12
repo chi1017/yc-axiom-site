@@ -174,10 +174,10 @@ export const CONTACT_EXEMPT = /^(en\/)?(builder|dashboard|admin|demo|rental\/sty
 // 隱私權政策與條款：只關掉選單、浮動按鈕、頁尾等站務元件；政策內文的聯絡方式另由「隱私權政策的聯絡方式也關閉」控制
 export const CONTACT_LEGAL = /^(en\/)?(privacy|terms)\//;
 export const privacyContactHidden = (s) => { const d = normalize(s).display; return !!(d.hide_contact && d.hide_contact_privacy); };
-const CHROME_CSS = '<style id="yc-no-contact">.nav-cta,.mobile-cta,.mobile-social-a,.line-float,.social-float,.footer-status,.tab-line,.footer-nav a[href*="/contact"]{display:none!important}</style>';
+const CHROME_CSS = '<style id="yc-no-contact">body .nav-right .nav-cta,.nav-cta,.mobile-cta,.mobile-social-a,.line-float,.social-float,.footer-status,.tab-line,.footer-nav a[href*="/contact"]{display:none!important}</style>';
 export const contactHidden = (s) => !!normalize(s).display.hide_contact;
 const CONTACT_A = 'a[href*="line.me"],a[href^="mailto:"],a[href^="tel:"],a[href*="instagram.com"],a[href*="threads.com"],a[href*="threads.net"],a[href*="/contact/"]:not(.lang-toggle),a[href$="/contact"]:not(.lang-toggle)';
-const CONTACT_CSS = '<style id="yc-no-contact">.nav-cta,.mobile-cta,.line-float,.social-float,.contact-grid,.footer-status,.seo-cta,.geo-cta,#cta.cta,' + CONTACT_A +
+const CONTACT_CSS = '<style id="yc-no-contact">body .nav-right .nav-cta,.nav-cta,.mobile-cta,.line-float,.social-float,.contact-grid,.footer-status,.seo-cta,.geo-cta,#cta.cta,' + CONTACT_A +
   ',.cta-banner:has(' + CONTACT_A + '),li:has(>' + CONTACT_A.split(',').join('),li:has(>') + '),.contact-info-item{display:none!important}' +
   '.yc-nc-note{margin:48px 0 0;font-size:17px;line-height:1.8;opacity:.85}</style>';
 const CONTACT_WORDS = /788cblaq|ycaxiom@gmail\.com|axiomyc2026|@ycaxiom|line\.me|threads\.(com|net)|instagram\.com/i;
@@ -207,10 +207,15 @@ export function hideContactHtml(html, en, mode, privacyToo) {
     try { return a + JSON.stringify(stripLd(JSON.parse(b)), null, 2) + c; } catch (e) { return m; }
   });
   if (/<\/head>/i.test(s) && !s.includes('id="yc-no-contact"')) s = s.replace(/<\/head>/i, CONTACT_CSS + '\n</head>');
+  // 表頭與手機選單的「免費諮詢」按鈕整個拿掉（只靠 CSS 隱藏時，手機版表頭的樣式會把空按鈕又顯示出來）
+  s = s.replace(/<a\b[^>]*class="[^"]*\b(nav-cta|mobile-cta)\b[^"]*"[^>]*>[\s\S]*?<\/a>/g, '');
   s = scrubInvites(s, en);
+  // 文字被拿掉後只剩空殼的聯絡連結也一併拿掉
+  s = s.replace(/<a\b[^>]*href="[^"]*(?:line\.me|mailto:|tel:|instagram\.com|threads\.(?:com|net)|\/contact\/?|#contact)[^"]*"[^>]*>\s*<\/a>/g, '');
   // 聯絡頁：表單與聯絡資訊隱藏，改放一段說明
   if (s.includes('<div class="contact-grid"')) {
     const h = en ? 'Inquiries are paused for now.' : '目前暫停接受諮詢.';
+    s = s.replace(/<title>[\s\S]*?<\/title>/, '<title>' + (en ? 'Contact YC AXIOM' : '聯絡 YC AXIOM') + '</title>');
     s = s.replace(/<h1([^>]*)>[\s\S]*?<\/h1>/, (m, at) => '<h1' + at.replace(/\s*data-original="[^"]*"/g, '') + ' data-original="' + h + '">' + h + '</h1>')
       .replace(/(<div class="contact-grid")/, '<p class="yc-nc-note">' + (en ? 'Feel free to browse our work and articles.' : '歡迎先參考作品集與文章。') + '</p>\n$1');
   }
@@ -228,7 +233,8 @@ function dropInvites(text, en) {
 function scrubInvites(html, en) {
   // 「歡迎先用 LINE 或<a>聯絡表單</a>詢問。」這種句子中間夾連結
   html = html.replace(/[^。>]*(用|加)\s*LINE\s*或\s*<a[^>]*>[^<]*<\/a>[^。<]*。/g, '');
-  return html.split(/(<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->|<[^>]+>)/).map((t, i) => (i % 2 ? t : dropInvites(t, en))).join('');
+  // 網頁標題（<title>）不動：「聯絡我們｜YC AXIOM」被整句拿掉會變成沒有標題
+  return html.split(/(<title>[\s\S]*?<\/title>|<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<!--[\s\S]*?-->|<[^>]+>)/).map((t, i) => (i % 2 ? t : dropInvites(t, en))).join('');
 }
 export function hideContactText(text) {
   return String(text).split('\n').filter((l) => !CONTACT_WORDS.test(l)).join('\n');
