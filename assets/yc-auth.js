@@ -3,7 +3,7 @@
 (function () {
   'use strict';
   var CFG = window.YC_CONFIG || {};
-  var CONSENT_VERSION = '2026-10-15-v1';
+  var CONSENT_VERSION = '2026-11-12-v2';
   var CONSENT_TEXT = '我同意 YC AXIOM 保存我的檢測紀錄，並寄送檢測報告與網站改善建議';
   var LINE_URL = 'https://line.me/R/ti/p/%40788cblaq';
   var listeners = [];
