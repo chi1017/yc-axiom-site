@@ -3543,7 +3543,9 @@ async function exportPDF(){
     await loadPdfLibs();
     const { jsPDF } = window.jspdf;
     const r = currentReport;
-    const brand = (typeof brandSettings !== 'undefined' && brandSettings?.name) ? brandSettings.name : 'SEO Analyzer';
+    const brand = (typeof brandSettings !== 'undefined' && brandSettings?.name) ? brandSettings.name : 'YC AXIOM';
+    // 報告最後附上 YC AXIOM 的檢測網址；官網沒有關閉聯絡方式時，也附上 LINE（關閉時頁面上的 LINE 按鈕會被拿掉）
+    const hasLine = !!document.querySelector('a[href*="line.me/R/ti/p/"]');
 
     // ── Build a styled HTML snapshot for html2canvas ──
     setProg(20,'建立報告畫面...');
@@ -3685,7 +3687,12 @@ async function exportPDF(){
 
   <!-- Footer -->
   <div style="text-align:center;padding-top:16px;border-top:1px solid #1A1815;font-size:11px;color:#555;">
-    ${escHtml(brand)} · SEO Analyzer v15 Pro · ${dateStr} · YC AXIOM 免費 SEO 檢測
+    ${escHtml(brand)} · ${dateStr} · YC AXIOM 免費 SEO 檢測 yc-axiom.pages.dev/seo/
+  </div>
+  <div style="margin-top:14px;padding:14px 16px;border:1px solid #3a3226;border-radius:8px;background:#14120F;font-size:12px;line-height:1.8;color:#cfc6b6;">
+    <strong style="color:#B59B6A;">想改善這份報告裡的問題？</strong><br>
+    YC AXIOM 提供網站租用（版型已內建這些 SEO 項目）與客製網站，也可以幫你修現有網站。<br>
+    官網：yc-axiom.pages.dev${hasLine ? '　LINE：@788cblaq' : ''}
   </div>
 
 </div>

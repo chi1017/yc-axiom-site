@@ -78,6 +78,28 @@ for (const t of TARGETS) {
   }
   if (!CHECK) console.log(t.out.padEnd(36), (text.length / 1024).toFixed(1) + 'KB', '（原始檔', (readFileSync(join(ROOT, t.in)).length / 1024).toFixed(1) + 'KB）', 'v=' + h);
 }
+// 站內搜尋索引：/search-index.json（標題、描述、小標），網站右上角的搜尋框第一次打開時才下載。
+// 放在網站根目錄而不是 assets/：部署時價格標記與「隱藏價錢」會一起套用。
+{
+  const SKIP = /^(admin|dashboard|builder|demo|showcase|seo\/dashboard|tpl)\/|404\.html$|^google[0-9a-f]+\.html$|-tool\.html$|^rental\/styles\//;
+  const dec = (t) => t.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
+  const rows = [];
+  for (const f of htmlFiles.filter((x) => !SKIP.test(x)).sort()) {
+    const h = readFileSync(join(ROOT, f), 'utf8');
+    if (/<meta name="robots" content="[^"]*noindex/i.test(h)) continue;
+    const title = dec((h.match(/<title>([\s\S]*?)<\/title>/i) || [])[1] || '').replace(/\s*[-｜|]\s*YC AXIOM.*$/i, '').replace(/^YC AXIOM\s*[｜|]\s*/, '');
+    if (!title) continue;
+    const desc = dec((h.match(/<meta name="description" content="([^"]*)"/i) || [])[1] || '');
+    const main = (h.match(/<main[\s\S]*?<\/main>/i) || [h])[0];
+    const heads = [...main.matchAll(/<h[23][^>]*>([\s\S]*?)<\/h[23]>/gi)].map((m) => dec(m[1])).filter(Boolean);
+    rows.push({ u: '/' + f.replace(/index\.html$/, ''), l: f.startsWith('en/') ? 'en' : 'zh', t: title, d: desc.slice(0, 160), h: [...new Set(heads)].join('｜').slice(0, 400) });
+  }
+  const text = JSON.stringify(rows) + '\n';
+  const outPath = join(ROOT, 'search-index.json');
+  const old = existsSync(outPath) ? readFileSync(outPath, 'utf8') : null;
+  if (old !== text) { if (CHECK) stale.push('search-index.json'); else writeFileSync(outPath, text); }
+  if (!CHECK) console.log('search-index.json'.padEnd(36), (text.length / 1024).toFixed(1) + 'KB', rows.length + ' 頁');
+}
 if (CHECK) {
   if (stale.length) { console.error('dist 不是最新，請執行 npm run build：\n  ' + stale.join('\n  ')); process.exit(1); }
   console.log('dist 與原始檔一致');
