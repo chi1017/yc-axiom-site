@@ -1,6 +1,6 @@
 /* 英文版（/en/）用的介面文字 */
 var YC_EN = /^en/i.test(document.documentElement.lang || '');
-var YC_TX = {"工具載入的時間比平常久，可能是網路比較慢。": "The tool is taking longer than usual to load; your connection may be slow.", "重新載入": "Reload", "直接開啟工具 ↗": "Open the tool directly ↗", "工具載入中…": "Loading tool…", "切換為深色模式": "Switch to dark mode", "切換為淺色模式": "Switch to light mode", "會員選單": "Member menu", "會員登入": "Sign in", "會員登入或註冊": "Sign in or sign up", "會員專區": "Member area", "會員專區選單": "Member area menu", "我的網站": "My website", "網站編輯器": "Website editor", "管理後台": "Admin", "切換 Google 帳號": "Switch Google account", "登出": "Sign out", "首頁": "Home", "服務": "Services", "網站租用": "Rental", "LINE 諮詢": "LINE", "選單": "Menu", "主要分頁": "Main tabs", "返回上一頁": "Back"};
+var YC_TX = {"工具載入的時間比平常久，可能是網路比較慢。": "The tool is taking longer than usual to load; your connection may be slow.", "重新載入": "Reload", "直接開啟工具 ↗": "Open the tool directly ↗", "工具載入中…": "Loading tool…", "切換為深色模式": "Switch to dark mode", "切換為淺色模式": "Switch to light mode", "會員選單": "Member menu", "會員登入": "Sign in", "會員登入或註冊": "Sign in or sign up", "會員專區": "Member area", "會員專區選單": "Member area menu", "我的網站": "My website", "網站編輯器": "Website editor", "管理後台": "Admin", "切換 Google 帳號": "Switch Google account", "登出": "Sign out", "首頁": "Home", "服務": "Services", "網站租用": "Rental", "LINE 諮詢": "LINE", "選單": "Menu", "主要分頁": "Main tabs", "返回上一頁": "Back", "本文目錄": "In this article", "段": "sections", "回到頂端": "Back to top", "搜尋網站": "Search this site", "常用搜尋": "Popular searches", "找不到相關頁面，換個關鍵字試試，或直接問我們。": "No matching pages. Try another keyword, or just ask us.", "搜尋服務、價格、文章、工具…": "Search services, pricing, articles, tools…", "關閉": "Close"};
 function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
 
 
@@ -792,4 +792,165 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         if (c.delay_sec > 0) timer = setTimeout(show, c.delay_sec * 1000);
         if (!(c.scroll_pct > 0) && !(c.delay_sec > 0)) show();
     }).catch(function () { /* 讀不到設定就不顯示 */ });
+})();
+
+/* ── 好用小工具：站內搜尋、文章目錄、回到頂端、LINE 諮詢帶上來源頁 ── */
+(function () {
+    'use strict';
+    if (/^\/(admin|dashboard|builder|demo)\//.test(location.pathname)) return;
+    var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var ga = function (e, p) { try { if (window.gtag) window.gtag('event', e, p || {}); } catch (x) { /* ignore */ } };
+    var pageName = function () {
+        var h = document.querySelector('main h1');
+        var t = h ? (h.innerText || h.textContent || '').split('\n')[0] : document.title.split(/[｜|]| - /)[0];
+        return t.replace(/[.。]\s*$/, '').trim().slice(0, 30);
+    };
+
+    // 1. LINE 諮詢：手機點下去直接開聊天並帶一句開場白（看得出客人是從哪一頁來的）；同時記錄點擊來源
+    var LINE_ID = '%40788cblaq';
+    var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+    document.addEventListener('click', function (e) {
+        var a = e.target.closest && e.target.closest('a[href*="line.me/R/ti/p/' + LINE_ID + '"]');
+        if (!a) return;
+        var where = a.closest('#yc-tabbar') ? 'tabbar' : a.closest('nav,#mobile-menu') ? 'menu' : a.closest('footer') ? 'footer' : a.closest('.social-float,.line-float') ? 'float' : a.closest('.yc-card') ? 'card' : 'page';
+        ga('line_click', { link_area: where, page_name: pageName() });
+        if (!mobile) return;
+        var msg = YC_EN ? 'Hi, I found you on your website (' + pageName() + '). I\'d like to ask about: ' : '你好，我在官網「' + pageName() + '」看到你們，想詢問：';
+        a.href = 'https://line.me/R/oaMessage/' + LINE_ID + '/?' + encodeURIComponent(msg);
+    }, true);
+
+    // 2. 文章目錄：文章頁小標有 4 個以上，就在第一個小標前放一個可收合的目錄
+    var body = document.querySelector('.article-body');
+    if (body && /\/(articles|learn)\/[^/]+\/?$/.test(location.pathname)) {
+        var hs = Array.prototype.filter.call(body.querySelectorAll('h2'), function (h) { return !h.closest('.faq-section,.cta-box,aside'); });
+        if (hs.length >= 4) {
+            var items = hs.map(function (h, i) {
+                if (!h.id) h.id = 'sec-' + (i + 1);
+                return '<li><a href="#' + h.id + '">' + esc((h.textContent || '').trim()) + '</a></li>';
+            }).join('');
+            var toc = document.createElement('details');
+            toc.className = 'yc-toc';
+            if (window.innerWidth >= 900) toc.open = true;
+            toc.innerHTML = '<summary>' + ycT('本文目錄') + '<span class="yc-toc-n">' + hs.length + ' ' + ycT('段') + '</span></summary><ol>' + items + '</ol>';
+            hs[0].parentNode.insertBefore(toc, hs[0]);
+        }
+    }
+
+    // 3. 回到頂端：頁面很長、往下捲超過兩個畫面才出現
+    var top = document.createElement('button');
+    top.type = 'button'; top.className = 'yc-top'; top.setAttribute('aria-label', ycT('回到頂端'));
+    top.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    top.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); var n = document.querySelector('nav a, nav button'); if (n) n.focus({ preventScroll: true }); });
+    document.body.appendChild(top);
+    var tick = false;
+    var onScroll = function () {
+        if (tick) return; tick = true;
+        requestAnimationFrame(function () {
+            tick = false;
+            var long = document.documentElement.scrollHeight > window.innerHeight * 3;
+            top.classList.toggle('is-in', long && window.scrollY > window.innerHeight * 2);
+        });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+    // 4. 站內搜尋：右上角放大鏡；也可以按「/」打開。索引第一次打開時才下載
+    var right = document.querySelector('nav .nav-right');
+    if (!right) return;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'theme-toggle yc-search-btn'; btn.setAttribute('aria-label', ycT('搜尋網站')); btn.title = ycT('搜尋網站');
+    btn.setAttribute('aria-haspopup', 'dialog');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+    var tt = right.querySelector('#theme-toggle');
+    right.insertBefore(btn, tt || null);
+    // 手機表頭放不下：改放在選單最上面
+    var mm = document.getElementById('mobile-menu');
+    if (mm) {
+        var mb = document.createElement('button');
+        mb.type = 'button'; mb.className = 'mobile-nav-btn yc-search-m';
+        mb.innerHTML = btn.innerHTML + '<span>' + ycT('搜尋網站') + '</span>';
+        mb.addEventListener('click', function () { if (typeof toggleMobileMenu === 'function' && mm.classList.contains('open')) toggleMobileMenu(); open(); });
+        var first = mm.querySelector('.mobile-nav-btn');
+        mm.insertBefore(mb, first || null);
+    }
+
+    var dlg = null, idx = null, loading = null, last = null;
+    var load = function () {
+        if (idx) return Promise.resolve(idx);
+        if (!loading) loading = fetch('/search-index.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (rows) {
+            idx = rows.filter(function (r) { return r.l === (YC_EN ? 'en' : 'zh'); }); return idx;
+        }).catch(function () { loading = null; return []; });
+        return loading;
+    };
+    var SUGGEST = YC_EN ? ['Website rental', 'Pricing', 'SEO', 'Café website', 'Partner'] : ['網站租用', '價格', '一頁式', 'SEO 檢測', '咖啡廳', '合作轉介'];
+    var score = function (r, words) {
+        // 每個字都有對到的排前面；只對到部分的也列出來，排在後面
+        var t = r.t.toLowerCase(), d = r.d.toLowerCase(), h = r.h.toLowerCase(), s = 0, n = 0;
+        for (var i = 0; i < words.length; i++) {
+            var w = words[i], hit = 0;
+            if (t.indexOf(w) >= 0) hit += 10;
+            if (h.indexOf(w) >= 0) hit += 4;
+            if (d.indexOf(w) >= 0) hit += 3;
+            if (hit) { n++; s += hit; }
+        }
+        return n ? s + (n === words.length ? 100 : 0) - r.u.split('/').length * 0.1 : 0;
+    };
+    var snippet = function (r, words) {
+        var parts = r.h.split('｜');
+        for (var i = 0; i < parts.length; i++) for (var j = 0; j < words.length; j++) if (parts[i].toLowerCase().indexOf(words[j]) >= 0) return parts[i];
+        return r.d;
+    };
+    var render = function () {
+        var q = dlg.querySelector('input').value.trim().toLowerCase(), out = dlg.querySelector('.yc-s-res');
+        if (!q) { out.innerHTML = '<p class="yc-s-hint">' + ycT('常用搜尋') + '</p><div class="yc-s-chips">' + SUGGEST.map(function (s) { return '<button type="button">' + esc(s) + '</button>'; }).join('') + '</div>'; return; }
+        load().then(function (rows) {
+            if (dlg.querySelector('input').value.trim().toLowerCase() !== q) return;
+            var words = q.split(/\s+/).filter(Boolean);
+            var res = rows.map(function (r) { return { r: r, s: score(r, words) }; }).filter(function (x) { return x.s > 0; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 8);
+            out.innerHTML = res.length ? '<ul role="listbox">' + res.map(function (x, i) {
+                return '<li><a href="' + esc(x.r.u) + '" role="option"' + (i === 0 ? ' aria-selected="true"' : '') + '><b>' + esc(x.r.t) + '</b><small>' + esc(snippet(x.r, words)) + '</small></a></li>';
+            }).join('') + '</ul>' : '<p class="yc-s-hint">' + ycT('找不到相關頁面，換個關鍵字試試，或直接問我們。') + '</p>';
+        });
+    };
+    var close = function () { if (!dlg) return; dlg.hidden = true; document.documentElement.classList.remove('yc-s-open'); if (last) last.focus(); };
+    var open = function () {
+        last = document.activeElement;
+        if (!dlg) {
+            dlg = document.createElement('div');
+            dlg.className = 'yc-search'; dlg.setAttribute('role', 'dialog'); dlg.setAttribute('aria-modal', 'true'); dlg.setAttribute('aria-label', ycT('搜尋網站'));
+            dlg.innerHTML = '<div class="yc-s-box"><div class="yc-s-bar"><input type="search" enterkeyhint="search" autocomplete="off" placeholder="' + esc(ycT('搜尋服務、價格、文章、工具…')) + '" aria-label="' + esc(ycT('搜尋網站')) + '"><button type="button" class="yc-s-x">' + ycT('關閉') + '</button></div><div class="yc-s-res" aria-live="polite"></div></div>';
+            document.body.appendChild(dlg);
+            var inp = dlg.querySelector('input'), t;
+            inp.addEventListener('input', function () { clearTimeout(t); t = setTimeout(render, 80); });
+            inp.addEventListener('keydown', function (e) {
+                var as = dlg.querySelectorAll('.yc-s-res a'), cur = -1;
+                as.forEach(function (a, i) { if (a.getAttribute('aria-selected') === 'true') cur = i; });
+                if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault(); if (!as.length) return;
+                    var n = (cur + (e.key === 'ArrowDown' ? 1 : -1) + as.length) % as.length;
+                    as.forEach(function (a, i) { a.setAttribute('aria-selected', String(i === n)); }); as[n].scrollIntoView({ block: 'nearest' });
+                }
+                if (e.key === 'Enter' && as.length) { e.preventDefault(); ga('site_search', { search_term: inp.value.trim() }); location.href = as[cur < 0 ? 0 : cur].href; }
+            });
+            dlg.addEventListener('click', function (e) {
+                if (e.target === dlg || e.target.closest('.yc-s-x')) return close();
+                var chip = e.target.closest('.yc-s-chips button');
+                if (chip) { inp.value = chip.textContent; render(); inp.focus(); }
+                if (e.target.closest('.yc-s-res a')) ga('site_search', { search_term: inp.value.trim() });
+            });
+            dlg.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') close();
+                if (e.key === 'Tab') { var f = dlg.querySelectorAll('input,button,a'); if (!f.length) return; var a = f[0], z = f[f.length - 1]; if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); } else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); } }
+            });
+        }
+        dlg.hidden = false; document.documentElement.classList.add('yc-s-open');
+        render(); load();
+        setTimeout(function () { dlg.querySelector('input').focus(); }, 30);
+    };
+    btn.addEventListener('click', open);
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+        var t = e.target; if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        e.preventDefault(); open();
+    });
 })();
