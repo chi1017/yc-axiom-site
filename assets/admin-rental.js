@@ -150,6 +150,53 @@
     var fx = !rs[5].error && rs[5].data && rs[5].data[0] && rs[5].data[0].detail ? rs[5].data[0].detail.flags || {} : {};
     return { events: rs[0].data || [], versions: rs[1].data || [], payments: rs[2].data || [], reports: rs[3].error ? [] : (rs[3].data || []), reviews: reviews, flags: fx };
   }
+  // ── 下載網站：後台產生網頁檔案，照片從公開儲存空間下載，在瀏覽器打包成 ZIP（不經過其他伺服器） ──
+  var CRC = null;
+  function crc32(b) {
+    if (!CRC) { CRC = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRC[n] = c >>> 0; } }
+    var x = 0xFFFFFFFF; for (var i = 0; i < b.length; i++) x = CRC[(x ^ b[i]) & 0xFF] ^ (x >>> 8); return (x ^ 0xFFFFFFFF) >>> 0;
+  }
+  function makeZip(entries) {   // entries: [{ name, data: Uint8Array }]，不壓縮（照片本來就壓縮過）
+    var enc = new TextEncoder(), parts = [], central = [], off = 0, d = new Date();
+    var dt = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF, dd = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+    entries.forEach(function (e) {
+      var nm = enc.encode(e.name), crc = crc32(e.data), sz = e.data.length;
+      var h = new DataView(new ArrayBuffer(30)); h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true); h.setUint16(10, dt, true); h.setUint16(12, dd, true); h.setUint32(14, crc, true); h.setUint32(18, sz, true); h.setUint32(22, sz, true); h.setUint16(26, nm.length, true); h.setUint16(28, 0, true);
+      parts.push(new Uint8Array(h.buffer), nm, e.data);
+      var c = new DataView(new ArrayBuffer(46)); c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true); c.setUint16(12, dt, true); c.setUint16(14, dd, true); c.setUint32(16, crc, true); c.setUint32(20, sz, true); c.setUint32(24, sz, true); c.setUint16(28, nm.length, true); c.setUint32(42, off, true);
+      central.push(new Uint8Array(c.buffer), nm);
+      off += 30 + nm.length + sz;
+    });
+    var csz = central.reduce(function (a, b) { return a + b.length; }, 0);
+    var end = new DataView(new ArrayBuffer(22)); end.setUint32(0, 0x06054b50, true); end.setUint16(8, entries.length, true); end.setUint16(10, entries.length, true); end.setUint32(12, csz, true); end.setUint32(16, off, true);
+    return new Blob(parts.concat(central, [new Uint8Array(end.buffer)]), { type: 'application/zip' });
+  }
+  async function exportZip(r, which) {
+    var res = await call('export_site', r.id, { which: which });
+    var enc = new TextEncoder(), entries = [], miss = [];
+    Object.keys(res.files || {}).forEach(function (f) { if (typeof res.files[f] === 'string') entries.push({ name: f, data: enc.encode(res.files[f]) }); });
+    var imgs = res.images || [], done = 0, errBox = document.getElementById('rn-merr');
+    for (var i = 0; i < imgs.length; i += 6) {
+      await Promise.all(imgs.slice(i, i + 6).map(async function (im) {
+        try {
+          var dl = await YC.client.storage.from('site-photos').download(im.path);
+          if (dl.error || !dl.data) throw new Error('x');
+          entries.push({ name: im.file, data: new Uint8Array(await dl.data.arrayBuffer()) });
+        } catch (e) { miss.push(im.file); }
+        done++; if (errBox) errBox.textContent = '下載照片 ' + done + '／' + imgs.length;
+      }));
+    }
+    var note = ['網站：' + (r.shop_name || r.slug), '版本：' + (which === 'live' ? '目前上線的版本' : '編輯器裡的草稿'), '原網址：' + (res.site_url || ''), '匯出時間：' + new Date().toLocaleString('zh-TW'), '',
+      '使用方式：把整個資料夾上傳到任何靜態網站主機（根目錄要放 index.html）。',
+      '注意：聯絡表單、預約與線上購買仍會送到 YC AXIOM 的系統；標題字型與手機小圖沒有包含，網站會改用系統字與原圖。'];
+    if (res.code_skipped) note.push('自訂程式碼尚未核准，這份檔案沒有包含。');
+    if (miss.length) note.push('', '以下照片下載失敗，沒有包含：', miss.join('\n'));
+    entries.push({ name: 'README.txt', data: enc.encode(note.join('\n') + '\n') });
+    var blob = makeZip(entries), a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = (r.slug || 'site') + '-' + (which === 'live' ? 'live' : 'draft') + '-' + new Date().toISOString().slice(0, 10) + '.zip';
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+    toast('已下載 ' + a.download + (miss.length ? '（' + miss.length + ' 張照片下載失敗，見 README）' : ''));
+  }
   async function call(action, siteId, params) {
     var r = await YC.client.functions.invoke('admin-site', { body: Object.assign({ action: action, site_id: siteId }, params || {}) });
     if (r.error) {
@@ -299,7 +346,7 @@
       '<select id="rn-due" aria-label="到期">' + opts([['all', '全部到期日'], ['7', '7 天內到期'], ['30', '30 天內到期'], ['over', '已過期']], state.due) + '</select>' +
       '<label class="rn-chk"><input type="checkbox" id="rn-fail"' + (state.failedOnly ? ' checked' : '') + '>只看部署失敗</label>' +
       '<select id="rn-sort" aria-label="排序">' + opts([['due_asc', '到期日：近 → 遠'], ['due_desc', '到期日：遠 → 近'], ['pub_desc', '最近發佈'], ['created_desc', '建立時間（新 → 舊）']], state.sort) + '</select>' +
-      '<button class="m-btn sm" id="rn-settings">匯款與方案設定</button><button class="m-btn sm" id="rn-simbtn" aria-expanded="' + (state.simOpen ? 'true' : 'false') + '">排程模擬</button><button class="m-btn sm" id="rn-reload">重新整理</button>' +
+      '<a class="m-btn sm" href="' + esc(YC.url('builder/') + '?new=1') + '" target="_blank" rel="noopener" title="先用自己的帳號建立，做好後在網站詳情按「轉移給客戶」">替客戶建立網站</a><button class="m-btn sm" id="rn-settings">匯款與方案設定</button><button class="m-btn sm" id="rn-simbtn" aria-expanded="' + (state.simOpen ? 'true' : 'false') + '">排程模擬</button><button class="m-btn sm" id="rn-reload">重新整理</button>' +
       '<span class="adm-count">' + v.length + ' / ' + rows.length + ' 個網站</span></div>' +
       '<div class="adm-wrap"><table class="adm-table rn-table"><thead><tr><th>狀態</th><th>店名／代稱</th><th>會員</th><th>網址</th><th>到期日</th><th>最近部署</th><th>最近發佈</th></tr></thead><tbody>' +
       (v.length ? v.map(function (r) {
@@ -390,6 +437,9 @@
       acts.push('<button class="m-btn sm rn-danger" data-act="purge">永久刪除</button>');
     }
     acts.push('<a class="m-btn sm" target="_blank" rel="noopener" href="' + esc(YC.url('builder/preview/') + '?site=' + encodeURIComponent(r.id)) + '">預覽最新版本</a>');
+    if (r.status !== 'cancelled') acts.push('<a class="m-btn sm" target="_blank" rel="noopener" href="' + esc(YC.url('builder/') + '?site=' + encodeURIComponent(r.id) + '&admin=1') + '">代客編輯</a>');
+    acts.push('<button class="m-btn sm" data-act="export">下載網站（ZIP）</button>');
+    if (r.status !== 'cancelled') acts.push('<button class="m-btn sm" data-act="transfer">轉移給客戶</button>');
     var kv = [
       ['會員', esc(r.member_email)],
       ['下一期', r.next_layout || r.next_tier ? '<span class="rn-warn">客戶申請' + [r.next_layout === 'single' ? '改回一頁版' : '', r.next_tier === 'basic' ? '取消進階功能' : ''].filter(Boolean).join('、') + '（續約確認收款時生效）</span>' : '<span class="rn-dim">不變</span>'],
@@ -540,6 +590,16 @@
       var to = r.tier === 'pro' ? 'basic' : 'pro';
       return confirmDialog(to === 'pro' ? '改為進階方案？' : '改回一般方案？', '<p class="rn-note">' + (to === 'pro' ? '開放預約行事曆、自訂程式碼（需審核）與多人協作。' : '網站會重新部署，拿掉自訂程式碼與預約行事曆；協作者會失去編輯權限（邀請紀錄保留）。') + '請記得同步調整收費。</p>', '確定', to === 'basic',
         async function () { var res = await call('set_tier', r.id, { tier: to }); toast(res.message || '已更新'); await refreshAfter(r.id, to === 'basic' && (r.status === 'live' || r.status === 'overdue')); });
+    }
+    if (act === 'export') {
+      return modal('下載「' + (r.shop_name || r.slug) + '」的網站', '<div class="rn-form"><p class="rn-note">打包成 ZIP：所有網頁、照片、robots.txt、sitemap.xml，解壓縮後可以放到任何靜態主機。標題字型與手機小圖不包含（改用系統字、原圖）；聯絡表單、預約與購買仍會送到 YC AXIOM 的系統。</p>' +
+        '<label>版本<select id="rn-exw">' + (r.live_version_id ? '<option value="live">目前上線的版本</option>' : '') + '<option value="draft">編輯器裡的草稿</option></select></label></div>', '下載',
+        false, async function () { await exportZip(r, document.getElementById('rn-exw').value); });
+    }
+    if (act === 'transfer') {
+      return modal('把「' + (r.shop_name || r.slug) + '」轉移給客戶', '<div class="rn-form"><p class="rn-note">網站的擁有者會改成這個 Email 的會員（對方要先用這個 Email 註冊並登入過一次）。轉移後你就不在「我的網站」看得到它，但後台照常可以管理與代客編輯。' + (r.status === 'draft' ? '草稿需要客戶登入後自己同意租用條款並送出上線申請。' : '') + '</p>' +
+        '<label>客戶的會員 Email<input type="email" id="rn-tremail" maxlength="200" autocomplete="off" placeholder="name@example.com"></label></div>', '轉移', false,
+        async function () { var e = document.getElementById('rn-tremail').value.trim(); if (!e) throw new Error('請輸入 Email'); var res = await call('transfer', r.id, { email: e }); toast(res.message || '已轉移'); await refreshAfter(r.id, false); });
     }
     if (act === 'republish') {
       return confirmDialog(r.status === 'suspended' ? '重新部署維護頁？' : '重新發佈？', '<p class="rn-note">' + (r.status === 'suspended' ? '會再部署一次「網站維護中」頁。' : '會用目前上線的版本重新部署一次（部署失敗時使用）。') + '</p>', '確定', false,
