@@ -210,6 +210,15 @@ async function boot() {
     await loadLib();
     const uid = YC.session.user.id;
     const pendingTrial = readTrial();
+    // 管理員代客編輯：?site=<id>&admin=1 直接開任何會員的網站（存檔、上傳都經由 admin-site，資料庫權限不變）
+    const qa = new URLSearchParams(location.search);
+    if (qa.get('admin') === '1' && qa.get('site') && YC.isAdmin && YC.isAdmin()) {
+      const a = await YC.client.from('rental_sites').select('*').eq('id', qa.get('site')).maybeSingle();
+      if (a.error) throw a.error;
+      if (!a.data) throw new Error('找不到這個網站');
+      S.admin = a.data.member_id !== uid;
+      if (S.admin) { S.mySites = [a.data]; return mount(a.data); }
+    }
     // 一個會員可以有多個網站：網址 ?site=<id> 指定要編輯哪一個，沒指定就開上次編輯的（或第一個）
     // 先接受寄到自己 Email 的協作邀請，再把「自己的網站」和「協作中的網站」一起列出
     try { await YC.client.functions.invoke('member-site', { body: { action: 'accept_invites' } }); } catch (e) { /* ignore */ }
@@ -327,7 +336,7 @@ function paintSiteSwitch(into) {
     S.dirty = false;
     location.href = location.pathname + (v === '__new' ? '?new=1' : '?site=' + encodeURIComponent(v));
   });
-  const canDelete = S.isOwner && ['draft', 'pending'].includes(S.site.status) && !S.site.first_published_at;
+  const canDelete = S.isOwner && !S.admin && ['draft', 'pending'].includes(S.site.status) && !S.site.first_published_at;
   box.replaceChildren(sel, canDelete ? h('button', { type: 'button', class: 'btn small danger', title: '刪除這個網站', onclick: askDeleteSite }, '刪除') : '');
 }
 // 刪除還沒上線過的網站：要輸入「刪除」兩個字確認。資料不會真的消失（改成已終止並隱藏），需要時可請管理員復原。
@@ -363,7 +372,9 @@ function mount(site) {
   S.isPro = site.tier === 'pro';
   S.flags = {};
   if (!S.trial) loadFlags(site);
-  if (!S.trial) { try { localStorage.setItem('yc-builder-site', site.id); } catch (e) { /* ignore */ } }
+  if (!S.trial && !S.admin) { try { localStorage.setItem('yc-builder-site', site.id); } catch (e) { /* ignore */ } }
+  if (S.admin) S.isOwner = true;   // 管理員代客編輯：可以改行業、網址代稱（草稿）；不能刪除、升級
+  paintAdminBar();
   paintSiteSwitch();
   paintTrialBar();
   S.content = L.normalizeContent(site.content);
@@ -514,14 +525,14 @@ async function uploadFont(file, msg, btn) {
   if (file.size > 20 * 1024 * 1024) { msg.className = 'msg bad'; msg.textContent = '字型檔超過 20MB，請改用較小的檔案（例如只含常用字的版本）'; return; }
   btn.disabled = true; msg.className = 'msg mute'; msg.textContent = '上傳中…';
   const path = S.site.id + '/font-' + Math.random().toString(36).slice(2, 12).replace(/[^a-z0-9]/g, 'x').padEnd(10, 'x') + '.' + ext;
-  const r = await YC.client.storage.from('site-fonts').upload(path, file, { contentType: 'application/octet-stream', upsert: false });
+  const r = await storageUpload('site-fonts', path, file, { contentType: 'application/octet-stream', upsert: false });
   btn.disabled = false;
   if (r.error) { msg.className = 'msg bad'; msg.textContent = '上傳失敗：' + r.error.message; return; }
   const old = S.content.style.customFont && S.content.style.customFont.path;
   S.content.style.customFont = { path, name: file.name.replace(/\.[^.]+$/, '').slice(0, 40) || '自訂字型' };
   S.content.style.font = 'custom';
   touch();
-  if (old && old !== path) YC.client.storage.from('site-fonts').remove([old]).catch(() => {});
+  if (old && old !== path) storageRemove('site-fonts', [old]);
   msg.className = 'msg ok'; msg.textContent = '已上傳。網站只會放標題用到的字，不會拖慢網站。';
   paintFontBox(); loadFontBlob();
 }
@@ -713,6 +724,25 @@ function setSaveText() {
   else if (S.dirty) e.textContent = '尚未儲存（2 秒後自動儲存）';
   else e.textContent = S.lastSaved ? '已儲存 ' + pad(S.lastSaved.getHours()) + ':' + pad(S.lastSaved.getMinutes()) + ':' + pad(S.lastSaved.getSeconds()) : '已儲存';
 }
+// ── 管理員代客編輯：寫入改走 admin-site（一般會員照舊直接寫資料庫） ──
+async function adminCall(body) {
+  const r = await YC.client.functions.invoke('admin-site', { body: { site_id: S.site.id, ...body } });
+  if (r.error) { let b = null; try { b = await r.error.context.json(); } catch (e) { /* ignore */ } return { error: { message: (b && b.message) || '操作失敗', code: b && b.error } }; }
+  return { data: r.data };
+}
+async function siteUpdate(patch) {
+  if (!S.admin) return YC.client.from('rental_sites').update(patch).eq('id', S.site.id).select('slug,template').single();
+  const r = await adminCall({ action: 'edit_save', patch });
+  if (r.error && r.error.code === 'invalid') r.error.code = '23514';
+  return r.error ? r : { data: { slug: r.data.slug, template: r.data.template } };
+}
+async function storageUpload(bucket, path, file, opts) {
+  if (!S.admin) return YC.client.storage.from(bucket).upload(path, file, opts);
+  const t = await adminCall({ action: 'edit_upload_url', bucket, path });
+  if (t.error) return t;
+  return YC.client.storage.from(bucket).uploadToSignedUrl(path, t.data.token, file, opts);
+}
+function storageRemove(bucket, paths) { if (S.admin) return; YC.client.storage.from(bucket).remove(paths).catch(() => {}); }   // 代客編輯不刪任何檔案
 async function save() {
   clearTimeout(S.timers.save);
   if (S.saving) { S.timers.save = setTimeout(save, 500); return true; }
@@ -725,7 +755,7 @@ async function save() {
   writeBackup(snapshot);
   const wantSlug = S.slug;
   if (S.site.status === 'draft' && wantSlug !== S.site.slug && S.slugState.ok && !S.lib.slugError(wantSlug)) payload.slug = wantSlug;
-  const r = await YC.client.from('rental_sites').update(payload).eq('id', S.site.id).select('slug').single();
+  const r = await siteUpdate(payload);
   S.saving = false;
   if (r.error) {
     S.saveErr = true; setSaveText(); console.warn('save', r.error);
@@ -1294,7 +1324,7 @@ function industryField() {
       }
       goBtn.disabled = true; goBtn.textContent = '更改中…';
       if (!(await save())) { goBtn.disabled = false; goBtn.textContent = '確定更改'; toast('目前的內容還沒儲存成功，請稍後再試', 5000); return; }
-      const r = await YC.client.from('rental_sites').update({ template: to.key }).eq('id', S.site.id).select('template').single();
+      const r = await siteUpdate({ template: to.key });
       if (r.error) {
         closeModal(); sel.value = from.key;
         toast(/permission|privilege|denied/i.test(r.error.message) ? '目前還不能自己更改行業，請聯絡我們協助' : '更改失敗：' + r.error.message, 6000);
@@ -1322,7 +1352,7 @@ function paintLayout() {
       cb.addEventListener('change', () => { S.sections[k] = cb.checked; touch(); if (cb.checked) scrollPreviewTo(k); });
       return h('label', {}, cb, sectionLabel(k));
     });
-    const up = multiOpen() && S.isOwner ? h('div', { class: 'upgrade' },
+    const up = multiOpen() && S.isOwner && !S.admin ? h('div', { class: 'upgrade' },
       h('div', { class: 'msg mute', text: '想把內容分成多個頁面（關於、' + IND().offer.nav + '、' + IND().space.label + '、常見問題…）？可以升級成多頁版。' }),
       h('button', { type: 'button', class: 'btn small', onclick: askUpgrade }, '升級成多頁版')) : null;
     box.replaceChildren(h('span', { text: '版型：一頁版（所有內容在同一頁）' }), h('div', { class: 'msg mute', style: 'margin:0 0 4px', text: '要顯示的區塊：' }), ...toggles, up || '');
@@ -2191,14 +2221,14 @@ async function uploadPhotoQuick(sl, file) {
   const out = await compress(file, sl.label, true);
   const { blob, ext, w, h: hh } = out;
   const path = S.site.id + '/room-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5) + '.' + ext;
-  const r = await YC.client.storage.from('site-photos').upload(path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
+  const r = await storageUpload('site-photos', path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
   if (r.error) throw new Error('上傳失敗：' + r.error.message);
   S.fresh.add(path); sl.set({ path, w, h: hh }); touch();
 }
 async function trashPhoto(path) {
   if (!path || !S.fresh.has(path)) return;     // 已發佈過的照片可能還被舊版本使用，不刪
   S.fresh.delete(path);
-  YC.client.storage.from('site-photos').remove([path]).catch(() => {});
+  storageRemove('site-photos', [path]);
 }
 async function loadHeic() {
   if (window.heic2any) return;
@@ -2312,7 +2342,7 @@ async function uploadPhoto(sl, file, nm, btn) {
     if (!out) { nm.textContent = ''; btn.disabled = false; return; }
     const { blob, ext, w, h: hh } = out;
     const path = S.site.id + '/' + (['hero', 'item', 'block', 'share', 'news'].includes(sl.key) ? sl.key : 'room') + '-' + Date.now().toString(36) + '.' + ext;
-    const r = await YC.client.storage.from('site-photos').upload(path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
+    const r = await storageUpload('site-photos', path, blob, { contentType: blob.type, cacheControl: '3600', upsert: false });
     if (r.error) throw new Error('上傳失敗：' + r.error.message);
     S.fresh.add(path);
     const old = sl.get() && sl.get().path;
@@ -2377,9 +2407,16 @@ function paintChecks(box, need, ex, sg) {
   if (!box.ckBound) { box.ckBound = true; box.addEventListener('toggle', () => { try { sessionStorage.setItem('yc-checks-open', box.open ? '1' : '0'); } catch (e) { /* ignore */ } }); }
 }
 
+function paintAdminBar() {
+  let bar = document.getElementById('admBar');
+  if (!S.admin) { if (bar) bar.remove(); return; }
+  if (!bar) { bar = h('div', { id: 'admBar', role: 'status', style: 'position:sticky;top:0;z-index:60;background:#7a4b12;color:#fff;font-size:13.5px;padding:7px 14px;text-align:center;line-height:1.5' }); document.body.prepend(bar); }
+  bar.textContent = '管理員代客編輯中：' + (S.site.content && S.site.content.name || S.site.slug) + '（' + S.site.slug + '）。修改會直接存到客戶的草稿；' + (S.site.status === 'draft' ? '第一次上線要由客戶同意條款後送出。' : '按「發佈」會更新客戶的正式網站。');
+}
 // ── 發佈 ──
 async function publish() {
   if (S.trial) return askLoginToKeep('發佈');
+  if (S.admin && S.site.status === 'draft') return modal('需要客戶送出', [h('p', { text: '這個網站還是草稿，第一次上線要由客戶自己同意租用條款後送出。內容已自動儲存；請在後台按「轉移給客戶」（若還沒轉移），再請客戶登入「我的網站」送出上線申請。' })], [h('button', { class: 'btn primary', onclick: closeModal }, '知道了')]);
   if (S.publishing) return;
   const v = validate();
   if (!v.ok) {
@@ -2392,7 +2429,7 @@ async function publish() {
     closeModal(); S.publishing = true; const btn = $('#btnPublish'); btn.disabled = true; btn.textContent = '處理中…';
     try {
       const ok = await save(); if (!ok) throw new Error('草稿尚未儲存成功，請稍後再按發佈');
-      if (needTerms()) {
+      if (needTerms() && !S.admin) {
         const t = await YC.client.rpc('rental_accept_terms', { p_site_id: S.site.id, p_version: termsVersion() });
         if (t.error) throw new Error('無法記錄條款同意，請稍後再試');
         S.site.terms_accepted_at = t.data || new Date().toISOString(); S.site.terms_version = termsVersion();
@@ -2443,7 +2480,7 @@ async function publish() {
   }
   // 還沒同意、或同意的是舊版條款：要勾選同意才能按
   function termsBox(label) {
-    const need = needTerms(), updated = need && !!S.site.terms_accepted_at;
+    const need = needTerms() && !S.admin, updated = need && !!S.site.terms_accepted_at;
     const chk = h('input', { type: 'checkbox', id: 'termsOk' });
     const btn = h('button', { class: 'btn primary', id: 'termsGo', onclick: go }, label);
     if (need) btn.disabled = true;
