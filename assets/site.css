@@ -2018,3 +2018,110 @@ html.yc-s-open { overflow: hidden; }
 .section-pad > .sp-lede.reveal, .section-pad > .article-meta.reveal { animation-delay: 0.14s; }
 .section-pad > .sp-actions.reveal, .section-pad > .article-body.reveal { animation-delay: 0.2s; }
 @media (prefers-reduced-motion: reduce) { .section-pad > .reveal { animation: none; } }
+
+/* ── 租用常見疑慮（租用頁、首頁）：四件事，每則附上條款出處 ── */
+.yc-assure { margin: 64px 0 8px; }
+.yc-assure-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.yc-assure-eyebrow { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+.yc-assure .sp-h2 { margin: 0; }
+.yc-assure-grid { list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.yc-assure-item { background: var(--surface); padding: 30px 30px 26px; display: grid; grid-template-columns: auto 1fr; column-gap: 18px; align-content: start; }
+.yc-assure-n { font-family: var(--f-display); font-size: 30px; line-height: 1; color: var(--accent); opacity: .9; padding-top: 2px; }
+.yc-assure-q { font-family: var(--f-ui); font-weight: 700; font-size: 18px; line-height: 1.45; color: var(--text-bright); margin: 0 0 4px; }
+.yc-assure-a1 { font-size: 15px; font-weight: 600; color: var(--accent-light); margin: 0 0 10px; }
+.yc-assure-a { font-size: 15px; line-height: 1.85; color: var(--text); margin: 0; }
+.yc-assure-src { grid-column: 2; margin: 14px 0 0; font-size: 12.5px; color: var(--text-dim); letter-spacing: .02em; }
+.yc-assure-src a { color: var(--text-dim); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--accent-rgb), .45); }
+.yc-assure-src a:hover { color: var(--accent-light); }
+.yc-assure-foot { margin: 16px 0 0; font-size: 14px; color: var(--text-dim); }
+.yc-assure--home { margin: 8px 0 0; }
+.yc-assure--home .yc-assure-a { display: none; }
+.yc-assure--home .yc-assure-item { padding: 24px 24px 22px; }
+.yc-assure--home .yc-assure-a1 { margin: 0; }
+@media (max-width: 760px) {
+  .yc-assure-grid { grid-template-columns: 1fr; }
+  .yc-assure-item { padding: 24px 20px 22px; column-gap: 14px; }
+  .yc-assure-n { font-size: 24px; }
+  .yc-assure-q { font-size: 17px; }
+}
+
+/* ── 月租試算（定價頁）──後台開啟「隱藏價錢」時，整個區塊在建置時移除 ── */
+.yc-calc { margin: 22px 0 0; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+.yc-calc-in { padding: 30px 30px 26px; }
+.yc-calc-title { font-family: var(--f-ui); font-weight: 800; font-size: 22px; color: var(--text-bright); margin: 0 0 6px; }
+.yc-calc-sub { font-size: 14px; color: var(--text-dim); margin: 0 0 22px; }
+.yc-calc fieldset { border: 0; margin: 0 0 22px; padding: 0; min-width: 0; }
+.yc-calc legend { font-size: 13px; letter-spacing: .08em; color: var(--accent); margin-bottom: 10px; padding: 0; }
+.yc-calc-opt { display: flex; gap: 12px; align-items: flex-start; padding: 11px 0; border-bottom: 1px solid var(--border); cursor: pointer; font-size: 15px; line-height: 1.6; color: var(--text); }
+.yc-calc-opt:last-of-type { border-bottom: 0; }
+.yc-calc-opt input { appearance: none; -webkit-appearance: none; flex: none; width: 20px; height: 20px; margin: 2px 0 0; border: 1.5px solid rgba(var(--accent-rgb), .55); border-radius: 3px; display: grid; place-items: center; cursor: pointer; background: transparent; }
+.yc-calc-opt input::after { content: ''; width: 10px; height: 6px; border: 2px solid var(--on-accent); border-top: 0; border-right: 0; transform: rotate(-45deg) translate(1px, -1px); opacity: 0; }
+.yc-calc-opt input:checked { background: var(--accent); border-color: var(--accent); }
+.yc-calc-opt input:checked::after { opacity: 1; }
+.yc-calc-opt input:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.yc-calc-opt small { display: block; font-size: 13px; color: var(--text-dim); }
+.yc-calc-tag { margin-left: auto; flex: none; font-size: 12px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--border); color: var(--text-dim); white-space: nowrap; }
+.yc-calc-tag.is-add { border-color: rgba(var(--accent-rgb), .5); color: var(--accent-light); }
+.yc-calc-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.yc-calc-chip { position: relative; }
+.yc-calc-chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.yc-calc-chip span { display: inline-block; font-size: 14px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 99px; color: var(--text-dim); transition: border-color .2s, color .2s, background .2s; }
+.yc-calc-chip input:checked + span { border-color: rgba(var(--accent-rgb), .6); color: var(--text-bright); background: var(--accent-dim); }
+.yc-calc-chip input:focus-visible + span { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.yc-calc-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 99px; padding: 3px; }
+.yc-calc-seg label { position: relative; }
+.yc-calc-seg input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.yc-calc-seg span { display: block; padding: 7px 16px; border-radius: 99px; font-size: 14px; color: var(--text-dim); cursor: pointer; }
+.yc-calc-seg input:checked + span { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.yc-calc-seg input:focus-visible + span { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.yc-calc-out { background: linear-gradient(160deg, rgba(var(--accent-rgb), .12), rgba(var(--accent-rgb), .03) 60%), var(--surface-2); border-left: 1px solid var(--border); padding: 30px; display: flex; flex-direction: column; }
+.yc-calc-plan { font-size: 14px; color: var(--accent-light); margin: 0 0 8px; min-height: 1.6em; }
+.yc-calc-total { font-family: var(--f-display); font-size: clamp(38px, 4.6vw, 52px); line-height: 1.05; color: var(--text-bright); margin: 0; font-variant-numeric: tabular-nums; }
+.yc-calc-total small { font-family: var(--f-ui); font-size: 16px; color: var(--text-dim); margin-left: 4px; }
+.yc-calc-detail { font-size: 14px; color: var(--text-dim); margin: 10px 0 0; line-height: 1.7; min-height: 3.4em; }
+.yc-calc-early { font-size: 13px; color: var(--accent-light); margin: 6px 0 0; }
+.yc-calc-inc { list-style: none; margin: 20px 0 0; padding: 16px 0 0; border-top: 1px solid var(--border); font-size: 14px; color: var(--text); line-height: 1.6; }
+.yc-calc-inc li { padding: 3px 0 3px 22px; position: relative; }
+.yc-calc-inc li::before { content: ''; position: absolute; left: 2px; top: 10px; width: 9px; height: 5px; border: 1.5px solid var(--accent); border-top: 0; border-right: 0; transform: rotate(-45deg); }
+.yc-calc-acts { margin-top: auto; padding-top: 22px; display: flex; flex-wrap: wrap; gap: 10px; }
+.yc-calc-note { font-size: 12.5px; color: var(--text-dim); margin: 14px 0 0; line-height: 1.7; }
+@media (max-width: 860px) {
+  .yc-calc { grid-template-columns: 1fr; }
+  .yc-calc-out { border-left: 0; border-top: 1px solid var(--border); }
+  .yc-calc-in, .yc-calc-out { padding: 24px 20px; }
+}
+
+/* ── 案例成果數字（作品集案例頁）── */
+.yc-result { margin: 40px 0 8px; }
+.article-body .yc-result-stats { list-style: none; display: grid; gap: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--border-active); border-bottom: 1px solid var(--border); margin: 0 0 30px; }
+.yc-result-stats li { padding: 22px 18px 20px 0; }
+.yc-result-stats li + li { padding-left: 18px; border-left: 1px solid var(--border); }
+.yc-result-num { display: block; font-family: var(--f-display); font-size: clamp(40px, 5vw, 60px); line-height: 1; color: var(--text-bright); font-variant-numeric: tabular-nums; }
+.yc-result-num em { font-style: normal; font-family: var(--f-ui); font-size: 16px; color: var(--accent); margin-left: 4px; }
+.yc-result-lbl { display: block; font-size: 14px; color: var(--text-dim); margin-top: 10px; line-height: 1.6; }
+.yc-rank { width: 100%; border-collapse: collapse; font-size: 15px; margin: 0 0 10px; }
+.yc-rank th { text-align: left; font-weight: 500; font-size: 13px; letter-spacing: .06em; color: var(--text-dim); padding: 0 0 10px; border-bottom: 1px solid var(--border); }
+.yc-rank td { padding: 14px 0; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.yc-rank td:first-child { color: var(--text-bright); font-weight: 600; padding-right: 12px; }
+.yc-rank .yc-rank-bar { width: 46%; }
+.yc-rank-meter { display: flex; align-items: center; gap: 12px; }
+.yc-rank-meter i { display: block; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--accent-deep), var(--accent-light)); }
+.yc-rank-meter b { font-weight: 700; color: var(--accent-light); white-space: nowrap; font-size: 14px; }
+.yc-rank-before { color: var(--text-dim); font-size: 14px; white-space: nowrap; }
+.article-body .yc-tl { list-style: none; display: block; margin: 8px 0 26px; padding: 0; border-left: 1px solid var(--border-active); }
+.article-body .yc-tl li { position: relative; padding: 0 0 22px 26px; }
+.yc-tl li::before { content: ''; position: absolute; left: -5px; top: 7px; width: 9px; height: 9px; border-radius: 50%; background: var(--black); border: 1.5px solid var(--accent); }
+.yc-tl li:last-child { padding-bottom: 0; }
+.yc-tl li:last-child::before { background: var(--accent); }
+.yc-tl-when { display: block; font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .12em; color: var(--accent); margin-bottom: 4px; }
+.yc-tl strong { color: var(--text-bright); }
+@media (max-width: 760px) {
+  .article-body .yc-result-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .yc-result-stats li { padding: 18px 12px 18px 0; }
+  .yc-result-stats li + li { padding-left: 12px; }
+  .yc-result-stats li:nth-child(3) { padding-left: 0; border-left: 0; border-top: 1px solid var(--border); }
+  .yc-result-stats li:nth-child(4) { border-top: 1px solid var(--border); }
+  .yc-rank .yc-rank-bar { width: 52%; }
+  .yc-rank-meter i { max-width: 34%; }
+  .yc-rank-before { white-space: normal; }
+}

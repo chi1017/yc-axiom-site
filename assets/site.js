@@ -954,3 +954,42 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         e.preventDefault(); open();
     });
 })();
+
+// ── 定價頁「月租試算」：價格來自後台設定（data-calc）；後台隱藏價錢時整個區塊在建置時移除 ──
+(function () {
+    var box = document.getElementById('calc');
+    if (!box || !box.dataset.calc) return;
+    var P; try { P = JSON.parse(box.dataset.calc); } catch (e) { return; }
+    if (!P || !P.sm) return;
+    var en = YC_EN, f = box.querySelector('form'), q = function (k) { return box.querySelector('[data-c="' + k + '"]'); };
+    var money = function (n) { return 'NT$' + Math.round(n).toLocaleString('en-US'); };
+    var T = en ? { one: 'One-page', multi: 'Multi-page', pro: 'Add-ons', mo: '/month', yr: '/year',
+        m: 'Monthly, no lock-in. Stop paying any time.', y: function (avg, save) { return 'About ' + money(avg) + ' a month' + (save > 0 ? ', saving ' + money(save) + ' compared with paying monthly.' : '.'); },
+        early: function (d) { return 'Early-bird price: start before ' + d + ' and keep it on renewals. Add-ons are at the regular price.'; },
+        base: ['Template and online editor (computer or phone)', 'Hosting, unlimited traffic, HTTPS and maintenance', 'Monthly SEO and AI visibility check'],
+        pages: 'Separate pages for About, Prices, Photos, News, FAQ and Contact', proInc: 'Booking calendar, custom code and embeds, team editing (up to 5)' }
+      : { one: '一頁版', multi: '多頁版', pro: '進階功能', mo: '／月', yr: '／年',
+        m: '月繳，不綁約，不想續就不付。', y: function (avg, save) { return '平均每月約 ' + money(avg) + (save > 0 ? '，比月繳省 ' + money(save) + '。' : '。'); },
+        early: function (d) { return '早鳥價：' + d + ' 前開始租用，之後續約都維持這個價格（進階功能以一般價格計算）。'; },
+        base: ['版型、線上編輯器（電腦、手機都能改）', '主機、不限流量、HTTPS、維護', '每月 SEO 與 AI 可見度體檢'],
+        pages: '關於、價目、照片、消息、常見問題、聯絡獨立頁面', proInc: '預約行事曆、自訂程式碼與嵌入、多人協作（最多 5 人）' };
+    var esc = function (s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); };
+    function calc() {
+        var multi = f.multi.checked, pro = !!f.querySelector('input[name="pro"]:checked'), year = f.querySelector('input[name="cycle"]:checked').value === 'y';
+        var m = (multi ? P.mm : P.sm) + (pro ? P.pm : 0), y = (multi ? P.my : P.sy) + (pro ? P.py : 0);
+        q('plan').textContent = (multi ? T.multi : T.one) + (pro ? ' + ' + T.pro : '');
+        q('total').textContent = money(year ? y : m);
+        q('unit').textContent = year ? T.yr : T.mo;
+        q('detail').textContent = year ? T.y(y / 12, m * 12 - y) : T.m;
+        var e = q('early'); e.hidden = !P.early; if (P.early) e.textContent = T.early(P.until);
+        var inc = T.base.slice();
+        if (multi) inc.push(T.pages);
+        if (pro) inc.push(T.proInc);
+        var picked = [].map.call(f.querySelectorAll('input[name="inc"]:checked'), function (x) { return x.nextElementSibling.textContent; });
+        if (picked.length) inc.push((en ? 'Included: ' : '已包含：') + picked.join(en ? ', ' : '、'));
+        q('inc').innerHTML = inc.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+    }
+    var sent = false;
+    f.addEventListener('change', function () { calc(); if (!sent && typeof gtag === 'function') { sent = true; try { gtag('event', 'rental_calc'); } catch (e) { /* ignore */ } } });
+    calc();
+})();

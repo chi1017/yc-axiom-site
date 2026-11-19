@@ -66,6 +66,7 @@ for (const f of walk(OUT)) {
   let s = readFileSync(f, 'utf8'), o = s;
   if (hasTokens(s)) s = render(s, rel.startsWith('en/') ? tokEn : tok);
   if (HIDE && !HIDE_EXEMPT.test(rel) && !rel.startsWith('assets/')) {
+    s = s.replace(/<!-- yc:calc -->[\s\S]*?<!-- \/yc:calc -->\n?/g, '');   // 月租試算整塊拿掉
     s = hidePriceText(s, rel.startsWith('en/'));
     hidden += s !== o ? 1 : 0;
   }
