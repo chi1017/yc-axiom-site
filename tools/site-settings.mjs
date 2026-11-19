@@ -102,7 +102,9 @@ export function tokens(s, eff) {
     terms_refund: '例如一頁版一次付 ' + num(sy) + ' 元、已使用 3 個月，退還 ' + num(sy) + ' − 3 × ' + num(sm) + ' = ' + num(Math.max(0, sy - 3 * sm)) + ' 元',
     terms_lock_note: E.early ? '早鳥價：在早鳥活動期間開始租用（第一次確認收款在活動期間內）的網站，之後續約、升級多頁版與加購進階功能，都維持當時的早鳥價格。'
       : '先前活動價格：在先前價格活動期間開始租用的網站，之後續約、升級多頁版與加購進階功能，都維持當時的價格。',
-    terms_version: termsVersion(s)
+    terms_version: termsVersion(s),
+    // 定價頁「月租試算」用的數字（放在 data 屬性；隱藏價錢時整個試算區塊會被移除）
+    calc_data: esc(JSON.stringify({ sm, sy, mm, my, pm: E.pro.month, py: E.pro.year, early: !!E.early, until: E.until }))
   };
 }
 

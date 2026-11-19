@@ -63,7 +63,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <script id="yc-webfont">/* 字型等頁面顯示後才下載，主要內容不用等字型 */(function(){var u="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Cinzel:wght@500&family=Noto+Serif+TC:wght@600&display=swap";function a(){var l=document.createElement("link");l.rel="stylesheet";l.href=u;document.head.appendChild(l);}if(document.readyState==="complete")a();else addEventListener("load",function(){setTimeout(a,0);});})();</script>
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Cinzel:wght@500&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="../assets/dist/site.min.css?v=c9970ca789">
+<link rel="stylesheet" href="../assets/dist/site.min.css?v=547e5620be">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -570,6 +570,27 @@
         <h2 class="sp-h2 reveal">網站租用</h2>
         <div class="sp-price reveal"><table><tbody><tr><td>網站租用．一頁版（預先設計的版型、線上編輯器、發佈與維護、每月網站體檢、線上購買（綠界收款）、GA4 流量統計；所有內容在同一頁，含價目、照片、常見問題、最新消息等區塊）</td><td class="sp-price-v">{{yc:single_label}}</td></tr><tr><td>{{yc:single_year_row}}</td><td class="sp-price-v">{{yc:single_year}}／年</td></tr><tr><td>網站租用．多頁版（同上，另有關於、價目、照片、消息、常見問題、聯絡等獨立頁面，可自選）</td><td class="sp-price-v">{{yc:multi_label}}</td></tr><tr><td>{{yc:multi_year_row}}</td><td class="sp-price-v">{{yc:multi_year}}／年</td></tr><tr><td>進階功能（加購，一頁版、多頁版都能加：預約行事曆讓客人直接選時段、額滿自動擋；自訂程式碼與嵌入，經審核後放進網站；多人協作，最多 5 人一起編輯）</td><td class="sp-price-v">每月加 {{yc:pro_month}}（一次付 12 個月加 {{yc:pro_year}}）</td></tr></tbody></table>
             <p class="sp-note">自己登入填寫內容、我們負責上線與維護，適合想先有專業網站的中小企業。<a href="../rental/">了解網站租用 →</a></p></div>
+        <!-- yc:calc -->
+        <section class="yc-calc reveal" id="calc" aria-labelledby="calc-t" data-calc="{{yc:calc_data}}">
+            <form class="yc-calc-in" onsubmit="return false">
+                <h3 class="yc-calc-title" id="calc-t">月租試算</h3>
+                <p class="yc-calc-sub">勾選你需要的，右邊直接算出每月要付多少。</p>
+                <fieldset><legend>網站要放什麼（都含在月租裡）</legend><div class="yc-calc-chips"><label class="yc-calc-chip"><input type="checkbox" name="inc" value="價目／菜單"><span>價目／菜單</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="環境照片"><span>環境照片</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="常見問題"><span>常見問題</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="最新消息"><span>最新消息</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="客人評價"><span>客人評價</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="線上購買"><span>線上購買</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="文章"><span>文章</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="英文版"><span>英文版</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="地圖"><span>地圖</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="聯絡表單"><span>聯絡表單</span></label><label class="yc-calc-chip"><input type="checkbox" name="inc" value="預約表單"><span>預約表單</span></label></div></fieldset>
+                <fieldset><legend>版面</legend><label class="yc-calc-opt"><input type="checkbox" name="multi"><span>每個主題要有自己的頁面<small>關於、價目、照片、消息、常見問題、聯絡分成獨立頁面。不勾就是一頁版，之後可以隨時升級。</small></span><span class="yc-calc-tag">多頁版</span></label></fieldset>
+                <fieldset><legend>進階功能（勾任一項就加購，三項都包含）</legend><label class="yc-calc-opt"><input type="checkbox" name="pro" value="booking"><span>客人在網站上直接選時段預約<small>額滿自動擋，不用一則一則回訊息</small></span><span class="yc-calc-tag is-add">進階功能</span></label><label class="yc-calc-opt"><input type="checkbox" name="pro" value="code"><span>放自己的程式碼或嵌入外部工具<small>例如訂位系統、Google 表單，經審核後放進網站</small></span><span class="yc-calc-tag is-add">進階功能</span></label><label class="yc-calc-opt"><input type="checkbox" name="pro" value="team"><span>和同事一起編輯<small>最多 5 人</small></span><span class="yc-calc-tag is-add">進階功能</span></label></fieldset>
+                <fieldset><legend>付款方式</legend><div class="yc-calc-seg" role="radiogroup" aria-label="付款方式"><label><input type="radio" name="cycle" value="m" checked><span>月繳</span></label><label><input type="radio" name="cycle" value="y"><span>一次付 12 個月</span></label></div></fieldset>
+            </form>
+            <div class="yc-calc-out" aria-live="polite">
+                <p class="yc-calc-plan" data-c="plan">一頁版</p>
+                <p class="yc-calc-total"><span data-c="total">{{yc:from}}</span><small data-c="unit">／月</small></p>
+                <p class="yc-calc-detail" data-c="detail">月繳，不綁約，不想續就不付。</p>
+                <p class="yc-calc-early" data-c="early" hidden></p>
+                <ul class="yc-calc-inc" data-c="inc"><li>版型、線上編輯器（電腦、手機都能改）</li><li>主機、不限流量、HTTPS、維護</li><li>每月 SEO 與 AI 可見度體檢</li></ul>
+                <div class="yc-calc-acts"><a class="btn-primary" href="../builder/">免費試用編輯器</a><a class="btn-secondary" href="../rental/#assure">租之前的四件事</a></div>
+                <p class="yc-calc-note">試算以目前公開價格計算，實際金額以會員專區顯示為準；看到成品才需要付款。</p>
+            </div>
+        </section>
+<!-- /yc:calc -->
 
         <!-- FAQ Section -->
         <div class="faq-section reveal">
@@ -717,6 +738,6 @@
         </div>
     </div>
 </footer>
-<script src="../assets/dist/site.min.js?v=a4caf365ba" defer></script>
+<script src="../assets/dist/site.min.js?v=e8f4f3a7ad" defer></script>
 </body>
 </html>
