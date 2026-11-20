@@ -9,6 +9,34 @@ export const DEFAULTS = {
   early: { enabled: true, single_month: 599, single_year: 5990, multi_month: 899, multi_year: 8990, deadline: '2027-02-03T23:59:00+08:00', quota: null },
   bar: { enabled: true, follow_early: true, text: '中小企業月租網站早鳥價 {早鳥價}／月，至 {截止日}', text_mobile: '早鳥價 {早鳥價}／月', button: '看方案 →', link: '/rental/', start: null, end: null, dismiss_days: 7 },
   display: { hide_prices: false, hide_contact: false, hide_contact_privacy: false },
+  quote: {
+    note: '以上為線上試算金額，正式金額以報價單為準。',
+    plans: [
+      { id: 'A', name: '單頁形象網站', en: 'One-page brand site', price: 15000, desc: '約 6 個區塊・基本動態・諮詢表單・基礎 SEO・約 2–3 週', desc_en: 'About 6 sections, basic motion, enquiry form, basic SEO, about 2–3 weeks' },
+      { id: 'B', name: '品牌多頁網站', en: 'Multi-page brand site', price: 32000, desc: '4 頁・Figma 介面設計・全站 SEO 語意架構・約 3–5 週', desc_en: '4 pages, Figma UI design, site-wide SEO structure, about 3–5 weeks' },
+      { id: 'C', name: '電商與系統網站', en: 'E-commerce site', price: 60000, desc: '購物車與結帳・一種金流與物流・轉化追蹤・約 6–8 週', desc_en: 'Cart and checkout, one payment and one shipping method, conversion tracking, about 6–8 weeks' }
+    ],
+    items: [
+      { id: 'sec', g: '規模', name: '增加區塊（每個）', en: 'Extra section (each)', unit: 'qty', max: 10, p: { A: 1500, B: null, C: null } },
+      { id: 'page', g: '規模', name: '增加頁面（每頁）', en: 'Extra page (each)', unit: 'qty', max: 10, p: { A: null, B: 7000, C: 7000 } },
+      { id: 'sku', g: '規模', name: '商品多規格（尺寸、顏色等）', en: 'Product variants (size, colour…)', unit: 'once', p: { A: null, B: null, C: 15000 } },
+      { id: 'copy', g: '內容與設計', name: '文案撰寫與整理', en: 'Copywriting and editing', unit: 'once', p: { A: 6000, B: 12000, C: 12000 } },
+      { id: 'photo', g: '內容與設計', name: '照片挑選與修圖', en: 'Photo selection and retouching', unit: 'once', p: { A: 3000, B: 5000, C: 5000 } },
+      { id: 'illus', g: '內容與設計', name: '客製插圖或圖示', en: 'Custom illustrations or icons', unit: 'once', p: { A: 6000, B: 8000, C: 8000 } },
+      { id: 'motion', g: '內容與設計', name: '進階捲動動畫', en: 'Advanced scroll animation', unit: 'once', p: { A: 8000, B: 12000, C: 12000 } },
+      { id: 'en', g: '內容與設計', name: '中英雙語', en: 'Chinese and English versions', unit: 'once', p: { A: 8000, B: 16000, C: 25000 } },
+      { id: 'embed', g: '功能', name: '嵌入預約、地圖等外部服務', en: 'Embed booking, maps or other services', unit: 'once', p: { A: 3000, B: 3000, C: 3000 } },
+      { id: 'form', g: '功能', name: '預約表單或表單分流', en: 'Booking form or routed forms', unit: 'once', p: { A: null, B: 6000, C: 6000 } },
+      { id: 'ga', g: '功能', name: 'GA4／Meta Pixel 轉化追蹤', en: 'GA4 / Meta Pixel conversion tracking', unit: 'once', p: { A: 4000, B: 4000, C: 0 } },
+      { id: 'pay', g: '功能', name: '多一種金流或物流（每種）', en: 'Extra payment or shipping method (each)', unit: 'qty', max: 4, p: { A: null, B: null, C: 8000 } },
+      { id: 'coupon', g: '功能', name: '優惠碼', en: 'Discount codes', unit: 'once', p: { A: null, B: null, C: 8000 } },
+      { id: 'member', g: '功能', name: '會員與訂單查詢', en: 'Member accounts and order lookup', unit: 'once', p: { A: null, B: null, C: 20000 } },
+      { id: 'seo', g: 'SEO', name: '關鍵字策略與內容架構優化', en: 'Keyword strategy and content structure', unit: 'once', p: { A: 18000, B: 18000, C: 18000 } },
+      { id: 'care', g: '上線後（每月）', name: '技術維護與安全託管', en: 'Technical maintenance and hosting care', unit: 'month', excl: 'care', p: { A: 1500, B: 1500, C: 1500 } },
+      { id: 'ops', g: '上線後（每月）', name: '進階運營（含技術維護、活動頁更新、GA4 月報）', en: 'Advanced operations (incl. maintenance, page updates, GA4 report)', unit: 'month', excl: 'care', p: { A: 5000, B: 5000, C: 5000 } },
+      { id: 'seom', g: '上線後（每月）', name: '長期 SEO 經營', en: 'Ongoing SEO', unit: 'month', p: { A: 15000, B: 15000, C: 15000 } }
+    ]
+  },
   card: { enabled: true, follow_early: true, title: '早鳥價 {早鳥價}／月', body: '中小企業專屬月租網站，自己填內容就能上線', b1_text: '看方案', b1_link: '/rental/', b2_text: 'LINE 詢問', b2_link: 'https://line.me/R/ti/p/%40788cblaq', scroll_pct: 40, delay_sec: 10, pages: ['/', '/rental/', '/services/', '/pricing/', '/articles/*'], dismiss_days: 7, start: null, end: null }
 };
 
@@ -34,7 +62,26 @@ export function normalize(s) {
     early: { ...DEFAULTS.early, ...(o.early || {}) },
     bar: { ...DEFAULTS.bar, ...(o.bar || {}) },
     card: { ...DEFAULTS.card, ...(o.card || {}), pages: Array.isArray(o.card && o.card.pages) ? o.card.pages : DEFAULTS.card.pages },
-    display: { ...DEFAULTS.display, ...(o.display || {}) }
+    display: { ...DEFAULTS.display, ...(o.display || {}) },
+    quote: normQuote(o.quote)
+  };
+}
+
+// 報價試算：價格只接受 0 以上整數（0＝已包含），null＝這個方案不提供
+function normQuote(q) {
+  const D = DEFAULTS.quote;
+  if (!q || !Array.isArray(q.plans) || !Array.isArray(q.items)) return JSON.parse(JSON.stringify(D));
+  const int = (v) => (v === null || v === '' || v === undefined ? null : Number.isInteger(Number(v)) && Number(v) >= 0 ? Number(v) : null);
+  const str = (v, n) => String(v == null ? '' : v).slice(0, n);
+  return {
+    note: str(q.note == null ? D.note : q.note, 200),
+    plans: ['A', 'B', 'C'].map((id) => { const x = q.plans.find((p) => p && p.id === id) || D.plans.find((p) => p.id === id); return { id, name: str(x.name, 40), en: str(x.en, 60), price: int(x.price) || 0, desc: str(x.desc, 120), desc_en: str(x.desc_en, 160) }; }),
+    items: q.items.filter((x) => x && x.name).slice(0, 40).map((x, i) => ({
+      id: str(x.id || 'i' + i, 20), g: str(x.g, 20), name: str(x.name, 60), en: str(x.en, 80),
+      unit: ['once', 'qty', 'month'].includes(x.unit) ? x.unit : 'once', ...(x.unit === 'qty' ? { max: Math.min(50, Math.max(1, int(x.max) || 10)) } : {}),
+      ...(x.excl ? { excl: str(x.excl, 20) } : {}),
+      p: { A: int(x.p && x.p.A), B: int(x.p && x.p.B), C: int(x.p && x.p.C) }
+    }))
   };
 }
 
@@ -104,7 +151,9 @@ export function tokens(s, eff) {
       : '先前活動價格：在先前價格活動期間開始租用的網站，之後續約、升級多頁版與加購進階功能，都維持當時的價格。',
     terms_version: termsVersion(s),
     // 定價頁「月租試算」用的數字（放在 data 屬性；隱藏價錢時整個試算區塊會被移除）
-    calc_data: esc(JSON.stringify({ sm, sy, mm, my, pm: E.pro.month, py: E.pro.year, early: !!E.early, until: E.until }))
+    calc_data: esc(JSON.stringify({ sm, sy, mm, my, pm: E.pro.month, py: E.pro.year, early: !!E.early, until: E.until })),
+    // 定價頁「報價試算」（客製網站）的方案與加購價格；隱藏價錢時整個區塊會被移除
+    quote_data: esc(JSON.stringify(normalize(s).quote))
   };
 }
 
