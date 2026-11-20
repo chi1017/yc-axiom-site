@@ -1,7 +1,7 @@
 /* 管理後台「價格與活動」分頁：方案價格、早鳥活動、頂部公告列、滑出卡片。
    儲存：資料庫函式 save_site_settings（資料庫層只允許管理員）；發布：Edge Function site-settings 觸發 GitHub Actions 重新建置官網。
    預覽：用建置時留下的 /admin/preview-src/ 範本，套用表單裡的設定，顯示公告列與卡片。 */
-import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText, hideContactHtml } from '../tools/site-settings.mjs?v=2026-11-21a';
+import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText, hideContactHtml } from '../tools/site-settings.mjs?v=2026-11-21b';
 
 const YC = window.YC;
 const box = document.getElementById('adm-prices');
@@ -123,6 +123,7 @@ ${quoteHtml()}
   <div class="ps-qtable"><table><thead><tr><th>分組</th><th>項目</th><th>計價</th><th>方案 A</th><th>方案 B</th><th>方案 C</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
   <div><button type="button" class="m-btn" id="ps-qadd">新增一項</button></div>
   <p class="ps-hint">價格欄：留空＝這個方案不提供（客人看不到這一項）；填 0＝已包含在方案裡。「依數量」的項目客人可以加減數量；分組名稱相同的會排在一起。「技術維護」與「進階運營」只能二選一。</p>
+  <div class="ps-row"><label>簽約訂金比例（%，其餘在驗收上線時付）<input type="number" min="0" max="100" step="1" data-qn="deposit" value="${esc(q.deposit)}"></label></div>
   <label>試算結果下方的說明<input type="text" data-qn="note" value="${esc(q.note)}" maxlength="200"></label>
 </section>`;
   }
@@ -145,6 +146,7 @@ ${quoteHtml()}
       if (k === 'p') x.p[k2] = ival(el); else if (k === 'max') x.max = ival(el); else x[k] = el.value.trim();
     });
     const qn = box.querySelector('[data-qn="note"]'); if (qn) f.quote.note = qn.value.trim();
+    const qd = box.querySelector('[data-qn="deposit"]'); if (qd) f.quote.deposit = ival(qd);
     return f;
   }
 
@@ -181,6 +183,7 @@ ${quoteHtml()}
       if (x.unit === 'qty' && !(Number.isInteger(x.max) && x.max >= 1 && x.max <= 50)) bad('quote', n + '的最多數量要是 1–50');
     });
     if (f.quote.items.length > 40) bad('quote', '報價項目最多 40 項');
+    if (!(Number.isInteger(f.quote.deposit) && f.quote.deposit >= 0 && f.quote.deposit <= 100)) bad('quote', '簽約訂金比例要是 0–100 的整數');
     [['bar', 'text'], ['bar', 'text_mobile'], ['bar', 'button'], ['card', 'title'], ['card', 'body'], ['card', 'b1_text'], ['card', 'b2_text']].forEach(([p, k]) => {
       (String(f[p][k] || '').match(/\{[^{}]+\}/g) || []).forEach((v) => { if (!VARS.includes(v)) bad(p + '.' + k, '不認得的變數 ' + v + '（可用：' + VARS.join('、') + '）'); });
     });

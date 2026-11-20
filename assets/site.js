@@ -1002,16 +1002,17 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     if (!Q || !Q.plans || !Q.items) return;
     var en = YC_EN, f = box.querySelector('form'), $ = function (k) { return box.querySelector('[data-q="' + k + '"]'); };
     var money = function (n) { return 'NT$' + Math.round(n).toLocaleString('en-US'); };
+    var D = Q.deposit >= 0 && Q.deposit <= 100 ? Q.deposit : 30, depOf = function (n) { return Math.round(n * D / 100); };
     var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     var nm = function (x) { return en && x.en ? x.en : x.name; };
-    var T = en ? { inc: 'Included', mo: '/month', each: ' each', plan: 'Website type', split: function (a, b) { return 'Deposit on signing (50%): ' + money(a) + ' · On launch (50%): ' + money(b); },
+    var T = en ? { inc: 'Included', mo: '/month', each: ' each', plan: 'Website type', split: function (a, b) { return 'Deposit on signing (' + D + '%): ' + money(a) + ' · On launch (' + (100 - D) + '%): ' + money(b); },
         none: 'Not available for this type', copied: 'Copied. Paste it into LINE or an email.', copyFail: 'Could not copy automatically; select the text below and copy it.',
         title: 'YC AXIOM website quote (estimate)', who: 'For', date: 'Date', no: 'Quote no.', item: 'Item', qty: 'Qty', amt: 'Amount', once: 'One-off total', monthly: 'Monthly',
-        pay: 'Payment: 50% on signing, 50% after acceptance and launch.', valid: 'Valid for 30 days from the date above.', url: 'Online calculator' }
-      : { inc: '已包含', mo: '／月', each: '／每個', plan: '網站類型', split: function (a, b) { return '簽約訂金 50%：' + money(a) + '・驗收上線 50%：' + money(b); },
+        pay: 'Payment: ' + D + '% on signing, ' + (100 - D) + '% after acceptance and launch.', valid: 'Valid for 30 days from the date above.', url: 'Online calculator' }
+      : { inc: '已包含', mo: '／月', each: '／每個', plan: '網站類型', split: function (a, b) { return '簽約訂金 ' + D + '%：' + money(a) + '・驗收上線 ' + (100 - D) + '%：' + money(b); },
         none: '這個方案不提供', copied: '已複製，可以直接貼到 LINE 或 Email。', copyFail: '無法自動複製，請手動選取文字複製。',
         title: '網站報價試算單', who: '報價對象', date: '日期', no: '試算編號', item: '項目', qty: '數量', amt: '金額', once: '一次性費用合計', monthly: '每月費用',
-        pay: '付款方式：簽約時支付 50% 訂金，驗收上線後支付 50% 尾款。', valid: '本試算自上列日期起 30 天內有效。', url: '線上試算' };
+        pay: '付款方式：簽約時支付 ' + D + '% 訂金，驗收上線後支付 ' + (100 - D) + '% 尾款。', valid: '本試算自上列日期起 30 天內有效。', url: '線上試算' };
     var qty = {};
     // 手機版：在勾選區時，底部顯示目前總價，點一下捲到試算結果
     var pill = document.createElement('button');
@@ -1066,7 +1067,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
             return '<li' + (l.plan ? ' class="is-plan"' : '') + '><span>' + esc(l.name) + '</span><span>' + (l.inc ? T.inc : money(l.amt) + (l.unit === 'month' ? T.mo : '')) + '</span></li>';
         }).join('');
         $('total').textContent = money(s.once);
-        var dep = Math.round(s.once / 2);
+        var dep = depOf(s.once);
         $('split').textContent = T.split(dep, s.once - dep);
         $('mbox').hidden = !s.month;
         $('month').textContent = money(s.month) + T.mo;
@@ -1076,7 +1077,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     var today = function () { var d = new Date(); return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate(); };
     var qno = function () { var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; }; return 'YC-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()); };
     function text(s) {
-        var dep = Math.round(s.once / 2), out = ['【YC AXIOM ' + (en ? 'website quote estimate' : '網站報價試算') + '】' + today()];
+        var dep = depOf(s.once), out = ['【YC AXIOM ' + (en ? 'website quote estimate' : '網站報價試算') + '】' + today()];
         if (s.who) out.push(T.who + (en ? ': ' : '：') + s.who);
         s.lines.forEach(function (l, i) { out.push((i ? '＋' : '') + l.name + '　' + (l.inc ? T.inc : money(l.amt))); });
         out.push(T.once + (en ? ': ' : '：') + money(s.once) + (en ? ' (' : '（') + T.split(dep, s.once - dep) + (en ? ')' : '）'));
@@ -1094,7 +1095,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, fall); else fall();
     });
     $('print').addEventListener('click', function () {
-        var s = draw(), dep = Math.round(s.once / 2), contact = [].map.call(box.querySelectorAll('.yc-q-contact a'), function (a) { return esc(a.textContent); });
+        var s = draw(), dep = depOf(s.once), contact = [].map.call(box.querySelectorAll('.yc-q-contact a'), function (a) { return esc(a.textContent); });
         var row = function (l) { return '<tr><td>' + esc(l.name) + '</td><td class="n">' + (l.inc ? T.inc : money(l.amt) + (l.unit === 'month' ? T.mo : '')) + '</td></tr>'; };
         var sh = document.getElementById('yc-qsheet') || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'yc-qsheet' }));
         sh.innerHTML = '<div class="qs-top"><div><div class="qs-brand">YC AXIOM</div><h1>' + T.title + '</h1></div><div class="qs-meta">' + T.no + (en ? ': ' : '：') + qno() + '<br>' + T.date + (en ? ': ' : '：') + today() + (s.who ? '<br>' + T.who + (en ? ': ' : '：') + esc(s.who) : '') + '</div></div>' +
