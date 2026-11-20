@@ -993,3 +993,139 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     f.addEventListener('change', function () { calc(); if (!sent && typeof gtag === 'function') { sent = true; try { gtag('event', 'rental_calc'); } catch (e) { /* ignore */ } } });
     calc();
 })();
+
+// ── 定價頁「報價試算」（客製網站）：方案與加購價格來自後台設定（data-quote）；隱藏價錢時整塊在建置時移除 ──
+(function () {
+    var box = document.getElementById('quote');
+    if (!box || !box.dataset.quote) return;
+    var Q; try { Q = JSON.parse(box.dataset.quote); } catch (e) { return; }
+    if (!Q || !Q.plans || !Q.items) return;
+    var en = YC_EN, f = box.querySelector('form'), $ = function (k) { return box.querySelector('[data-q="' + k + '"]'); };
+    var money = function (n) { return 'NT$' + Math.round(n).toLocaleString('en-US'); };
+    var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var nm = function (x) { return en && x.en ? x.en : x.name; };
+    var T = en ? { inc: 'Included', mo: '/month', each: ' each', plan: 'Website type', split: function (a, b) { return 'Deposit on signing (50%): ' + money(a) + ' · On launch (50%): ' + money(b); },
+        none: 'Not available for this type', copied: 'Copied. Paste it into LINE or an email.', copyFail: 'Could not copy automatically; select the text below and copy it.',
+        title: 'YC AXIOM website quote (estimate)', who: 'For', date: 'Date', no: 'Quote no.', item: 'Item', qty: 'Qty', amt: 'Amount', once: 'One-off total', monthly: 'Monthly',
+        pay: 'Payment: 50% on signing, 50% after acceptance and launch.', valid: 'Valid for 30 days from the date above.', url: 'Online calculator' }
+      : { inc: '已包含', mo: '／月', each: '／每個', plan: '網站類型', split: function (a, b) { return '簽約訂金 50%：' + money(a) + '・驗收上線 50%：' + money(b); },
+        none: '這個方案不提供', copied: '已複製，可以直接貼到 LINE 或 Email。', copyFail: '無法自動複製，請手動選取文字複製。',
+        title: '網站報價試算單', who: '報價對象', date: '日期', no: '試算編號', item: '項目', qty: '數量', amt: '金額', once: '一次性費用合計', monthly: '每月費用',
+        pay: '付款方式：簽約時支付 50% 訂金，驗收上線後支付 50% 尾款。', valid: '本試算自上列日期起 30 天內有效。', url: '線上試算' };
+    var qty = {};
+    // 手機版：在勾選區時，底部顯示目前總價，點一下捲到試算結果
+    var pill = document.createElement('button');
+    pill.type = 'button'; pill.className = 'yc-q-pill'; pill.setAttribute('aria-hidden', 'true'); pill.tabIndex = -1;
+    pill.innerHTML = '<span>' + (en ? 'Estimate' : '試算') + '</span><b></b><span>' + (en ? 'See total ↓' : '看結果 ↓') + '</span>';
+    document.body.appendChild(pill);
+    pill.addEventListener('click', function () { box.querySelector('.yc-q-out').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    if ('IntersectionObserver' in window) {
+        var vis = { form: false, out: false }, upd = function () { pill.classList.toggle('is-on', vis.form && !vis.out); };
+        new IntersectionObserver(function (es) { es.forEach(function (e) { vis[e.target === f ? 'form' : 'out'] = e.isIntersecting; }); upd(); }, { rootMargin: '-80px 0px -140px 0px' })
+            .observe(f);
+        new IntersectionObserver(function (es) { es.forEach(function (e) { vis.out = e.isIntersecting; }); upd(); }).observe(box.querySelector('.yc-q-out'));
+    }
+    // 方案
+    $('plans').innerHTML = Q.plans.map(function (p, i) {
+        return '<label class="yc-q-plan"><input type="radio" name="plan" value="' + p.id + '"' + (i === 1 ? ' checked' : '') + '><span class="yc-q-plan-in"><span class="yc-q-plan-k">PLAN ' + p.id + '</span><b>' + esc(nm(p)) + '</b><span class="yc-q-plan-p">' + money(p.price) + (en ? '' : ' 起') + '</span><small>' + esc(en && p.desc_en ? p.desc_en : p.desc) + '</small></span></label>';
+    }).join('');
+    // 加購項目（依分組）
+    var html = '', g = null;
+    Q.items.forEach(function (x, i) {
+        if (x.g !== g) { g = x.g; html += '<p class="yc-q-g">' + esc(en ? ({ '規模': 'Scope', '內容與設計': 'Content and design', '功能': 'Features', 'SEO': 'SEO', '上線後（每月）': 'After launch (monthly)' }[g] || g) : g) + '</p>'; }
+        var type = x.excl ? 'radio' : 'checkbox';
+        html += '<label class="yc-q-item" data-i="' + i + '"><input type="' + type + '" name="' + (x.excl ? 'x-' + esc(x.excl) : 'i' + i) + '" value="' + i + '"><span>' + esc(nm(x)) +
+            (x.unit === 'qty' ? '<span class="yc-q-qty" data-qty="' + i + '"><button type="button" data-d="-1" aria-label="' + (en ? 'Fewer' : '減少') + '">−</button><output>1</output><button type="button" data-d="1" aria-label="' + (en ? 'More' : '增加') + '">+</button></span>' : '') +
+            '</span><span class="yc-q-price"></span></label>';
+        if (x.unit === 'qty') qty[i] = 1;
+    });
+    $('items').innerHTML = html;
+    $('note').textContent = Q.note || '';
+    var plan = function () { var r = f.querySelector('input[name="plan"]:checked'); return Q.plans.filter(function (p) { return p.id === (r ? r.value : 'B'); })[0] || Q.plans[0]; };
+    function state() {
+        var P = plan(), lines = [{ name: nm(P), amt: P.price, plan: true }], once = P.price, month = 0, mlines = [];
+        Q.items.forEach(function (x, i) {
+            var lab = box.querySelector('.yc-q-item[data-i="' + i + '"]'), inp = lab.querySelector('input'), pr = x.p[P.id];
+            var off = pr === null || pr === undefined;
+            lab.classList.toggle('is-off', off); lab.classList.toggle('is-inc', pr === 0);
+            inp.disabled = off || pr === 0;
+            if (pr === 0) { if (!inp.checked) inp.dataset.auto = '1'; inp.checked = true; } else if (inp.dataset.auto) { inp.checked = false; delete inp.dataset.auto; }
+            lab.querySelector('.yc-q-price').textContent = off ? '' : pr === 0 ? T.inc : money(pr) + (x.unit === 'month' ? T.mo : x.unit === 'qty' ? T.each : '');
+            var q = lab.querySelector('.yc-q-qty');
+            if (q) { q.hidden = !inp.checked; q.querySelector('output').textContent = qty[i]; q.querySelector('[data-d="-1"]').disabled = qty[i] <= 1; q.querySelector('[data-d="1"]').disabled = qty[i] >= (x.max || 10); }
+            if (off || !inp.checked) return;
+            var n = x.unit === 'qty' ? qty[i] : 1, a = pr * n;
+            var row = { name: nm(x) + (n > 1 ? ' ×' + n : ''), amt: a, inc: pr === 0, qty: n, unit: x.unit };
+            if (x.unit === 'month') { month += a; mlines.push(row); } else { once += a; lines.push(row); }
+        });
+        return { P: P, lines: lines, mlines: mlines, once: once, month: month, who: (f.who.value || '').trim() };
+    }
+    function draw() {
+        var s = state();
+        $('lines').innerHTML = s.lines.concat(s.mlines).map(function (l) {
+            return '<li' + (l.plan ? ' class="is-plan"' : '') + '><span>' + esc(l.name) + '</span><span>' + (l.inc ? T.inc : money(l.amt) + (l.unit === 'month' ? T.mo : '')) + '</span></li>';
+        }).join('');
+        $('total').textContent = money(s.once);
+        var dep = Math.round(s.once / 2);
+        $('split').textContent = T.split(dep, s.once - dep);
+        $('mbox').hidden = !s.month;
+        $('month').textContent = money(s.month) + T.mo;
+        pill.querySelector('b').textContent = money(s.once) + (s.month ? ' + ' + money(s.month) + T.mo : '');
+        return s;
+    }
+    var today = function () { var d = new Date(); return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate(); };
+    var qno = function () { var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; }; return 'YC-' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()); };
+    function text(s) {
+        var dep = Math.round(s.once / 2), out = ['【YC AXIOM ' + (en ? 'website quote estimate' : '網站報價試算') + '】' + today()];
+        if (s.who) out.push(T.who + (en ? ': ' : '：') + s.who);
+        s.lines.forEach(function (l, i) { out.push((i ? '＋' : '') + l.name + '　' + (l.inc ? T.inc : money(l.amt))); });
+        out.push(T.once + (en ? ': ' : '：') + money(s.once) + (en ? ' (' : '（') + T.split(dep, s.once - dep) + (en ? ')' : '）'));
+        if (s.month) out.push(T.monthly + (en ? ': ' : '：') + money(s.month) + T.mo + (en ? ' (' : '（') + s.mlines.map(function (l) { return l.name; }).join(en ? ', ' : '、') + (en ? ')' : '）'));
+        if (Q.note) out.push(Q.note);
+        out.push(location.origin + location.pathname + '#quote');
+        return out.join('\n');
+    }
+    function msg(t) { var m = $('msg'); m.textContent = t; clearTimeout(msg.t); msg.t = setTimeout(function () { m.textContent = ''; }, 5000); }
+    function ga(n) { try { if (typeof gtag === 'function') gtag('event', n, { plan: plan().id }); } catch (e) { /* ignore */ } }
+    $('copy').addEventListener('click', function () {
+        var t = text(draw());
+        var done = function () { msg(T.copied); ga('quote_copy'); };
+        var fall = function () { var ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) { /* ignore */ } ta.remove(); ok ? done() : msg(T.copyFail); };
+        if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, fall); else fall();
+    });
+    $('print').addEventListener('click', function () {
+        var s = draw(), dep = Math.round(s.once / 2), contact = [].map.call(box.querySelectorAll('.yc-q-contact a'), function (a) { return esc(a.textContent); });
+        var row = function (l) { return '<tr><td>' + esc(l.name) + '</td><td class="n">' + (l.inc ? T.inc : money(l.amt) + (l.unit === 'month' ? T.mo : '')) + '</td></tr>'; };
+        var sh = document.getElementById('yc-qsheet') || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'yc-qsheet' }));
+        sh.innerHTML = '<div class="qs-top"><div><div class="qs-brand">YC AXIOM</div><h1>' + T.title + '</h1></div><div class="qs-meta">' + T.no + (en ? ': ' : '：') + qno() + '<br>' + T.date + (en ? ': ' : '：') + today() + (s.who ? '<br>' + T.who + (en ? ': ' : '：') + esc(s.who) : '') + '</div></div>' +
+            '<table><thead><tr><th>' + T.item + '</th><th class="n">' + T.amt + '</th></tr></thead><tbody>' + s.lines.map(row).join('') + '</tbody>' +
+            '<tfoot><tr class="qs-tot"><td>' + T.once + '</td><td class="n">' + money(s.once) + '</td></tr></tfoot></table>' +
+            '<p class="qs-note">' + T.split(dep, s.once - dep) + '</p>' +
+            (s.month ? '<table><thead><tr><th>' + T.monthly + '</th><th class="n">' + T.amt + '</th></tr></thead><tbody>' + s.mlines.map(row).join('') + '</tbody><tfoot><tr class="qs-tot"><td>' + T.monthly + '</td><td class="n">' + money(s.month) + T.mo + '</td></tr></tfoot></table>' : '') +
+            '<p class="qs-note">' + T.pay + '</p><p class="qs-note">' + T.valid + '</p>' + (Q.note ? '<p class="qs-note">' + esc(Q.note) + '</p>' : '') +
+            '<div class="qs-foot"><span>YC AXIOM</span><span>' + esc(location.host) + '</span>' + contact.map(function (c) { return '<span>' + c + '</span>'; }).join('') + '</div>';
+        var html = document.documentElement, t0 = document.title;
+        document.title = 'YC-AXIOM-' + (s.who ? s.who + '-' : '') + qno();
+        html.classList.add('yc-printing');
+        var off = function () { html.classList.remove('yc-printing'); document.title = t0; window.removeEventListener('afterprint', off); };
+        window.addEventListener('afterprint', off);
+        ga('quote_print');
+        window.print();
+        setTimeout(off, 1500);
+    });
+    f.addEventListener('change', function (e) { if (e.target && e.target.dataset) delete e.target.dataset.auto; draw(); });
+    f.addEventListener('input', function (e) { if (e.target.name === 'who') draw(); });
+    $('items').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-d]'); if (!b) return;
+        e.preventDefault();
+        var i = +b.closest('[data-qty]').getAttribute('data-qty'), x = Q.items[i];
+        qty[i] = Math.max(1, Math.min(x.max || 10, qty[i] + Number(b.getAttribute('data-d'))));
+        draw();
+    });
+    // 互斥的月費項目（技術維護／進階運營）：再點一次已選的可以取消
+    $('items').addEventListener('mousedown', function (e) { var r = e.target.closest('.yc-q-item'); var inp = r && r.querySelector('input[type=radio]'); if (inp) inp.dataset.was = inp.checked ? '1' : ''; });
+    $('items').addEventListener('click', function (e) { var r = e.target.closest('.yc-q-item'); var inp = r && r.querySelector('input[type=radio]'); if (inp && e.target === inp && inp.dataset.was === '1') { inp.checked = false; inp.dataset.was = ''; draw(); } });
+    var used = false;
+    f.addEventListener('change', function () { if (!used) { used = true; ga('quote_use'); } });
+    draw();
+})();
