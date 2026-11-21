@@ -32,6 +32,10 @@ function init() {
     '.ps-qplans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.ps-qplan{display:grid;grid-template-columns:1fr 110px;gap:8px;border:1px solid var(--border);border-radius:6px;padding:10px 12px}.ps-qplan b{grid-column:1/-1;color:var(--text-bright);font-size:14px}.ps-qwide{grid-column:1/-1}' +
     '.ps-qtable{overflow-x:auto}.ps-qtable table{width:100%;border-collapse:collapse;min-width:760px;font-size:13px}.ps-qtable th{text-align:left;color:var(--text-dim);font-weight:500;padding:6px 4px;border-bottom:1px solid var(--border)}.ps-qtable td{padding:5px 4px;border-bottom:1px solid var(--border);vertical-align:top}' +
     '.ps-qtable input,.ps-qtable select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;font:13px var(--f-ui);padding:6px 8px;min-height:34px;width:100%;box-sizing:border-box}.ps-qtable td:nth-child(1){width:96px}.ps-qtable td:nth-child(3){width:96px}.ps-qtable td:nth-child(n+4):nth-child(-n+6){width:92px}.ps-qtable .ps-qen{margin-top:4px;font-size:12px;opacity:.85}.ps-qtable .ps-qmax{margin-top:4px}' +
+    '.ps-row>*,.ps-sec label{min-width:0}.ps-sec input[type=datetime-local]{-webkit-appearance:none;appearance:none;text-align:left;max-width:100%;min-width:0;display:block}.ps-sec input[type=datetime-local]::-webkit-date-and-time-value{text-align:left}' +
+    '@media (max-width:640px){.ps-row{grid-template-columns:1fr 1fr}.ps-row label:has(input[type=datetime-local]),.ps-row label:has(textarea),.ps-row label:has(input[type=text]){grid-column:1/-1}.ps-sec{padding:16px 14px}' +
+    '.ps-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 0 calc(10px + env(safe-area-inset-bottom,0px))}.ps-bar>label{grid-column:1/-1;font-size:0;gap:0}.ps-bar .m-btn{width:100%;min-height:42px;padding:6px;font-size:14px}.ps-bar .ps-msg{grid-column:1/-1}.ps-bar .ps-msg:empty{display:none}.ps-note-in{min-height:40px}' +
+    '.ps-qplan{grid-template-columns:1fr 96px}}' +
     '.ps-hist{list-style:none;margin:0;padding:0;display:grid;gap:6px}.ps-hist li{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-size:13.5px}';
   document.head.appendChild(css);
 
@@ -299,7 +303,7 @@ ${statusHtml()}
   </div>
 </div>
 <div class="ps-bar">
-  <label class="ps-hint" style="flex:1 1 220px">修改說明（選填）<input type="text" id="ps-note" class="ps-note-in" maxlength="200" placeholder="例如：一頁版早鳥改 499"></label>
+  <label class="ps-hint" style="flex:1 1 220px">修改說明（選填）<input type="text" id="ps-note" class="ps-note-in" maxlength="200" placeholder="修改說明（選填），例如：一頁版早鳥改 499"></label>
   <button type="button" class="m-btn primary" id="ps-save">儲存並發布</button>
   <button type="button" class="m-btn" id="ps-republish">只重新發布</button>
   <button type="button" class="m-btn" id="ps-daily">立即執行每日檢查</button>
