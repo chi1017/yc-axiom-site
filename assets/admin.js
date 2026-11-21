@@ -262,5 +262,13 @@
     } catch (e) { console.warn('admin', e); msg('讀取失敗', '請重新整理頁面再試一次。'); }
     busy = false; if (again) { again = false; render(); }
   }
+  // 從「總覽」點待處理事項過來：套用篩選
+  document.addEventListener('yc-admin-filter', function (e) {
+    var d = e.detail || {}; if (d.tab !== 'members') return;
+    var f = d.filter || {}; state.status = f.status || 'all'; state.score = 'all'; state.geoScore = 'all'; state.q = '';
+    if (!state.loaded) return;
+    var el = document.getElementById('a-tbody'); if (el) { var m = document.getElementById('a-main'); if (m) m.innerHTML = ''; }
+    drawList();
+  });
   YC.onChange(function () { render(); });
 })();

@@ -20,7 +20,7 @@
   };
   var MAIL_LABEL = { adminFirstPublish: '管理員通知', customerGoLive: '網站上線通知（客戶）', customerReceipt: '收款通知（客戶）',
     customerReminder: '即將到期提醒（客戶）', customerOverdue: '已到期通知（客戶）', customerSuspended: '已暫停通知（客戶）', customerMonthlyReport: '月報（客戶）', adminAutoSuspended: '自動暫停通知（管理員）', adminLongSuspended: '暫停滿 30 天通知（管理員）' };
-  var state = { domMsg: '', rows: [], loaded: false, q: '', status: 'all', due: 'all', failedOnly: false, layout: 'all', sort: 'due_asc', sel: null, bank: null, plan: null, tab: 'members', det: null, loading: false, simOpen: false, sim: { date: '', site: '', out: null, err: '', busy: false, runs: null, runsErr: '' } };
+  var state = { picked: new Set(), domMsg: '', rows: [], loaded: false, q: '', status: 'all', due: 'all', failedOnly: false, layout: 'all', sort: 'due_asc', sel: null, bank: null, plan: null, tab: 'members', det: null, loading: false, simOpen: false, sim: { date: '', site: '', out: null, err: '', busy: false, runs: null, runsErr: '' } };
   var token = 0, watchTimer = null;
 
   // ── 小工具 ──
@@ -330,14 +330,19 @@
 
   // ── 畫面：列表 ──
   function opts(list, cur) { return list.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === cur ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join(''); }
+  // 數字卡片：點一下就套用對應的篩選
+  var CHIP = { all: { status: 'all', due: 'all', failedOnly: false }, pending: { status: 'pending' }, live: { status: 'live' }, overdue: { status: 'overdue' }, suspended: { status: 'suspended' }, due7: { status: 'all', due: '7' }, failed: { status: 'all', failedOnly: true } };
+  function chipOn(k) { var f = CHIP[k]; return Object.keys(f).every(function (x) { return state[x] === f[x]; }) && (k !== 'all' ? true : state.layout === 'all' && !state.q); }
+  function chip(k, n, label) { return '<div data-f="' + k + '" role="button" tabindex="0" aria-pressed="' + (k !== 'all' && chipOn(k)) + '"><b>' + n + '</b><span>' + label + '</span></div>'; }
+  function applyFilter(f) { state.status = 'all'; state.due = 'all'; state.failedOnly = false; Object.keys(f || {}).forEach(function (x) { state[x] = f[x]; }); }
   function drawList() {
     var rows = state.rows, count = function (st) { return rows.filter(function (r) { return r.status === st; }).length; };
     var soon = rows.filter(function (r) { return r.days_left != null && r.days_left >= 0 && r.days_left <= 7 && (r.status === 'live' || r.status === 'overdue'); }).length;
     var failed = rows.filter(function (r) { return r.last_deploy_type === 'deploy_failed'; }).length;
     var v = view();
     root.innerHTML =
-      '<div class="adm-chips"><div><b>' + rows.length + '</b><span>全部網站</span></div><div><b>' + count('pending') + '</b><span>待上線</span></div><div><b>' + count('live') + '</b><span>上線中</span></div>' +
-      '<div><b>' + count('overdue') + '</b><span>逾期</span></div><div><b>' + count('suspended') + '</b><span>已暫停</span></div><div><b>' + soon + '</b><span>7 天內到期</span></div><div><b>' + failed + '</b><span>最近部署失敗</span></div><div><b>' + rows.filter(function (r) { return r.codePending; }).length + '</b><span>程式碼待審核</span></div><div><b>' + rows.filter(function (r) { return r.upgrade_pending; }).length + '</b><span>升級待補款</span></div><div><b>' + rows.filter(function (r) { return r.pro_pending; }).length + '</b><span>進階待補款</span></div></div>' +
+      '<div class="adm-chips">' + chip('all', rows.length, '全部網站') + chip('pending', count('pending'), '待上線') + chip('live', count('live'), '上線中') +
+      chip('overdue', count('overdue'), '逾期') + chip('suspended', count('suspended'), '已暫停') + chip('due7', soon, '7 天內到期') + chip('failed', failed, '最近部署失敗') + '<div><b>' + rows.filter(function (r) { return r.codePending; }).length + '</b><span>程式碼待審核</span></div><div><b>' + rows.filter(function (r) { return r.upgrade_pending; }).length + '</b><span>升級待補款</span></div><div><b>' + rows.filter(function (r) { return r.pro_pending; }).length + '</b><span>進階待補款</span></div></div>' +
       (state.simOpen ? simHtml() : '') +
       '<div class="adm-tools rn-tools">' +
       '<input type="search" id="rn-q" placeholder="搜尋 網址代稱／店名／Email" value="' + esc(state.q) + '" aria-label="搜尋">' +
@@ -346,15 +351,16 @@
       '<select id="rn-due" aria-label="到期">' + opts([['all', '全部到期日'], ['7', '7 天內到期'], ['30', '30 天內到期'], ['over', '已過期']], state.due) + '</select>' +
       '<label class="rn-chk"><input type="checkbox" id="rn-fail"' + (state.failedOnly ? ' checked' : '') + '>只看部署失敗</label>' +
       '<select id="rn-sort" aria-label="排序">' + opts([['due_asc', '到期日：近 → 遠'], ['due_desc', '到期日：遠 → 近'], ['pub_desc', '最近發佈'], ['created_desc', '建立時間（新 → 舊）']], state.sort) + '</select>' +
-      '<a class="m-btn sm" href="' + esc(YC.url('builder/') + '?new=1') + '" target="_blank" rel="noopener" title="先用自己的帳號建立，做好後在網站詳情按「轉移給客戶」">替客戶建立網站</a><button class="m-btn sm" id="rn-settings">匯款與方案設定</button><button class="m-btn sm" id="rn-simbtn" aria-expanded="' + (state.simOpen ? 'true' : 'false') + '">排程模擬</button><button class="m-btn sm" id="rn-reload">重新整理</button>' +
+      '<a class="m-btn sm" href="' + esc(YC.url('builder/') + '?new=1') + '" target="_blank" rel="noopener" title="先用自己的帳號建立，做好後在網站詳情按「轉移給客戶」">替客戶建立網站</a><button class="m-btn sm" id="rn-settings">匯款與方案設定</button><button class="m-btn sm" id="rn-simbtn" aria-expanded="' + (state.simOpen ? 'true' : 'false') + '">排程模擬</button><button class="m-btn sm" id="rn-reload">重新整理</button><button class="m-btn sm" id="rn-csv">匯出 CSV</button>' +
       '<span class="adm-count">' + v.length + ' / ' + rows.length + ' 個網站</span></div>' +
-      '<div class="adm-wrap"><table class="adm-table rn-table"><thead><tr><th>狀態</th><th>店名／代稱</th><th>會員</th><th>網址</th><th>到期日</th><th>最近部署</th><th>最近發佈</th></tr></thead><tbody>' +
+      (state.picked.size ? '<div class="rn-bulk" role="region" aria-label="批次動作">已選 <b>' + state.picked.size + '</b> 個網站<button class="m-btn sm" id="rn-brepub">重新發佈所選</button><button class="m-btn sm" id="rn-bcsv">匯出所選 CSV</button><button class="m-btn sm" id="rn-bclear">取消選取</button></div>' : '') +
+      '<div class="adm-wrap"><table class="adm-table rn-table"><thead><tr><th class="rn-ck"><input type="checkbox" id="rn-all" aria-label="全選目前清單"' + (v.length && v.every(function (r) { return state.picked.has(r.id); }) ? ' checked' : '') + '></th><th>狀態</th><th>店名／代稱</th><th>會員</th><th>網址</th><th>到期日</th><th>最近部署</th><th>最近發佈</th></tr></thead><tbody>' +
       (v.length ? v.map(function (r) {
         var u = safeUrl(r.public_url);
-        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.tier === 'pro' ? '・<b style="color:#e0b05a">進階</b>' : '') + (r.codePending ? '・<b class="rn-warn">程式碼待審核</b>' : '') + (r.upgrade_pending ? '・<b class="rn-warn">升級待補款 ' + esc(money(r.upgrade_amount || 0)) + '</b>' : '') + (r.pro_pending ? '・<b class="rn-warn">進階待補款 ' + esc(money(r.pro_amount || 0)) + '</b>' : '') + (r.next_layout || r.next_tier ? '・<b class="rn-warn">下期降級</b>' : '') + '</div></td>' +
+        return '<tr class="rn-row" tabindex="0" data-id="' + esc(r.id) + '"><td class="rn-ck" data-l=""><input type="checkbox" class="rn-pick" value="' + esc(r.id) + '" aria-label="選取 ' + esc(r.shop_name || r.slug) + '"' + (state.picked.has(r.id) ? ' checked' : '') + '></td><td>' + badge(r.status) + '</td><td><div class="rn-shop">' + esc(r.shop_name || '（未命名）') + '</div><div class="rn-sub">' + esc(r.slug) + '・' + esc(indLabel(r.template)) + '・' + esc(LAYOUT[r.layout] || '一頁版') + (r.tier === 'pro' ? '・<b style="color:#e0b05a">進階</b>' : '') + (r.codePending ? '・<b class="rn-warn">程式碼待審核</b>' : '') + (r.upgrade_pending ? '・<b class="rn-warn">升級待補款 ' + esc(money(r.upgrade_amount || 0)) + '</b>' : '') + (r.pro_pending ? '・<b class="rn-warn">進階待補款 ' + esc(money(r.pro_amount || 0)) + '</b>' : '') + (r.next_layout || r.next_tier ? '・<b class="rn-warn">下期降級</b>' : '') + '</div></td>' +
           '<td style="word-break:break-all">' + esc(r.member_email) + '</td><td class="adm-url">' + (u ? '<a href="' + esc(u) + '" target="_blank" rel="noopener noreferrer">' + esc(u.replace(/^https:\/\//, '').replace(/\/$/, '')) + '</a>' : '<span class="rn-dim">—</span>') + (r.custom_domain ? '<div class="rn-sub">' + esc(r.custom_domain) + (r.domain_status === 'active' ? '（已生效）' : '（設定中）') + '</div>' : '') + '</td>' +
           '<td>' + dueText(r) + '</td><td>' + deployText(r) + '</td><td class="adm-time">' + (r.last_published_at ? esc(fmtDT(r.last_published_at)) : '<span class="rn-dim">—</span>') + '</td></tr>';
-      }).join('') : '<tr><td colspan="7" class="adm-none">' + (rows.length ? '沒有符合條件的網站' : '還沒有客戶建立網站') + '</td></tr>') + '</tbody></table></div>';
+      }).join('') : '<tr><td colspan="8" class="adm-none">' + (rows.length ? '沒有符合條件的網站' : '還沒有客戶建立網站') + '</td></tr>') + '</tbody></table></div>';
     bindList();
   }
   function bindList() {
@@ -370,12 +376,62 @@
     if (state.simOpen) bindSim();
     $('rn-reload').onclick = async function () { try { await load(); drawList(); toast('已重新整理'); } catch (e) { toast('讀取失敗：' + (e.message || e)); } };
     $('rn-settings').onclick = openSettings;
+    $('rn-csv').onclick = function () { csv(view()); };
+    Array.prototype.forEach.call(root.querySelectorAll('.adm-chips [data-f]'), function (c) {
+      var go = function () { applyFilter(CHIP[c.getAttribute('data-f')]); if (c.getAttribute('data-f') === 'all') { state.layout = 'all'; state.q = ''; } drawList(); };
+      c.onclick = go; c.onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+    });
+    var v = view();
+    if ($('rn-all')) $('rn-all').onchange = function () { var on = this.checked; v.forEach(function (r) { if (on) state.picked.add(r.id); else state.picked.delete(r.id); }); drawList(); };
+    Array.prototype.forEach.call(root.querySelectorAll('.rn-pick'), function (cb) {
+      cb.onclick = function (e) { e.stopPropagation(); };
+      cb.onchange = function () { if (cb.checked) state.picked.add(cb.value); else state.picked.delete(cb.value); drawList(); };
+    });
+    if ($('rn-bclear')) $('rn-bclear').onclick = function () { state.picked.clear(); drawList(); };
+    if ($('rn-bcsv')) $('rn-bcsv').onclick = function () { csv(state.rows.filter(function (r) { return state.picked.has(r.id); })); };
+    if ($('rn-brepub')) $('rn-brepub').onclick = function () { bulkRepublish(); };
     Array.prototype.forEach.call(root.querySelectorAll('.rn-row'), function (tr) {
       var open = function () { openDetail(tr.getAttribute('data-id')); };
-      tr.onclick = function (e) { if (e.target.closest('a')) return; open(); };
+      tr.onclick = function (e) { if (e.target.closest('a') || e.target.closest('.rn-ck')) return; open(); };
       tr.onkeydown = function (e) { if (e.key === 'Enter') open(); };
     });
   }
+
+  // ── 匯出 CSV（目前清單或所選） ──
+  function csv(rows) {
+    var q = function (v) { v = v == null ? '' : String(v); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var head = ['店名', '網址代稱', '狀態', '版型', '行業', '會員 Email', '網址', '自訂網域', '到期日', '剩餘天數', '最近部署', '最近發佈', '建立時間'];
+    var lines = [head.map(q).join(',')].concat(rows.map(function (r) {
+      return [r.shop_name, r.slug, STATUS[r.status] || r.status, LAYOUT[r.layout] || r.layout, indLabel(r.template), r.member_email, r.public_url, r.custom_domain, r.paid_until, r.days_left, EVENT_LABEL[r.last_deploy_type] || r.last_deploy_type, fmtDT(r.last_published_at), fmtDT(r.created_at)].map(q).join(',');
+    }));
+    var blob = new Blob(['\ufeff' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'yc-axiom-rental-sites-' + twToday() + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    toast('已匯出 ' + rows.length + ' 個網站');
+  }
+  // ── 批次重新發佈：一個一個送出（只處理上線中、逾期、已暫停的網站），結果列在提示裡 ──
+  async function bulkRepublish() {
+    var list = state.rows.filter(function (r) { return state.picked.has(r.id); });
+    var ok = list.filter(function (r) { return r.status === 'live' || r.status === 'overdue' || r.status === 'suspended'; });
+    var skip = list.length - ok.length;
+    if (!ok.length) return toast('所選的網站都還沒上線，沒有可以重新發佈的');
+    if (!window.confirm('重新發佈 ' + ok.length + ' 個網站？' + (skip ? '\n（' + skip + ' 個草稿或待上線的網站會略過）' : '') + '\n每個網站會用目前上線的版本重新部署，約需幾分鐘。')) return;
+    var done = 0, fail = [];
+    for (var i = 0; i < ok.length; i++) {
+      toast('重新發佈中 ' + (i + 1) + '／' + ok.length + '…');
+      try { await call('republish', ok[i].id); done++; } catch (e) { fail.push((ok[i].shop_name || ok[i].slug) + '：' + (e.message || e)); }
+    }
+    state.picked.clear();
+    try { await load(); } catch (e) { /* ignore */ }
+    drawList();
+    toast('已排入 ' + done + ' 個' + (fail.length ? '，失敗 ' + fail.length + ' 個：' + fail.join('；') : ''));
+  }
+  // 從「總覽」點待處理事項過來：套用篩選
+  document.addEventListener('yc-admin-filter', function (e) {
+    var d = e.detail || {}; if (d.tab !== 'rental') return;
+    applyFilter(d.filter); state.picked.clear();
+    if (state.loaded) drawList();
+  });
 
   // ── 詳情側欄 ──
   function closeDrawer() {

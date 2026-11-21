@@ -231,6 +231,70 @@
 .mem-danger p { margin: 0; font-size: 13px; color: var(--text-dim); line-height: 1.8; max-width: 620px; }
 .mem-danger a { color: var(--accent); }
 .mem-msg { color: #f0776b; font-size: 13px; margin-top: 10px; min-height: 1em; }
+
+/* ── 總覽分頁 ── */
+.ah-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 18px 0 4px; }
+.ah-sub { font-size: 13px; color: var(--text-dim); margin: 0; }
+.ah-sec { margin: 22px 0 6px; }
+.ah-h { font: 700 15px var(--f-ui); color: var(--accent); letter-spacing: .06em; margin: 0 0 12px; }
+.ah-todo { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+.ah-item { display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center; text-align: left; padding: 16px 18px; border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 4px; background: var(--surface); color: var(--text); font: 14.5px var(--f-ui); cursor: pointer; min-height: 64px; }
+.ah-item b { font: 800 28px var(--f-ui); color: var(--text-bright); line-height: 1; }
+.ah-item em { font-style: normal; color: var(--text-dim); }
+.ah-item:hover { border-color: var(--accent); }
+.ah-bad { border-left-color: #f87171; } .ah-bad b { color: #f87171; }
+.ah-mid { border-left-color: #fbbf24; }
+.ah-ok { margin: 0; padding: 16px 18px; border: 1px dashed var(--border); border-radius: 4px; color: var(--text-dim); font-size: 14px; }
+.ah-acts { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.ah-act { display: grid; gap: 4px; text-align: left; padding: 16px 18px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); color: var(--text); text-decoration: none; cursor: pointer; font: 14px var(--f-ui); min-height: 64px; }
+.ah-act b { color: var(--text-bright); font-size: 15px; }
+.ah-act span { font-size: 12.5px; color: var(--text-dim); line-height: 1.6; }
+.ah-act:hover { border-color: var(--accent); }
+.ah-act:disabled { opacity: .5; cursor: wait; }
+.ah-chips button { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 14px 22px; min-width: 150px; text-align: left; cursor: pointer; color: inherit; font: inherit; }
+.ah-chips button:hover { border-color: var(--accent); }
+.ah-chips b { display: block; font: 800 28px var(--f-ui); color: var(--text-bright); line-height: 1.1; }
+.ah-chips span { font-size: 12px; color: var(--text-dim); }
+.ah-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; color: var(--text); word-break: break-all; }
+/* 數字卡片可以點來篩選 */
+.adm-chips > div[data-f] { cursor: pointer; }
+.adm-chips > div[data-f]:hover, .adm-chips > div[data-f][aria-pressed="true"] { border-color: var(--accent); }
+.rn-bulk { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: -4px 0 12px; padding: 10px 14px; border: 1px dashed var(--accent); border-radius: 4px; font-size: 14px; }
+.rn-table td.rn-ck, .rn-table th.rn-ck { width: 34px; }
+.rn-table input[type=checkbox] { width: 18px; height: 18px; }
+
+/* ── 手機版 ── */
+@media (max-width: 760px) {
+  .adm-tabs { overflow-x: auto; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding: 0 12px; gap: 0; }
+  .adm-tabs::-webkit-scrollbar { display: none; }
+  .adm-tabs button { flex: none; padding: 12px 14px; min-height: 44px; }
+  .mem h1.section-title { font-size: 30px; }
+  .adm-chips { gap: 8px; }
+  .adm-chips > div, .ah-chips button { min-width: 0; flex: 1 1 calc(50% - 8px); padding: 12px 14px; }
+  .adm-chips b, .ah-chips b { font-size: 22px; }
+  .adm-tools { gap: 8px; }
+  .adm-tools input[type=search] { min-width: 0; max-width: none; flex: 1 1 100%; }
+  .adm-tools select { flex: 1 1 calc(50% - 8px); min-width: 0; min-height: 42px; }
+  .adm-tools .m-btn { flex: 1 1 calc(50% - 8px); }
+  /* 表格改成一列一張卡片 */
+  .adm-wrap { border: 0; background: none; overflow: visible; }
+  .adm-table { min-width: 0 !important; }
+  .adm-table thead { display: none; }
+  .adm-table, .adm-table tbody, .adm-table tr, .adm-table td { display: block; width: 100%; box-sizing: border-box; }
+  .adm-table tr { border: 1px solid var(--border); border-radius: 6px; background: var(--surface); margin-bottom: 10px; padding: 8px 4px; }
+  .adm-table td { border: 0; padding: 6px 10px; display: grid; grid-template-columns: 84px minmax(0, 1fr); column-gap: 10px; row-gap: 2px; align-items: start; background: none !important; }
+  .adm-table td::before { content: attr(data-l); font-size: 12px; color: var(--text-dim); padding-top: 2px; }
+  .adm-table td > * { grid-column: 2; justify-self: start; max-width: 100%; }
+  .adm-table td::before { grid-column: 1; grid-row: 1 / span 4; }
+  .adm-table td > textarea, .adm-table td > select { justify-self: stretch; }
+  .adm-table td.adm-none { display: block; }
+  .adm-table td.adm-none::before { content: none; }
+  .adm-table .adm-notes { width: 100%; box-sizing: border-box; }
+  .adm-table tr { position: relative; }
+  .rn-table td.rn-ck { position: absolute; top: 12px; right: 12px; width: auto !important; padding: 0; display: block !important; z-index: 1; }
+  .rn-table td.rn-ck input { width: 24px; height: 24px; }
+  .rn-table td.rn-ck::before { content: none; }
+}
 /* 後台不需要右下角的 LINE 與社群浮動按鈕（手機上會蓋住儲存列） */
 .line-float, .social-float { display: none !important; }
 @media (max-width: 860px) { .mem-grid { grid-template-columns: 1fr; } .mem-card { padding: 18px; } .trend text { font-size: 17px; } }
@@ -311,12 +375,14 @@
     <div class="container section-pad">
         <div class="mem wide">
         <p class="section-eyebrow mem-eyebrow">Admin / 管理後台</p>
-        <h1 class="section-title">會員與名單</h1>
+        <h1 class="section-title">管理後台</h1>
         <div id="adm-tabs" class="adm-tabs" role="tablist" aria-label="管理後台分頁" hidden>
+            <button type="button" role="tab" data-tab="home" aria-selected="false">總覽</button>
             <button type="button" role="tab" data-tab="members" aria-selected="true">會員與名單</button>
             <button type="button" role="tab" data-tab="rental" aria-selected="false">租用網站</button>
             <button type="button" role="tab" data-tab="prices" aria-selected="false">價格與活動</button>
         </div>
+        <div id="adm-home" hidden></div>
         <div id="adm-root" aria-live="polite"><div class="mem-card mem-empty"><p>載入中…</p></div></div>
         <div id="adm-rental" aria-live="polite" hidden></div>
         <div id="adm-prices" hidden></div>
@@ -363,9 +429,10 @@
 <script src="../assets/supabase-config.js?v=2026-10-15"></script>
 <script src="../assets/vendor/supabase-2.117.2.min.js"></script>
 <script src="../assets/yc-auth.js?v=2026-11-12a"></script>
-<script src="../assets/admin.js?v=2026-10-16"></script>
-<script src="../assets/admin-rental.js?v=2026-11-13a"></script>
+<script src="../assets/admin.js?v=2026-11-22a"></script>
+<script src="../assets/admin-rental.js?v=2026-11-22a"></script>
 <script src="../assets/admin-search.js?v=2026-11-12a"></script>
 <script type="module" src="../assets/admin-settings.js?v=2026-11-22b"></script>
+<script src="../assets/admin-home.js?v=2026-11-22a"></script>
 </body>
 </html>
