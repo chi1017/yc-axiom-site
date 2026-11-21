@@ -14,8 +14,8 @@ export const DEFAULTS = {
     note: '以上為線上試算金額，正式金額以報價單為準。',
     deposit: 30,
     plans: [
-      { id: 'A', name: '一頁式網頁', en: 'One-page site', price: 3000, desc: '單頁滾動式・既有版型換成品牌配色・最多 5 個區塊・手機版・基本 SEO・修改 1 次', desc_en: 'Single scrolling page on a ready-made layout in your colours, up to 5 sections, mobile-ready, basic SEO, 1 round of changes' },
-      { id: 'B', name: '多頁式網頁', en: 'Multi-page site', price: 7000, desc: '最多 4 頁（例如首頁、關於、服務、聯絡）・既有版型換成品牌配色・手機版・基本 SEO・修改 1 次', desc_en: 'Up to 4 pages (e.g. home, about, services, contact) on a ready-made layout in your colours, mobile-ready, basic SEO, 1 round of changes' },
+      { id: 'A', name: '一頁式網頁', en: 'One-page site', price: 3000, desc: '單頁滾動式・既有版型換成品牌配色・最多 5 個區塊・手機版・基本 SEO・修改 2 次', desc_en: 'Single scrolling page on a ready-made layout in your colours, up to 5 sections, mobile-ready, basic SEO, 2 rounds of changes' },
+      { id: 'B', name: '多頁式網頁', en: 'Multi-page site', price: 7000, desc: '最多 4 頁（例如首頁、關於、服務、聯絡）・既有版型換成品牌配色・手機版・基本 SEO・修改 2 次', desc_en: 'Up to 4 pages (e.g. home, about, services, contact) on a ready-made layout in your colours, mobile-ready, basic SEO, 2 rounds of changes' },
       { id: 'N', name: '只要單項服務', en: 'Services only', price: 0, desc: '已經有網站，只需要 SEO、設計稿、文案、數據、網域或維護等服務', desc_en: 'You already have a site and only need SEO, design, copy, data, domain or maintenance' }
     ],
     items: [
@@ -24,7 +24,7 @@ export const DEFAULTS = {
       { id: 'page', g: '規模', name: '增加頁面（每頁）', en: 'Extra page (each)', unit: 'qty', max: 20, p: { A: null, B: 1000, N: null },
         d: '多頁式基本 4 頁。每多一頁（例如作品集、常見問題、課程介紹、隱私權政策）就加一頁。', d_en: 'The multi-page site includes 4 pages. Add one for each extra page, such as a portfolio, FAQ, course page or privacy policy.' },
       { id: 'rev', g: '規模', name: '多修改一次（每次）', en: 'Extra round of changes (each)', unit: 'qty', max: 5, p: { A: 500, B: 800, N: null },
-        d: '基本含 1 次修改。想多調整幾輪版面或內容時加購。', d_en: 'One round of changes is included. Add more if you expect several rounds of layout or content edits.' },
+        d: '基本含 2 次修改。想多調整幾輪版面或內容時加購。', d_en: 'Two rounds of changes are included. Add more if you expect several rounds of layout or content edits.' },
       { id: 'copy', g: '內容與設計', name: '文案撰寫與整理', en: 'Copywriting and editing', unit: 'once', p: { A: 1500, B: 3000, N: 1500 },
         d: '我們依訪談整理品牌故事、服務特色與首頁文案，用客人會搜尋的說法寫，你確認後再上線。不勾的話由你提供文字。', d_en: 'We write your brand story, service highlights and homepage copy from an interview, in the words customers search for, and you approve it before launch. Leave it unticked if you will supply the text.' },
       { id: 'photo', g: '內容與設計', name: '照片挑選與修圖', en: 'Photo selection and retouching', unit: 'once', p: { A: 800, B: 1500, N: null },
