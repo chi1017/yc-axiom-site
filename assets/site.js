@@ -1108,8 +1108,63 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         var fall = function () { var ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) { /* ignore */ } ta.remove(); ok ? done() : msg(T.copyFail); };
         if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, fall); else fall();
     });
+    // 手機（尤其是 LINE、IG 內建瀏覽器）常常不支援列印：改成畫一張報價單圖片，長按就能儲存或分享
+    var touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    if (touch) $('print').textContent = en ? 'Save as image' : '存成圖片';
+    function sheetImage(s) {
+        var W = 1240, P = 80, lineH = 56, rows = [];
+        var add = function (t, a, o) { rows.push({ t: t, a: a || '', o: o || {} }); };
+        s.lines.forEach(function (l) { add(l.name, cell(l), { b: l.plan }); });
+        if (s.lines.length) add(T.once, money(s.once), { tot: true });
+        if (s.once) add(T.split(depOf(s.once), s.once - depOf(s.once)), '', { note: true });
+        if (s.year) { add(T.yearly, '', { head: true }); s.ylines.forEach(function (l) { add(l.name, cell(l)); }); add(T.yearly, money(s.year) + T.yr, { tot: true }); }
+        if (s.month) { add(T.monthly, '', { head: true }); s.mlines.forEach(function (l) { add(l.name, cell(l)); }); add(T.monthly, money(s.month) + T.mo, { tot: true }); }
+        if (s.asks) add(T.askNote(s.asks), '', { note: true });
+        [T.pay, T.valid, Q.note].forEach(function (x) { if (x) add(x, '', { note: true }); });
+        var H = 330 + rows.length * lineH + 140, c = document.createElement('canvas'); c.width = W; c.height = H;
+        var g = c.getContext('2d'), F = '"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif';
+        g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.fillStyle = '#111'; g.textBaseline = 'middle';
+        g.font = '700 34px ' + F; g.fillText('Y C   A X I O M', P, 90);
+        g.font = '800 54px ' + F; g.fillText(T.title, P, 160);
+        g.font = '400 26px ' + F; g.fillStyle = '#555'; g.textAlign = 'right';
+        g.fillText(T.no + sep + qno(), W - P, 80); g.fillText(T.date + sep + today(), W - P, 118); if (s.who) g.fillText(T.who + sep + s.who, W - P, 156);
+        g.textAlign = 'left'; g.fillStyle = '#111'; g.fillRect(P, 210, W - P * 2, 4);
+        var y = 270;
+        var wrap = function (t, max) { var out = [], cur = ''; String(t).split('').forEach(function (ch) { if (g.measureText(cur + ch).width > max) { out.push(cur); cur = ch; } else cur += ch; }); if (cur) out.push(cur); return out; };
+        rows.forEach(function (r) {
+            g.font = (r.o.tot || r.o.b || r.o.head ? '700 ' : '400 ') + (r.o.note ? '24px ' : r.o.tot ? '32px ' : '28px ') + F;
+            g.fillStyle = r.o.note ? '#555' : '#111';
+            var ls = wrap(r.t, r.a ? W - P * 2 - 330 : W - P * 2);
+            ls.forEach(function (ln, i) { g.fillText(ln, P, y + i * 34); });
+            if (r.a) { g.textAlign = 'right'; g.fillText(r.a, W - P, y); g.textAlign = 'left'; }
+            var h = Math.max(lineH, ls.length * 34 + 22);
+            if (!r.o.note) { g.fillStyle = r.o.tot ? '#111' : '#ddd'; g.fillRect(P, y + h / 2 - 4, W - P * 2, r.o.tot ? 2 : 1); }
+            y += h;
+        });
+        var contact = [].map.call(box.querySelectorAll('.yc-q-contact a'), function (a) { return a.textContent; });
+        g.font = '400 24px ' + F; g.fillStyle = '#555'; g.fillText(['YC AXIOM', location.host].concat(contact).join('　'), P, y + 50);
+        if (y + 110 < H) { var d = g.getImageData(0, 0, W, y + 110); c.height = y + 110; g.putImageData(d, 0, 0); }
+        return c.toDataURL('image/png');
+    }
+    function showImage(s) {
+        var url = sheetImage(s), name = 'YC-AXIOM-' + (s.who ? s.who + '-' : '') + qno() + '.png';
+        var ov = document.createElement('div'); ov.className = 'yc-qimg'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', T.title);
+        ov.innerHTML = '<div class="yc-qimg-bar"><span>' + (en ? 'Press and hold the image to save or share it' : '長按圖片就能儲存或分享') + '</span><button type="button" data-x>' + (en ? 'Close' : '關閉') + '</button></div>' +
+            '<img alt="' + esc(T.title) + '" src="' + url + '">' +
+            '<div class="yc-qimg-acts"><a class="btn-primary" download="' + esc(name) + '" href="' + url + '">' + (en ? 'Download image' : '下載圖片') + '</a><button type="button" class="btn-secondary" data-p>' + (en ? 'Print' : '列印') + '</button></div>';
+        document.body.appendChild(ov); document.documentElement.style.overflow = 'hidden';
+        var close = function () { ov.remove(); document.documentElement.style.overflow = ''; };
+        ov.querySelector('[data-x]').onclick = close;
+        ov.querySelector('[data-p]').onclick = function () { close(); doPrint(s); };
+        ov.querySelector('[data-x]').focus();
+        ga('quote_image');
+    }
     $('print').addEventListener('click', function () {
         var s = draw(); if (!s.lines.length && !s.mlines.length && !s.ylines.length) return msg(T.empty);
+        if (touch) return showImage(s);
+        doPrint(s);
+    });
+    function doPrint(s) {
         var contact = [].map.call(box.querySelectorAll('.yc-q-contact a'), function (a) { return esc(a.textContent); });
         var row = function (l) { return '<tr><td>' + esc(l.name) + '</td><td class="n">' + cell(l) + '</td></tr>'; };
         var sh = document.getElementById('yc-qsheet') || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'yc-qsheet' }));
@@ -1130,7 +1185,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         ga('quote_print');
         window.print();
         setTimeout(off, 1500);
-    });
+    }
     f.addEventListener('change', function (e) { if (e.target && e.target.dataset) delete e.target.dataset.auto; draw(); });
     f.addEventListener('input', function (e) { if (e.target.name === 'who') draw(); });
     $('items').addEventListener('click', function (e) {

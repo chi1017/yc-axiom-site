@@ -2251,3 +2251,9 @@ html.yc-s-open { overflow: hidden; }
 [data-q="items"]:empty { min-height: 900px; }
 .yc-q-lines:empty { min-height: 60px; }
 @media (max-width: 640px) { .yc-q-plans:empty { min-height: 340px; } }
+/* 手機：報價單圖片 */
+.yc-qimg { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,.88); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: calc(12px + env(safe-area-inset-top, 0px)) 14px calc(16px + env(safe-area-inset-bottom, 0px)); overflow-y: auto; }
+.yc-qimg-bar { width: 100%; max-width: 620px; display: flex; justify-content: space-between; align-items: center; gap: 10px; color: #f3ead8; font-size: 14px; }
+.yc-qimg-bar button { background: none; border: 1px solid rgba(255,255,255,.4); color: #fff; border-radius: 99px; padding: 6px 16px; font: 14px var(--f-ui); min-height: 40px; }
+.yc-qimg img { width: 100%; max-width: 620px; height: auto; border-radius: 4px; background: #fff; -webkit-touch-callout: default; }
+.yc-qimg-acts { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
