@@ -2257,3 +2257,22 @@ html.yc-s-open { overflow: hidden; }
 .yc-qimg-bar button { background: none; border: 1px solid rgba(255,255,255,.4); color: #fff; border-radius: 99px; padding: 6px 16px; font: 14px var(--f-ui); min-height: 40px; }
 .yc-qimg img { width: 100%; max-width: 620px; height: auto; border-radius: 4px; background: #fff; -webkit-touch-callout: default; }
 .yc-qimg-acts { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* ── 定價頁：買斷和租用一年費用比較 ── */
+.yc-yr { margin: 48px 0 8px; }
+.yc-yr .sp-h2 { margin-bottom: 18px; }
+.yc-yr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.yc-yr-card { border: 1px solid var(--border); border-radius: 4px; background: var(--surface); padding: 24px 24px 20px; display: flex; flex-direction: column; }
+.yc-yr-card--rent { border-color: var(--border-active); background: linear-gradient(160deg, rgba(var(--accent-rgb), .1), rgba(var(--accent-rgb), .02) 60%), var(--surface); }
+.yc-yr-k { font-size: 13px; letter-spacing: .08em; color: var(--accent); margin: 0 0 8px; }
+.yc-yr-p { font-family: var(--f-display); font-size: clamp(28px, 3vw, 36px); color: var(--text-bright); margin: 0 0 14px; line-height: 1.15; }
+.yc-yr-p small { display: block; font-family: var(--f-ui); font-size: 13px; color: var(--text-dim); margin-top: 6px; }
+.yc-yr-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); font-size: 14.5px; }
+.yc-yr-list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); color: var(--text); }
+.yc-yr-list b { font-weight: 600; color: var(--text-bright); white-space: nowrap; text-align: right; }
+.yc-yr-note { margin: 12px 0 0; font-size: 13.5px; color: var(--text-dim); line-height: 1.7; }
+.yc-yr-where { margin-top: 14px; padding: 18px 22px; border: 1px dashed var(--border); border-radius: 4px; font-size: 14.5px; line-height: 1.85; color: var(--text); }
+.yc-yr-where p { margin: 0; }
+.yc-yr-where p + p { margin-top: 10px; }
+.yc-yr-where strong { color: var(--text-bright); margin-right: 6px; }
+@media (max-width: 760px) { .yc-yr-grid { grid-template-columns: 1fr; } .yc-yr-card { padding: 20px 18px 16px; } .yc-yr-list b { white-space: normal; } }

@@ -63,7 +63,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <script id="yc-webfont">/* 字型等頁面顯示後才下載，主要內容不用等字型 */(function(){var u="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Cinzel:wght@500&family=Noto+Serif+TC:wght@600&display=swap";function a(){var l=document.createElement("link");l.rel="stylesheet";l.href=u;document.head.appendChild(l);}if(document.readyState==="complete")a();else addEventListener("load",function(){setTimeout(a,0);});})();</script>
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Cinzel:wght@500&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="../assets/dist/site.min.css?v=4f77b9fca9">
+<link rel="stylesheet" href="../assets/dist/site.min.css?v=d3e557dda5">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -106,7 +106,7 @@
       "name": "網站租用和買斷（客製網站）有什麼不同？",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "客製網站起價用 YC 版型換成你的品牌風格，需要從頭客製另外報價，完工後原始碼與設定完整移交給你（買斷）。網站租用則是使用我們預先設計好的版型與線上編輯器，內容由你自己填寫，上線與維護由我們負責；版型與程式的權利屬於我們，租用期間提供你使用，不另外移交原始碼。提供多種行業版型；一頁版{{yc:single_label}}，多頁版{{yc:multi_label}}。"
+        "text": "客製網站起價用 YC 版型換成你的品牌風格，需要從頭客製另外報價，完工後網站檔案完整交給你（買斷）。網站租用則是使用我們預先設計好的版型與線上編輯器，內容由你自己填寫，上線與維護由我們負責；版型與程式的權利屬於我們，租用期間提供你使用，不另外移交原始碼。提供多種行業版型；一頁版{{yc:single_label}}，多頁版{{yc:multi_label}}。"
       }
     },
     {
@@ -563,6 +563,37 @@
             </div>
         </div>
         <!-- yc:calc -->
+        <section class="yc-yr reveal" id="year-cost" aria-labelledby="yr-t">
+            <h2 class="sp-h2" id="yr-t">買斷和租用，一年要花多少？</h2>
+            <div class="yc-yr-grid">
+                <div class="yc-yr-card">
+                    <p class="yc-yr-k">買斷・一頁式網頁</p>
+                    <p class="yc-yr-p">NT$3,000 起<small>製作費，一次付清</small></p>
+                    <ul class="yc-yr-list">
+                        <li><span>製作</span><b>NT$3,000 起</b></li>
+                        <li><span>主機與網域</span><b>自行負責或另購</b></li>
+                        <li><span>網站維護合約（選購）</span><b>NT$5,400／年</b></li>
+                    </ul>
+                    <p class="yc-yr-note">第二年起：只有主機與網域的費用，維護合約要不要續都可以。</p>
+                </div>
+                <div class="yc-yr-card yc-yr-card--rent">
+                    <p class="yc-yr-k">租用・一頁版</p>
+                    <p class="yc-yr-p">{{yc:from}}<small>每月，一次付 12 個月為 {{yc:single_year}}</small></p>
+                    <ul class="yc-yr-list">
+                        <li><span>主機、流量、HTTPS</span><b>已包含</b></li>
+                        <li><span>線上編輯器（電腦、手機都能改）</span><b>已包含</b></li>
+                        <li><span>維護與每月 SEO、AI 可見度體檢</span><b>已包含</b></li>
+                    </ul>
+                    <p class="yc-yr-note">每年費用固定，不綁約，不續租就停止。</p>
+                </div>
+            </div>
+            <div class="yc-yr-where">
+                <p><strong>買斷後網站放在哪裡？</strong>驗收後網站檔案交給你，可以放在你自己的主機（例如虛擬主機或 Cloudflare Pages 這類靜態網站服務）。主機與網域由你負責，用你的名義申請；也可以請我們代購代設定，網域代購 NT$500（網域年費另計），主機費用依你選的方案另計。</p>
+                <p><strong>租用的網站放在哪裡？</strong>放在 YC AXIOM 的主機上，主機、上線與維護都由我們負責；自己的網域可以接上來，網域登記在你名下。</p>
+            </div>
+        </section>
+<!-- /yc:calc -->
+        <!-- yc:calc -->
         <a class="yc-qcard reveal" href="../quote/">
             <span class="yc-qcard-k">Quote builder</span>
             <span class="yc-qcard-t">報價試算：勾選你要的服務，馬上知道多少</span>
@@ -650,7 +681,7 @@
                         <span class="faq-icon">+</span>
                     </div>
                     <div class="faq-answer">
-                        客製網站起價用 YC 版型換成你的品牌風格，需要從頭客製另外報價，完工後原始碼與設定完整移交給你（買斷）。網站租用則是使用我們預先設計好的版型與線上編輯器，內容由你自己填寫，上線與維護由我們負責；版型與程式的權利屬於我們，租用期間提供你使用，不另外移交原始碼。提供多種行業版型；一頁版{{yc:single_label}}，多頁版{{yc:multi_label}}。
+                        客製網站起價用 YC 版型換成你的品牌風格，需要從頭客製另外報價，完工後網站檔案完整交給你（買斷）。網站租用則是使用我們預先設計好的版型與線上編輯器，內容由你自己填寫，上線與維護由我們負責；版型與程式的權利屬於我們，租用期間提供你使用，不另外移交原始碼。提供多種行業版型；一頁版{{yc:single_label}}，多頁版{{yc:multi_label}}。
                     </div>
                 </div>
 
