@@ -2246,3 +2246,8 @@ html.yc-s-open { overflow: hidden; }
 .yc-qcard-d { grid-column: 1; font-size: 14.5px; line-height: 1.8; color: var(--text-dim); }
 .yc-qcard-go { grid-column: 2; grid-row: 1 / span 3; white-space: nowrap; padding: 12px 22px; border-radius: 4px; background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: 15px; }
 @media (max-width: 700px) { .yc-qcard { grid-template-columns: 1fr; padding: 22px 20px; } .yc-qcard-go { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 8px; } }
+/* 報價試算：內容由程式填入前先保留高度，避免畫面跳動 */
+.yc-q-plans:empty { min-height: 268px; }
+[data-q="items"]:empty { min-height: 900px; }
+.yc-q-lines:empty { min-height: 60px; }
+@media (max-width: 640px) { .yc-q-plans:empty { min-height: 340px; } }
