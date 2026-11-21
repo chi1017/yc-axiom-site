@@ -15,27 +15,66 @@ export const DEFAULTS = {
     plans: [
       { id: 'A', name: '單頁形象網站', en: 'One-page brand site', price: 15000, desc: '約 6 個區塊・基本動態・諮詢表單・基礎 SEO・約 2–3 週', desc_en: 'About 6 sections, basic motion, enquiry form, basic SEO, about 2–3 weeks' },
       { id: 'B', name: '品牌多頁網站', en: 'Multi-page brand site', price: 28000, desc: '4 頁・Figma 介面設計・全站 SEO 語意架構・約 3–5 週', desc_en: '4 pages, Figma UI design, site-wide SEO structure, about 3–5 weeks' },
-      { id: 'C', name: '電商與系統網站', en: 'E-commerce site', price: 60000, desc: '購物車與結帳・一種金流與物流・轉化追蹤・約 6–8 週', desc_en: 'Cart and checkout, one payment and one shipping method, conversion tracking, about 6–8 weeks' }
+      { id: 'C', name: '電商與系統網站', en: 'E-commerce site', price: 60000, desc: '購物車與結帳・一種金流與物流・轉化追蹤・約 6–8 週', desc_en: 'Cart and checkout, one payment and one shipping method, conversion tracking, about 6–8 weeks' },
+      { id: 'N', name: '只要單項服務', en: 'Services only', price: 0, desc: '已經有網站，只需要 SEO、設計稿、文案、數據或維護等服務', desc_en: 'You already have a site and only need SEO, design, copy, data or maintenance' }
     ],
     items: [
-      { id: 'sec', g: '規模', name: '增加區塊（每個）', en: 'Extra section (each)', unit: 'qty', max: 10, p: { A: 500, B: null, C: null } },
-      { id: 'page', g: '規模', name: '增加頁面（每頁）', en: 'Extra page (each)', unit: 'qty', max: 10, p: { A: null, B: 6000, C: 6000 } },
-      { id: 'sku', g: '規模', name: '商品多規格（尺寸、顏色等）', en: 'Product variants (size, colour…)', unit: 'once', p: { A: null, B: null, C: 14000 } },
-      { id: 'copy', g: '內容與設計', name: '文案撰寫與整理', en: 'Copywriting and editing', unit: 'once', p: { A: 5000, B: 11000, C: 11000 } },
-      { id: 'photo', g: '內容與設計', name: '照片挑選與修圖', en: 'Photo selection and retouching', unit: 'once', p: { A: 2000, B: 4000, C: 4000 } },
-      { id: 'illus', g: '內容與設計', name: '客製插圖或圖示', en: 'Custom illustrations or icons', unit: 'once', p: { A: 5000, B: 7000, C: 7000 } },
-      { id: 'motion', g: '內容與設計', name: '進階捲動動畫', en: 'Advanced scroll animation', unit: 'once', p: { A: 7000, B: 11000, C: 11000 } },
-      { id: 'en', g: '內容與設計', name: '中英雙語', en: 'Chinese and English versions', unit: 'once', p: { A: 7000, B: 15000, C: 24000 } },
-      { id: 'embed', g: '功能', name: '嵌入預約、地圖等外部服務', en: 'Embed booking, maps or other services', unit: 'once', p: { A: 2000, B: 2000, C: 2000 } },
-      { id: 'form', g: '功能', name: '預約表單或表單分流', en: 'Booking form or routed forms', unit: 'once', p: { A: null, B: 5000, C: 5000 } },
-      { id: 'ga', g: '功能', name: 'GA4／Meta Pixel 轉化追蹤', en: 'GA4 / Meta Pixel conversion tracking', unit: 'once', p: { A: 3000, B: 3000, C: 0 } },
-      { id: 'pay', g: '功能', name: '多一種金流或物流（每種）', en: 'Extra payment or shipping method (each)', unit: 'qty', max: 4, p: { A: null, B: null, C: 7000 } },
-      { id: 'coupon', g: '功能', name: '優惠碼', en: 'Discount codes', unit: 'once', p: { A: null, B: null, C: 7000 } },
-      { id: 'member', g: '功能', name: '會員與訂單查詢', en: 'Member accounts and order lookup', unit: 'once', p: { A: null, B: null, C: 19000 } },
-      { id: 'seo', g: 'SEO', name: '關鍵字策略與內容架構優化', en: 'Keyword strategy and content structure', unit: 'once', p: { A: 17000, B: 17000, C: 17000 } },
-      { id: 'care', g: '上線後（每月）', name: '技術維護與安全託管', en: 'Technical maintenance and hosting care', unit: 'month', excl: 'care', p: { A: 1500, B: 1500, C: 1500 } },
-      { id: 'ops', g: '上線後（每月）', name: '進階運營（含技術維護、活動頁更新、GA4 月報）', en: 'Advanced operations (incl. maintenance, page updates, GA4 report)', unit: 'month', excl: 'care', p: { A: 5000, B: 5000, C: 5000 } },
-      { id: 'seom', g: '上線後（每月）', name: '長期 SEO 經營', en: 'Ongoing SEO', unit: 'month', p: { A: 15000, B: 15000, C: 15000 } }
+      { id: 'sec', g: '規模', name: '增加區塊（每個）', en: 'Extra section (each)', unit: 'qty', max: 10, p: { A: 500, B: null, C: null, N: null },
+        d: '單頁網站基本約 6 個區塊。每多一個區塊（例如作品集、團隊、價目表、客人評價）就加一個。', d_en: 'The one-page site includes about 6 sections. Add one for each extra block, such as a portfolio, team, price list or reviews.' },
+      { id: 'page', g: '規模', name: '增加頁面（每頁）', en: 'Extra page (each)', unit: 'qty', max: 10, p: { A: null, B: 6000, C: 6000, N: null },
+        d: '多頁網站基本 4 頁。每多一頁（例如作品集、案例、文章列表、單一服務介紹頁）就加一頁，含設計與 SEO 設定。', d_en: 'The multi-page site includes 4 pages. Add one for each extra page, such as a portfolio, case studies, a blog list or a single-service page, including design and SEO setup.' },
+      { id: 'sku', g: '規模', name: '商品多規格（尺寸、顏色等）', en: 'Product variants (size, colour…)', unit: 'once', p: { A: null, B: null, C: 14000, N: null },
+        d: '同一個商品有多種尺寸、顏色或組合，各自有庫存與價格時需要。', d_en: 'Needed when one product comes in several sizes, colours or bundles, each with its own stock and price.' },
+      { id: 'copy', g: '內容與設計', name: '文案撰寫與整理', en: 'Copywriting and editing', unit: 'once', p: { A: 5000, B: 11000, C: 11000, N: 3000 },
+        d: '我們依訪談整理品牌故事、服務特色與首頁文案，用客人會搜尋的說法寫，你確認後再上線。不勾的話由你提供文字。', d_en: 'We write your brand story, service highlights and homepage copy from an interview, in the words customers search for, and you approve it before launch. Leave it unticked if you will supply the text.' },
+      { id: 'photo', g: '內容與設計', name: '照片挑選與修圖', en: 'Photo selection and retouching', unit: 'once', p: { A: 2000, B: 4000, C: 4000, N: null },
+        d: '從你提供的照片挑出適合的，統一調色、裁切與壓縮，讓網站好看又不拖慢速度。不含外拍。', d_en: 'We pick the best of your photos and colour-correct, crop and compress them so the site looks good and stays fast. Photo shoots are not included.' },
+      { id: 'illus', g: '內容與設計', name: '客製插圖或圖示', en: 'Custom illustrations or icons', unit: 'once', p: { A: 5000, B: 7000, C: 7000, N: null },
+        d: '依品牌風格畫一組專屬圖示或插圖，取代通用素材，讓網站更有辨識度。', d_en: 'A set of icons or illustrations drawn in your brand style instead of stock graphics.' },
+      { id: 'motion', g: '內容與設計', name: '進階捲動動畫', en: 'Advanced scroll animation', unit: 'once', p: { A: 7000, B: 11000, C: 11000, N: null },
+        d: '捲動時跟著畫面變化的進階動態，例如視差、分段展開、數字跑動，適合想讓人印象深刻的品牌。基本進場動態已包含。', d_en: 'Richer motion that reacts as people scroll, such as parallax, staged reveals and counting numbers. Basic entrance motion is already included.' },
+      { id: 'en', g: '內容與設計', name: '中英雙語', en: 'Chinese and English versions', unit: 'once', p: { A: 7000, B: 15000, C: 24000, N: null },
+        d: '加一套英文版網頁，含語言切換與各自的 SEO 設定。英文內容可由你提供，或加購文案一起處理。', d_en: 'A full English version with a language switch and its own SEO setup. You can supply the English text or add copywriting.' },
+      { id: 'uiux1', g: '內容與設計', name: '單頁 UI/UX 設計稿（Figma）', en: 'One-page UI/UX design (Figma)', unit: 'once', p: { A: null, B: null, C: null, N: 6000 },
+        d: '只要設計、不含開發：一頁高保真的 Figma 設計稿與互動原型，可以交給你的工程師製作。', d_en: 'Design only, no build: one high-fidelity Figma page with a clickable prototype your developers can build from.' },
+      { id: 'uiux2', g: '內容與設計', name: '多頁 UI/UX 流程設計（Figma）', en: 'Multi-page UI/UX design (Figma)', unit: 'once', p: { A: null, B: null, C: null, N: 15000 },
+        d: '只要設計、不含開發：整站頁面流程、元件規範與互動原型，適合要自己開發或已有工程團隊的公司。', d_en: 'Design only, no build: full page flows, a component guide and a prototype, for teams that will build it themselves.' },
+      { id: 'embed', g: '功能', name: '嵌入預約、地圖等外部服務', en: 'Embed booking, maps or other services', unit: 'once', p: { A: 2000, B: 2000, C: 2000, N: null },
+        d: '把你已經在用的預約系統、Google 地圖、表單或影片放進網站，樣式調整成和網站一致。', d_en: 'Place the booking system, Google Map, form or video you already use into the site, styled to match.' },
+      { id: 'form', g: '功能', name: '預約表單或表單分流', en: 'Booking form or routed forms', unit: 'once', p: { A: null, B: 5000, C: 5000, N: null },
+        d: '依服務類型分成不同表單，或做一個預約表單，送出後通知到你的 Email。', d_en: 'Separate forms per service, or a booking form, with notifications sent to your email.' },
+      { id: 'ga', g: '功能', name: 'GA4／Meta Pixel 轉化追蹤', en: 'GA4 / Meta Pixel conversion tracking', unit: 'once', p: { A: 3000, B: 3000, C: 0, N: 4000 },
+        d: '設定 Google Analytics 4、Search Console 與 Meta Pixel，追蹤表單送出、LINE 點擊、購買等關鍵動作，知道廣告與流量有沒有帶來客人。', d_en: 'Set up GA4, Search Console and Meta Pixel to track form submissions, LINE clicks and purchases, so you know which traffic brings customers.' },
+      { id: 'pay', g: '功能', name: '多一種金流或物流（每種）', en: 'Extra payment or shipping method (each)', unit: 'qty', max: 4, p: { A: null, B: null, C: 7000, N: null },
+        d: '基本含一種金流與一種物流。每多接一種（例如加 LINE Pay、超商取貨、宅配）就加一種。', d_en: 'One payment and one shipping method are included. Add one for each extra, such as LINE Pay, convenience-store pickup or home delivery.' },
+      { id: 'coupon', g: '功能', name: '優惠碼', en: 'Discount codes', unit: 'once', p: { A: null, B: null, C: 7000, N: null },
+        d: '可以設定折扣碼、滿額折扣與使用期限，方便做活動。', d_en: 'Discount codes, spend-and-save offers and expiry dates for promotions.' },
+      { id: 'member', g: '功能', name: '會員與訂單查詢', en: 'Member accounts and order lookup', unit: 'once', p: { A: null, B: null, C: 19000, N: null },
+        d: '客人可以註冊會員、查詢訂單狀態與購買紀錄，回購更方便。', d_en: 'Customers can sign up, check order status and see past purchases.' },
+      { id: 'sys', g: '功能', name: '串接現有系統或後台', en: 'Connect to your existing systems', unit: 'ask', p: { A: null, B: 0, C: 0, N: 0 },
+        d: '和你現有的 POS、ERP、庫存或會員系統串接，需要先看系統規格才能報價。', d_en: 'Connect with your POS, ERP, stock or membership system. We need to see the system first to quote.' },
+      { id: 'seob', g: 'SEO 與 AI 搜尋', name: '基礎 SEO 設定套裝', en: 'Basic SEO setup', unit: 'once', p: { A: 0, B: 0, C: 0, N: 10000 },
+        d: '頁面標題與描述、Schema 結構化資料、sitemap 與 PageSpeed 速度優化。新網站已包含；已有網站可以單買。', d_en: 'Titles and descriptions, Schema structured data, sitemap and PageSpeed tuning. Included with a new site; available on its own for existing sites.' },
+      { id: 'seo', g: 'SEO 與 AI 搜尋', name: '關鍵字策略與內容架構優化', en: 'Keyword strategy and content structure', unit: 'once', p: { A: 17000, B: 17000, C: 17000, N: 18000 },
+        d: '找出客人實際會搜尋的字，規劃哪一頁對應哪一組關鍵字，並調整標題、內文與內部連結。', d_en: 'Find the words customers actually search, map them to pages, and adjust titles, copy and internal links.' },
+      { id: 'geo', g: 'SEO 與 AI 搜尋', name: 'GEO／AI 搜尋優化', en: 'GEO / AI search optimisation', unit: 'ask', p: { A: 0, B: 0, C: 0, N: 0 },
+        d: '設定 AI 爬蟲、llms.txt 與結構化資料，調整內容結構，讓 ChatGPT、Gemini 等 AI 比較容易理解你的網站。依網站現況報價，無法保證被 AI 推薦。', d_en: 'Set up AI crawler access, llms.txt and structured data, and restructure content so AI assistants understand your site. Quoted per site; AI recommendations cannot be guaranteed.' },
+      { id: 'etl1', g: '數據與市場', name: '單次資料清洗（單一資料源）', en: 'One-off data clean-up (one source)', unit: 'once', p: { A: 3000, B: 3000, C: 3000, N: 3000 },
+        d: '把一個平台匯出的訂單、庫存或客戶資料整理乾淨，去重、補齊、統一格式，交給你一份可以直接用的表格。', d_en: 'Clean one platform’s orders, stock or customer export: remove duplicates, fill gaps and standardise formats into a usable spreadsheet.' },
+      { id: 'etl2', g: '數據與市場', name: '多來源資料整合（含自動化腳本）', en: 'Multi-source data integration (with automation)', unit: 'once', p: { A: 8000, B: 8000, C: 8000, N: 8000 },
+        d: '兩個以上平台或系統的資料合併成一份報表，並寫好自動化腳本，下次放新檔案就能直接產出。', d_en: 'Merge data from two or more platforms into one report, with a script so new files produce it automatically next time.' },
+      { id: 'mkt1', g: '數據與市場', name: '競品分析報告（10 家內）', en: 'Competitor report (up to 10)', unit: 'once', p: { A: 15000, B: 15000, C: 15000, N: 15000 },
+        d: '整理 10 家以內競爭對手的價格、服務、網站與評價，找出你可以切入的差異點。', d_en: 'Compare up to 10 competitors on price, services, websites and reviews, and identify where you can stand out.' },
+      { id: 'mkt2', g: '數據與市場', name: '深度產業掃描報告（20 家以上）', en: 'In-depth market scan (20+)', unit: 'once', p: { A: 30000, B: 30000, C: 30000, N: 30000 },
+        d: '掃描 20 家以上同業，加上市場缺口分析，適合準備開新品牌、新據點或調整定位時使用。', d_en: 'A scan of 20+ businesses with a market-gap analysis, for launching a new brand or location or repositioning.' },
+      { id: 'care', g: '上線後（每月）', name: '技術維護與安全託管', en: 'Technical maintenance and hosting care', unit: 'month', excl: 'care', p: { A: 1500, B: 1500, C: 1500, N: 1500 },
+        d: '系統與套件安全性更新、定期備份、效能監控，以及每月少量的圖文修改。', d_en: 'Security updates, regular backups, performance monitoring and small monthly text and image edits.' },
+      { id: 'ops', g: '上線後（每月）', name: '進階運營與內容更新', en: 'Advanced operations and content updates', unit: 'month', excl: 'care', p: { A: 5000, B: 5000, C: 5000, N: 5000 },
+        d: '包含技術維護，另外每月幫你更新活動或商品頁，並提供 GA4 流量月報與改善建議。和技術維護二選一。', d_en: 'Everything in maintenance plus monthly campaign or product page updates and a GA4 traffic report with suggestions. Choose this or maintenance.' },
+      { id: 'datam', g: '上線後（每月）', name: '商業資料月報', en: 'Monthly business data report', unit: 'month', p: { A: 1000, B: 1000, C: 1000, N: 1000 },
+        d: '每月固定整理訂單、庫存或帳務資料，自動產出 Excel／PDF 月報，數字異常時提醒你。', d_en: 'Each month we tidy orders, stock or accounts and produce an Excel/PDF report, flagging anything unusual.' },
+      { id: 'seom', g: '上線後（每月）', name: '長期 SEO 經營', en: 'Ongoing SEO', unit: 'month', p: { A: 15000, B: 15000, C: 15000, N: 15000 },
+        d: '持續佈局關鍵字與內容、監控排名、分析競爭對手流量，並調整轉換率，每月提供成效報告。', d_en: 'Ongoing keyword and content work, rank tracking, competitor traffic analysis and conversion tuning, with a monthly report.' }
     ]
   },
   card: { enabled: true, follow_early: true, title: '早鳥價 {早鳥價}／月', body: '中小企業專屬月租網站，自己填內容就能上線', b1_text: '看方案', b1_link: '/rental/', b2_text: 'LINE 詢問', b2_link: 'https://line.me/R/ti/p/%40788cblaq', scroll_pct: 40, delay_sec: 10, pages: ['/', '/rental/', '/services/', '/pricing/', '/articles/*'], dismiss_days: 7, start: null, end: null }
@@ -70,19 +109,22 @@ export function normalize(s) {
 
 // 報價試算：價格只接受 0 以上整數（0＝已包含），null＝這個方案不提供
 function normQuote(q) {
-  const D = DEFAULTS.quote;
+  const D = DEFAULTS.quote, IDS = D.plans.map((p) => p.id);
   if (!q || !Array.isArray(q.plans) || !Array.isArray(q.items)) return JSON.parse(JSON.stringify(D));
   const int = (v) => (v === null || v === '' || v === undefined ? null : Number.isInteger(Number(v)) && Number(v) >= 0 ? Number(v) : null);
   const str = (v, n) => String(v == null ? '' : v).slice(0, n);
+  // 舊版設定沒有「只要單項服務」：補上預設方案，舊項目在這個方案先不提供
+  const oldItem = (x) => D.items.find((d) => d.id === x.id);
   return {
     note: str(q.note == null ? D.note : q.note, 200),
     deposit: Number.isInteger(Number(q.deposit)) && Number(q.deposit) >= 0 && Number(q.deposit) <= 100 ? Number(q.deposit) : D.deposit,
-    plans: ['A', 'B', 'C'].map((id) => { const x = q.plans.find((p) => p && p.id === id) || D.plans.find((p) => p.id === id); return { id, name: str(x.name, 40), en: str(x.en, 60), price: int(x.price) || 0, desc: str(x.desc, 120), desc_en: str(x.desc_en, 160) }; }),
-    items: q.items.filter((x) => x && x.name).slice(0, 40).map((x, i) => ({
+    plans: IDS.map((id) => { const x = q.plans.find((p) => p && p.id === id) || D.plans.find((p) => p.id === id); return { id, name: str(x.name, 40), en: str(x.en, 60), price: id === 'N' ? 0 : int(x.price) || 0, desc: str(x.desc, 120), desc_en: str(x.desc_en, 160), ...(x.off ? { off: true } : {}) }; }),
+    items: q.items.filter((x) => x && x.name).slice(0, 60).map((x, i) => ({
       id: str(x.id || 'i' + i, 20), g: str(x.g, 20), name: str(x.name, 60), en: str(x.en, 80),
-      unit: ['once', 'qty', 'month'].includes(x.unit) ? x.unit : 'once', ...(x.unit === 'qty' ? { max: Math.min(50, Math.max(1, int(x.max) || 10)) } : {}),
+      unit: ['once', 'qty', 'month', 'ask'].includes(x.unit) ? x.unit : 'once', ...(x.unit === 'qty' ? { max: Math.min(50, Math.max(1, int(x.max) || 10)) } : {}),
       ...(x.excl ? { excl: str(x.excl, 20) } : {}),
-      p: { A: int(x.p && x.p.A), B: int(x.p && x.p.B), C: int(x.p && x.p.C) }
+      d: str(x.d == null ? (oldItem(x) || {}).d : x.d, 300), d_en: str(x.d_en == null ? (oldItem(x) || {}).d_en : x.d_en, 400),
+      p: Object.fromEntries(IDS.map((k) => [k, int(x.p && k in x.p ? x.p[k] : (oldItem(x) ? oldItem(x).p[k] : null))]))
     }))
   };
 }

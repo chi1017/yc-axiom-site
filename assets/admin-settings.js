@@ -1,7 +1,7 @@
 /* 管理後台「價格與活動」分頁：方案價格、早鳥活動、頂部公告列、滑出卡片。
    儲存：資料庫函式 save_site_settings（資料庫層只允許管理員）；發布：Edge Function site-settings 觸發 GitHub Actions 重新建置官網。
    預覽：用建置時留下的 /admin/preview-src/ 範本，套用表單裡的設定，顯示公告列與卡片。 */
-import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText, hideContactHtml } from '../tools/site-settings.mjs?v=2026-11-21b';
+import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText, hideContactHtml } from '../tools/site-settings.mjs?v=2026-11-22b';
 
 const YC = window.YC;
 const box = document.getElementById('adm-prices');
@@ -12,7 +12,7 @@ function init() {
   const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const st = { row: null, used: 0, hist: [], built: null, form: null, loaded: false, busy: false, msg: '', msgBad: false, publishPending: false, page: 'home', device: 'desktop', allowPast: false };
   const VARS = ['{早鳥價}', '{多頁早鳥價}', '{截止日}', '{一頁版價}', '{多頁版價}'];
-  const PREVIEW_PATH = { home: '/', rental: '/rental/', pricing: '/pricing/' };
+  const PREVIEW_PATH = { home: '/', rental: '/rental/', pricing: '/pricing/', quote: '/quote/' };
 
   // 台灣時間 <-> datetime-local
   const toLocal = (iso) => { const t = Date.parse(iso || ''); if (!Number.isFinite(t)) return ''; return new Date(t + 8 * 3600e3).toISOString().slice(0, 16); };
@@ -29,6 +29,12 @@ function init() {
     '.ps-bar{position:sticky;bottom:0;z-index:5;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 0;background:var(--bg,#111);border-top:1px solid var(--border)}.ps-msg{font-size:14px}.ps-msg.bad{color:#f87171}.ps-msg.ok{color:#34d399}' +
     '.ps-pv{position:sticky;top:12px;display:grid;gap:10px}.ps-pv .ps-tools{display:flex;flex-wrap:wrap;gap:8px}.ps-pv button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}' +
     '.ps-fwrap{border:1px solid var(--border);border-radius:6px;overflow:hidden;background:#111;position:relative}.ps-frame{border:0;background:#111;display:block;transform-origin:0 0}' +
+    '.ps-qtoolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.ps-qtoolbar input{flex:1 1 200px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;font:14px var(--f-ui);padding:8px 10px;min-height:40px}.ps-qsub{margin:6px 0 -4px;font-size:13px;color:var(--accent)}' +
+    '.ps-qlist{display:grid;gap:6px}.ps-qi{border:1px solid var(--border);border-radius:6px;background:var(--surface)}.ps-qi[open]{border-color:var(--accent)}.ps-qi summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:10px 12px;cursor:pointer;min-height:44px;box-sizing:border-box}.ps-qi summary::-webkit-details-marker{display:none}.ps-qi summary::after{content:"編輯";margin-left:auto;font-size:12px;color:var(--text-dim);border:1px solid var(--border);border-radius:99px;padding:2px 10px}.ps-qi[open] summary::after{content:"收合"}' +
+    '.ps-qi-g{font-size:11.5px;color:var(--text-dim);border:1px solid var(--border);border-radius:99px;padding:1px 8px}.ps-qi-n{color:var(--text-bright);font-size:14.5px;font-weight:600}.ps-qi-s{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:12.5px;color:var(--text-dim);font-variant-numeric:tabular-nums}.ps-qi-s em{font-style:normal}' +
+    '.ps-qi-body{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 12px 14px;border-top:1px solid var(--border)}.ps-qi-body label{display:grid;gap:4px;font-size:13px;color:var(--text-dim)}.ps-qi-body input,.ps-qi-body select,.ps-qi-body textarea{background:var(--black,#0b0a09);color:var(--text);border:1px solid var(--border);border-radius:4px;font:14px var(--f-ui);padding:8px 10px;min-height:40px;width:100%;box-sizing:border-box}.ps-qi-body textarea{resize:vertical;line-height:1.6}' +
+    '.ps-qprices{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}.ps-qacts{display:flex;flex-wrap:wrap;gap:8px}.ps-qi-body .ps-qwide{grid-column:1/-1}' +
+    '@media (max-width:640px){.ps-qi-body{grid-template-columns:1fr}.ps-qprices{grid-template-columns:1fr 1fr}}' +
     '.ps-qplans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.ps-qplan{display:grid;grid-template-columns:1fr 110px;gap:8px;border:1px solid var(--border);border-radius:6px;padding:10px 12px}.ps-qplan b{grid-column:1/-1;color:var(--text-bright);font-size:14px}.ps-qwide{grid-column:1/-1}' +
     '.ps-qtable{overflow-x:auto}.ps-qtable table{width:100%;border-collapse:collapse;min-width:760px;font-size:13px}.ps-qtable th{text-align:left;color:var(--text-dim);font-weight:500;padding:6px 4px;border-bottom:1px solid var(--border)}.ps-qtable td{padding:5px 4px;border-bottom:1px solid var(--border);vertical-align:top}' +
     '.ps-qtable input,.ps-qtable select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:4px;font:13px var(--f-ui);padding:6px 8px;min-height:34px;width:100%;box-sizing:border-box}.ps-qtable td:nth-child(1){width:96px}.ps-qtable td:nth-child(3){width:96px}.ps-qtable td:nth-child(n+4):nth-child(-n+6){width:92px}.ps-qtable .ps-qen{margin-top:4px;font-size:12px;opacity:.85}.ps-qtable .ps-qmax{margin-top:4px}' +
@@ -105,29 +111,43 @@ ${quoteHtml()}
 <p class="ps-hint">文字可用的變數：${VARS.map(esc).join('、')}</p>`;
   }
 
-  // 報價試算（定價頁，客製網站）：方案基本價、加購項目與每個方案的價格。價格欄留空＝這個方案不提供，填 0＝已包含
+  // 報價試算（/quote/ 頁）：方案基本價、項目與每個方案的價格。一項一張卡片，點開編輯；價格欄留空＝這個方案不提供，填 0＝已包含
   function quoteHtml() {
     const q = st.form.quote, pv = (v) => (v === null || v === undefined ? '' : v);
-    const UNIT = { once: '一次', qty: '依數量', month: '每月' };
-    const plans = q.plans.map((p, i) => `<div class="ps-qplan"><b>方案 ${p.id}</b>
+    const UNIT = { once: '一次', qty: '依數量', month: '每月', ask: '另外報價' };
+    const PL = q.plans.map((p) => p.id);
+    st.qOpen = st.qOpen || new Set();
+    const plans = q.plans.map((p, i) => `<details class="ps-qi"${st.qOpen.has('plan-' + p.id) ? ' open' : ''} data-open="plan-${p.id}"><summary><span class="ps-qi-n">${esc(p.name)}</span><span class="ps-qi-s">${p.id === 'N' ? '依項目計價' : money(p.price) + ' 起'}</span></summary>
+      <div class="ps-qi-body">
       <label>名稱<input type="text" data-qp="${i}.name" value="${esc(p.name)}" maxlength="40"></label>
-      <label>基本價<input type="number" min="0" step="1" data-qp="${i}.price" value="${esc(p.price)}"></label>
+      ${p.id === 'N' ? '' : `<label>基本價<input type="number" inputmode="numeric" min="0" step="1" data-qp="${i}.price" value="${esc(p.price)}"></label>`}
       <label class="ps-qwide">說明<input type="text" data-qp="${i}.desc" value="${esc(p.desc)}" maxlength="120"></label>
       <label>英文名稱<input type="text" data-qp="${i}.en" value="${esc(p.en)}" maxlength="60"></label>
-      <label class="ps-qwide">英文說明<input type="text" data-qp="${i}.desc_en" value="${esc(p.desc_en)}" maxlength="160"></label></div>`).join('');
-    const rows = q.items.map((x, i) => `<tr>
-      <td><input type="text" data-qi="${i}.g" value="${esc(x.g)}" maxlength="20" aria-label="分組"></td>
-      <td><input type="text" data-qi="${i}.name" value="${esc(x.name)}" maxlength="60" aria-label="項目名稱"><input type="text" data-qi="${i}.en" value="${esc(x.en)}" maxlength="80" placeholder="英文名稱（選填）" aria-label="英文名稱" class="ps-qen"></td>
-      <td><select data-qi="${i}.unit" aria-label="計價方式">${Object.keys(UNIT).map((u) => `<option value="${u}"${x.unit === u ? ' selected' : ''}>${UNIT[u]}</option>`).join('')}</select>${x.unit === 'qty' ? `<input type="number" min="1" max="50" data-qi="${i}.max" value="${esc(x.max || 10)}" aria-label="最多數量" title="最多數量" class="ps-qmax">` : ''}</td>
-      ${['A', 'B', 'C'].map((k) => `<td><input type="number" min="0" step="1" data-qi="${i}.p.${k}" value="${esc(pv(x.p[k]))}" aria-label="方案 ${k} 價格" placeholder="不提供"></td>`).join('')}
-      <td><button type="button" class="m-btn" data-qdel="${i}" aria-label="刪除這一項">刪除</button></td></tr>`).join('');
-    return `<section class="ps-sec" aria-labelledby="ps-h6"><h3 id="ps-h6">報價試算（定價頁，客製網站）</h3>
-  <p class="ps-hint">客人在定價頁勾選方案與項目，會即時算出總價，也能複製摘要或印成報價單。後台開啟「隱藏官網所有價錢」時，整個試算不會顯示。</p>
-  <div class="ps-qplans">${plans}</div>
-  <div class="ps-qtable"><table><thead><tr><th>分組</th><th>項目</th><th>計價</th><th>方案 A</th><th>方案 B</th><th>方案 C</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+      <label class="ps-qwide">英文說明<input type="text" data-qp="${i}.desc_en" value="${esc(p.desc_en)}" maxlength="160"></label></div></details>`).join('');
+    const sum = (x) => PL.map((k) => { const v = x.p[k]; return v === null || v === undefined ? '' : `<span title="${esc((q.plans.find((p) => p.id === k) || {}).name)}">${({ A: '單頁', B: '多頁', C: '電商', N: '單項' })[k] || k} ${x.unit === 'ask' ? '報價' : v === 0 ? '含' : money(v)}</span>`; }).join('');
+    const items = q.items.map((x, i) => `<details class="ps-qi"${st.qOpen.has(x.id) ? ' open' : ''} data-open="${esc(x.id)}"><summary><span class="ps-qi-g">${esc(x.g)}</span><span class="ps-qi-n">${esc(x.name) || '（未命名）'}</span><span class="ps-qi-s">${sum(x)}${x.unit === 'month' ? '<em>／月</em>' : x.unit === 'qty' ? '<em>／每個</em>' : ''}</span></summary>
+      <div class="ps-qi-body">
+      <label>分組<input type="text" data-qi="${i}.g" value="${esc(x.g)}" maxlength="20" list="ps-qgroups"></label>
+      <label>計價<select data-qi="${i}.unit">${Object.keys(UNIT).map((u) => `<option value="${u}"${x.unit === u ? ' selected' : ''}>${UNIT[u]}</option>`).join('')}</select></label>
+      <label class="ps-qwide">名稱<input type="text" data-qi="${i}.name" value="${esc(x.name)}" maxlength="60"></label>
+      <div class="ps-qwide ps-qprices">${PL.map((k) => `<label>${esc((q.plans.find((p) => p.id === k) || {}).name || k)}<input type="number" inputmode="numeric" min="0" step="1" data-qi="${i}.p.${k}" value="${esc(pv(x.p[k]))}" placeholder="不提供"></label>`).join('')}</div>
+      ${x.unit === 'qty' ? `<label>最多數量<input type="number" inputmode="numeric" min="1" max="50" data-qi="${i}.max" value="${esc(x.max || 10)}"></label>` : ''}
+      <label class="ps-qwide">說明（客人點「說明」看到的內容）<textarea data-qi="${i}.d" maxlength="300" rows="3">${esc(x.d)}</textarea></label>
+      <label class="ps-qwide">英文名稱<input type="text" data-qi="${i}.en" value="${esc(x.en)}" maxlength="80"></label>
+      <label class="ps-qwide">英文說明<textarea data-qi="${i}.d_en" maxlength="400" rows="2">${esc(x.d_en)}</textarea></label>
+      <div class="ps-qwide ps-qacts"><button type="button" class="m-btn" data-qmove="${i}.-1"${i === 0 ? ' disabled' : ''}>上移</button><button type="button" class="m-btn" data-qmove="${i}.1"${i === q.items.length - 1 ? ' disabled' : ''}>下移</button><button type="button" class="m-btn" data-qdel="${i}">刪除這一項</button></div>
+      </div></details>`).join('');
+    const groups = [...new Set(q.items.map((x) => x.g).filter(Boolean))];
+    return `<section class="ps-sec" aria-labelledby="ps-h6"><h3 id="ps-h6">報價試算（/quote/ 頁）</h3>
+  <p class="ps-hint">客人在「報價試算」頁勾選方案與項目，會即時算出總價，也能複製摘要或印成報價單。點一項就能展開修改。價格欄留空＝這個方案不提供（客人看不到），填 0＝已包含；計價選「另外報價」的項目不算進總價。開啟「隱藏官網所有價錢」時，整個試算不會顯示。</p>
+  <div class="ps-qtoolbar"><input type="search" id="ps-qfind" placeholder="搜尋項目名稱" aria-label="搜尋報價項目" value="${esc(st.qFind || '')}"><button type="button" class="m-btn" id="ps-qexpand">${st.qAllOpen ? '全部收合' : '全部展開'}</button><a class="m-btn" href="../quote/" target="_blank" rel="noopener">看報價頁</a></div>
+  <p class="ps-qsub">網站類型</p>
+  <div class="ps-qlist">${plans}</div>
+  <p class="ps-qsub">項目（${q.items.length}）</p>
+  <div class="ps-qlist" id="ps-qitems">${items}</div>
+  <datalist id="ps-qgroups">${groups.map((g) => `<option value="${esc(g)}">`).join('')}</datalist>
   <div><button type="button" class="m-btn" id="ps-qadd">新增一項</button></div>
-  <p class="ps-hint">價格欄：留空＝這個方案不提供（客人看不到這一項）；填 0＝已包含在方案裡。「依數量」的項目客人可以加減數量；分組名稱相同的會排在一起。「技術維護」與「進階運營」只能二選一。</p>
-  <div class="ps-row"><label>簽約訂金比例（%，其餘在驗收上線時付）<input type="number" min="0" max="100" step="1" data-qn="deposit" value="${esc(q.deposit)}"></label></div>
+  <div class="ps-row"><label>簽約訂金比例（%，其餘在驗收交付時付）<input type="number" inputmode="numeric" min="0" max="100" step="1" data-qn="deposit" value="${esc(q.deposit)}"></label></div>
   <label>試算結果下方的說明<input type="text" data-qn="note" value="${esc(q.note)}" maxlength="200"></label>
 </section>`;
   }
@@ -178,15 +198,16 @@ ${quoteHtml()}
     if (f.card.b2_text && !f.card.b2_link) bad('card.b2_link', '按鈕二有文字就要有連結');
     (f.card.pages || []).forEach((pg) => { if (!/^\/[^\s]*$/.test(pg)) bad('card.pages', '顯示頁面要以 / 開頭：' + pg); });
     const nonNeg = (v) => v === null || (Number.isInteger(v) && v >= 0);
-    f.quote.plans.forEach((p, i) => { if (!p.name) bad('quote', '方案 ' + p.id + ' 要有名稱'); if (!posInt(p.price)) bad('quote', '方案 ' + p.id + ' 的基本價要是正整數'); });
+    f.quote.plans.forEach((p, i) => { if (!p.name) bad('quote', '網站類型 ' + p.id + ' 要有名稱'); if (p.id !== 'N' && !posInt(p.price)) bad('quote', '「' + p.name + '」的基本價要是正整數'); });
     f.quote.items.forEach((x, i) => {
       const n = '報價項目「' + (x.name || '第 ' + (i + 1) + ' 項') + '」';
       if (!x.name) bad('quote', n + '要有名稱');
-      ['A', 'B', 'C'].forEach((k) => { if (!nonNeg(x.p[k])) bad('quote', n + '的方案 ' + k + ' 價格要是 0 以上整數或留空'); });
-      if (['A', 'B', 'C'].every((k) => x.p[k] === null)) bad('quote', n + '至少要有一個方案提供（價格不要全部留空）');
+      const PL = f.quote.plans.map((p) => p.id);
+      PL.forEach((k) => { if (!nonNeg(x.p[k])) bad('quote', n + '的「' + f.quote.plans.find((p) => p.id === k).name + '」價格要是 0 以上整數或留空'); });
+      if (PL.every((k) => x.p[k] === null)) bad('quote', n + '至少要有一個網站類型提供（價格不要全部留空）');
       if (x.unit === 'qty' && !(Number.isInteger(x.max) && x.max >= 1 && x.max <= 50)) bad('quote', n + '的最多數量要是 1–50');
     });
-    if (f.quote.items.length > 40) bad('quote', '報價項目最多 40 項');
+    if (f.quote.items.length > 60) bad('quote', '報價項目最多 60 項');
     if (!(Number.isInteger(f.quote.deposit) && f.quote.deposit >= 0 && f.quote.deposit <= 100)) bad('quote', '簽約訂金比例要是 0–100 的整數');
     [['bar', 'text'], ['bar', 'text_mobile'], ['bar', 'button'], ['card', 'title'], ['card', 'body'], ['card', 'b1_text'], ['card', 'b2_text']].forEach(([p, k]) => {
       (String(f[p][k] || '').match(/\{[^{}]+\}/g) || []).forEach((v) => { if (!VARS.includes(v)) bad(p + '.' + k, '不認得的變數 ' + v + '（可用：' + VARS.join('、') + '）'); });
@@ -252,6 +273,7 @@ ${quoteHtml()}
       }
       const eff = effective(f, now, st.used), pr = promo(f, eff, now), path = PREVIEW_PATH[st.page];
       html = render(srcCache[st.page], tokens(f, eff));
+      html = f.display && f.display.hide_prices ? html.replace(/<!-- \/?yc:nocalc -->\n?/g, '') : html.replace(/<!-- yc:nocalc -->[\s\S]*?<!-- \/yc:nocalc -->\n?/g, '');
       if (f.display && f.display.hide_prices) html = hidePriceText(html.replace(/<!-- yc:calc -->[\s\S]*?<!-- \/yc:calc -->\n?/g, ''), false);
       if (f.display && f.display.hide_contact) html = hideContactHtml(html, false, '', false);
       html = html.replace('id="page-loader"', 'id="page-loader-off" hidden').replace(/<script[^>]*googletagmanager[\s\S]*?<\/script>/gi, '').replace(/<script>\s*window\.dataLayer[\s\S]*?<\/script>/gi, '');
@@ -294,7 +316,7 @@ ${statusHtml()}
   <form id="ps-form" novalidate>${formHtml()}</form>
   <div class="ps-pv" aria-label="預覽">
     <div class="ps-tools" role="group" aria-label="預覽頁面">
-      ${['home', 'rental', 'pricing'].map((p) => `<button type="button" class="m-btn" data-page="${p}" aria-pressed="${st.page === p}">${{ home: '首頁', rental: '/rental/', pricing: '/pricing/' }[p]}</button>`).join('')}
+      ${['home', 'rental', 'pricing', 'quote'].map((p) => `<button type="button" class="m-btn" data-page="${p}" aria-pressed="${st.page === p}">${{ home: '首頁', rental: '/rental/', pricing: '/pricing/', quote: '/quote/' }[p]}</button>`).join('')}
       <button type="button" class="m-btn" data-device="desktop" aria-pressed="${st.device === 'desktop'}">電腦</button>
       <button type="button" class="m-btn" data-device="mobile" aria-pressed="${st.device === 'mobile'}">手機</button>
     </div>
@@ -398,8 +420,19 @@ ${statusHtml()}
     box.querySelectorAll('[data-page]').forEach((b) => b.addEventListener('click', () => { st.page = b.getAttribute('data-page'); box.querySelectorAll('[data-page]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); preview(); }));
     box.querySelectorAll('[data-device]').forEach((b) => b.addEventListener('click', () => { st.device = b.getAttribute('data-device'); box.querySelectorAll('[data-device]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); preview(); }));
     const redraw = () => { const keep = window.scrollY; st.form = readForm(); draw(); window.scrollTo(0, keep); };
-    document.getElementById('ps-qadd').addEventListener('click', () => { st.form = readForm(); st.form.quote.items.push({ id: 'n' + Date.now().toString(36), g: '其他', name: '', en: '', unit: 'once', p: { A: null, B: null, C: null } }); const keep = window.scrollY; draw(); window.scrollTo(0, keep); const last = box.querySelectorAll('[data-qi$=".name"]'); if (last.length) last[last.length - 1].focus(); });
-    box.querySelectorAll('[data-qdel]').forEach((b) => b.addEventListener('click', () => { st.form = readForm(); st.form.quote.items.splice(+b.getAttribute('data-qdel'), 1); const keep = window.scrollY; draw(); window.scrollTo(0, keep); }));
+    document.getElementById('ps-qadd').addEventListener('click', () => { st.form = readForm(); const nid = 'n' + Date.now().toString(36); st.form.quote.items.push({ id: nid, g: '其他', name: '', en: '', unit: 'once', d: '', d_en: '', p: Object.fromEntries(st.form.quote.plans.map((p) => [p.id, null])) }); st.qOpen.add(nid); const keep = window.scrollY; draw(); window.scrollTo(0, keep); const last = box.querySelectorAll('[data-qi$=".name"]'); if (last.length) last[last.length - 1].focus(); });
+    box.querySelectorAll('[data-qdel]').forEach((b) => b.addEventListener('click', () => { st.form = readForm(); const x = st.form.quote.items[+b.getAttribute('data-qdel')]; if (!window.confirm('刪除「' + (x.name || '這一項') + '」？儲存後才會生效。')) return; st.form.quote.items.splice(+b.getAttribute('data-qdel'), 1); const keep = window.scrollY; draw(); window.scrollTo(0, keep); }));
+    box.querySelectorAll('[data-qmove]').forEach((b) => b.addEventListener('click', () => {
+      st.form = readForm(); const [i, d] = b.getAttribute('data-qmove').split('.').map(Number), it = st.form.quote.items, j = i + d;
+      if (j < 0 || j >= it.length) return; [it[i], it[j]] = [it[j], it[i]]; st.qOpen.add(it[j].id);
+      const keep = window.scrollY; draw(); window.scrollTo(0, keep);
+      const el = box.querySelector(`[data-qmove="${j}.${d}"]`) || box.querySelector(`[data-qmove="${j}.${-d}"]`); if (el) el.focus();
+    }));
+    box.querySelectorAll('details.ps-qi').forEach((dt) => dt.addEventListener('toggle', () => { if (dt.open) st.qOpen.add(dt.dataset.open); else st.qOpen.delete(dt.dataset.open); }));
+    const qf = document.getElementById('ps-qfind');
+    const filt = () => { st.qFind = qf.value.trim(); const k = st.qFind.toLowerCase(); box.querySelectorAll('#ps-qitems > details').forEach((dt) => { dt.hidden = !!k && !dt.textContent.toLowerCase().includes(k) && !(dt.querySelector('[data-qi$=".name"]').value || '').toLowerCase().includes(k); }); };
+    qf.addEventListener('input', filt); filt();
+    document.getElementById('ps-qexpand').addEventListener('click', () => { st.qAllOpen = !st.qAllOpen; box.querySelectorAll('details.ps-qi').forEach((dt) => { dt.open = st.qAllOpen; }); document.getElementById('ps-qexpand').textContent = st.qAllOpen ? '全部收合' : '全部展開'; });
     box.querySelectorAll('[data-qi$=".unit"]').forEach((el) => el.addEventListener('change', redraw));
     document.getElementById('ps-save').addEventListener('click', onSave);
     document.getElementById('ps-republish').addEventListener('click', onRepublish);

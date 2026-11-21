@@ -13,6 +13,7 @@
 - [搜尋優化 SEO＋GEO](https://yc-axiom.pages.dev/services/geo-optimization/)：讓網站更容易被 Google 與 AI 搜尋找到並正確引用
 - [服務項目總覽](https://yc-axiom.pages.dev/services/)
 - [定價](https://yc-axiom.pages.dev/pricing/)：客製網站一次買斷、無強制月費
+- [報價試算](https://yc-axiom.pages.dev/quote/)：線上勾選網站類型、加購功能、SEO、GEO、數據與市場分析、每月維護，即時算出網頁設計費用與分期金額
 
 ## 網站租用
 
