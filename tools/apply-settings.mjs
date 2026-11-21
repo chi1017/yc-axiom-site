@@ -54,7 +54,7 @@ const HIDE = pricesHidden(data), NOC = contactHidden(data), NOC_P = privacyConta
 console.log('價格設定 v' + S.version + '：早鳥' + (eff.early ? '進行中（至 ' + eff.until + '）' : '未進行') + '，一頁版 ' + tok.from + '／月、多頁版 ' + tok.multi_from + '／月；公告列' + (pr.bar.show ? '顯示' : '不顯示') + '、卡片' + (pr.card.show ? '顯示' : '不顯示') + (HIDE ? '；官網價錢隱藏中' : '') + (NOC ? '；聯絡方式關閉中' + (NOC_P ? '（含隱私權政策）' : '') : ''));
 
 // 預覽用範本（套用前）
-const PREVIEW = { 'index.html': 'home.html', 'rental/index.html': 'rental.html', 'pricing/index.html': 'pricing.html' };
+const PREVIEW = { 'index.html': 'home.html', 'rental/index.html': 'rental.html', 'pricing/index.html': 'pricing.html', 'quote/index.html': 'quote.html' };
 mkdirSync(join(OUT, 'admin/preview-src'), { recursive: true });
 for (const [src, dst] of Object.entries(PREVIEW)) if (existsSync(join(OUT, src))) copyFileSync(join(OUT, src), join(OUT, 'admin/preview-src', dst));
 
@@ -65,8 +65,11 @@ for (const f of walk(OUT)) {
   if (!/\.(html|txt|xml|json|webmanifest)$/.test(rel)) continue;
   let s = readFileSync(f, 'utf8'), o = s;
   if (hasTokens(s)) s = render(s, rel.startsWith('en/') ? tokEn : tok);
+  // 隱藏價錢時才顯示的替代內容（例如報價試算頁的「請洽詢報價」）；沒隱藏時拿掉
+  if (!HIDE) s = s.replace(/<!-- yc:nocalc -->[\s\S]*?<!-- \/yc:nocalc -->\n?/g, '');
+  else s = s.replace(/<!-- \/?yc:nocalc -->\n?/g, '');
   if (HIDE && !HIDE_EXEMPT.test(rel) && !rel.startsWith('assets/')) {
-    s = s.replace(/<!-- yc:calc -->[\s\S]*?<!-- \/yc:calc -->\n?/g, '');   // 月租試算整塊拿掉
+    s = s.replace(/<!-- yc:calc -->[\s\S]*?<!-- \/yc:calc -->\n?/g, '');   // 月租試算、報價試算整塊拿掉
     s = hidePriceText(s, rel.startsWith('en/'));
     hidden += s !== o ? 1 : 0;
   }

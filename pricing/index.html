@@ -63,7 +63,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <script id="yc-webfont">/* 字型等頁面顯示後才下載，主要內容不用等字型 */(function(){var u="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Cinzel:wght@500&family=Noto+Serif+TC:wght@600&display=swap";function a(){var l=document.createElement("link");l.rel="stylesheet";l.href=u;document.head.appendChild(l);}if(document.readyState==="complete")a();else addEventListener("load",function(){setTimeout(a,0);});})();</script>
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Cinzel:wght@500&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="../assets/dist/site.min.css?v=93a19021a4">
+<link rel="stylesheet" href="../assets/dist/site.min.css?v=c9b756a5d9">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -333,6 +333,9 @@
         <p class="sp-lede reveal">公開網頁設計價格：形象網站價格、電商與 SEO 的參考區間如下，架設網站費用與網站製作報價會依頁數與功能調整。客製網站是一次性買斷、無強制月費，所有方案都可客製化組合；想用月租方式先上線，可以看<a href="../rental/">網站租用</a>（每月 {{yc:from}} 起，使用我們設計的版型、內容自己填）。</p>
 
 
+        <!-- yc:calc -->
+        <p class="sp-note reveal" style="margin-top:-6px"><a href="../quote/">想直接知道自己的價格？用報價試算勾選需要的服務 →</a></p>
+<!-- /yc:calc -->
         <div class="pc-incl reveal"><p class="pc-incl-h">每個客製網站都包含</p><ul class="pc-base pc-base--compact reveal"><li title="不套版，視覺與架構依你的品牌與客群規劃。"><strong>依品牌從頭設計</strong></li><li title="RWD 響應式設計，上線前做跨裝置測試驗收。"><strong>電腦、平板、手機都好看</strong></li><li title="驗收後移交原始碼、Figma 設計稿與主機控制權。"><strong>原始碼與設計稿完整交給你</strong></li><li title="一次買斷；之後要不要找我們維護，你自己決定。"><strong>不綁約、無強制月費</strong></li><li title="含 Bug 修正與基礎圖文微調。"><strong>上線後 30 天免費保固</strong></li><li title="簽約付 30%，驗收無誤上線前付 70%。"><strong>分兩期付款</strong></li></ul></div>
         <h2 class="sr-only">網頁設計方案與價格</h2>
         <div class="pricing-tabs reveal" style="margin-top: 40px;">
@@ -563,41 +566,12 @@
         </div>
 
         <!-- yc:calc -->
-        <section class="yc-q reveal" id="quote" aria-labelledby="quote-t" data-quote="{{yc:quote_data}}">
-            <div class="yc-q-head">
-                <p class="yc-assure-eyebrow">Quote builder</p>
-                <h2 class="sp-h2" id="quote-t">報價試算：勾選你要的，馬上知道多少</h2>
-                <p class="yc-q-lede">先選網站類型，再勾需要的功能與服務，右邊會算出一次性費用、分期金額與每月費用。可以複製給同事討論，也可以印出或存成 PDF。</p>
-            </div>
-            <div class="yc-q-grid">
-                <form class="yc-q-form" onsubmit="return false" novalidate>
-                    <fieldset class="yc-q-step"><legend><span class="yc-q-n">1</span>網站類型</legend><div class="yc-q-plans" data-q="plans"></div></fieldset>
-                    <fieldset class="yc-q-step"><legend><span class="yc-q-n">2</span>需要的功能與服務</legend><div data-q="items"></div></fieldset>
-                    <fieldset class="yc-q-step"><legend><span class="yc-q-n">3</span>報價對象（選填）</legend><label class="yc-q-who"><span>公司或店名，會印在報價單上</span><input type="text" name="who" maxlength="40" autocomplete="organization" placeholder="例如：好喝咖啡"></label></fieldset>
-                    <noscript><p class="yc-q-lede">報價試算需要開啟 JavaScript。</p></noscript>
-                </form>
-                <aside class="yc-q-out" aria-live="polite">
-                    <p class="yc-q-out-h">試算結果</p>
-                    <ul class="yc-q-lines" data-q="lines"></ul>
-                    <div class="yc-q-sum">
-                        <p class="yc-q-sum-l">一次性費用</p>
-                        <p class="yc-q-total" data-q="total">NT$0</p>
-                        <p class="yc-q-split" data-q="split"></p>
-                    </div>
-                    <div class="yc-q-sum yc-q-sum--m" data-q="mbox" hidden>
-                        <p class="yc-q-sum-l">每月費用</p>
-                        <p class="yc-q-total yc-q-total--m" data-q="month">NT$0</p>
-                    </div>
-                    <div class="yc-q-acts">
-                        <button type="button" class="btn-primary" data-q="copy">複製報價摘要</button>
-                        <button type="button" class="btn-secondary" data-q="print">列印／存成 PDF</button>
-                    </div>
-                    <p class="yc-q-msg" data-q="msg" role="status"></p>
-                    <p class="yc-calc-note" data-q="note"></p>
-                    <p class="yc-q-contact" hidden><a href="https://line.me/R/ti/p/%40788cblaq">LINE @788cblaq</a><a href="mailto:ycaxiom@gmail.com">ycaxiom@gmail.com</a></p>
-                </aside>
-            </div>
-        </section>
+        <a class="yc-qcard reveal" href="../quote/">
+            <span class="yc-qcard-k">Quote builder</span>
+            <span class="yc-qcard-t">報價試算：勾選你要的服務，馬上知道多少</span>
+            <span class="yc-qcard-d">網站製作、加購功能、SEO 與 AI 搜尋、數據與市場分析、每月維護，所有服務都能自己組合試算，每一項都有說明，可以複製摘要或印成報價單。</span>
+            <span class="yc-qcard-go">開始試算 →</span>
+        </a>
 <!-- /yc:calc -->
         <div class="pricing-note reveal">
             <p>所有方案均可<span>客製化組合</span>，費用依實際需求報價。<br>有任何專案問題，歡迎隨時聯繫諮詢。</p>
@@ -764,6 +738,7 @@
             <a href="../seo/">SEO 工具</a>
             <a href="../learn/">問題中心</a>
             <a href="../pricing/">定價</a>
+            <a href="../quote/">報價試算</a>
             <a href="../rental/">網站租用</a>
             <a href="../contact/">聯絡</a>
         </div>
@@ -775,6 +750,6 @@
         </div>
     </div>
 </footer>
-<script src="../assets/dist/site.min.js?v=7fe5f298b3" defer></script>
+<script src="../assets/dist/site.min.js?v=233075edc8" defer></script>
 </body>
 </html>
