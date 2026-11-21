@@ -1006,14 +1006,14 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     var nm = function (x) { return en && x.en ? x.en : x.name; };
     var ds = function (x) { return en && x.d_en ? x.d_en : x.d; };
-    var T = en ? { inc: 'Included', ask: 'Quoted separately', mo: '/month', each: ' each', from: '', byItem: 'Priced by item', more: 'Details', less: 'Hide',
+    var T = en ? { inc: 'Included', ask: 'Quoted separately', yr: '/year', yearly: 'Yearly', mo: '/month', each: ' each', from: '', byItem: 'Priced by item', more: 'Details', less: 'Hide',
         split: function (a, b) { return 'Deposit on signing (' + D + '%): ' + money(a) + ' · On delivery (' + (100 - D) + '%): ' + money(b); },
         askNote: function (n) { return n + ' item' + (n > 1 ? 's are' : ' is') + ' quoted separately after we review your needs.'; },
         copied: 'Copied. Paste it into LINE or an email.', copyFail: 'Could not copy automatically; please select and copy the text.',
         title: 'YC AXIOM quote estimate', who: 'For', date: 'Date', no: 'Ref.', item: 'Item', amt: 'Amount', once: 'One-off total', monthly: 'Monthly',
         pay: 'Payment: ' + D + '% on signing, ' + (100 - D) + '% on acceptance and delivery.', valid: 'Valid for 30 days from the date above.', empty: 'Tick at least one service.',
         groups: { '規模': 'Scope', '內容與設計': 'Content and design', '功能': 'Features', 'SEO 與 AI 搜尋': 'SEO and AI search', '數據與市場': 'Data and market research', '上線後（每月）': 'After launch (monthly)', 'SEO': 'SEO' } }
-      : { inc: '已包含', ask: '另外報價', mo: '／月', each: '／每個', from: ' 起', byItem: '依項目計價', more: '說明', less: '收合',
+      : { inc: '已包含', ask: '另外報價', yr: '／年', yearly: '每年費用', mo: '／月', each: '／每個', from: ' 起', byItem: '依項目計價', more: '說明', less: '收合',
         split: function (a, b) { return '簽約訂金 ' + D + '%：' + money(a) + '・驗收交付 ' + (100 - D) + '%：' + money(b); },
         askNote: function (n) { return '另有 ' + n + ' 項需要看過需求後另外報價。'; },
         copied: '已複製，可以直接貼到 LINE 或 Email。', copyFail: '無法自動複製，請手動選取文字複製。',
@@ -1054,34 +1054,35 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     $('note').textContent = Q.note || '';
     var plan = function () { var r = f.querySelector('input[name="plan"]:checked'); return plans.filter(function (p) { return p.id === (r ? r.value : want); })[0] || plans[0]; };
     function state() {
-        var P = plan(), lines = P.price ? [{ name: nm(P), amt: P.price, plan: true }] : [], once = P.price, month = 0, mlines = [], asks = [];
+        var P = plan(), lines = P.price ? [{ name: nm(P), amt: P.price, plan: true }] : [], once = P.price, month = 0, mlines = [], year = 0, ylines = [], asks = [];
         Q.items.forEach(function (x, i) {
             var row = box.querySelector('.yc-q-item[data-i="' + i + '"]'), inp = row.querySelector('input'), pr = x.p[P.id];
             var off = pr === null || pr === undefined, ask = x.unit === 'ask', inc = !ask && pr === 0;
             row.classList.toggle('is-off', off); row.classList.toggle('is-inc', inc);
             inp.disabled = off || inc;
             if (inc) { if (!inp.checked) inp.dataset.auto = '1'; inp.checked = true; } else if (inp.dataset.auto) { inp.checked = false; delete inp.dataset.auto; }
-            row.querySelector('.yc-q-price').textContent = off ? '' : ask ? T.ask : inc ? T.inc : money(pr) + (x.unit === 'month' ? T.mo : x.unit === 'qty' ? T.each : '');
+            row.querySelector('.yc-q-price').textContent = off ? '' : ask ? T.ask : inc ? T.inc : money(pr) + (x.unit === 'month' ? T.mo : x.unit === 'year' ? T.yr : x.unit === 'qty' ? T.each : '');
             var q = row.querySelector('.yc-q-qty');
             if (q) { q.hidden = off || !inp.checked; q.querySelector('output').textContent = qty[i]; q.querySelector('[data-d="-1"]').disabled = qty[i] <= 1; q.querySelector('[data-d="1"]').disabled = qty[i] >= (x.max || 10); }
             if (off || !inp.checked) return;
             if (ask) { asks.push({ name: nm(x), ask: true }); return; }
             var n = x.unit === 'qty' ? qty[i] : 1, a = pr * n;
             var r = { name: nm(x) + (n > 1 ? ' ×' + n : ''), amt: a, inc: inc, unit: x.unit };
-            if (x.unit === 'month') { month += a; mlines.push(r); } else { once += a; lines.push(r); }
+            if (x.unit === 'month') { month += a; mlines.push(r); } else if (x.unit === 'year') { year += a; ylines.push(r); } else { once += a; lines.push(r); }
         });
         box.querySelectorAll('.yc-q-grp').forEach(function (gp) { gp.hidden = !gp.querySelector('.yc-q-item:not(.is-off)'); });
-        return { P: P, lines: lines.concat(asks), mlines: mlines, asks: asks.length, once: once, month: month, who: (f.who.value || '').trim() };
+        return { P: P, lines: lines.concat(asks), mlines: mlines, ylines: ylines, asks: asks.length, once: once, month: month, year: year, who: (f.who.value || '').trim() };
     }
-    var cell = function (l) { return l.ask ? T.ask : l.inc ? T.inc : money(l.amt) + (l.unit === 'month' ? T.mo : ''); };
+    var cell = function (l) { return l.ask ? T.ask : l.inc ? T.inc : money(l.amt) + (l.unit === 'month' ? T.mo : l.unit === 'year' ? T.yr : ''); };
     function draw() {
-        var s = state(), all = s.lines.concat(s.mlines);
+        var s = state(), all = s.lines.concat(s.ylines, s.mlines);
         $('lines').innerHTML = all.length ? all.map(function (l) { return '<li' + (l.plan ? ' class="is-plan"' : '') + '><span>' + esc(l.name) + '</span><span>' + cell(l) + '</span></li>'; }).join('') : '<li class="is-empty"><span>' + T.empty + '</span></li>';
         $('total').textContent = money(s.once);
         $('split').textContent = (s.once ? T.split(depOf(s.once), s.once - depOf(s.once)) : '') + (s.asks ? (s.once ? ' ' : '') + T.askNote(s.asks) : '');
         $('mbox').hidden = !s.month;
         $('month').textContent = money(s.month) + T.mo;
-        pill.querySelector('b').textContent = money(s.once) + (s.month ? ' + ' + money(s.month) + T.mo : '');
+        if ($('ybox')) { $('ybox').hidden = !s.year; $('year').textContent = money(s.year) + T.yr; }
+        pill.querySelector('b').textContent = money(s.once) + (s.year ? ' + ' + money(s.year) + T.yr : '') + (s.month ? ' + ' + money(s.month) + T.mo : '');
         return s;
     }
     var today = function () { var d = new Date(); return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate(); };
@@ -1092,6 +1093,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         if (s.who) out.push(T.who + sep + s.who);
         s.lines.forEach(function (l, i) { out.push((i ? '＋' : '') + l.name + '　' + cell(l)); });
         if (s.once) out.push(T.once + sep + money(s.once) + (en ? ' (' : '（') + T.split(depOf(s.once), s.once - depOf(s.once)) + (en ? ')' : '）'));
+        if (s.year) { out.push(T.yearly + sep + money(s.year) + T.yr); s.ylines.forEach(function (l) { out.push('・' + l.name + '　' + cell(l)); }); }
         if (s.month) { out.push(T.monthly + sep + money(s.month) + T.mo); s.mlines.forEach(function (l) { out.push('・' + l.name + '　' + cell(l)); }); }
         if (s.asks) out.push(T.askNote(s.asks));
         if (Q.note) out.push(Q.note);
@@ -1101,13 +1103,13 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     function msg(t) { var m = $('msg'); m.textContent = t; clearTimeout(msg.t); msg.t = setTimeout(function () { m.textContent = ''; }, 5000); }
     function ga(n) { try { if (typeof gtag === 'function') gtag('event', n, { plan: plan().id }); } catch (e) { /* ignore */ } }
     $('copy').addEventListener('click', function () {
-        var s = draw(); if (!s.lines.length && !s.mlines.length) return msg(T.empty);
+        var s = draw(); if (!s.lines.length && !s.mlines.length && !s.ylines.length) return msg(T.empty);
         var t = text(s), done = function () { msg(T.copied); ga('quote_copy'); };
         var fall = function () { var ta = document.createElement('textarea'); ta.value = t; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) { /* ignore */ } ta.remove(); ok ? done() : msg(T.copyFail); };
         if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, fall); else fall();
     });
     $('print').addEventListener('click', function () {
-        var s = draw(); if (!s.lines.length && !s.mlines.length) return msg(T.empty);
+        var s = draw(); if (!s.lines.length && !s.mlines.length && !s.ylines.length) return msg(T.empty);
         var contact = [].map.call(box.querySelectorAll('.yc-q-contact a'), function (a) { return esc(a.textContent); });
         var row = function (l) { return '<tr><td>' + esc(l.name) + '</td><td class="n">' + cell(l) + '</td></tr>'; };
         var sh = document.getElementById('yc-qsheet') || document.body.appendChild(Object.assign(document.createElement('div'), { id: 'yc-qsheet' }));
@@ -1115,6 +1117,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
             (s.lines.length ? '<table><thead><tr><th>' + T.item + '</th><th class="n">' + T.amt + '</th></tr></thead><tbody>' + s.lines.map(row).join('') + '</tbody>' +
             '<tfoot><tr class="qs-tot"><td>' + T.once + '</td><td class="n">' + money(s.once) + '</td></tr></tfoot></table>' : '') +
             (s.once ? '<p class="qs-note">' + T.split(depOf(s.once), s.once - depOf(s.once)) + '</p>' : '') +
+            (s.year ? '<table><thead><tr><th>' + T.yearly + '</th><th class="n">' + T.amt + '</th></tr></thead><tbody>' + s.ylines.map(row).join('') + '</tbody><tfoot><tr class="qs-tot"><td>' + T.yearly + '</td><td class="n">' + money(s.year) + T.yr + '</td></tr></tfoot></table>' : '') +
             (s.month ? '<table><thead><tr><th>' + T.monthly + '</th><th class="n">' + T.amt + '</th></tr></thead><tbody>' + s.mlines.map(row).join('') + '</tbody><tfoot><tr class="qs-tot"><td>' + T.monthly + '</td><td class="n">' + money(s.month) + T.mo + '</td></tr></tfoot></table>' : '') +
             (s.asks ? '<p class="qs-note">' + T.askNote(s.asks) + '</p>' : '') +
             '<p class="qs-note">' + T.pay + '</p><p class="qs-note">' + T.valid + '</p>' + (Q.note ? '<p class="qs-note">' + esc(Q.note) + '</p>' : '') +

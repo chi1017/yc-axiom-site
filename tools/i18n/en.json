@@ -3536,5 +3536,7 @@
 "想先看各方案差在哪裡，請看<a1>定價與方案比較</a1>；預算有限、想用月租方式先上線，可以看<a2>網站租用</a2>。": "To compare plans first, see <a1>Pricing and plans</a1>. On a tight budget and want to launch with a monthly plan? See <a2>Website rental</a2>.",
 "<span1>01. 線上試算的金額就是正式報價嗎？</span1> <span2>+</span2>": "<span1>01. Is the online estimate a formal quote?</span1> <span2>+</span2>",
 "<span1>02. 付款怎麼分？</span1> <span2>+</span2>": "<span1>02. How is payment split?</span1> <span2>+</span2>",
-"<span1>03. 沒有看到我要的功能怎麼辦？</span1> <span2>+</span2>": "<span1>03. What if the feature I need isn’t listed?</span1> <span2>+</span2>"
+"<span1>03. 沒有看到我要的功能怎麼辦？</span1> <span2>+</span2>": "<span1>03. What if the feature I need isn’t listed?</span1> <span2>+</span2>",
+"線上試算網頁設計費用：一頁式 3,000 起、多頁式 7,000 起，再勾選頁面、文案、雙語、購物車金流、會員、SEO、網域信箱、維護等加購，即時算出總價與分期金額，可複製摘要或印成報價單。": "Estimate your web design cost online: one-page sites from NT$3,000 and multi-page sites from NT$7,000, then add pages, copywriting, bilingual, checkout, member accounts, SEO, domain and email, and maintenance to see the total and payment split instantly. Copy the summary or print a quote.",
+"每年費用": "Yearly"
 }

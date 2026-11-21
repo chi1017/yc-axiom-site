@@ -1,7 +1,7 @@
 /* 管理後台「價格與活動」分頁：方案價格、早鳥活動、頂部公告列、滑出卡片。
    儲存：資料庫函式 save_site_settings（資料庫層只允許管理員）；發布：Edge Function site-settings 觸發 GitHub Actions 重新建置官網。
    預覽：用建置時留下的 /admin/preview-src/ 範本，套用表單裡的設定，顯示公告列與卡片。 */
-import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText, hideContactHtml } from '../tools/site-settings.mjs?v=2026-11-22b';
+import { DEFAULTS, normalize, effective, tokens, render, promo, barHead, barBody, cardAllowed, taipeiDate, money, hidePriceText, hideContactHtml } from '../tools/site-settings.mjs?v=2026-11-22c';
 
 const YC = window.YC;
 const box = document.getElementById('adm-prices');
@@ -114,7 +114,7 @@ ${quoteHtml()}
   // 報價試算（/quote/ 頁）：方案基本價、項目與每個方案的價格。一項一張卡片，點開編輯；價格欄留空＝這個方案不提供，填 0＝已包含
   function quoteHtml() {
     const q = st.form.quote, pv = (v) => (v === null || v === undefined ? '' : v);
-    const UNIT = { once: '一次', qty: '依數量', month: '每月', ask: '另外報價' };
+    const UNIT = { once: '一次', qty: '依數量', year: '每年', month: '每月', ask: '另外報價' };
     const PL = q.plans.map((p) => p.id);
     st.qOpen = st.qOpen || new Set();
     const plans = q.plans.map((p, i) => `<details class="ps-qi"${st.qOpen.has('plan-' + p.id) ? ' open' : ''} data-open="plan-${p.id}"><summary><span class="ps-qi-n">${esc(p.name)}</span><span class="ps-qi-s">${p.id === 'N' ? '依項目計價' : money(p.price) + ' 起'}</span></summary>
@@ -124,8 +124,8 @@ ${quoteHtml()}
       <label class="ps-qwide">說明<input type="text" data-qp="${i}.desc" value="${esc(p.desc)}" maxlength="120"></label>
       <label>英文名稱<input type="text" data-qp="${i}.en" value="${esc(p.en)}" maxlength="60"></label>
       <label class="ps-qwide">英文說明<input type="text" data-qp="${i}.desc_en" value="${esc(p.desc_en)}" maxlength="160"></label></div></details>`).join('');
-    const sum = (x) => PL.map((k) => { const v = x.p[k]; return v === null || v === undefined ? '' : `<span title="${esc((q.plans.find((p) => p.id === k) || {}).name)}">${({ A: '單頁', B: '多頁', C: '電商', N: '單項' })[k] || k} ${x.unit === 'ask' ? '報價' : v === 0 ? '含' : money(v)}</span>`; }).join('');
-    const items = q.items.map((x, i) => `<details class="ps-qi"${st.qOpen.has(x.id) ? ' open' : ''} data-open="${esc(x.id)}"><summary><span class="ps-qi-g">${esc(x.g)}</span><span class="ps-qi-n">${esc(x.name) || '（未命名）'}</span><span class="ps-qi-s">${sum(x)}${x.unit === 'month' ? '<em>／月</em>' : x.unit === 'qty' ? '<em>／每個</em>' : ''}</span></summary>
+    const sum = (x) => PL.map((k) => { const v = x.p[k]; return v === null || v === undefined ? '' : `<span title="${esc((q.plans.find((p) => p.id === k) || {}).name)}">${({ A: '一頁', B: '多頁', C: '電商', N: '單項' })[k] || k} ${x.unit === 'ask' ? '報價' : v === 0 ? '含' : money(v)}</span>`; }).join('');
+    const items = q.items.map((x, i) => `<details class="ps-qi"${st.qOpen.has(x.id) ? ' open' : ''} data-open="${esc(x.id)}"><summary><span class="ps-qi-g">${esc(x.g)}</span><span class="ps-qi-n">${esc(x.name) || '（未命名）'}</span><span class="ps-qi-s">${sum(x)}${x.unit === 'month' ? '<em>／月</em>' : x.unit === 'year' ? '<em>／年</em>' : x.unit === 'qty' ? '<em>／每個</em>' : ''}</span></summary>
       <div class="ps-qi-body">
       <label>分組<input type="text" data-qi="${i}.g" value="${esc(x.g)}" maxlength="20" list="ps-qgroups"></label>
       <label>計價<select data-qi="${i}.unit">${Object.keys(UNIT).map((u) => `<option value="${u}"${x.unit === u ? ' selected' : ''}>${UNIT[u]}</option>`).join('')}</select></label>
