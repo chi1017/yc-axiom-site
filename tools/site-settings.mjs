@@ -65,8 +65,8 @@ export const DEFAULTS = {
         d: '依檢測結果執行優化，包含 Meta 標籤、標題結構、內部連結、網站速度與手機相容性。新網站已包含基本 SEO。', d_en: 'Fixes based on the audit: meta tags, headings, internal links, speed and mobile compatibility. New sites already include basic SEO.' },
       { id: 'seo', g: 'SEO 與 AI 搜尋', name: '關鍵字策略與內容架構', en: 'Keyword strategy and content structure', unit: 'once', p: { A: 5000, B: 6000, N: 6000 },
         d: '找出客人實際會搜尋的字，規劃哪一頁對應哪一組關鍵字，並調整標題、內文與內部連結。', d_en: 'Find the words customers actually search, map them to pages, and adjust titles, copy and internal links.' },
-      { id: 'geo', g: 'SEO 與 AI 搜尋', name: 'GEO／AI 搜尋優化', en: 'GEO / AI search optimisation', unit: 'ask', p: { A: 0, B: 0, N: 0 },
-        d: '設定 AI 爬蟲、llms.txt 與結構化資料，調整內容結構，讓 AI 比較容易理解你的網站。依網站現況報價，無法保證被 AI 推薦。', d_en: 'AI crawler access, llms.txt, structured data and content restructuring. Quoted per site; AI recommendations cannot be guaranteed.' },
+      { id: 'seoy', g: 'SEO 與 AI 搜尋', name: 'SEO／GEO 文章經營（年約）', en: 'SEO / GEO content programme (yearly)', unit: 'year', p: { A: 48000, B: 48000, N: 48000 },
+        d: '一年鎖定 10 組關鍵字，每月撰寫並發布 5 篇文章，同時寫給 Google 和 ChatGPT、Gemini 等 AI 搜尋看（SEO＋GEO），並追蹤排名與成效。無法保證排名或被 AI 推薦。', d_en: 'A year targeting 10 keyword groups, with 5 articles written and published each month for both Google and AI search (SEO + GEO), plus ranking and results tracking. Rankings and AI recommendations cannot be guaranteed.' },
       { id: 'domain', g: '網域與信箱', name: '網域代購與串接（網域年費另計）', en: 'Domain purchase and connection (domain fee extra)', unit: 'once', p: { A: 500, B: 500, N: 500 },
         d: '幫你用你的名義買網域（例如 .com.tw）並接到網站。網域本身的註冊年費依註冊商價格另計，網域登記在你名下。', d_en: 'We buy a domain in your name (e.g. .com.tw) and connect it. The registry’s yearly fee is extra and the domain is registered to you.' },
       { id: 'dns', g: '網域與信箱', name: 'DNS 設定代管', en: 'DNS setup', unit: 'once', p: { A: 1000, B: 1000, N: 1000 },
@@ -85,8 +85,6 @@ export const DEFAULTS = {
         d: '每天自動備份網站資料，保留 30 天，發生問題時可以還原到任何一天。', d_en: 'Automatic daily backups kept for 30 days, restorable to any day.' },
       { id: 'care', g: '上線後（每年）', name: '網站維護合約', en: 'Maintenance contract', unit: 'year', p: { A: 5400, B: 5400, N: 5400 },
         d: '內容更新、程式錯誤修正與基本技術支援，每月含 2 小時服務時數，超過另計。', d_en: 'Content updates, bug fixes and basic support, with 2 hours a month included; extra time billed separately.' },
-      { id: 'seom', g: '上線後（每月）', name: '長期 SEO 經營', en: 'Ongoing SEO', unit: 'month', p: { A: 6000, B: 6000, N: 6000 },
-        d: '持續佈局關鍵字與內容、監控排名、分析競爭對手，每月提供成效報告。', d_en: 'Ongoing keyword and content work, rank tracking and competitor analysis, with a monthly report.' },
       { id: 'datam', g: '上線後（每月）', name: '商業資料月報', en: 'Monthly business data report', unit: 'month', p: { A: 800, B: 800, N: 800 },
         d: '每月整理訂單、庫存或帳務資料，自動產出 Excel／PDF 月報，數字異常時提醒你。', d_en: 'Each month we tidy orders, stock or accounts into an Excel/PDF report and flag anything unusual.' }
     ]
