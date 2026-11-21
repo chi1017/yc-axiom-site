@@ -231,6 +231,8 @@
 .mem-danger p { margin: 0; font-size: 13px; color: var(--text-dim); line-height: 1.8; max-width: 620px; }
 .mem-danger a { color: var(--accent); }
 .mem-msg { color: #f0776b; font-size: 13px; margin-top: 10px; min-height: 1em; }
+/* 後台不需要右下角的 LINE 與社群浮動按鈕（手機上會蓋住儲存列） */
+.line-float, .social-float { display: none !important; }
 @media (max-width: 860px) { .mem-grid { grid-template-columns: 1fr; } .mem-card { padding: 18px; } .trend text { font-size: 17px; } }
 </style>
 
@@ -364,6 +366,6 @@
 <script src="../assets/admin.js?v=2026-10-16"></script>
 <script src="../assets/admin-rental.js?v=2026-11-13a"></script>
 <script src="../assets/admin-search.js?v=2026-11-12a"></script>
-<script type="module" src="../assets/admin-settings.js?v=2026-11-21b"></script>
+<script type="module" src="../assets/admin-settings.js?v=2026-11-22a"></script>
 </body>
 </html>
