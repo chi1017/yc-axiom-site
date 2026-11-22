@@ -1151,11 +1151,25 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         var ov = document.createElement('div'); ov.className = 'yc-qimg'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', T.title);
         ov.innerHTML = '<div class="yc-qimg-bar"><span>' + (en ? 'Press and hold the image to save or share it' : '長按圖片就能儲存或分享') + '</span><button type="button" data-x>' + (en ? 'Close' : '關閉') + '</button></div>' +
             '<img alt="' + esc(T.title) + '" src="' + url + '">' +
-            '<div class="yc-qimg-acts"><a class="btn-primary" download="' + esc(name) + '" href="' + url + '">' + (en ? 'Download image' : '下載圖片') + '</a><button type="button" class="btn-secondary" data-p>' + (en ? 'Print' : '列印') + '</button></div>';
+            '<div class="yc-qimg-acts"><button type="button" class="btn-primary" data-d>' + (en ? 'Save image' : '儲存圖片') + '</button><button type="button" class="btn-secondary" data-p>' + (en ? 'Print' : '列印') + '</button></div>';
         document.body.appendChild(ov); document.documentElement.style.overflow = 'hidden';
         var close = function () { ov.remove(); document.documentElement.style.overflow = ''; };
         ov.querySelector('[data-x]').onclick = close;
         ov.querySelector('[data-p]').onclick = function () { close(); doPrint(s); };
+        // iPhone／Android 的 Safari、Chrome 不支援 <a download> 存圖片：改用分享選單（可選「儲存影像」），不支援時才用下載連結
+        ov.querySelector('[data-d]').onclick = function () {
+            var bin = atob(url.split(',')[1]), arr = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+            var blob = new Blob([arr], { type: 'image/png' }), file = null;
+            try { file = new File([blob], name, { type: 'image/png' }); } catch (e) { /* 舊瀏覽器 */ }
+            if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: T.title }).catch(function () { /* 使用者取消 */ });
+                return;
+            }
+            var a = document.createElement('a'), bu = URL.createObjectURL(blob);
+            a.href = bu; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(function () { URL.revokeObjectURL(bu); }, 4000);
+        };
         ov.querySelector('[data-x]').focus();
         ga('quote_image');
     }
