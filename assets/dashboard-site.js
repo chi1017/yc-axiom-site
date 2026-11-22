@@ -349,8 +349,8 @@
       var e = await YC.client.from('site_events').select('type,created_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
       var pays = await YC.client.from('payments').select('amount,months,paid_on,period_to').eq('site_id', s.id).order('paid_on', { ascending: false }).order('created_at', { ascending: false }).limit(5);
       var rep = await YC.client.from('site_reports').select('month,seo_score,geo_score,top_issues').eq('site_id', s.id).eq('status', 'ok').order('month', { ascending: false }).limit(2);
-      var since = new Date(Date.now() + 8 * 3600 * 1000 - 29 * 86400000).toISOString().slice(0, 10);
-      var hits = await YC.client.from('site_daily_hits').select('day,path,views').eq('site_id', s.id).gte('day', since).limit(2000);
+      var since = new Date(Date.now() + 8 * 3600 * 1000 - 59 * 86400000).toISOString().slice(0, 10);   // 60 天：最近 30 天和前 30 天比較
+      var hits = await YC.client.from('site_daily_hits').select('day,path,views').eq('site_id', s.id).gte('day', since).limit(8000);
       var pay = await YC.client.from('site_pay_settings').select('mode,merchant_id,updated_at').eq('site_id', s.id).maybeSingle();
       var orders = await YC.client.from('shop_orders').select('trade_no,site_id,kind,items,amount,buyer,status,test,pay_info,created_at,paid_at,fulfilled_at').eq('site_id', s.id).order('created_at', { ascending: false }).limit(20);
       var msgs = await YC.client.from('site_messages').select('name,contact,message,created_at,kind,meta', { count: 'exact' }).eq('site_id', s.id).order('created_at', { ascending: false }).limit(10);
@@ -383,7 +383,8 @@
         bankHtml(bank, needPay) +
         ((pays.data || []).length ? '<details style="margin:12px 0 0"><summary style="cursor:pointer;font-size:14px">收款紀錄（最近 ' + pays.data.length + ' 筆）</summary><ul style="margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.8">' +
           pays.data.map(function (p) { return '<li>' + esc(p.paid_on) + '　' + esc(money(p.amount)) + '（' + esc(p.months) + ' 個月，服務至 ' + esc(p.period_to) + '）</li>'; }).join('') + '</ul></details>' : '') +
-        statsHtml(hits && !hits.error ? hits.data : null) +
+        (window.YCInsights ? window.YCInsights.html(s, hits && !hits.error ? hits.data : [], { report: !!(rep && !rep.error && rep.data && rep.data.length) })
+          : statsHtml(hits && !hits.error ? hits.data.filter(function (x) { return x.day >= new Date(Date.now() + 8 * 3600 * 1000 - 29 * 86400000).toISOString().slice(0, 10); }) : null)) +
         bkHtml + msgsHtml(msgs && !msgs.error ? msgs.data : null, msgs && msgs.count, s) +
         shopHtml(s, pay && !pay.error ? pay.data : null, orders && !orders.error ? orders.data : null) +
         domainHtml(s) + collabHtml(s, mem && !mem.error ? mem.data : null) +

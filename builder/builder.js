@@ -828,7 +828,7 @@ async function refreshStatus() {
 }
 
 // ── 左側表單 ──
-const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', notice: 'c-notice', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more', bookingCal: 'c-cal', code: 'c-code', order: 'c-order' };
+const FIELD_CARD = { blocks: 'c-blocks', seo: 'c-seo', style: 'c-style', template: 'c-basic', social: 'c-info', slug: 'c-basic', name: 'c-info', tagline: 'c-info', intro: 'c-info', address: 'c-info', phone: 'c-info', hours: 'c-hours', notice: 'c-notice', booking: 'c-booking', photos: 'c-photos', menu: 'c-menu', faq: 'c-faq', news: 'c-news', video: 'c-more', ga4: 'c-more', gsc: 'c-more', reviews: 'c-more', contactForm: 'c-more', showMap: 'c-more', bookingForm: 'c-more', posts: 'c-posts', en: 'c-en', shop: 'c-shop', bookingDeposit: 'c-more', bookingCal: 'c-cal', code: 'c-code', order: 'c-order' };
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const DAYL = { mon: '週一', tue: '週二', wed: '週三', thu: '週四', fri: '週五', sat: '週六', sun: '週日' };
 
@@ -1110,7 +1110,8 @@ function buildPanel() {
     h('div', { class: 'field' }, h('span', { text: '客人評價（選填，最多 6 則）' }), h('div', { class: 'msg mute', style: 'margin:0 0 8px', text: '請放真實的評價，可以摘自 Google 評論或客人留言；名字可以只寫稱呼（例如：林小姐）。' })),
     h('div', { id: 'reviewBox' }), h('button', { type: 'button', class: 'btn small', id: 'reviewAdd' }, '＋ 新增評價'), h('span', { id: 'reviewCnt', class: 'msg mute', style: 'margin-left:10px' }),
     h('div', { style: 'height:14px' }),
-    field('Google Analytics 評估 ID（選填）', 'ga4', { max: 20, ph: 'G-XXXXXXXXXX', help: '網站已經內建瀏覽次數統計（在會員專區查看）。需要更詳細的分析才填；GA 會在訪客第一次操作或 6 秒後才載入。' })));
+    field('Google Analytics 評估 ID（選填）', 'ga4', { max: 20, ph: 'G-XXXXXXXXXX', help: '網站已經內建瀏覽次數統計（在會員專區查看）。需要更詳細的分析才填；GA 會在訪客第一次操作或 6 秒後才載入。' }),
+    field('Google Search Console 驗證碼（選填）', 'gsc', { max: 200, ph: '<meta name="google-site-verification" content="…">', help: '在 Search Console 新增網站時選「HTML 標記」，把 Google 給的整段貼在這裡、重新發佈，再回 Google 按「驗證」。步驟見會員專區的使用手冊。' })));
   // 線上購買：商品（名稱、價格、說明、照片），付款走店家自己的綠界帳號（會員專區設定）
   const shopOn = h('input', { type: 'checkbox', id: 'f-shop-enabled' }); shopOn.checked = !!S.content.shop.enabled;
   shopOn.addEventListener('change', () => { S.content.shop.enabled = shopOn.checked; touch(); if (shopOn.checked) scrollPreviewTo('shop'); });
@@ -2360,7 +2361,7 @@ function validate() {
   r.ok = r.errors.length === 0; return r;
 }
 // 檢查清單的項目：打開那張設定卡片，捲到那個欄位並閃一下（照片類只捲過去、不開鍵盤）
-const FIELD_EL = { name: '#f-name', tagline: '#f-tagline', intro: '#f-intro', address: '#f-address', phone: '#f-phone', 'booking.url': '#f-booking-url', 'booking.label': '#f-booking-label', hoursNote: '#f-hoursNote', video: '#f-video', ga4: '#f-ga4' };
+const FIELD_EL = { name: '#f-name', tagline: '#f-tagline', intro: '#f-intro', address: '#f-address', phone: '#f-phone', 'booking.url': '#f-booking-url', 'booking.label': '#f-booking-label', hoursNote: '#f-hoursNote', video: '#f-video', ga4: '#f-ga4', gsc: '#f-gsc' };
 function goField(field) {
   const id = FIELD_CARD[field.split('.')[0]]; if (!id) return;
   const card = $('#' + id);
