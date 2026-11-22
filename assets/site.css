@@ -2276,3 +2276,8 @@ html.yc-s-open { overflow: hidden; }
 .yc-yr-where p + p { margin-top: 10px; }
 .yc-yr-where strong { color: var(--text-bright); margin-right: 6px; }
 @media (max-width: 760px) { .yc-yr-grid { grid-template-columns: 1fr; } .yc-yr-card { padding: 20px 18px 16px; } .yc-yr-list b { white-space: normal; } }
+
+/* 報價試算：管理員自填「另外報價」項目的金額 */
+.yc-q-item .yc-q-askamt { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin: 6px 0 0 32px; font-size: 13px; color: var(--text-dim); }
+.yc-q-item .yc-q-askamt[hidden] { display: none; }
+.yc-q-askamt input { width: 130px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 14px; }

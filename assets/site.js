@@ -1020,6 +1020,16 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         title: '報價試算單', who: '報價對象', date: '日期', no: '試算編號', item: '項目', amt: '金額', once: '一次性費用合計', monthly: '每月費用',
         pay: '付款方式：簽約時支付 ' + D + '% 訂金，驗收交付後支付 ' + (100 - D) + '% 尾款。', valid: '本試算自上列日期起 30 天內有效。', empty: '請至少勾選一項服務。', groups: {} };
     var qty = {};
+    // 「另外報價」的項目：只有用管理員帳號登入時，才能在這台裝置上填金額（一般訪客只會看到「另外報價」）
+    var ADMIN = (function () {
+        try {
+            for (var k = 0; k < localStorage.length; k++) {
+                var key = localStorage.key(k);
+                if (/^sb-.+-auth-token$/.test(key)) { var j = JSON.parse(localStorage.getItem(key)); var u = j && (j.user || (j.currentSession && j.currentSession.user)); if (u && u.app_metadata && u.app_metadata.role === 'admin') return true; }
+            }
+        } catch (e) { /* 沒有登入資料 */ }
+        return false;
+    })();
     // 手機版：在勾選區時，底部顯示目前總價，點一下捲到試算結果
     var pill = document.createElement('button');
     pill.type = 'button'; pill.className = 'yc-q-pill'; pill.setAttribute('aria-hidden', 'true'); pill.tabIndex = -1;
@@ -1046,6 +1056,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         var type = x.excl ? 'radio' : 'checkbox', did = 'yc-qd-' + i;
         html += '<div class="yc-q-item" data-i="' + i + '"><label class="yc-q-lab"><input type="' + type + '" name="' + (x.excl ? 'x-' + esc(x.excl) : 'i' + i) + '" value="' + i + '"><span class="yc-q-name">' + esc(nm(x)) + '</span></label>' +
             (x.unit === 'qty' ? '<span class="yc-q-qty" data-qty="' + i + '" hidden><button type="button" data-d="-1" aria-label="' + (en ? 'Fewer' : '減少') + '">−</button><output>1</output><button type="button" data-d="1" aria-label="' + (en ? 'More' : '增加') + '">+</button></span>' : '') +
+            (x.unit === 'ask' && ADMIN ? '<label class="yc-q-askamt" hidden><span>' + (en ? 'Amount (admin)' : '管理員填金額') + '</span><input type="number" min="0" step="500" inputmode="numeric" data-ask="' + i + '" placeholder="NT$"></label>' : '') +
             '<span class="yc-q-price"></span>' +
             (ds(x) ? '<button type="button" class="yc-q-more" aria-expanded="false" aria-controls="' + did + '" aria-label="' + esc(nm(x)) + '：' + T.more + '">' + T.more + '</button><p class="yc-q-desc" id="' + did + '" hidden>' + esc(ds(x)) + '</p>' : '') + '</div>';
         if (x.unit === 'qty') qty[i] = 1;
@@ -1064,8 +1075,14 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
             row.querySelector('.yc-q-price').textContent = off ? '' : ask ? T.ask : inc ? T.inc : money(pr) + (x.unit === 'month' ? T.mo : x.unit === 'year' ? T.yr : x.unit === 'qty' ? T.each : '');
             var q = row.querySelector('.yc-q-qty');
             if (q) { q.hidden = off || !inp.checked; q.querySelector('output').textContent = qty[i]; q.querySelector('[data-d="-1"]').disabled = qty[i] <= 1; q.querySelector('[data-d="1"]').disabled = qty[i] >= (x.max || 10); }
+            var am = row.querySelector('.yc-q-askamt');
+            if (am) am.hidden = off || !inp.checked;
             if (off || !inp.checked) return;
-            if (ask) { asks.push({ name: nm(x), ask: true }); return; }
+            if (ask) {
+                var av = am ? Math.max(0, Math.round(+am.querySelector('input').value || 0)) : 0;
+                if (av) { once += av; lines.push({ name: nm(x), amt: av }); } else asks.push({ name: nm(x), ask: true });
+                return;
+            }
             var n = x.unit === 'qty' ? qty[i] : 1, a = pr * n;
             var r = { name: nm(x) + (n > 1 ? ' ×' + n : ''), amt: a, inc: inc, unit: x.unit };
             if (x.unit === 'month') { month += a; mlines.push(r); } else if (x.unit === 'year') { year += a; ylines.push(r); } else { once += a; lines.push(r); }
@@ -1201,7 +1218,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         setTimeout(off, 1500);
     }
     f.addEventListener('change', function (e) { if (e.target && e.target.dataset) delete e.target.dataset.auto; draw(); });
-    f.addEventListener('input', function (e) { if (e.target.name === 'who') draw(); });
+    f.addEventListener('input', function (e) { if (e.target.name === 'who' || (e.target.dataset && e.target.dataset.ask)) draw(); });
     $('items').addEventListener('click', function (e) {
         var mo = e.target.closest('.yc-q-more');
         if (mo) { var d = document.getElementById(mo.getAttribute('aria-controls')), open = mo.getAttribute('aria-expanded') !== 'true'; d.hidden = !open; mo.setAttribute('aria-expanded', open); mo.textContent = open ? T.less : T.more; return; }
