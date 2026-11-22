@@ -153,13 +153,14 @@ def fix_links(soup, base):
                     v2 = en_path(v) if v.startswith('/') else en_url(v)
                     v = v2 or v
                 t[a] = v
-        if t.has_attr('srcset'):
-            parts = []
-            for p in t['srcset'].split(','):
-                bits = p.strip().split(' ', 1)
-                bits[0] = absolutize(bits[0], base)
-                parts.append(' '.join(bits))
-            t['srcset'] = ', '.join(parts)
+        for sa in ('srcset', 'data-srcset'):
+            if t.has_attr(sa):
+                parts = []
+                for p in t[sa].split(','):
+                    bits = p.strip().split(' ', 1)
+                    bits[0] = absolutize(bits[0], base)
+                    parts.append(' '.join(bits))
+                t[sa] = ', '.join(parts)
         if t.name == 'meta' and t.get('property') == 'og:url' and t.has_attr('content'):
             t['content'] = en_url(t['content'])
 
