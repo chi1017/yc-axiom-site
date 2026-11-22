@@ -1012,7 +1012,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         copied: 'Copied. Paste it into LINE or an email.', copyFail: 'Could not copy automatically; please select and copy the text.',
         title: 'YC AXIOM quote estimate', who: 'For', date: 'Date', no: 'Ref.', item: 'Item', amt: 'Amount', once: 'One-off total', monthly: 'Monthly',
         pay: 'Payment: ' + D + '% on signing, ' + (100 - D) + '% on acceptance and delivery.', valid: 'Valid for 30 days from the date above.', empty: 'Tick at least one service.',
-        groups: { '規模': 'Scope', '內容與設計': 'Content and design', '功能': 'Features', 'SEO 與 AI 搜尋': 'SEO and AI search', '數據與市場': 'Data and market research', '上線後（每月）': 'After launch (monthly)', 'SEO': 'SEO' } }
+        groups: { '規模': 'Scope', '內容與設計': 'Content and design', '功能': 'Features', 'SEO 與 AI 搜尋': 'SEO and AI search', '數據與市場': 'Data and market research', '網域與信箱': 'Domain and email', '上線後（每年）': 'After launch (yearly)', '上線後（每月）': 'After launch (monthly)', 'SEO': 'SEO' } }
       : { inc: '已包含', ask: '另外報價', yr: '／年', yearly: '每年費用', mo: '／月', each: '／每個', from: ' 起', byItem: '依項目計價', more: '說明', less: '收合',
         split: function (a, b) { return '簽約訂金 ' + D + '%：' + money(a) + '・驗收交付 ' + (100 - D) + '%：' + money(b); },
         askNote: function (n) { return '另有 ' + n + ' 項需要看過需求後另外報價。'; },
