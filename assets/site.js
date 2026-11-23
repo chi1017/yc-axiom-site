@@ -1195,6 +1195,38 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         if (touch) return showImage(s);
         doPrint(s);
     });
+    // 管理員：產生報價單或合約（合約程式只在管理員按下時才下載）
+    if (ADMIN && !en) {
+        var adm = document.createElement('div'); adm.className = 'yc-q-admin';
+        adm.innerHTML = '<p class="yc-q-admin-h">管理員：產生文件</p>' +
+            '<label>合約期間<select data-c="term"><option value="0">買斷（只含一次性費用）</option><option value="1" selected>買斷＋1 年服務約</option><option value="2">買斷＋2 年服務約（年費 95 折）</option><option value="3">買斷＋3 年服務約（年費 9 折）</option></select></label>' +
+            '<details><summary>甲方資料（選填，空白可印出後手寫）</summary>' +
+            '<label>甲方名稱<input data-c="name" autocomplete="off" placeholder="公司或店名，預設帶入報價對象"></label>' +
+            '<label>負責人／聯絡人<input data-c="rep" autocomplete="off"></label>' +
+            '<label>統一編號（選填）<input data-c="tax" inputmode="numeric" maxlength="8" autocomplete="off"></label>' +
+            '<label>地址<input data-c="addr" autocomplete="off"></label>' +
+            '<label>電話<input data-c="tel" inputmode="tel" autocomplete="off"></label>' +
+            '<label>Email<input data-c="mail" type="email" autocomplete="off"></label>' +
+            '<label>素材齊全後幾個工作天交付初稿<input data-c="days" type="number" min="1" value="14"></label>' +
+            '<label>網址（網站預計使用的網域，選填）<input data-c="site" autocomplete="off" placeholder="www.example.com"></label></details>' +
+            '<div class="yc-q-admin-acts"><button type="button" class="btn-secondary" data-c="quote">產生報價單</button><button type="button" class="btn-primary" data-c="contract">產生合約</button></div>' +
+            '<p class="yc-q-admin-n">只有管理員看得到。合約範本依台灣民法承攬、著作權法、個人資料保護法撰寫，正式簽約前建議請律師看過一次。</p>';
+        var acts = box.querySelector('.yc-q-acts'); acts.parentNode.insertBefore(adm, acts.nextSibling);
+        var cv = function (k) { var el = adm.querySelector('[data-c="' + k + '"]'); return el ? String(el.value || '').trim() : ''; };
+        adm.querySelector('[data-c="quote"]').onclick = function () { $('print').click(); };
+        adm.querySelector('[data-c="contract"]').onclick = function () {
+            var s = draw(); if (!s.lines.length && !s.mlines.length && !s.ylines.length) return msg(T.empty);
+            var b = this; b.disabled = true;
+            var go = function () {
+                b.disabled = false;
+                window.YCContract.open({ s: s, Q: Q, money: money, depOf: depOf, today: today, qno: qno, esc: esc, touch: touch, cell: cell,
+                    term: +cv('term'), party: { name: cv('name') || s.who, rep: cv('rep'), tax: cv('tax'), addr: cv('addr'), tel: cv('tel'), mail: cv('mail') }, days: +cv('days') || 14, site: cv('site') });
+            };
+            if (window.YCContract) return go();
+            var sc = document.createElement('script'); sc.src = (document.querySelector('script[src*="site.min.js"]') || {}).src.replace(/dist\/site\.min\.js.*$/, 'quote-contract.js?v=2026-11-24a');
+            sc.onload = go; sc.onerror = function () { b.disabled = false; msg('合約程式載入失敗，請重新整理再試一次。'); }; document.head.appendChild(sc);
+        };
+    }
     function doPrint(s) {
         var contact = [].map.call(box.querySelectorAll('.yc-q-contact a'), function (a) { return esc(a.textContent); });
         var row = function (l) { return '<tr><td>' + esc(l.name) + '</td><td class="n">' + cell(l) + '</td></tr>'; };

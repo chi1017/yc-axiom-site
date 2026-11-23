@@ -2281,3 +2281,17 @@ html.yc-s-open { overflow: hidden; }
 .yc-q-item .yc-q-askamt { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; margin: 6px 0 0 32px; font-size: 13px; color: var(--text-dim); }
 .yc-q-item .yc-q-askamt[hidden] { display: none; }
 .yc-q-askamt input { width: 130px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 14px; }
+
+/* 報價試算：管理員產生報價單／合約 */
+.yc-q-admin { margin-top: 18px; padding: 14px 16px; border: 1px dashed var(--border); border-radius: 12px; display: grid; gap: 10px; font-size: 14px; }
+.yc-q-admin-h { margin: 0; font-weight: 700; color: var(--text-bright, var(--text)); }
+.yc-q-admin label { display: grid; gap: 4px; font-size: 13px; color: var(--text-dim); }
+.yc-q-admin select, .yc-q-admin input { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 15px; }
+.yc-q-admin select option { color: #111; }
+.yc-q-admin details { display: grid; gap: 8px; }
+.yc-q-admin details[open] { padding-bottom: 4px; }
+.yc-q-admin details > label { margin-top: 8px; }
+.yc-q-admin summary { cursor: pointer; font-size: 13px; color: var(--text-dim); min-height: 32px; display: flex; align-items: center; }
+.yc-q-admin-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.yc-q-admin-acts button { cursor: pointer; }
+.yc-q-admin-n { margin: 0; font-size: 12px; color: var(--text-dim); line-height: 1.6; }
