@@ -115,6 +115,19 @@ html.embedded .hero{display:none}
 html.embedded .main{padding-top:24px}
 html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(--vh,600px) - 90px)}
 @media (max-width:640px){header{padding:14px 16px}.main{padding:24px 14px 50px}.score-hero{padding:18px;gap:16px}.cat-row{grid-template-columns:104px 1fr 56px}.item{grid-template-columns:62px 1fr}.item .pts{grid-column:2}.pane{padding:14px}}
+.pdf-snap{position:absolute;left:-10000px;top:0;width:794px;padding:40px 44px;background:#fff;color:#111;--bg:#fff;--bg2:#fff;--bg3:#f4f1ec;--border:#d9d3c9;--border2:#cfc8bc;--text:#111;--text2:#333;--text3:#555;--accent2:#8a6d3b}
+.pdf-snap #xlink-card,.pdf-snap .actions-row,.pdf-snap .geo-cta,.pdf-snap #yc-gate,.pdf-snap .yc-gate,.pdf-snap button{display:none!important}
+.pdf-snap .geo-full{display:block!important}
+.pdf-snap .score-hero,.pdf-snap .geo-section{background:#fff;border-color:#cfc8bc;color:#111}
+.pdf-snap .score-info h2,.pdf-snap .geo-section h3,.pdf-snap .score-num,.pdf-snap .item .t,.pdf-snap .issue b{color:#111}
+.pdf-snap .item .n,.pdf-snap .issue p,.pdf-snap .cat-row .pt{color:#333}
+.pdf-head{display:flex;flex-direction:column;gap:2px;border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:18px}.pdf-head b{letter-spacing:.3em;font-size:13px}.pdf-head span{font-size:20px;font-weight:700}.pdf-head small{color:#555;font-size:12px}
+.pdf-foot{margin-top:20px;padding-top:10px;border-top:1px solid #ddd;font-size:11px;color:#666}
+.pdf-ready{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6)}
+.pdf-ready>div{width:100%;max-width:360px;padding:20px;border-radius:14px;background:var(--bg2);border:1px solid var(--border2);color:var(--text)}
+.pdf-ready b{display:block;font-size:16px;margin-bottom:6px}.pdf-ready p{font-size:13px;color:var(--text2);margin-bottom:14px}
+.pdf-ready button{width:100%;min-height:46px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
+.pdf-ready [data-s]{background:var(--accent);color:#111;border:0;margin-bottom:8px}.pdf-ready [data-c]{background:none;color:var(--text2);border:1px solid var(--border2)}
 @media print{
   body{background:#fff;color:#111}header,.input-card,.actions-row,.geo-cta,#yc-gate,.hero,.disclaimer.top,#toast{display:none!important}
   #results{display:block!important}#results.yc-gated .geo-full{display:block!important}
@@ -239,7 +252,7 @@ window.ycScrollToScore = function () {
 
     <div class="geo-section" id="mentionNext" style="border-color:rgba(181,155,106,.35)"><h3>下一步：實際問問 AI 會不會推薦你</h3><p class="sub" style="margin-bottom:10px">這份分數是官網的條件。想知道客人問 AI「推薦哪一家」時你有沒有出現，可以用免費的 AI 提及檢測，把 ChatGPT、Perplexity 的回答貼回來分析。</p><a class="btn-sub" id="mentionLink" href="geo/ai-mentions/" target="_top" style="text-decoration:none;display:inline-block">開始 AI 提及檢測 →</a></div>
     <div class="actions-row" id="exportRow">
-      <button class="btn-sub" onclick="exportPDF()">⬇ 列印／存成 PDF</button>
+      <button class="btn-sub" onclick="exportPDF()">⬇ 下載 PDF</button>
       <button class="btn-sub" onclick="exportJSON()">⬇ JSON</button>
       <button class="btn-sub" onclick="exportCSV()">⬇ CSV</button>
     </div>
@@ -468,7 +481,60 @@ function exportCSV() {
   var csv = '﻿' + rows.map(function (r) { return r.map(function (c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
   download('geo-report-' + stamp() + '.csv', 'text/csv;charset=utf-8', csv);
 }
-function exportPDF() { if (!currentReport) return; window.print(); }
+// PDF：把報告畫成圖再組成 A4 PDF（嵌在官網 iframe 裡、或用 iPhone 時，window.print() 常常沒反應或印到外層頁面）
+function loadLib(src) { return new Promise(function (ok, no) { var x = document.createElement('script'); x.src = src; x.onload = ok; x.onerror = no; document.head.appendChild(x); }); }
+async function exportPDF() {
+  if (!currentReport) return;
+  var btns = document.querySelectorAll('[onclick*="exportPDF"]'); btns.forEach(function (b) { b.disabled = true; b.dataset.t = b.textContent; b.textContent = '產生 PDF 中…'; });
+  var snap = null;
+  try {
+    if (!window.jspdf) await loadLib('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    if (!window.html2canvas) await loadLib('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    snap = document.createElement('div'); snap.className = 'pdf-snap';
+    var u = (currentReport && (currentReport.url || currentReport.finalUrl)) || ($('urlIn') && $('urlIn').value) || '';
+    snap.innerHTML = '<div class="pdf-head"><b>YC AXIOM</b><span>GEO 檢測報告（AI 可見度）</span><small>' + String(u).replace(/[<>&"]/g, '') + '　' + new Date().toLocaleDateString('zh-TW') + '</small></div>';
+    var body = $('results').cloneNode(true); body.removeAttribute('id'); body.style.display = 'block'; snap.appendChild(body);
+    snap.insertAdjacentHTML('beforeend', '<div class="pdf-foot">YC AXIOM　yc-axiom.pages.dev/geo/</div>');
+    document.body.appendChild(snap);
+    await new Promise(function (r) { setTimeout(r, 60); });
+    var canvas = await html2canvas(snap, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false, windowWidth: 794 });
+    var doc = new window.jspdf.jsPDF({ unit: 'pt', format: 'a4' }), pw = doc.internal.pageSize.getWidth(), ph = doc.internal.pageSize.getHeight();
+    var pxPerPt = canvas.width / pw, sliceH = Math.floor(ph * pxPerPt), y = 0, first = true;
+    while (y < canvas.height) {
+      var h = Math.min(sliceH, canvas.height - y), c = document.createElement('canvas'); c.width = canvas.width; c.height = h;
+      var cx = c.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0, 0, c.width, h); cx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+      if (!first) doc.addPage(); first = false;
+      doc.addImage(c.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, pw, h / pxPerPt);
+      y += h;
+    }
+    var host = ''; try { host = new URL(u).hostname.replace(/^www\./, ''); } catch (e) {}
+    var name = 'GEO-' + (host || 'report') + '-' + new Date().toISOString().slice(0, 10) + '.pdf';
+    pdfReady(doc.output('blob'), name);
+  } catch (e) {
+    console.error(e); window.print();
+  } finally {
+    if (snap) snap.remove();
+    btns.forEach(function (b) { b.disabled = false; if (b.dataset.t) b.textContent = b.dataset.t; });
+  }
+}
+// 產生完成後再讓使用者按一次「儲存」：手機的分享選單必須由點擊直接觸發
+function pdfReady(blob, name) {
+  var file = null; try { file = new File([blob], name, { type: 'application/pdf' }); } catch (e) {}
+  var canShare = !!(file && navigator.canShare && navigator.canShare({ files: [file] }));
+  var touch = window.matchMedia && matchMedia('(hover: none)').matches;
+  var save = function () {
+    if (canShare && touch) { navigator.share({ files: [file], title: 'GEO 檢測報告' }).catch(function () {}); return; }
+    var a = document.createElement('a'), bu = URL.createObjectURL(blob); a.href = bu; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(bu); }, 8000);
+  };
+  if (!touch) { save(); return; }
+  var ov = document.createElement('div'); ov.className = 'pdf-ready'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', 'PDF 已產生');
+  ov.innerHTML = '<div><b>PDF 已產生</b><p>按「儲存 PDF」後，在分享選單選「儲存到檔案」，或直接傳到 LINE。</p><button type="button" data-s>儲存 PDF</button><button type="button" data-c>關閉</button></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('[data-s]').onclick = function () { save(); };
+  ov.querySelector('[data-c]').onclick = function () { ov.remove(); };
+  ov.querySelector('[data-s]').focus();
+}
 function copyText() { return; }
 function shareReport() { return; }
 
