@@ -1,5 +1,7 @@
-/* 管理後台「關鍵字排名」分頁：即時向 Google Search Console 查詢網站的關鍵字平均排名（不存檔）。
-   後端：site-settings 函式 action gsc_sites／gsc_rank（只有管理員）。 */
+/* 管理後台「關鍵字排名」分頁：即時向 Google Search Console 查詢網站的關鍵字平均排名（不存檔、不需要金鑰）。
+   做法：管理員用同一個 Google 帳號再授權一次「Search Console 唯讀」權限，瀏覽器拿到 Google 的存取權杖（約 1 小時有效），
+   直接向 Google 查詢；權杖只放在這個分頁的 sessionStorage，不送到我們的伺服器。
+   看得到哪些網站＝這個 Google 帳號在 Search Console 有權限的網站（客戶把 ycaxiom@gmail.com 加為使用者即可）。 */
 (function () {
   'use strict';
   var YC = window.YC, box = document.getElementById('adm-rank'), tabs = document.getElementById('adm-tabs');
@@ -25,10 +27,69 @@
     '@media (max-width:640px){.rk-form{grid-template-columns:1fr}.rk-table thead{display:none}.rk-table tr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-bottom:1px solid var(--border)}.rk-table td{border:0;padding:0}.rk-table td.q{grid-column:1/-1;font-weight:600}.rk-table td.n::before{content:attr(data-l) " ";color:var(--text-dim);font-weight:400}}';
   document.head.appendChild(css);
 
+  // ── Google 授權與 Search Console API（瀏覽器直接呼叫）──
+  var SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly', TK = 'yc-gsc-token', PEND = 'yc-gsc-pending';
+  var API = 'https://www.googleapis.com/webmasters/v3';
+  function tokenGet() { try { var t = JSON.parse(sessionStorage.getItem(TK) || 'null'); return t && t.exp > Date.now() ? t.t : ''; } catch (e) { return ''; } }
+  function tokenSet(t) { try { if (t) sessionStorage.setItem(TK, JSON.stringify({ t: t, exp: Date.now() + 55 * 60000 })); else sessionStorage.removeItem(TK); } catch (e) { /* 無痕模式 */ } }
+  async function capture() {
+    // 剛從 Google 授權回來：Supabase 的登入狀態裡會帶著 Google 的存取權杖（provider_token）
+    var pend = false; try { pend = sessionStorage.getItem(PEND) === '1'; } catch (e) { /* ignore */ }
+    if (!pend) return;
+    try {
+      var r = await YC.client.auth.getSession(), ses = (r && r.data && r.data.session) || YC.session;
+      if (ses && ses.provider_token) { tokenSet(ses.provider_token); sessionStorage.removeItem(PEND); }
+    } catch (e) { /* ignore */ }
+  }
+  async function authorize() {
+    try { sessionStorage.setItem(PEND, '1'); } catch (e) { /* ignore */ }
+    var email = YC.session && YC.session.user && YC.session.user.email;
+    var r = await YC.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname, scopes: SCOPE, skipBrowserRedirect: true,
+      queryParams: Object.assign({ prompt: 'consent', include_granted_scopes: 'true' }, email ? { login_hint: email } : {}) } });
+    if (r.error) throw r.error;
+    location.href = r.data.url;
+  }
+  async function gapi(path, body) {
+    var t = tokenGet(); if (!t) { var e0 = new Error('需要授權'); e0.code = 'auth'; throw e0; }
+    var res = await fetch(API + path, { method: body ? 'POST' : 'GET', headers: Object.assign({ Authorization: 'Bearer ' + t }, body ? { 'Content-Type': 'application/json' } : {}), body: body ? JSON.stringify(body) : undefined });
+    var j = await res.json().catch(function () { return {}; });
+    if (res.status === 401) { tokenSet(''); var e1 = new Error('Google 授權已過期，請再授權一次。'); e1.code = 'auth'; throw e1; }
+    if (!res.ok) {
+      var m = (j.error && j.error.message) || String(res.status), e2 = new Error(m);
+      e2.code = /has not been used|is disabled|SERVICE_DISABLED/i.test(m) ? 'api_off' : res.status === 403 ? 'forbidden' : 'failed';
+      throw e2;
+    }
+    return j;
+  }
+  var iso = function (t) { return new Date(t).toISOString().slice(0, 10); };
   async function fn(body) {
-    var r = await YC.client.functions.invoke('site-settings', { body: body });
-    if (r.error) { var m = r.error.message || String(r.error), code = ''; try { var j = await r.error.context.json(); m = j.message || m; code = j.error || ''; } catch (e) { /* ignore */ } var er = new Error(m); er.code = code; throw er; }
-    return r.data || {};
+    if (body.action === 'gsc_sites') {
+      var j = await gapi('/sites');
+      return { email: (YC.session && YC.session.user && YC.session.user.email) || '', sites: (j.siteEntry || []).filter(function (x) { return x.permissionLevel !== 'siteUnverifiedUser'; }).map(function (x) { return { url: x.siteUrl }; }) };
+    }
+    // gsc_rank：最近 days 天 vs 前一段同樣天數；資料約晚 3 天
+    var DAY = 86400000, end = Date.now() - 3 * DAY, start = end - (body.days - 1) * DAY, pEnd = start - DAY, pStart = pEnd - (body.days - 1) * DAY;
+    var kw = body.keywords || [], base = { dimensions: ['query'], type: 'web', rowLimit: 1000 };
+    if (kw.length) base.dimensionFilterGroups = [{ groupType: 'or', filters: kw.map(function (k) { return { dimension: 'query', operator: 'contains', expression: k }; }) }];
+    var path = '/sites/' + encodeURIComponent(body.site) + '/searchAnalytics/query';
+    var both = await Promise.all([gapi(path, Object.assign({}, base, { startDate: iso(start), endDate: iso(end) })), gapi(path, Object.assign({}, base, { startDate: iso(pStart), endDate: iso(pEnd) }))]);
+    var pm = {}; (both[1].rows || []).forEach(function (r) { pm[r.keys[0]] = r; });
+    var r1 = function (n) { return Math.round(n * 10) / 10; };
+    var rows = (both[0].rows || []).map(function (r) { var p = pm[r.keys[0]]; return { query: r.keys[0], position: r1(r.position), prev: p ? r1(p.position) : null, clicks: r.clicks, impressions: r.impressions }; })
+      .sort(function (a, b) { return b.impressions - a.impressions; }).slice(0, 100);
+    return { site: body.site, from: iso(start), to: iso(end), rows: rows, missing: kw.filter(function (k) { return !rows.some(function (r) { return r.query.indexOf(k) > -1; }); }) };
+  }
+  function authHtml(msg) {
+    return '<div class="rk-card rk-setup"><b>用 Google 帳號授權查詢</b>' + (msg ? '<p class="rk-note">' + esc(msg) + '</p>' : '') +
+      '<p class="rk-note">按下後會跳到 Google，請選<b>登入後台的同一個帳號</b>，並允許「查看 Search Console 資料」（唯讀）。授權約 1 小時有效，過期再按一次即可。不需要設定任何金鑰。</p>' +
+      '<div class="rk-acts" style="margin-top:10px"><button type="button" class="m-btn" id="rk-auth">用 Google 授權</button></div></div>';
+  }
+  function bindAuth() { var b = document.getElementById('rk-auth'); if (b) b.onclick = function () { b.disabled = true; authorize().catch(function (e) { b.disabled = false; window.alert('授權失敗：' + (e.message || e)); }); }; }
+  function errHtml(e) {
+    if (e.code === 'auth') return authHtml(e.message === '需要授權' ? '' : e.message);
+    if (e.code === 'api_off') return '<div class="rk-card rk-setup"><b>還差一步：啟用 Search Console API</b><p class="rk-note">Google 回覆這個專案還沒啟用 Search Console API。請到 Google Cloud Console 的「API 和服務 → 程式庫」搜尋「Google Search Console API」按「啟用」（不用建立金鑰），幾分鐘後再按一次查詢。</p><p class="rk-note">' + esc(e.message) + '</p></div>';
+    if (e.code === 'forbidden') return '<div class="rk-card rk-setup"><b>這個 Google 帳號沒有這個網站的權限</b><p class="rk-note">請客戶到 Search Console →「設定」→「使用者和權限」→「新增使用者」，填入你登入後台的 Gmail，權限選「受限」。</p></div>';
+    return '<div class="rk-card"><p class="rk-note">查詢失敗：' + esc(e.message || e) + '</p></div>';
   }
 
   function setupHtml(email, msg) {
@@ -47,8 +108,8 @@
       '<label>期間<select id="rk-days"><option value="7">最近 7 天</option><option value="28" selected>最近 28 天</option><option value="90">最近 3 個月</option></select></label>' +
       '<label class="rk-wide">要追蹤的關鍵字（選填，一行一個，最多 20 個；空白就列出曝光最多的前 100 個搜尋字詞）<textarea id="rk-kw" placeholder="台中攝影棚&#10;台中攝影棚租借">' + esc(kw) + '</textarea></label>' +
       '<div class="rk-acts rk-wide"><button type="button" class="m-btn" id="rk-go">查詢排名</button><button type="button" class="m-btn sm" id="rk-reload">重新整理網站清單</button></div>' +
-      '<p class="rk-note rk-wide">排名是 Google Search Console 統計的「平均排名」，1～10 是搜尋結果第一頁。資料約晚 3 天，▲▼ 是和前一段同樣天數相比。服務帳戶：' + esc(st.email) + '</p>' +
-      '</div></div>' : setupHtml(st.email, '服務帳戶目前看不到任何網站。');
+      '<p class="rk-note rk-wide">排名是 Google Search Console 統計的「平均排名」，1～10 是搜尋結果第一頁。資料約晚 3 天，▲▼ 是和前一段同樣天數相比。查詢帳號：' + esc(st.email) + '</p>' +
+      '</div></div>' : '<div class="rk-card rk-setup"><b>這個 Google 帳號目前看不到任何網站</b><p class="rk-note">請客戶到 Search Console →「設定」→「使用者和權限」→「新增使用者」，填入 ' + esc(st.email || '你登入後台的 Gmail') + '，權限選「受限」，再按「重新整理網站清單」。</p><div class="rk-acts"><button type="button" class="m-btn sm" id="rk-reload">重新整理網站清單</button></div></div>';
     box.innerHTML = '<div class="rk">' + form + '<div id="rk-out" aria-live="polite">' + (st.data ? table() : '') + '</div></div>';
     var go = document.getElementById('rk-go'); if (go) go.onclick = run;
     var rl = document.getElementById('rk-reload'); if (rl) rl.onclick = function () { st.sites = null; load(); };
@@ -109,17 +170,27 @@
     var b = document.getElementById('rk-go'); st.busy = true; b.disabled = true; b.textContent = '查詢中…';
     var out = document.getElementById('rk-out');
     try { st.data = await fn({ action: 'gsc_rank', site: site, days: Number(days), keywords: kw }); st.sort = kw.length ? 'position' : 'impressions'; out.innerHTML = table(); bindTable(); }
-    catch (e) { out.innerHTML = e.code === 'gsc_forbidden' ? setupHtml(st.email, e.message) : '<div class="rk-card"><p class="rk-note">查詢失敗：' + esc(e.message || e) + '</p></div>'; }
+    catch (e) { out.innerHTML = errHtml(e); bindAuth(); }
     st.busy = false; b.disabled = false; b.textContent = '查詢排名';
   }
 
   async function load() {
+    await capture();
+    if (!tokenGet()) { box.innerHTML = '<div class="rk">' + authHtml('') + '</div>'; bindAuth(); return; }
     draw();
     try { var r = await fn({ action: 'gsc_sites' }); st.sites = r.sites || []; st.email = r.email || ''; draw(); }
-    catch (e) { box.innerHTML = '<div class="rk">' + setupHtml('', e.code === 'not_configured' ? '還沒設定 Google 服務帳戶金鑰。' : '讀取失敗：' + (e.message || e)) + '</div>'; }
+    catch (e) { st.sites = null; box.innerHTML = '<div class="rk">' + errHtml(e) + '</div>'; bindAuth(); }
   }
   document.addEventListener('yc-admin-tab', function (e) {
     var on = e.detail === 'rank'; box.hidden = !on;
     if (on && !st.sites && YC.isAdmin && YC.isAdmin()) load();
   });
+  // 從 Google 授權回來：自動切到這個分頁
+  function resume() {
+    var pend = false; try { pend = sessionStorage.getItem(PEND) === '1'; } catch (e) { /* ignore */ }
+    if (!pend || !YC.isAdmin || !YC.isAdmin()) return;
+    var b = tabs.querySelector('[data-tab="rank"]'); if (b && b.getAttribute('aria-selected') !== 'true') b.click();
+  }
+  if (YC.onChange) YC.onChange(function () { setTimeout(resume, 50); });
+  setTimeout(resume, 300);
 })();
