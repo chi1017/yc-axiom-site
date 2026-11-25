@@ -128,6 +128,14 @@ html.embedded #toast{position:absolute;bottom:auto;top:calc(var(--vt,0px) + var(
 .pdf-ready b{display:block;font-size:16px;margin-bottom:6px}.pdf-ready p{font-size:13px;color:var(--text2);margin-bottom:14px}
 .pdf-ready button{width:100%;min-height:46px;border-radius:10px;font:inherit;font-weight:700;cursor:pointer}
 .pdf-ready [data-s]{background:var(--accent);color:#111;border:0;margin-bottom:8px}.pdf-ready [data-c]{background:none;color:var(--text2);border:1px solid var(--border2)}
+.aiv-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:4px 0 10px}.aiv-sum>div{padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg3)}
+.aiv-sum span{display:block;font-size:12px;color:var(--text3)}.aiv-sum b{display:block;font-size:19px;color:#fff;margin:2px 0}.aiv-sum small{display:block;font-size:12px;color:var(--text3);line-height:1.5}
+.aiv-verdict{font-size:13.5px;color:var(--text2);line-height:1.7;margin:0 0 12px}
+.aiv-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px}.aiv-k{font-size:12px;color:var(--text3);margin:10px 0 3px}.aiv-k:first-child{margin-top:0}.aiv-v{font-size:13.5px;color:var(--text);line-height:1.6;word-break:break-word}.aiv-v em,.aiv-text em{color:#f0776b;font-style:normal}
+.aiv-h{list-style:none;margin:0;padding:0;font-size:13px;line-height:1.6}.aiv-h li{display:flex;gap:8px;padding:2px 0;color:var(--text2)}.aiv-h li span{flex:none;font-size:10.5px;padding:1px 5px;border:1px solid var(--border2);border-radius:4px;color:var(--text3);height:fit-content}.aiv-h .aiv-h2{padding-left:12px}.aiv-h .aiv-h3{padding-left:24px}
+.aiv-text{max-height:260px;overflow:auto;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--bg3);font-size:13px;line-height:1.8;color:var(--text2);white-space:pre-wrap;word-break:break-word}
+@media (max-width:640px){.aiv-sum,.aiv-grid{grid-template-columns:1fr}}
+.pdf-snap .aiv-sum b{color:#111}.pdf-snap .aiv-sum>div,.pdf-snap .aiv-text{background:#f7f5f1}.pdf-snap .aiv-text{max-height:none}
 @media print{
   body{background:#fff;color:#111}header,.input-card,.actions-row,.geo-cta,#yc-gate,.hero,.disclaimer.top,#toast{display:none!important}
   #results{display:block!important}#results.yc-gated .geo-full{display:block!important}
@@ -244,6 +252,7 @@ window.ycScrollToScore = function () {
     </div>
 
     <div class="geo-full">
+      <div class="geo-section" id="aiView" style="display:none"></div>
       <div class="geo-section"><h3>各面向得分</h3><p class="sub">AI 可見度由七個面向組成，滿分 100 分。「無法判斷」與「不適用」的項目不計入分母。</p><div id="catRows"></div></div>
       <div class="geo-section" id="issuesBox"><h3>優先處理清單</h3><p class="sub">依「失分最多」排序，先改上面的，效果最大。</p><div id="issueList"></div></div>
       <div class="geo-section"><h3>逐項檢測結果</h3><p class="sub">通過＝拿滿分，警告＝拿一半，需修正＝0 分。</p><div id="itemList"></div></div>
@@ -408,7 +417,38 @@ function finish(r) {
   renderResults(r);
   var js = detectJsSite(tabState.t1 && tabState.t1.html);
   var jn = $('jsNote'); if (jn) jn.style.display = js.is ? 'flex' : 'none';
+  renderAiView(tabState.t1 && tabState.t1.html, js);
   window.ycScrollToScore();
+}
+
+// 「AI 看到的網站」：AI 爬蟲大多不執行 JavaScript，只讀得到原始 HTML 裡的文字。這裡把原始 HTML 當成 AI 看到的樣子整理出來。
+function renderAiView(html, js) {
+  var box = $('aiView'); if (!box) return;
+  var doc; try { doc = new DOMParser().parseFromString(html || '', 'text/html'); } catch (e) { box.style.display = 'none'; return; }
+  var c = doc.body ? doc.body.cloneNode(true) : null;
+  if (c) c.querySelectorAll('script,style,noscript,svg,template,iframe').forEach(function (n) { n.remove(); });
+  var text = c ? String(c.textContent || '').replace(/\s+/g, ' ').trim() : '';
+  var cjk = (text.match(/[㐀-鿿豈-﫿]/g) || []).length, words = (text.match(/[A-Za-z]{2,}/g) || []).length, size = cjk + words;
+  var title = (doc.querySelector('title') || {}).textContent || '';
+  var desc = (doc.querySelector('meta[name="description"]') || { getAttribute: function () { return ''; } }).getAttribute('content') || '';
+  var heads = Array.prototype.slice.call(doc.querySelectorAll('h1,h2,h3')).map(function (h) { return { l: h.tagName.toLowerCase(), t: String(h.textContent || '').replace(/\s+/g, ' ').trim() }; }).filter(function (h) { return h.t; }).slice(0, 14);
+  var types = [];
+  doc.querySelectorAll('script[type="application/ld+json"]').forEach(function (sc) {
+    try { var j = JSON.parse(sc.textContent); (Array.isArray(j) ? j : (j['@graph'] || [j])).forEach(function (o) { var t = o && o['@type']; (Array.isArray(t) ? t : [t]).forEach(function (x) { if (x && types.indexOf(x) < 0) types.push(x); }); }); } catch (e) { /* 格式錯誤的 JSON-LD 略過 */ }
+  });
+  var level = js.is || size < 150 ? 'bad' : size < 400 ? 'warn' : 'ok';
+  var verdict = { ok: ['良好', 'AI 爬蟲讀得到足夠的內容。'], warn: ['偏少', 'AI 爬蟲讀得到的文字不多，可能有部分內容要靠 JavaScript 才會出現，或頁面本身內容較少。'], bad: ['幾乎讀不到', 'AI 爬蟲幾乎讀不到內容。網站很可能要靠 JavaScript 才把內容顯示出來，對不執行 JavaScript 的 AI 來說，這一頁幾乎是空白的。'] }[level];
+  var col = { ok: 'var(--accent2)', warn: '#e0b05a', bad: '#f0776b' }[level];
+  var preview = text.slice(0, 700);
+  box.innerHTML = '<h3>AI 看到的網站</h3><p class="sub">ChatGPT、Perplexity、Claude 等 AI 爬蟲大多不執行 JavaScript，只讀得到網頁原始碼裡的文字。下面是 AI 爬蟲實際讀到的內容，可以和你在瀏覽器看到的畫面對照：瀏覽器有、這裡沒有的內容，AI 就看不到。</p>' +
+    '<div class="aiv-sum"><div><span>AI 讀得到的內容</span><b style="color:' + col + '">' + verdict[0] + '</b><small>約 ' + cjk + ' 個中文字、' + words + ' 個英文字</small></div>' +
+    '<div><span>結構化資料</span><b>' + (types.length ? types.length + ' 種' : '沒有') + '</b><small>' + esc(types.slice(0, 5).join('、') || 'AI 只能從文字推測店家資料') + '</small></div>' +
+    '<div><span>標題結構</span><b>' + heads.length + ' 個</b><small>H1～H3 標題</small></div></div>' +
+    '<p class="aiv-verdict">' + esc(verdict[1]) + (js.frameworks.length ? '（偵測到 ' + esc(js.frameworks.join('、')) + '）' : '') + '</p>' +
+    '<div class="aiv-grid"><div><p class="aiv-k">網頁標題</p><p class="aiv-v">' + (esc(title.trim()) || '<em>沒有標題</em>') + '</p><p class="aiv-k">網頁描述</p><p class="aiv-v">' + (esc(desc.trim()) || '<em>沒有描述</em>') + '</p>' +
+    '<p class="aiv-k">標題結構</p>' + (heads.length ? '<ul class="aiv-h">' + heads.map(function (h) { return '<li class="aiv-' + h.l + '"><span>' + h.l.toUpperCase() + '</span>' + esc(h.t.slice(0, 80)) + '</li>'; }).join('') + '</ul>' : '<p class="aiv-v"><em>讀不到任何標題</em></p>') + '</div>' +
+    '<div><p class="aiv-k">AI 讀到的文字（前 700 字）</p><div class="aiv-text">' + (esc(preview) || '<em>讀不到任何文字</em>') + (text.length > 700 ? '…' : '') + '</div></div></div>';
+  box.style.display = '';
 }
 
 // ── 顯示結果 ──
