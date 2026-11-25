@@ -41,13 +41,26 @@
       if (ses && ses.provider_token) { tokenSet(ses.provider_token); sessionStorage.removeItem(PEND); }
     } catch (e) { /* ignore */ }
   }
+  // Google 授權：用 YC AXIOM Rank 專案（ycaxiom@gmail.com 的 Google Cloud）的 OAuth 用戶端 ID，彈出視窗取得唯讀權杖。
+  // 用戶端 ID 是公開的識別碼，不是金鑰。
+  var CLIENT_ID = '245006929937-cge2kd9920f4q8nud93tqthndld3b9oi.apps.googleusercontent.com';
+  function loadGis() {
+    if (window.google && google.accounts && google.accounts.oauth2) return Promise.resolve();
+    return new Promise(function (ok, no) { var x = document.createElement('script'); x.src = 'https://accounts.google.com/gsi/client'; x.async = true; x.onload = ok; x.onerror = function () { no(new Error('無法載入 Google 授權元件')); }; document.head.appendChild(x); });
+  }
   async function authorize() {
-    try { sessionStorage.setItem(PEND, '1'); } catch (e) { /* ignore */ }
+    await loadGis();
     var email = YC.session && YC.session.user && YC.session.user.email;
-    var r = await YC.client.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname, scopes: SCOPE, skipBrowserRedirect: true,
-      queryParams: Object.assign({ prompt: 'consent', include_granted_scopes: 'true' }, email ? { login_hint: email } : {}) } });
-    if (r.error) throw r.error;
-    location.href = r.data.url;
+    return new Promise(function (ok, no) {
+      var tc = google.accounts.oauth2.initTokenClient({ client_id: CLIENT_ID, scope: SCOPE, hint: email || undefined,
+        callback: function (r) {
+          if (r && r.access_token) { try { sessionStorage.setItem(TK, JSON.stringify({ t: r.access_token, exp: Date.now() + Math.max(60, (Number(r.expires_in) || 3600) - 300) * 1000 })); } catch (e) { /* ignore */ } st.sites = null; load(); ok(); }
+          else no(new Error((r && (r.error_description || r.error)) || '沒有取得授權'));
+        },
+        error_callback: function (e) { no(new Error(e && e.type === 'popup_closed' ? '授權視窗被關閉了' : e && e.type === 'popup_failed_to_open' ? '瀏覽器擋住了授權視窗，請允許這個網站的彈出式視窗' : '授權失敗')); }
+      });
+      tc.requestAccessToken();
+    });
   }
   async function gapi(path, body) {
     var t = tokenGet(); if (!t) { var e0 = new Error('需要授權'); e0.code = 'auth'; throw e0; }
@@ -81,7 +94,7 @@
   }
   function authHtml(msg) {
     return '<div class="rk-card rk-setup"><b>用 Google 帳號授權查詢</b>' + (msg ? '<p class="rk-note">' + esc(msg) + '</p>' : '') +
-      '<p class="rk-note">按下後會跳到 Google，請選<b>登入後台的同一個帳號</b>，並允許「查看 Search Console 資料」（唯讀）。授權約 1 小時有效，過期再按一次即可。不需要設定任何金鑰。</p>' +
+      '<p class="rk-note">按下後會開一個 Google 視窗，請選 <b>ycaxiom@gmail.com</b>，並允許「查看 Search Console 資料」（唯讀）。授權約 1 小時有效，過期再按一次即可。不需要設定任何金鑰。</p>' +
       '<div class="rk-acts" style="margin-top:10px"><button type="button" class="m-btn" id="rk-auth">用 Google 授權</button></div></div>';
   }
   function bindAuth() { var rt = document.getElementById('rk-retry'); if (rt) rt.onclick = function () { st.sites = null; load(); };
