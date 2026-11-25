@@ -84,10 +84,11 @@
       '<p class="rk-note">按下後會跳到 Google，請選<b>登入後台的同一個帳號</b>，並允許「查看 Search Console 資料」（唯讀）。授權約 1 小時有效，過期再按一次即可。不需要設定任何金鑰。</p>' +
       '<div class="rk-acts" style="margin-top:10px"><button type="button" class="m-btn" id="rk-auth">用 Google 授權</button></div></div>';
   }
-  function bindAuth() { var b = document.getElementById('rk-auth'); if (b) b.onclick = function () { b.disabled = true; authorize().catch(function (e) { b.disabled = false; window.alert('授權失敗：' + (e.message || e)); }); }; }
+  function bindAuth() { var rt = document.getElementById('rk-retry'); if (rt) rt.onclick = function () { st.sites = null; load(); };
+    var b = document.getElementById('rk-auth'); if (b) b.onclick = function () { b.disabled = true; authorize().catch(function (e) { b.disabled = false; window.alert('授權失敗：' + (e.message || e)); }); }; }
   function errHtml(e) {
     if (e.code === 'auth') return authHtml(e.message === '需要授權' ? '' : e.message);
-    if (e.code === 'api_off') return '<div class="rk-card rk-setup"><b>還差一步：啟用 Search Console API</b><p class="rk-note">Google 回覆這個專案還沒啟用 Search Console API。請到 Google Cloud Console 的「API 和服務 → 程式庫」搜尋「Google Search Console API」按「啟用」（不用建立金鑰），幾分鐘後再按一次查詢。</p><p class="rk-note">' + esc(e.message) + '</p></div>';
+    if (e.code === 'api_off') return '<div class="rk-card rk-setup"><b>還差一步：啟用 Search Console API</b><p class="rk-note">Google 回覆這個專案還沒啟用 Search Console API。請到 Google Cloud Console 的「API 和服務 → 程式庫」搜尋「Google Search Console API」按「啟用」（不用建立金鑰），通常要等 2～5 分鐘才會生效。</p><div class="rk-acts" style="margin:10px 0"><button type="button" class="m-btn" id="rk-retry">再試一次</button></div><p class="rk-note">' + esc(e.message) + '</p></div>';
     if (e.code === 'forbidden') return '<div class="rk-card rk-setup"><b>這個 Google 帳號沒有這個網站的權限</b><p class="rk-note">請客戶到 Search Console →「設定」→「使用者和權限」→「新增使用者」，填入你登入後台的 Gmail，權限選「受限」。</p></div>';
     return '<div class="rk-card"><p class="rk-note">查詢失敗：' + esc(e.message || e) + '</p></div>';
   }
