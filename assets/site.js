@@ -1285,3 +1285,10 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     if (window.innerWidth < 900) return;
     Array.prototype.forEach.call(document.querySelectorAll('details.svc-more'), function (d) { d.open = true; });
 })();
+
+/* 換頁轉場被中斷（例如連點兩個連結）時，瀏覽器會丟出一個沒人接的錯誤；在這裡接住，不影響換頁 */
+(function () {
+    var quiet = function (e) { try { if (e.viewTransition) { e.viewTransition.finished.catch(function () {}); e.viewTransition.ready.catch(function () {}); e.viewTransition.updateCallbackDone.catch(function () {}); } } catch (x) { /* ignore */ } };
+    window.addEventListener('pageswap', quiet);
+    window.addEventListener('pagereveal', quiet);
+})();
