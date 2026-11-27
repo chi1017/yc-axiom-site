@@ -58,6 +58,12 @@
 - [按摩 SPA 網站](https://yc-axiom.pages.dev/industries/massage-spa-website/)：按摩、SPA、芳療工作室
 - [補習班教室網站](https://yc-axiom.pages.dev/industries/tutoring-school-website/)：補習班、才藝教室、教學品牌
 - [診所網站](https://yc-axiom.pages.dev/industries/clinic-website/)：診所、牙醫、中醫、物理治療所
+- [室內裝修怎麼被 AI 推薦](https://yc-axiom.pages.dev/industries/interior-design-geo/)：裝潢、木作、系統櫃業者的 GEO 做法
+- [美業怎麼被 AI 推薦](https://yc-axiom.pages.dev/industries/beauty-salon-geo/)：美髮、美甲、美睫的 GEO 做法
+- [餐飲業怎麼被 AI 推薦](https://yc-axiom.pages.dev/industries/restaurant-geo/)：餐廳、小吃、早午餐的 GEO 做法
+- [GEO 要多少錢](https://yc-axiom.pages.dev/articles/geo-cost/)：GEO 費用與做法
+- [台中店家怎麼被 AI 推薦](https://yc-axiom.pages.dev/articles/taichung-shop-ai-recommend/)：在地店家的 GEO 七個步驟
+- [舊網站要重做還是先修 SEO](https://yc-axiom.pages.dev/articles/fix-or-rebuild-website/)：五個問題判斷修或重做
 - [合作轉介](https://yc-axiom.pages.dev/partners/)：記帳士、設計師、開店顧問等合作夥伴轉介客戶
 - [聯絡我們](https://yc-axiom.pages.dev/contact/)
 - [隱私權政策](https://yc-axiom.pages.dev/privacy/)
