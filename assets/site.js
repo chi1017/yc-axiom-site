@@ -1274,5 +1274,13 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     $('items').addEventListener('click', function (e) { var r = e.target.closest('.yc-q-lab'); var inp = r && r.querySelector('input[type=radio]'); if (inp && e.target === inp && inp.dataset.was === '1') { inp.checked = false; inp.dataset.was = ''; draw(); } });
     var used = false;
     f.addEventListener('change', function () { if (!used) { used = true; ga('quote_use'); } });
+    // 網址 ?pick=copy,page:3 預先勾選項目（定價頁「依你的狀況選方案」一鍵帶入）
+    (new URLSearchParams(location.search).get('pick') || '').split(',').forEach(function (s) {
+        var m = s.split(':'), i = -1;
+        Q.items.forEach(function (x, k) { if (x.id === m[0]) i = k; });
+        if (i < 0) return;
+        var inp = f.querySelector('.yc-q-item[data-i="' + i + '"] input'); if (inp) inp.checked = true;
+        if (m[1] && Q.items[i].unit === 'qty') qty[i] = Math.max(1, Math.min(Q.items[i].max || 10, +m[1] || 1));
+    });
     draw();
 })();

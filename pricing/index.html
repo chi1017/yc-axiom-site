@@ -63,7 +63,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <script id="yc-webfont">/* 字型等頁面顯示後才下載，主要內容不用等字型 */(function(){var u="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Cinzel:wght@500&family=Noto+Serif+TC:wght@600&display=swap";function a(){var l=document.createElement("link");l.rel="stylesheet";l.href=u;document.head.appendChild(l);}if(document.readyState==="complete")a();else addEventListener("load",function(){setTimeout(a,0);});})();</script>
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&family=Cinzel:wght@500&family=Noto+Serif+TC:wght@600&display=swap" rel="stylesheet"></noscript>
-<link rel="stylesheet" href="../assets/dist/site.min.css?v=cb41675358">
+<link rel="stylesheet" href="../assets/dist/site.min.css?v=bd9443452e">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -339,13 +339,152 @@
         <div class="pc-incl reveal"><p class="pc-incl-h">每個客製網站都包含</p><ul class="pc-base pc-base--compact reveal"><li title="用 YC 設計好的版型，換成你的品牌配色與字體；可加購客製插圖與動畫。"><strong>依品牌配色與風格設計</strong></li><li title="RWD 響應式設計，上線前做跨裝置測試驗收。"><strong>電腦、平板、手機都好看</strong></li><li title="驗收後移交網站檔案與相關帳號控制權。"><strong>網站檔案完整交給你</strong></li><li title="一次買斷；之後要不要找我們維護，你自己決定。"><strong>不綁約、無強制月費</strong></li><li title="含 Bug 修正與基礎圖文微調。"><strong>上線後 30 天免費保固</strong></li><li title="簽約付 30%，驗收無誤上線前付 70%。"><strong>分兩期付款</strong></li></ul></div>
         <h2 class="sr-only">網頁設計方案與價格</h2>
         <div class="pricing-tabs reveal" style="margin-top: 40px;">
-            <button class="pricing-tab active magnetic" data-tab="compare" onclick="switchTab('compare')">方案比較</button>
+            <button class="pricing-tab active magnetic" data-tab="plans" onclick="switchTab('plans')">依狀況選方案</button>
+            <button class="pricing-tab magnetic" data-tab="compare" onclick="switchTab('compare')">網站方案比較</button>
             <button class="pricing-tab magnetic" data-tab="list" onclick="switchTab('list')">單項服務價格</button>
             <button class="pricing-tab magnetic" data-tab="monthly" onclick="switchTab('monthly')">年約與月費</button>
+            <button class="pricing-tab magnetic" data-tab="rental" onclick="switchTab('rental')">網站租用</button>
+        </div>
+
+        <!-- Tab：依你的狀況選方案 -->
+        <div id="tab-plans" class="pricing-panel active">
+            <p class="yp-geo"><strong>先用一句話懂 GEO：</strong>很多人現在不先 Google，而是直接問 ChatGPT「台中哪家推薦」。SEO 讓 Google 找得到你，GEO 讓 AI 回答時會提到你。先選你現在的狀況：</p>
+            <div class="yp-pick" role="group" aria-label="選擇你現在的狀況">
+                <button type="button" class="yp-pick-b is-on" data-track="new" aria-pressed="true"><span class="yp-pick-n">01</span><b>還沒有網站</b><small>從 0 開始，一次做對</small></button>
+                <button type="button" class="yp-pick-b" data-track="fix" aria-pressed="false"><span class="yp-pick-n">02</span><b>網站舊了或有問題</b><small>先修 SEO，再做 GEO</small></button>
+                <button type="button" class="yp-pick-b" data-track="geo" aria-pressed="false"><span class="yp-pick-n">03</span><b>網站不錯，想升級 GEO</b><small>讓 AI 也推薦你</small></button>
+            </div>
+
+            <div class="yp-track is-on" id="plan-new" data-track="new">
+                <p class="yp-lead"><strong>我們的做法：</strong>網站一開始就做成 Google 和 AI 都看得懂的樣子。上線時一起做，比上線後再補省錢。</p>
+                <div class="yp-grid">
+                    <article class="yp-card">
+                        <p class="yp-k">起步</p>
+                        <p class="yp-p">NT$9,800</p>
+                        <p class="yp-for">適合剛開業、想先有網站的小店</p>
+                        <ul class="yp-list">
+                            <li>一頁式網站，手機版、基本 SEO</li>
+                            <li>幫你整理文案</li>
+                            <li>店家結構化資料：店名、地址、營業時間讓 Google 和 AI 讀對</li>
+                            <li>開放 AI 爬蟲並建立 llms.txt，AI 讀得到也知道重點</li>
+                            <li>Google 商家檔案整理</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=A&amp;pick=copy,geoschema,geobot,geollms,geogbp">帶入報價試算 →</a>
+                    </article>
+                    <article class="yp-card yp-card--hot">
+                        <p class="yp-k">標準<span class="yp-tag">推薦</span></p>
+                        <p class="yp-p">NT$23,000</p>
+                        <p class="yp-for">適合一般店家、工作室</p>
+                        <ul class="yp-list">
+                            <li>多頁式網站 4 頁</li>
+                            <li>文案、照片修圖、預約表單</li>
+                            <li>GA4：看得到客人從哪裡來</li>
+                            <li>GEO 完整套組 8 項，含 10 題常見問題與品牌事實頁</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=B&amp;pick=copy,photo,form,ga,geopack">帶入報價試算 →</a>
+                    </article>
+                    <article class="yp-card">
+                        <p class="yp-k">進階</p>
+                        <p class="yp-p">NT$37,000</p>
+                        <p class="yp-for">適合想長期經營、靠內容接案的業者</p>
+                        <ul class="yp-list">
+                            <li>標準方案全部內容</li>
+                            <li>再加 3 頁，例如作品集、文章、常見問題</li>
+                            <li>關鍵字策略：先查客人搜什麼，再規劃頁面</li>
+                            <li>內容管理後台：自己發文章、加作品</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=B&amp;pick=page:3,copy,photo,form,ga,cms,seo,geopack">帶入報價試算 →</a>
+                    </article>
+                </div>
+                <p class="yp-foot">以上為一次性製作費，網域與主機另計（主機代管 NT$1,800／年）。</p>
+            </div>
+
+            <div class="yp-track" id="plan-fix" data-track="fix" hidden>
+                <p class="yp-lead"><strong>我們的做法：</strong>先健檢，再修地基，最後才做 GEO。常見的問題是手機版跑版、速度慢、Google 搜不到、標題亂、店家資料不一致；這些沒修好，AI 也讀不懂。</p>
+                <div class="yp-grid">
+                    <article class="yp-card">
+                        <p class="yp-k">先健檢</p>
+                        <p class="yp-p">NT$2,500</p>
+                        <p class="yp-for">想先知道問題在哪</p>
+                        <ul class="yp-list">
+                            <li>速度、手機版、收錄、標題與網站結構逐項檢查</li>
+                            <li>告訴你哪些一定要修、哪些可以先不管</li>
+                            <li>決定重做網站時，報告費可全額折抵</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=N&amp;pick=seorep">帶入報價試算 →</a>
+                    </article>
+                    <article class="yp-card">
+                        <p class="yp-k">修好 SEO</p>
+                        <p class="yp-p">NT$8,000</p>
+                        <p class="yp-for">先把 Google 這關修好</p>
+                        <ul class="yp-list">
+                            <li>修速度與手機版</li>
+                            <li>重寫標題與描述、整理網址</li>
+                            <li>提交 Sitemap，處理 Google 沒收錄的頁面</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=N&amp;pick=seoopt">帶入報價試算 →</a>
+                    </article>
+                    <article class="yp-card yp-card--hot">
+                        <p class="yp-k">SEO＋GEO 一起做<span class="yp-tag">推薦</span></p>
+                        <p class="yp-p">NT$15,000</p>
+                        <p class="yp-for">網站還能用，想一次修好</p>
+                        <ul class="yp-list">
+                            <li>先修 SEO 地基</li>
+                            <li>再做 GEO 完整套組 8 項</li>
+                            <li>附修改前後的檢測對照</li>
+                            <li>比分開買省 NT$2,000</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=N&amp;pick=seogeo">帶入報價試算 →</a>
+                    </article>
+                </div>
+                <p class="yp-foot">網站太舊、改不動？直接重做通常比較划算，請看<button type="button" class="yp-link" data-go="new">「還沒有網站」的方案</button>。</p>
+            </div>
+
+            <div class="yp-track" id="plan-geo" data-track="geo" hidden>
+                <p class="yp-lead"><strong>我們的做法：</strong>Google 排名已經有了，下一步是讓 ChatGPT、Gemini、Perplexity 回答時也提到你，再每月追蹤結果。</p>
+                <div class="yp-grid">
+                    <article class="yp-card">
+                        <p class="yp-k">升級</p>
+                        <p class="yp-p">NT$9,000<small>一次</small></p>
+                        <p class="yp-for">一次把 GEO 做好</p>
+                        <ul class="yp-list">
+                            <li>AI 爬蟲、llms.txt、結構化資料</li>
+                            <li>10 題常見問題，重點頁改成先講答案</li>
+                            <li>店家資料一致、Google 商家檔案、品牌事實頁</li>
+                            <li>附 GEO 檢測前後對照</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=N&amp;pick=geopack">帶入報價試算 →</a>
+                    </article>
+                    <article class="yp-card yp-card--hot">
+                        <p class="yp-k">升級＋追蹤<span class="yp-tag">推薦</span></p>
+                        <p class="yp-p">NT$9,000<small>＋每月 NT$800</small></p>
+                        <p class="yp-for">做完想知道 AI 有沒有提到你</p>
+                        <ul class="yp-list">
+                            <li>升級方案全部內容</li>
+                            <li>每月用 10 個客人會問的問題查 ChatGPT、Gemini、Perplexity 與 Google AI 摘要</li>
+                            <li>記錄有沒有提到你、排第幾，附截圖與建議</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=N&amp;pick=geopack,geomon">帶入報價試算 →</a>
+                    </article>
+                    <article class="yp-card">
+                        <p class="yp-k">全面經營</p>
+                        <p class="yp-p">NT$9,000<small>＋每月 NT$3,000，6 個月起</small></p>
+                        <p class="yp-for">想長期穩定被找到</p>
+                        <ul class="yp-list">
+                            <li>升級方案全部內容</li>
+                            <li>每月 Google 商家 4 篇貼文、回覆評論</li>
+                            <li>每月補 2 題常見問題，依排名調整頁面</li>
+                            <li>AI 提及檢查與月報；要長期寫文章可加文章年約</li>
+                        </ul>
+                        <a class="yp-go" href="../quote/?plan=N&amp;pick=geopack,vis">帶入報價試算 →</a>
+                    </article>
+                </div>
+                <p class="yp-foot">不確定網站算哪一種？先用<a href="../geo/">免費 GEO 檢測</a>看分數。SEO 與 GEO 都無法保證排名或一定被 AI 推薦，我們做的是讓你被找到、被讀懂的條件都到位。</p>
+            </div>
         </div>
 
         <!-- Tab 0: 方案比較 -->
-        <div id="tab-compare" class="pricing-panel active">
+        <div id="tab-compare" class="pricing-panel">
             <p class="pc-hint">以下是起價，需要的頁面與功能再一項一項加購；用<a href="../quote/">報價試算</a>可以直接算出總價。<span class="pc-m-only">點上方按鈕或左右滑動切換方案。</span></p>
             <div class="pc-pick" role="group" aria-label="選擇要看的方案"><button type="button" class="pc-pick-b is-on" data-col="1" aria-pressed="true">一頁式</button><button type="button" class="pc-pick-b" data-col="2" aria-pressed="false">多頁式</button><button type="button" class="pc-pick-b" data-col="3" aria-pressed="false">電商與會員</button><button type="button" class="pc-pick-b" data-col="4" aria-pressed="false">網站租用</button></div><div id="pcWrap" data-col="1" class="pc-wrap reveal" role="region" aria-label="方案比較表" tabindex="0">
             <table class="pc-table">
@@ -568,9 +707,8 @@
                     <div class="plan-footer">一年一約，平均每篇約 NT$800</div>
                 </div>
             </div>
-        </div>
         <!-- yc:calc -->
-        <section class="yc-yr reveal" id="year-cost" aria-labelledby="yr-t">
+        <section class="yc-yr" id="year-cost" aria-labelledby="yr-t">
             <h2 class="sp-h2" id="yr-t">買斷和租用，一年要花多少？</h2>
             <div class="yc-yr-grid">
                 <div class="yc-yr-card">
@@ -600,20 +738,10 @@
             </div>
         </section>
 <!-- /yc:calc -->
-        <!-- yc:calc -->
-        <a class="yc-qcard reveal" href="../quote/">
-            <span class="yc-qcard-k">Quote builder</span>
-            <span class="yc-qcard-t">報價試算：勾選你要的服務，馬上知道多少</span>
-            <span class="yc-qcard-d">網站製作、加購功能、SEO 與 AI 搜尋、數據與市場分析、每月維護，所有服務都能自己組合試算，每一項都有說明，可以複製摘要或印成報價單。</span>
-            <span class="yc-qcard-go">開始試算 →</span>
-        </a>
-<!-- /yc:calc -->
-        <div class="pricing-note reveal">
-            <p>所有方案均可<span>客製化組合</span>，費用依實際需求報價。<br>有任何專案問題，歡迎隨時聯繫諮詢。</p>
-            <a href="../contact/" class="btn-primary magnetic" style="white-space:nowrap;">免費索取報價</a>
         </div>
-
-        <h2 class="sp-h2 reveal">網站租用</h2>
+        <!-- Tab：網站租用 -->
+        <div id="tab-rental" class="pricing-panel">
+        <h2 class="sp-h2">網站租用</h2>
         <div class="sp-price reveal"><table><tbody><tr><td>網站租用．一頁版（預先設計的版型、線上編輯器、發佈與維護、每月網站體檢、線上購買（綠界收款）、GA4 流量統計；所有內容在同一頁，含價目、照片、常見問題、最新消息等區塊）</td><td class="sp-price-v">{{yc:single_label}}</td></tr><tr><td>{{yc:single_year_row}}</td><td class="sp-price-v">{{yc:single_year}}／年</td></tr><tr><td>網站租用．多頁版（同上，另有關於、價目、照片、消息、常見問題、聯絡等獨立頁面，可自選）</td><td class="sp-price-v">{{yc:multi_label}}</td></tr><tr><td>{{yc:multi_year_row}}</td><td class="sp-price-v">{{yc:multi_year}}／年</td></tr><tr><td>進階功能（加購，一頁版、多頁版都能加：預約行事曆讓客人直接選時段、額滿自動擋；自訂程式碼與嵌入，經審核後放進網站；多人協作，最多 5 人一起編輯）</td><td class="sp-price-v">每月加 {{yc:pro_month}}（一次付 12 個月加 {{yc:pro_year}}）</td></tr></tbody></table>
             <p class="sp-note">自己登入填寫內容、我們負責上線與維護，適合想先有專業網站的中小企業。<a href="../rental/">了解網站租用 →</a></p></div>
         <!-- yc:calc -->
@@ -637,6 +765,22 @@
             </div>
         </section>
 <!-- /yc:calc -->
+        </div>
+
+        <!-- yc:calc -->
+        <a class="yc-qcard reveal" href="../quote/">
+            <span class="yc-qcard-k">Quote builder</span>
+            <span class="yc-qcard-t">報價試算：勾選你要的服務，馬上知道多少</span>
+            <span class="yc-qcard-d">網站製作、加購功能、SEO 與 AI 搜尋、數據與市場分析、每月維護，所有服務都能自己組合試算，每一項都有說明，可以複製摘要或印成報價單。</span>
+            <span class="yc-qcard-go">開始試算 →</span>
+        </a>
+<!-- /yc:calc -->
+        <div class="pricing-note reveal">
+            <p>所有方案均可<span>客製化組合</span>，費用依實際需求報價。<br>有任何專案問題，歡迎隨時聯繫諮詢。</p>
+            <a href="../contact/" class="btn-primary magnetic" style="white-space:nowrap;">免費索取報價</a>
+        </div>
+
+
 
         <!-- FAQ Section -->
         <div class="faq-section reveal">
@@ -747,6 +891,26 @@
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) show(+wrap.getAttribute('data-col') + (dx < 0 ? 1 : -1));
     }, { passive: true });
 })();
+(function () {
+    /* 依狀況選方案：三種狀況切換；網址 #plan-new / #plan-fix / #plan-geo 直接開對應方案，#calc、#year-cost 會切到所在分頁 */
+    var box = document.getElementById('tab-plans'); if (!box) return;
+    var bs = box.querySelectorAll('.yp-pick-b'), ts = box.querySelectorAll('.yp-track');
+    function pick(k) {
+        Array.prototype.forEach.call(bs, function (b) { var on = b.getAttribute('data-track') === k; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+        Array.prototype.forEach.call(ts, function (t) { var on = t.getAttribute('data-track') === k; t.classList.toggle('is-on', on); t.hidden = !on; });
+    }
+    Array.prototype.forEach.call(bs, function (b) { b.addEventListener('click', function () { pick(b.getAttribute('data-track')); try { history.replaceState(null, '', '#plan-' + b.getAttribute('data-track')); } catch (e) { /* ignore */ } }); });
+    box.addEventListener('click', function (e) { var g = e.target.closest('[data-go]'); if (g) { pick(g.getAttribute('data-go')); box.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+    function fromHash() {
+        var h = location.hash.slice(1), el = h && document.getElementById(h); if (!el) return;
+        var t = /^plan-(new|fix|geo)$/.exec(h), pn = el.closest('.pricing-panel');
+        if (t) pick(t[1]);
+        if (pn && typeof switchTab === 'function') switchTab(pn.id.slice(4));
+        setTimeout(function () { el.scrollIntoView({ block: 'start' }); }, 80);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fromHash); else fromHash();
+    window.addEventListener('hashchange', fromHash);
+})();
 </script>
 
 
@@ -785,6 +949,6 @@
         </div>
     </div>
 </footer>
-<script src="../assets/dist/site.min.js?v=b1650f4aea" defer></script>
+<script src="../assets/dist/site.min.js?v=8500795a5e" defer></script>
 </body>
 </html>

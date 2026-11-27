@@ -73,6 +73,7 @@ textarea#htmlIn{width:100%;min-height:150px;background:var(--bg3);border:1px sol
 .geo-cta.show{display:flex}
 .geo-cta a.line{background:#06C755;color:#fff;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:6px;font-size:14px}
 .geo-cta a.line:hover{filter:brightness(1.07)}
+.geo-cta a.plan{border:1px solid var(--accent2,#B59B6A);color:var(--accent2,#B59B6A);font-weight:700;text-decoration:none;padding:9px 18px;border-radius:6px;font-size:14px}.geo-cta a.plan:hover{background:rgba(181,155,106,.12)}
 .geo-cta .hint{font-size:12px;color:var(--text3)}
 .geo-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px}
 .geo-section h3{font-size:16px;color:#fff;margin-bottom:4px;font-family:'Plus Jakarta Sans','Noto Sans TC',sans-serif}
@@ -247,7 +248,7 @@ window.ycScrollToScore = function () {
       <div class="score-info">
         <h2><span id="scoreTitle">—</span><span class="grade na" id="gradeChip"></span></h2>
         <p id="scoreSummary"></p>
-        <div class="geo-cta" id="geoCta"><a class="line" id="lineBtn" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">找 YC 幫你優化</a><span class="hint">分數低於 80 分，有不少可以改善的地方，歡迎 LINE 詢問。</span></div>
+        <div class="geo-cta" id="geoCta"><a class="plan" id="planBtn" href="https://yc-axiom.pages.dev/pricing/#plan-fix" target="_top">看建議方案</a><a class="line" id="lineBtn" href="https://line.me/R/ti/p/%40788cblaq" target="_blank" rel="noopener">找 YC 幫你優化</a><span class="hint" id="planHint"></span></div>
       </div>
     </div>
 
@@ -468,7 +469,10 @@ function renderResults(r) {
   var top = r.issues.length;
   parts.push(top ? '共有 ' + top + ' 項可以改善' : '沒有明顯需要改善的項目');
   $('scoreSummary').textContent = parts.join('　·　');
-  $('geoCta').classList.toggle('show', !!r.needHelp);
+  // 依分數推薦定價頁的方案：60 分以下先修 SEO 地基；60 分以上升級 GEO；80 分以上建議追蹤 AI 提及
+  var rec = r.score == null ? null : r.score < 60 ? ['plan-fix', '分數偏低，建議先修好 SEO 地基，再做 GEO（SEO＋GEO 一起做 NT$15,000）。'] : r.score < 80 ? ['plan-geo', '基礎還可以，建議做 GEO 完整套組，把 AI 讀不懂的地方補齊（NT$9,000）。'] : ['plan-geo', '分數不錯，可以每月追蹤 AI 有沒有提到你，持續調整（每月 NT$800 起）。'];
+  if (rec) { $('planBtn').href = 'https://yc-axiom.pages.dev/pricing/#' + rec[0]; $('planHint').textContent = rec[1]; }
+  $('geoCta').classList.toggle('show', !!rec);
 
   // 各面向
   $('catRows').innerHTML = r.categories.map(function (c) {
