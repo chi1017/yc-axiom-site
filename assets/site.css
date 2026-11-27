@@ -2429,3 +2429,58 @@ html.yc-s-open { overflow: hidden; }
 .sp-plain dd { margin: 0; font-size: 15px; line-height: 1.85; color: var(--text); }
 .sp-plain dd a { display: inline-block; margin-left: 6px; color: var(--accent); }
 @media (max-width: 768px) { .sp-plain { grid-template-columns: 1fr; } .sp-plain > div { padding: 16px 18px; } }
+
+/* ── 換頁轉場：同站換頁時內容淡入，上方導覽列與手機底部列固定不閃 ── */
+@view-transition { navigation: auto; }
+body > nav { view-transition-name: yc-nav; }
+#yc-tabbar { view-transition-name: yc-tabbar; }
+::view-transition-old(root) { animation: 160ms ease-out both yc-vt-out; }
+::view-transition-new(root) { animation: 240ms cubic-bezier(.2,.7,.2,1) both yc-vt-in; }
+@keyframes yc-vt-out { to { opacity: 0; } }
+@keyframes yc-vt-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
+/* ── 服務頁段落目錄 ── */
+.yc-toc--svc { margin: 28px 0 8px; }
+
+/* ── 首頁：服務捷徑（取代原本的「三項主力服務」區塊） ── */
+.rh-stage-more { grid-column: 2; margin-top: 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; font-size: 14px; color: var(--text-dim); }
+.rh-stage-more a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid var(--border); border-radius: 99px; color: var(--text); text-decoration: none; transition: border-color .25s, color .25s; }
+.rh-stage-more a:hover { border-color: var(--accent); color: var(--accent); }
+.rh-stage-more .rh-stage-all { border-color: transparent; color: var(--accent); padding: 0 4px; }
+@media (max-width: 1024px) { .rh-stage-more { grid-column: 1; } }
+@media (max-width: 768px) { .rh-stage-more { gap: 8px; font-size: 13.5px; } .rh-stage-more a { min-height: 34px; padding: 0 12px; } }
+
+/* ── 服務總覽：清單與比較表可收合，手機版不再一路長下去 ── */
+.svc-more { margin-top: 14px; }
+.svc-more > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 36px; font-size: 13.5px; font-weight: 700; color: var(--accent); }
+.svc-more > summary::-webkit-details-marker { display: none; }
+.svc-more > summary::after { content: "+"; font-family: var(--f-ui); transition: transform .25s; }
+.svc-more[open] > summary::after { transform: rotate(45deg); }
+.svc-more .service-list { margin-top: 6px; }
+.svc-matrix > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; padding-right: 32px; position: relative; }
+.svc-matrix > summary::-webkit-details-marker { display: none; }
+.svc-matrix > summary span { font-size: 14px; color: var(--text-dim); }
+.svc-matrix > summary::after { content: "+"; position: absolute; right: 0; top: 4px; font-size: 22px; color: var(--accent); transition: transform .25s; }
+.svc-matrix[open] > summary::after { transform: rotate(45deg); }
+.svc-matrix[open] > summary { margin-bottom: 20px; }
+
+/* ── 全站節奏統一：同一套圓角、標題大小、段落間距與點擊高度 ──
+   卡片類一律 4px 圓角；大標同級同大小；說明小字不小於 14px；可點的東西至少 44px 高。 */
+:root { --r-card: 4px; --gap-sec: 64px; --gap-sec-m: 44px; }
+.yc-toc, .pl-grp, .sp-plain, .yp-card, .yp-pick-b, .rh-stage-list a, .service-card, .faq-item, .tr, .sp-related, .cta-banner, .matrix-table-wrap { border-radius: var(--r-card); }
+.rh-h2, .sp-h2:not(.sp-h2--sm) { font-size: clamp(28px, 3.2vw, 40px); line-height: 1.25; }
+.sp-h2:not(.sp-h2--sm) { margin: var(--gap-sec) 0 20px; }
+.rh-section { padding-top: 80px; padding-bottom: 80px; }
+.sp-note, .rh-other { font-size: 14px; line-height: 1.85; }
+.rh-lede { font-size: 15.5px; line-height: 1.9; }
+.btn-primary, .btn-secondary, .rh-more, .service-more { min-height: 44px; display: inline-flex; align-items: center; }
+.sp-related { margin-top: var(--gap-sec); }
+@media (max-width: 768px) {
+  .sp-h2:not(.sp-h2--sm) { margin-top: var(--gap-sec-m); }
+  .rh-section { padding-top: 52px; padding-bottom: 52px; }
+  .rh-head { margin-bottom: 18px; }
+  .rh-lede { margin-bottom: 28px; }
+  .sp-related { margin-top: var(--gap-sec-m); padding: 20px; }
+  .sp-lede { font-size: 16px; }
+}

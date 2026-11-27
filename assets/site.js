@@ -1,6 +1,6 @@
 /* 英文版（/en/）用的介面文字 */
 var YC_EN = /^en/i.test(document.documentElement.lang || '');
-var YC_TX = {"工具載入的時間比平常久，可能是網路比較慢。": "The tool is taking longer than usual to load; your connection may be slow.", "重新載入": "Reload", "直接開啟工具 ↗": "Open the tool directly ↗", "工具載入中…": "Loading tool…", "切換為深色模式": "Switch to dark mode", "切換為淺色模式": "Switch to light mode", "會員選單": "Member menu", "會員登入": "Sign in", "會員登入或註冊": "Sign in or sign up", "會員專區": "Member area", "會員專區選單": "Member area menu", "我的網站": "My website", "網站編輯器": "Website editor", "管理後台": "Admin", "切換 Google 帳號": "Switch Google account", "登出": "Sign out", "首頁": "Home", "服務": "Services", "網站租用": "Rental", "LINE 諮詢": "LINE", "選單": "Menu", "主要分頁": "Main tabs", "返回上一頁": "Back", "本文目錄": "In this article", "段": "sections", "回到頂端": "Back to top", "搜尋網站": "Search this site", "常用搜尋": "Popular searches", "找不到相關頁面，換個關鍵字試試，或直接問我們。": "No matching pages. Try another keyword, or just ask us.", "搜尋服務、價格、文章、工具…": "Search services, pricing, articles, tools…", "關閉": "Close"};
+var YC_TX = {"工具載入的時間比平常久，可能是網路比較慢。": "The tool is taking longer than usual to load; your connection may be slow.", "重新載入": "Reload", "直接開啟工具 ↗": "Open the tool directly ↗", "工具載入中…": "Loading tool…", "切換為深色模式": "Switch to dark mode", "切換為淺色模式": "Switch to light mode", "會員選單": "Member menu", "會員登入": "Sign in", "會員登入或註冊": "Sign in or sign up", "會員專區": "Member area", "會員專區選單": "Member area menu", "我的網站": "My website", "網站編輯器": "Website editor", "管理後台": "Admin", "切換 Google 帳號": "Switch Google account", "登出": "Sign out", "首頁": "Home", "服務": "Services", "方案": "Plans", "網站租用": "Rental", "LINE 諮詢": "LINE", "選單": "Menu", "主要分頁": "Main tabs", "返回上一頁": "Back", "本文目錄": "In this article", "本頁目錄": "On this page", "段": "sections", "回到頂端": "Back to top", "搜尋網站": "Search this site", "常用搜尋": "Popular searches", "找不到相關頁面，換個關鍵字試試，或直接問我們。": "No matching pages. Try another keyword, or just ask us.", "搜尋服務、價格、文章、工具…": "Search services, pricing, articles, tools…", "關閉": "Close"};
 function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
 
 
@@ -47,84 +47,73 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         });
     }
 
-    /* ── Retina / High-DPI Hero Particle Canvas ── */
+    const REDUCE_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    const FINE_POINTER = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+
+    /* ── Retina / High-DPI Hero Particle Canvas ──
+       只在主視覺看得到、分頁在前景時才畫；連線合併成一條路徑、用距離平方比較，捲動時不再卡頓。 */
     const canvas = document.getElementById('hero-canvas');
-    if (canvas) {
+    if (canvas && !REDUCE_MOTION) {
         const ctx = canvas.getContext('2d');
-        let particles = [];
-        let mouseX = 0, mouseY = 0;
-        
+        const particles = [];
+        let w = 0, h = 0, rect = null, mouseX = -999, mouseY = -999, rafId = 0, visible = true;
         function resizeCanvas() {
-            const dpr = window.devicePixelRatio || 1;
-            const width = canvas.parentElement.clientWidth;
-            const height = canvas.parentElement.clientHeight;
-            
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-            ctx.scale(dpr, dpr);
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            w = canvas.parentElement.clientWidth; h = canvas.parentElement.clientHeight;
+            canvas.width = w * dpr; canvas.height = h * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            rect = null;
         }
         resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        window.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = e.clientX - rect.left;
-            mouseY = e.clientY - rect.top;
-        });
-
-        const displayWidth = () => canvas.parentElement.clientWidth;
-        const displayHeight = () => canvas.parentElement.clientHeight;
-
-        for (let i = 0; i < 50; i++) {
-            particles.push({
-                x: Math.random() * displayWidth(),
-                y: Math.random() * displayHeight(),
-                vx: (Math.random() - 0.5) * 0.5,
-                vy: (Math.random() - 0.5) * 0.5,
-                size: Math.random() * 2 + 1
-            });
+        window.addEventListener('resize', resizeCanvas, { passive: true });
+        window.addEventListener('scroll', () => { rect = null; }, { passive: true });
+        if (FINE_POINTER) window.addEventListener('mousemove', (e) => {
+            if (!visible) return;
+            if (!rect) rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left; mouseY = e.clientY - rect.top;
+        }, { passive: true });
+        const N = w < 768 ? 28 : 46;
+        for (let i = 0; i < N; i++) {
+            particles.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5, size: Math.random() * 2 + 1 });
         }
-
+        const LINK2 = 120 * 120, MOUSE2 = 100 * 100;
         function drawParticles() {
-            const w = displayWidth();
-            const h = displayHeight();
+            rafId = 0;
             ctx.clearRect(0, 0, w, h);
             ctx.fillStyle = 'rgba(181, 155, 106, 0.6)';
-            ctx.strokeStyle = 'rgba(181, 155, 106, 0.08)';
-
-            particles.forEach((p, i) => {
+            ctx.beginPath();
+            for (const p of particles) {
                 p.x += p.vx; p.y += p.vy;
                 if (p.x < 0 || p.x > w) p.vx *= -1;
                 if (p.y < 0 || p.y > h) p.vy *= -1;
-
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-
+                ctx.moveTo(p.x + p.size, p.y); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            }
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(181, 155, 106, 0.08)';
+            ctx.beginPath();
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
                 for (let j = i + 1; j < particles.length; j++) {
-                    const p2 = particles[j];
-                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-                    if (dist < 120) {
-                        ctx.beginPath();
-                        ctx.moveTo(p.x, p.y);
-                        ctx.lineTo(p2.x, p2.y);
-                        ctx.stroke();
-                    }
+                    const q = particles[j], dx = p.x - q.x, dy = p.y - q.y;
+                    if (dx * dx + dy * dy < LINK2) { ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); }
                 }
-
-                // Interactive Mouse Distort
-                const mDist = Math.hypot(p.x - mouseX, p.y - mouseY);
-                if (mDist < 100) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = 'rgba(181, 155, 106, 0.25)';
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(mouseX, mouseY);
-                    ctx.stroke();
-                }
-            });
-            requestAnimationFrame(drawParticles);
+            }
+            ctx.stroke();
+            ctx.strokeStyle = 'rgba(181, 155, 106, 0.25)';
+            ctx.beginPath();
+            for (const p of particles) {
+                const dx = p.x - mouseX, dy = p.y - mouseY;
+                if (dx * dx + dy * dy < MOUSE2) { ctx.moveTo(p.x, p.y); ctx.lineTo(mouseX, mouseY); }
+            }
+            ctx.stroke();
+            if (visible && !document.hidden) rafId = requestAnimationFrame(drawParticles);
         }
-        drawParticles();
+        const start = () => { if (!rafId && visible && !document.hidden) rafId = requestAnimationFrame(drawParticles); };
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver((en) => { visible = en[0].isIntersecting; if (visible) start(); else { cancelAnimationFrame(rafId); rafId = 0; } }).observe(canvas);
+        }
+        document.addEventListener('visibilitychange', start);
+        start();
     }
 
     /* ── 3D Card Tilt Effect ──
@@ -177,7 +166,6 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     }
 
     /* ── Scroll Progress Bar（減少動態效果時不啟用）── */
-    const REDUCE_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     if (!REDUCE_MOTION) window.addEventListener('scroll', () => {
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
         const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -206,52 +194,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
 
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    /* ── Custom Cursor Motion ── */
-    const cursorDot = document.getElementById('cursor-dot');
-    const cursorFollower = document.getElementById('cursor-follower');
-
-    /* 只在滑鼠＋可懸停的裝置啟用；觸控裝置與「減少動態效果」完全停用 */
-    const FINE_POINTER = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
-    if (cursorDot && cursorFollower && FINE_POINTER && !REDUCE_MOTION && window.innerWidth > 1024) {
-        window.addEventListener('mousemove', (e) => {
-            const posX = e.clientX;
-            const posY = e.clientY;
-
-            cursorDot.style.left = `${posX}px`;
-            cursorDot.style.top = `${posY}px`;
-
-            cursorFollower.animate({
-                left: `${posX}px`,
-                top: `${posY}px`
-            }, { duration: 400, fill: "forwards" });
-        });
-
-        /* Mouse events inside the embedded SEO tool iframe never reach this page, so the
-           decorative cursor would freeze at the iframe's edge — hide it while over the tool
-           (and while the pointer is outside the window). */
-        const hideCursor = () => { cursorDot.style.opacity = '0'; cursorFollower.style.opacity = '0'; };
-        const showCursor = () => { cursorDot.style.opacity = ''; cursorFollower.style.opacity = ''; };
-        const seoToolFrame = document.getElementById('seoToolFrame');
-        if (seoToolFrame) {
-            seoToolFrame.addEventListener('mouseenter', hideCursor);
-            seoToolFrame.addEventListener('mouseleave', showCursor);
-        }
-        document.documentElement.addEventListener('mouseleave', hideCursor);
-        document.documentElement.addEventListener('mouseenter', showCursor);
-
-        document.querySelectorAll('a, button, .form-chip, .work-item, .faq-item, .tilt-card').forEach(el => {
-            el.addEventListener('mouseenter', () => {
-                cursorFollower.style.transform = 'translate(-50%, -50%) scale(1.4)';
-                cursorFollower.style.borderColor = 'var(--accent)';
-                cursorFollower.style.backgroundColor = 'rgba(181, 155, 106, 0.05)';
-            });
-            el.addEventListener('mouseleave', () => {
-                cursorFollower.style.transform = 'translate(-50%, -50%) scale(1)';
-                cursorFollower.style.borderColor = 'rgba(181, 155, 106, 0.4)';
-                cursorFollower.style.backgroundColor = 'transparent';
-            });
-        });
-    }
+    /* 自訂游標跟隨圈已移除：用系統游標，操作不延遲。 */
 
     /* ── Portfolio Filter System ── */
     function filterWorks(category, btn) {
@@ -668,12 +611,12 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
     var root = me ? new URL(me.src.indexOf('/assets/dist/') > -1 ? '../../' : '../', me.src).href : location.origin + '/';
     var rel = location.href.indexOf(root) === 0 ? location.href.slice(root.length).split(/[?#]/)[0] : '';
     var rel0 = rel.replace(/^en\//, '');
-    var cur = (rel0 === '' || rel0 === 'index.html') ? 'home' : /^services\//.test(rel0) ? 'services' : /^rental\//.test(rel0) ? 'rental' : '';
+    var cur = (rel0 === '' || rel0 === 'index.html') ? 'home' : /^pricing\//.test(rel0) ? 'plans' : /^rental\//.test(rel0) ? 'rental' : '';
     var lineA = document.querySelector('a.line-float');
     var ico = function (d) { return '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + d + '</svg>'; };
     var tabs = [
         { k: 'home', href: root + (YC_EN ? 'en/' : ''), label: ycT('首頁'), icon: ico('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>') },
-        { k: 'services', href: root + (YC_EN ? 'en/' : '') + 'services/', label: ycT('服務'), icon: ico('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/>') },
+        { k: 'plans', href: root + (YC_EN ? 'en/' : '') + 'pricing/#tab-plans', label: ycT('方案'), icon: ico('<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="M15.5 15.5l1.5 1.5 3-3"/>') },
         { k: 'rental', href: root + (YC_EN ? 'en/' : '') + 'rental/', label: ycT('網站租用'), icon: ico('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>') },
         { k: 'line', href: lineA ? lineA.getAttribute('href') : '', label: ycT('LINE 諮詢'), icon: lineA && lineA.querySelector('svg') ? lineA.querySelector('svg').outerHTML.replace(/width="\d+"/, 'width="24"').replace(/height="\d+"/, 'height="24"') : '' },
         { k: 'menu', label: ycT('選單'), icon: ico('<path d="M4 7h16M4 12h16M4 17h16"/>') }
@@ -816,11 +759,31 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         var where = a.closest('#yc-tabbar') ? 'tabbar' : a.closest('nav,#mobile-menu') ? 'menu' : a.closest('footer') ? 'footer' : a.closest('.social-float,.line-float') ? 'float' : a.closest('.yc-card') ? 'card' : 'page';
         ga('line_click', { link_area: where, page_name: pageName() });
         if (!mobile) return;
-        var msg = YC_EN ? 'Hi, I found you on your website (' + pageName() + '). I\'d like to ask about: ' : '你好，我在官網「' + pageName() + '」看到你們，想詢問：';
+        // 服務、行業、方案頁直接帶出「想問哪一項」，其他頁帶出從哪一頁來
+        var svc = /^\/(en\/)?(services|industries)\/[^/]+\/?$/.test(location.pathname) || /^\/(en\/)?pricing\//.test(location.pathname);
+        var msg = YC_EN ? (svc ? 'Hi, I\'d like to ask about ' + pageName() + ': ' : 'Hi, I found you on your website (' + pageName() + '). I\'d like to ask about: ')
+            : (svc ? '你好，我想詢問「' + pageName() + '」：' : '你好，我在官網「' + pageName() + '」看到你們，想詢問：');
         a.href = 'https://line.me/R/oaMessage/' + LINE_ID + '/?' + encodeURIComponent(msg);
     }, true);
 
     // 2. 文章目錄：文章頁小標有 4 個以上，就在第一個小標前放一個可收合的目錄
+    // 服務頁與行業頁：大標 4 個以上，也放一個段落目錄
+    if (/\/(services|industries)\/[^/]+\/?$/.test(location.pathname)) {
+        var shs = Array.prototype.filter.call(document.querySelectorAll('main h2.sp-h2'), function (h) { return !h.closest('.faq-section,.sp-related,aside') && !h.classList.contains('sp-h2--sm'); });
+        if (shs.length >= 4) {
+            var sitems = shs.map(function (h, i) {
+                if (!h.id) h.id = 'sec-' + (i + 1);
+                return '<li><a href="#' + h.id + '">' + esc((h.textContent || '').trim()) + '</a></li>';
+            }).join('');
+            var stoc = document.createElement('details');
+            stoc.className = 'yc-toc yc-toc--svc';
+            if (window.innerWidth >= 900) stoc.open = true;
+            stoc.innerHTML = '<summary>' + ycT('本頁目錄') + '<span class="yc-toc-n">' + shs.length + ' ' + ycT('段') + '</span></summary><ol>' + sitems + '</ol>';
+            var anchor = document.querySelector('main .sp-plain') || shs[0].previousElementSibling;
+            if (anchor && anchor.parentNode === shs[0].parentNode && anchor.classList.contains('sp-plain')) anchor.parentNode.insertBefore(stoc, anchor.nextSibling);
+            else shs[0].parentNode.insertBefore(stoc, shs[0]);
+        }
+    }
     var body = document.querySelector('.article-body');
     if (body && /\/(articles|learn)\/[^/]+\/?$/.test(location.pathname)) {
         var hs = Array.prototype.filter.call(body.querySelectorAll('h2'), function (h) { return !h.closest('.faq-section,.cta-box,aside'); });
@@ -848,8 +811,8 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         if (tick) return; tick = true;
         requestAnimationFrame(function () {
             tick = false;
-            var long = document.documentElement.scrollHeight > window.innerHeight * 3;
-            top.classList.toggle('is-in', long && window.scrollY > window.innerHeight * 2);
+            var long = document.documentElement.scrollHeight > window.innerHeight * 2.5;
+            top.classList.toggle('is-in', long && window.scrollY > window.innerHeight * 1.2);
         });
     };
     window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
@@ -1283,4 +1246,42 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         if (m[1] && Q.items[i].unit === 'qty') qty[i] = Math.max(1, Math.min(Q.items[i].max || 10, +m[1] || 1));
     });
     draw();
+})();
+
+/* ── 換頁加速：滑鼠移到（或手指按到）站內連結就先下載下一頁；Chrome 用 Speculation Rules，其他瀏覽器用 prefetch ── */
+(function () {
+    var SKIP = /^\/(admin|dashboard|builder|auth|member|api)\b|\.(pdf|zip|png|jpe?g|webp|svg|xml|txt)$/i;
+    var conn = navigator.connection;
+    if (conn && (conn.saveData || /2g/.test(conn.effectiveType || ''))) return;
+    try {
+        if (HTMLScriptElement.supports && HTMLScriptElement.supports('speculationrules')) {
+            var sr = document.createElement('script');
+            sr.type = 'speculationrules';
+            sr.textContent = JSON.stringify({ prefetch: [{ source: 'document', where: { and: [
+                { href_matches: '/*' },
+                { not: { href_matches: ['/admin/*', '/dashboard/*', '/builder/*', '/auth/*', '/member/*', '/*.pdf'] } },
+                { not: { selector_matches: '[target=_blank], [download], [rel~=nofollow]' } }
+            ] }, eagerness: 'moderate' }] });
+            document.head.appendChild(sr);
+            return;
+        }
+    } catch (e) { /* ignore */ }
+    var done = {};
+    function pre(e) {
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a || a.target === '_blank' || a.hasAttribute('download') || a.origin !== location.origin) return;
+        var u = a.pathname + a.search;
+        if (u === location.pathname + location.search || done[u] || SKIP.test(a.pathname)) return;
+        done[u] = 1;
+        var l = document.createElement('link'); l.rel = 'prefetch'; l.href = u; document.head.appendChild(l);
+    }
+    document.addEventListener('mouseover', pre, { passive: true });
+    document.addEventListener('touchstart', pre, { passive: true });
+})();
+
+
+/* 服務總覽：電腦版把「包含哪些」預設打開，手機版維持收合 */
+(function () {
+    if (window.innerWidth < 900) return;
+    Array.prototype.forEach.call(document.querySelectorAll('details.svc-more'), function (d) { d.open = true; });
 })();
