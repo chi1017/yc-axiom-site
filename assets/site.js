@@ -1158,8 +1158,8 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
         if (touch) return showImage(s);
         doPrint(s);
     });
-    // 管理員：產生報價單或合約（合約程式只在管理員按下時才下載）
-    if (ADMIN && !en) {
+    // 管理員：產生報價單或合約。先用登入資料判斷要不要檢查，再向伺服器確認登入有效、是管理員、而且是 ALAN 本人的帳號，才出現這些工具
+    function buildAdmin() {
         var adm = document.createElement('div'); adm.className = 'yc-q-admin';
         adm.innerHTML = '<p class="yc-q-admin-h">管理員：產生文件</p>' +
             '<label>合約期間<select data-c="term"><option value="0">買斷（只含一次性費用）</option><option value="1" selected>買斷＋1 年服務約</option><option value="2">買斷＋2 年服務約（年費 95 折）</option><option value="3">買斷＋3 年服務約（年費 9 折）</option></select></label>' +
@@ -1192,6 +1192,22 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
             sc.onload = go; sc.onerror = function () { b.disabled = false; msg('合約程式載入失敗，請重新整理再試一次。'); }; document.head.appendChild(sc);
         };
     }
+    var OWNER = 'ycaxiom@gmail.com';
+    if (ADMIN && !en) (async function () {
+        try {
+            var base = ((document.querySelector('script[src*="site.min.js"]') || {}).src || '').replace(/assets\/dist\/site\.min\.js.*$/, '');
+            var load = function (src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); };
+            if (!window.YC_CONFIG) await load(base + 'assets/supabase-config.js');
+            if (!window.supabase) await load(base + 'assets/vendor/supabase-2.117.2.min.js');
+            var c = window.YC_CONFIG;
+            var cl = window.YC_SB_QUOTE || (window.YC_SB_QUOTE = window.supabase.createClient(c.supabaseUrl, c.supabaseAnonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false } }));
+            var r = await cl.auth.getUser();
+            var u = r && r.data && r.data.user;
+            if (u && u.app_metadata && u.app_metadata.role === 'admin' && String(u.email || '').toLowerCase() === OWNER) return buildAdmin();
+        } catch (e) { /* 連不到伺服器或沒登入：不顯示管理工具 */ }
+        // 確認不是本人：連「另外報價」的填金額欄也拿掉
+        Array.prototype.forEach.call(document.querySelectorAll('.yc-q-askamt'), function (el) { el.remove(); });
+    })();
     function doPrint(s) {
         var contact = [].map.call(box.querySelectorAll('.yc-q-contact a'), function (a) { return esc(a.textContent); });
         var row = function (l) { return '<tr><td>' + esc(l.name) + '</td><td class="n">' + cell(l) + '</td></tr>'; };
