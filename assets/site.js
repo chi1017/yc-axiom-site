@@ -1188,7 +1188,7 @@ function ycT(s) { return (YC_EN && YC_TX[s]) || s; }
                     extra: cv('extra'), term: +cv('term'), party: { name: cv('name') || s.who, rep: cv('rep'), tax: cv('tax'), addr: cv('addr'), tel: cv('tel'), mail: cv('mail') }, days: +cv('days') || 14, site: cv('site') });
             };
             if (window.YCContract) return go();
-            var sc = document.createElement('script'); sc.src = (document.querySelector('script[src*="site.min.js"]') || {}).src.replace(/dist\/site\.min\.js.*$/, 'quote-contract.js?v=2026-11-27');
+            var sc = document.createElement('script'); sc.src = (document.querySelector('script[src*="site.min.js"]') || {}).src.replace(/dist\/site\.min\.js.*$/, 'quote-contract.js?v=2026-11-28');
             sc.onload = go; sc.onerror = function () { b.disabled = false; msg('合約程式載入失敗，請重新整理再試一次。'); }; document.head.appendChild(sc);
         };
     }
